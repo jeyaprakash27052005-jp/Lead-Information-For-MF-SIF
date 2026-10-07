@@ -3,13 +3,14 @@ import { Lead, User, LeadStatus } from '../types';
 import {
   X,
   UserPlus,
-  DollarSign,
+  IndianRupee,
   Briefcase,
   FileText,
   User as UserIcon,
   ShieldCheck,
   AlertCircle
 } from 'lucide-react';
+import { formatInr } from '../utils/currency';
 
 interface LeadFormModalProps {
   isOpen: boolean;
@@ -224,10 +225,10 @@ export const LeadFormModal: React.FC<LeadFormModalProps> = ({
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Annual Income ($) <span className="text-rose-500">*</span>
+                  Annual Income (₹) <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
-                  <DollarSign className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                  <IndianRupee className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                   <input
                     type="number"
                     min="0"
@@ -237,9 +238,15 @@ export const LeadFormModal: React.FC<LeadFormModalProps> = ({
                     onChange={(e) =>
                       setAnnualIncome(e.target.value ? parseInt(e.target.value, 10) : '')
                     }
-                    placeholder="e.g. 120000"
+                    placeholder="e.g. 1200000"
                     className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-semibold"
                   />
+                </div>
+                <div className="mt-1.5 flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-2 py-1">
+                  <IndianRupee className="w-3 h-3 shrink-0" />
+                  <span>
+                    {annualIncome === '' ? '—' : formatInr(Number(annualIncome))}
+                  </span>
                 </div>
               </div>
             </div>
@@ -278,7 +285,7 @@ export const LeadFormModal: React.FC<LeadFormModalProps> = ({
                 value={narration}
                 onChange={(e) => setNarration(e.target.value)}
                 rows={3}
-                placeholder="Details of other savings (e.g. $50,000 in fixed deposits, active mutual fund SIP of $1,000/month, gold bonds, commercial property rental return)..."
+                placeholder="Details of other savings (e.g. ₹5,00,000 in fixed deposits, active mutual fund SIP of ₹10,000/month, gold bonds, commercial property rental return)..."
                 className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>

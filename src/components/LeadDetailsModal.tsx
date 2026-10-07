@@ -3,7 +3,7 @@ import { Lead } from '../types';
 import {
   X,
   User,
-  DollarSign,
+  IndianRupee,
   Briefcase,
   FileText,
   Calendar,
@@ -13,6 +13,7 @@ import {
   Edit,
   ArrowRight
 } from 'lucide-react';
+import { formatInr, formatInrCompact, formatInrNumber } from '../utils/currency';
 
 interface LeadDetailsModalProps {
   lead: Lead | null;
@@ -44,11 +45,7 @@ export const LeadDetailsModal: React.FC<LeadDetailsModalProps> = ({
     }
   };
 
-  const formattedIncome = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(lead.annualIncome);
+  const formattedIncome = formatInr(lead.annualIncome);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
@@ -151,7 +148,7 @@ export const LeadDetailsModal: React.FC<LeadDetailsModalProps> = ({
               <div className="p-3.5">
                 <span className="text-slate-500 block text-[11px]">Annual Income</span>
                 <span className="font-bold text-emerald-700 text-sm flex items-center gap-1">
-                  <DollarSign className="w-3.5 h-3.5" />
+                  <IndianRupee className="w-3.5 h-3.5" />
                   {formattedIncome}
                 </span>
               </div>

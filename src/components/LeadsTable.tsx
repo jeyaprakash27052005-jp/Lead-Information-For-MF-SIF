@@ -9,7 +9,7 @@ import {
   Trash2,
   Search,
   Filter,
-  DollarSign,
+  IndianRupee,
   User as UserIcon,
   Briefcase,
   FileText,
@@ -17,6 +17,7 @@ import {
   PlusCircle,
   Building2
 } from 'lucide-react';
+import { formatInr, formatInrCompact, formatInrNumber } from '../utils/currency';
 
 interface LeadsTableProps {
   leads: Lead[];
@@ -211,11 +212,7 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
               <tbody className="divide-y divide-slate-100">
                 {filteredLeads.map((lead) => {
                   const isMenuOpen = activeMenuId === lead.id;
-                  const formattedIncome = new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: 'USD',
-                    maximumFractionDigits: 0,
-                  }).format(lead.annualIncome);
+                  const formattedIncome = formatInr(lead.annualIncome);
 
                   return (
                     <tr
@@ -250,7 +247,7 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
                       {/* Annual Income */}
                       <td className="py-3 px-4">
                         <span className="font-bold text-emerald-700 flex items-center gap-0.5">
-                          <DollarSign className="w-3.5 h-3.5" />
+                          <IndianRupee className="w-3.5 h-3.5" />
                           {formattedIncome}
                         </span>
                         <span className="text-[10px] text-slate-400 uppercase">per annum</span>

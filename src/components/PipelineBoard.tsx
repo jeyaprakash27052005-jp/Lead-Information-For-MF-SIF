@@ -7,12 +7,13 @@ import {
   Activity,
   Edit,
   Trash2,
-  DollarSign,
+  IndianRupee,
   ShieldCheck,
   CheckCircle2,
   Clock,
   ArrowRight
 } from 'lucide-react';
+import { formatInr, formatInrCompact, formatInrNumber } from '../utils/currency';
 
 interface PipelineBoardProps {
   leads: Lead[];
@@ -85,7 +86,7 @@ export const PipelineBoard: React.FC<PipelineBoardProps> = ({
                 <div>
                   <h3 className="text-xs font-bold text-slate-900">{col.label}</h3>
                   <div className="text-[10px] text-slate-500 font-medium">
-                    ${(colTotalIncome / 1000).toFixed(0)}k volume
+                    {formatInrCompact(colTotalIncome)} volume
                   </div>
                 </div>
                 <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-white text-slate-700 border border-slate-200 shadow-2xs">
@@ -102,11 +103,7 @@ export const PipelineBoard: React.FC<PipelineBoardProps> = ({
                 ) : (
                   columnLeads.map((lead) => {
                     const isMenuOpen = activeMenuId === lead.id;
-                    const formattedIncome = new Intl.NumberFormat('en-US', {
-                      style: 'currency',
-                      currency: 'USD',
-                      maximumFractionDigits: 0,
-                    }).format(lead.annualIncome);
+                    const formattedIncome = formatInr(lead.annualIncome);
 
                     return (
                       <div
@@ -195,7 +192,7 @@ export const PipelineBoard: React.FC<PipelineBoardProps> = ({
                             {lead.age}y • {lead.gender}
                           </span>
                           <span className="font-bold text-emerald-700 flex items-center">
-                            <DollarSign className="w-3 h-3" />
+                            <IndianRupee className="w-3 h-3" />
                             {formattedIncome}
                           </span>
                         </div>

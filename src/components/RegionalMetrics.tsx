@@ -9,6 +9,7 @@ import {
   TrendingUp,
   HelpCircle
 } from 'lucide-react';
+import { formatInr, formatInrCompact, formatInrNumber } from '../utils/currency';
 
 interface RegionalMetricsProps {
   leads: Lead[];
@@ -63,11 +64,7 @@ export const RegionalMetrics: React.FC<RegionalMetricsProps> = ({
   });
 
   const fmt = (num: number) =>
-    new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0,
-    }).format(num);
+    formatInr(num);
 
   return (
     <div className="space-y-6">

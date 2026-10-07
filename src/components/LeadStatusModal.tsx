@@ -4,7 +4,7 @@ import {
   X,
   Activity,
   CheckCircle2,
-  DollarSign,
+  IndianRupee,
   Briefcase,
   FileText,
   User,
@@ -14,6 +14,7 @@ import {
   Clock,
   TrendingUp
 } from 'lucide-react';
+import { formatInr, formatInrCompact, formatInrNumber } from '../utils/currency';
 
 interface LeadStatusModalProps {
   lead: Lead | null;
@@ -83,11 +84,7 @@ export const LeadStatusModal: React.FC<LeadStatusModalProps> = ({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const formattedIncome = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(lead.annualIncome);
+  const formattedIncome = formatInr(lead.annualIncome);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -204,7 +201,7 @@ export const LeadStatusModal: React.FC<LeadStatusModalProps> = ({
                 <div>
                   <span className="text-slate-400 block text-[10px] uppercase font-semibold">Annual Income</span>
                   <span className="font-bold text-emerald-700 text-xs flex items-center gap-0.5 mt-0.5">
-                    <DollarSign className="w-3 h-3" />
+                    <IndianRupee className="w-3 h-3" />
                     {formattedIncome}
                   </span>
                 </div>

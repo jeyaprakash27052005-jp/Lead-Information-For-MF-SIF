@@ -7,12 +7,13 @@ import {
   Layers,
   Building2,
   Calendar,
-  DollarSign,
+  IndianRupee,
   FileText,
   User as UserIcon,
   ShieldCheck,
   CheckCircle2
 } from 'lucide-react';
+import { formatInr, formatInrCompact, formatInrNumber } from '../utils/currency';
 
 interface LeadReportsProps {
   leads: Lead[];
@@ -44,7 +45,7 @@ export const LeadReports: React.FC<LeadReportsProps> = ({
       'Name',
       'Age',
       'Gender',
-      'Annual Income ($)',
+      'Annual Income (INR)',
       'Occupation',
       'Savings Narration',
       'Status',
@@ -92,11 +93,7 @@ export const LeadReports: React.FC<LeadReportsProps> = ({
   const totalIncome = filteredLeads.reduce((sum, l) => sum + l.annualIncome, 0);
 
   const fmt = (num: number) =>
-    new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0,
-    }).format(num);
+    formatInr(num);
 
   return (
     <div className="space-y-6">
@@ -301,8 +298,7 @@ export const LeadReports: React.FC<LeadReportsProps> = ({
 
                     <td className="py-3.5 px-4 font-bold text-emerald-700">
                       <span className="flex items-center gap-0.5">
-                        <DollarSign className="w-3.5 h-3.5" />
-                        {new Intl.NumberFormat('en-US').format(lead.annualIncome)}
+                        ₹{formatInrNumber(lead.annualIncome)}
                       </span>
                     </td>
 
