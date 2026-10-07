@@ -145,7 +145,7 @@ export default function App() {
     showFeedback(`Moved to ${newStatus}.`);
   };
 
-  // User Management actions (Only Head can create users)
+  // User Management actions (Head creates any user; Regional Incharge creates Area Incharges in own region)
   const handleAddUser = async (userData: {
     username: string;
     password?: string;
@@ -156,6 +156,13 @@ export default function App() {
     createdBy: string;
     creatorRole: string;
   }) => {
+    if (currentUser?.role === 'regional_incharge') {
+      if (userData.role !== 'area_incharge' || userData.region !== currentUser.region) {
+        throw new Error('Regional Incharges can only create Area Incharge accounts in their own region.');
+      }
+    } else if (currentUser?.role !== 'head') {
+      throw new Error('You do not have permission to create user accounts.');
+    }
     const created = await apiService.createUser(userData);
     setUsers((prev) => [...prev, created]);
     showFeedback(`User account @${created.username} for ${created.name} created in online database.`);

@@ -44,6 +44,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({
 }) => {
   const isHead = currentUser.role === 'head';
   const isRegional = currentUser.role === 'regional_incharge';
+  // Head and Regional Incharge can create accounts (Regional Incharge: Area Incharges in own region only)
+  const canCreateUsers = isHead || isRegional;
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [username, setUsername] = useState('');
@@ -92,8 +94,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({
         password: password.trim(),
         name: name.trim(),
         designation: designation.trim(),
-        role,
-        region,
+        role: isRegional ? 'area_incharge' : role,
+        region: isRegional ? currentUser.region : region,
         createdBy: `${currentUser.name} (${currentUser.designation})`,
         creatorRole: currentUser.role,
       });
@@ -180,18 +182,18 @@ export const UserManagement: React.FC<UserManagementProps> = ({
           <p className="text-xs text-slate-500 mt-0.5">
             {isHead
               ? 'Head Administrator privilege: Provision Regional Incharges and Area Incharges, deactivate IDs, or delete user accounts.'
-              : 'Regional Incharge privilege: Manage assigned Area Incharge IDs, deactivate dormant accounts, or remove team members.'}
+              : 'Regional Incharge privilege: Create Area Incharge IDs for your region, deactivate dormant accounts, or remove team members.'}
           </p>
         </div>
 
-        {/* Head has Add Users Feature */}
-        {isHead && (
+        {/* Head and Regional Incharge have the Add Users feature */}
+        {canCreateUsers && (
           <button
             onClick={() => setIsAddModalOpen(true)}
             className="flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 transition-colors shadow-xs shrink-0 cursor-pointer"
           >
             <UserPlus className="w-4 h-4 text-indigo-400" />
-            <span>Add New User Account</span>
+            <span>{isHead ? 'Add New User Account' : 'Add Area Incharge'}</span>
           </button>
         )}
       </div>
@@ -369,7 +371,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
                     Create New Organization User
                   </h2>
                   <p className="text-xs text-slate-300">
-                    Provision Regional Incharge or Area Incharge account
+                    {isHead ? 'Provision Regional Incharge or Area Incharge account' : `Provision Area Incharge account for ${currentUser.region}`}
                   </p>
                 </div>
               </div>
@@ -390,7 +392,15 @@ export const UserManagement: React.FC<UserManagementProps> = ({
                   </div>
                 )}
 
-                {/* Role Tier Selection */}
+                {/* Role Tier Selection (Head only; Regional Incharge creates Area Incharges) */}
+                {isRegional && (
+                  <div className="p-3 rounded-lg border border-sky-200 bg-sky-50/60 flex items-center gap-2 text-xs">
+                    <UserCheck className="w-4 h-4 text-sky-600" />
+                    <span className="font-bold text-slate-900">Area Incharge</span>
+                    <span className="text-slate-500">• {currentUser.region}</span>
+                  </div>
+                )}
+                {isHead && (
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                     Select User Type (Role) <span className="text-rose-500">*</span>
@@ -435,6 +445,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
                     </button>
                   </div>
                 </div>
+                )}
 
                 {/* Name */}
                 <div>
@@ -509,11 +520,12 @@ export const UserManagement: React.FC<UserManagementProps> = ({
                     Assigned Region
                   </label>
                   <select
-                    value={region}
+                    value={isRegional ? currentUser.region : region}
+                    disabled={isRegional}
                     onChange={(e) => setRegion(e.target.value)}
                     className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500 bg-white"
                   >
-                    {regions.map((reg) => (
+                    {(isRegional ? [currentUser.region] : regions).map((reg) => (
                       <option key={reg} value={reg}>
                         {reg}
                       </option>
