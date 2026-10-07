@@ -250,20 +250,21 @@ export async function ensureFirestoreDatabaseSeeded(): Promise<void> {
   if (isInitialized) return;
   const usersPath = 'users';
   try {
+    // Sample data is written ONLY into a brand-new database (no Head account yet).
+    // After that it is never re-created, so anything deleted in the app stays deleted
+    // (even if every lead or every sample user has been removed).
     const headDocRef = doc(db, usersPath, 'usr_head_1');
     const headSnap = await getDoc(headDocRef);
     if (!headSnap.exists()) {
-      // Seed initial users into Firestore
       for (const u of INITIAL_USERS) {
         await setDoc(doc(db, usersPath, u.id), u);
       }
-    }
-
-    const leadsPath = 'leads';
-    const leadsSnap = await getDocs(collection(db, leadsPath));
-    if (leadsSnap.empty) {
-      for (const l of INITIAL_LEADS) {
-        await setDoc(doc(db, leadsPath, l.id), l);
+      const leadsPath = 'leads';
+      const leadsSnap = await getDocs(collection(db, leadsPath));
+      if (leadsSnap.empty) {
+        for (const l of INITIAL_LEADS) {
+          await setDoc(doc(db, leadsPath, l.id), l);
+        }
       }
     }
     isInitialized = true;

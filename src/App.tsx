@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { User, Lead, LeadStatus, ViewTab } from './types';
-import { apiService, testConnection } from './services/api';
+import { apiService, testConnection, getWriteVersion } from './services/api';
 import { Header } from './components/Header';
 import { Navigation } from './components/Navigation';
 import { LeadsTable } from './components/LeadsTable';
@@ -72,6 +72,71 @@ export default function App() {
 
   useEffect(() => {
     loadData();
+  }, []);
+
+  // Keep every open screen in sync with the database: re-read users, leads and regions
+  // every 20 seconds and whenever the tab regains focus. Anything deleted elsewhere
+  // disappears here too.
+  const currentUserIdRef = useRef<string | null>(null);
+  currentUserIdRef.current = currentUser?.id ?? null;
+
+  const syncFromDatabase = async () => {
+    const versionAtStart = getWriteVersion();
+    try {
+      const [fetchedUsers, fetchedLeads, fetchedRegions] = await Promise.all([
+        apiService.getUsers(),
+        apiService.getLeads(),
+        apiService.getRegions().catch(() => null),
+      ]);
+      // A write happened while we were fetching: this snapshot may be stale, skip it.
+      if (getWriteVersion() !== versionAtStart) return;
+      setUsers(fetchedUsers);
+      setLeads(fetchedLeads);
+      if (fetchedRegions) setStoredRegions(fetchedRegions);
+
+      const meId = currentUserIdRef.current;
+      if (meId) {
+        const me = fetchedUsers.find((u) => u.id === meId);
+        if (!me || me.status !== 'active') {
+          setCurrentUser(null);
+          showFeedback(
+            !me
+              ? 'Your account was deleted. You have been logged out.'
+              : 'Your account was deactivated. You have been logged out.',
+            'error'
+          );
+        }
+      }
+    } catch (err) {
+      console.warn('Background refresh failed:', err);
+    }
+  };
+
+  // If a lead / user that an open dialog is showing was deleted, close that dialog
+  useEffect(() => {
+    if (statusModalLead && !leads.some((l) => l.id === statusModalLead.id)) setStatusModalLead(null);
+    if (detailsModalLead && !leads.some((l) => l.id === detailsModalLead.id)) setDetailsModalLead(null);
+    if (editingLead && !leads.some((l) => l.id === editingLead.id)) {
+      setEditingLead(null);
+      setIsAddLeadModalOpen(false);
+    }
+  }, [leads]);
+
+  useEffect(() => {
+    if (profileUserToEdit && !users.some((u) => u.id === profileUserToEdit.id)) {
+      setProfileUserToEdit(null);
+      setIsProfileModalOpen(false);
+    }
+  }, [users]);
+
+  useEffect(() => {
+    const timer = setInterval(syncFromDatabase, 20000);
+    const onFocus = () => syncFromDatabase();
+    window.addEventListener('focus', onFocus);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('focus', onFocus);
+    };
   }, []);
 
   const showFeedback = (text: string, type: 'success' | 'info' | 'error' = 'success') => {
@@ -245,7 +310,24 @@ export default function App() {
 
   // Not logged in -> Show single unified login screen ("one login")
   if (!currentUser) {
-    return <LoginPage onLogin={handleLogin} />;
+    return (
+      <>
+        <LoginPage onLogin={handleLogin} />
+        {feedbackMessage && (
+          <div className="fixed bottom-4 right-4 z-50">
+            <div
+              className={`px-4 py-2.5 rounded-lg shadow-xl border text-xs font-semibold ${
+                feedbackMessage.type === 'error'
+                  ? 'bg-rose-900 text-rose-100 border-rose-700'
+                  : 'bg-slate-900 text-white border-slate-800'
+              }`}
+            >
+              {feedbackMessage.text}
+            </div>
+          </div>
+        )}
+      </>
+    );
   }
 
   // All assignable regions (defaults + any region created via Add User)
