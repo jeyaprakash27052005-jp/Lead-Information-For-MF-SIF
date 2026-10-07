@@ -28,7 +28,11 @@
         "role": {
           "type": "string",
           "description": "Role tier",
-          "enum": ["head", "regional_incharge", "area_incharge"]
+          "enum": [
+            "head",
+            "regional_incharge",
+            "area_incharge"
+          ]
         },
         "region": {
           "type": "string",
@@ -38,7 +42,10 @@
         "status": {
           "type": "string",
           "description": "Account status",
-          "enum": ["active", "inactive"]
+          "enum": [
+            "active",
+            "inactive"
+          ]
         },
         "createdAt": {
           "type": "string",
@@ -49,7 +56,14 @@
           "description": "ID or name of the creator"
         }
       },
-      "required": ["username", "name", "designation", "role", "region", "status"]
+      "required": [
+        "username",
+        "name",
+        "designation",
+        "role",
+        "region",
+        "status"
+      ]
     },
     "lead": {
       "title": "Lead",
@@ -68,7 +82,11 @@
         "gender": {
           "type": "string",
           "description": "Gender identity",
-          "enum": ["Male", "Female", "Other"]
+          "enum": [
+            "Male",
+            "Female",
+            "Other"
+          ]
         },
         "annualIncome": {
           "type": "number",
@@ -87,7 +105,12 @@
         "status": {
           "type": "string",
           "description": "Current lead status",
-          "enum": ["Pending", "Ready to Invest", "Process", "Other"]
+          "enum": [
+            "Pending",
+            "Ready to Invest",
+            "Process",
+            "Other"
+          ]
         },
         "statusRemarks": {
           "type": "string",
@@ -131,7 +154,17 @@
           "description": "ISO timestamp of last update"
         }
       },
-      "required": ["name", "age", "gender", "annualIncome", "occupation", "status", "addedByName", "addedByDesignation", "assignedRegion"]
+      "required": [
+        "name",
+        "age",
+        "gender",
+        "annualIncome",
+        "occupation",
+        "status",
+        "addedByName",
+        "addedByDesignation",
+        "assignedRegion"
+      ]
     },
     "testConnection": {
       "title": "TestConnection",
@@ -145,6 +178,23 @@
           "type": "string"
         }
       }
+    },
+    "region": {
+      "title": "Region",
+      "description": "Assignable division / territory managed by the Head",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "createdAt": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ]
     }
   },
   "firestore": {
@@ -165,6 +215,12 @@
         "$ref": "#/entities/testConnection"
       },
       "description": "Diagnostic connection verification documents"
+    },
+    "/regions/{regionId}": {
+      "schema": {
+        "$ref": "#/entities/region"
+      },
+      "description": "Collection of regions (one document per region)"
     }
   }
 }

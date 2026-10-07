@@ -15,9 +15,69 @@ import firebaseConfig from '../../firebase-applet-config.json';
 import { User, Lead, LeadStatus } from '../types';
 import { DEFAULT_REGIONS } from '../utils/regions';
 
-const REGIONS_COLLECTION = 'test';
-const REGIONS_DOC_ID = 'regions_config';
-const REGIONS_DOC_PATH = `${REGIONS_COLLECTION}/${REGIONS_DOC_ID}`;
+const REGIONS_COLLECTION = 'regions';
+const regionDocId = (name: string) =>
+  name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'region';
+
+const isPermissionError = (e: unknown) => {
+  const text = e instanceof Error ? e.message : String(e);
+  return /permission/i.test(text) || (e as { code?: string })?.code === 'permission-denied';
+};
+
+// Marker so the default regions are written to the 'regions' table only once
+// (afterwards, deleting every region keeps it empty).
+const seedMarkerRef = () => doc(db, 'test', 'regions_seeded');
+const regionsTableSeeded = async () => (await getDoc(seedMarkerRef())).exists();
+const markRegionsTableSeeded = async () => {
+  try {
+    await setDoc(seedMarkerRef(), { seededAt: new Date().toISOString() });
+  } catch {
+    /* marker is best-effort */
+  }
+};
+
+// Fallback storage (one document) used only while the 'regions' table is not permitted
+const legacyRef = () => doc(db, 'test', 'regions_config');
+const readLegacy = async (): Promise<string[]> => {
+  const snap = await getDoc(legacyRef());
+  const names = snap.exists() ? (snap.data() as { names?: unknown }).names : undefined;
+  return Array.isArray(names)
+    ? names.filter((n): n is string => typeof n === 'string' && n.trim() !== '')
+    : [...DEFAULT_REGIONS];
+};
+const legacyRegions = {
+  async get(): Promise<string[]> {
+    try {
+      const names = await readLegacy();
+      const snap = await getDoc(legacyRef());
+      if (!snap.exists()) await setDoc(legacyRef(), { names });
+      return names;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.GET, 'test/regions_config');
+    }
+  },
+  async add(name: string): Promise<string> {
+    try {
+      const current = await readLegacy();
+      if (current.some((r) => r.toLowerCase() === name.toLowerCase())) {
+        throw new Error(`Region "${name}" already exists.`);
+      }
+      await setDoc(legacyRef(), { names: [...current, name] });
+      return name;
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already exists')) throw error;
+      handleFirestoreError(error, OperationType.WRITE, 'test/regions_config');
+    }
+  },
+  async remove(name: string): Promise<void> {
+    try {
+      const current = await readLegacy();
+      await setDoc(legacyRef(), { names: current.filter((r) => r.toLowerCase() !== name.toLowerCase()) });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, 'test/regions_config');
+    }
+  },
+};
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
@@ -82,167 +142,24 @@ export async function testConnection(): Promise<boolean> {
   }
 }
 
-// Initial default users and leads seed data for online Firestore
 interface StoredUser extends User {
   password?: string;
 }
 
-const INITIAL_USERS: StoredUser[] = [
-  {
-    id: 'usr_head_1',
-    username: 'JPM_MF',
-    password: 'JPM_MF',
-    name: 'JPM MF (Head Incharge)',
-    designation: 'Head Incharge',
-    role: 'head',
-    region: 'Universal HQ',
-    status: 'active',
-    createdAt: new Date().toISOString(),
-    createdBy: 'System Superadmin',
-  },
-  {
-    id: 'usr_reg_north',
-    username: 'reg_north',
-    password: 'password123',
-    name: 'Sophia Martinez',
-    designation: 'Regional Incharge - North Division',
-    role: 'regional_incharge',
-    region: 'North Division',
-    status: 'active',
-    createdAt: new Date().toISOString(),
-    createdBy: 'JPM_MF',
-  },
-  {
-    id: 'usr_reg_south',
-    username: 'reg_south',
-    password: 'password123',
-    name: 'David Vikram Rao',
-    designation: 'Regional Incharge - South Division',
-    role: 'regional_incharge',
-    region: 'South Division',
-    status: 'active',
-    createdAt: new Date().toISOString(),
-    createdBy: 'JPM_MF',
-  },
-  {
-    id: 'usr_area_1',
-    username: 'area_north1',
-    password: 'password123',
-    name: 'Liam Chen',
-    designation: 'Area Incharge - Metro Sector A',
-    role: 'area_incharge',
-    region: 'North Division',
-    status: 'active',
-    createdAt: new Date().toISOString(),
-    createdBy: 'JPM_MF',
-  },
-  {
-    id: 'usr_area_2',
-    username: 'area_south1',
-    password: 'password123',
-    name: 'Priya Sharma',
-    designation: 'Area Incharge - Coastal Belt',
-    role: 'area_incharge',
-    region: 'South Division',
-    status: 'active',
-    createdAt: new Date().toISOString(),
-    createdBy: 'JPM_MF',
-  },
-];
-
-const INITIAL_LEADS: Lead[] = [
-  {
-    id: 'lead_101',
-    name: 'Jonathan Miller',
-    age: 42,
-    gender: 'Male',
-    annualIncome: 1450000,
-    occupation: 'Senior Solutions Architect',
-    narration: 'Has ₹4,50,000 in diversified equity mutual funds, ₹3,00,000 in EPF/PPF retirement savings, seeking tax-saving long term wealth plan.',
-    status: 'Ready to Invest',
-    statusRemarks: 'Discussed risk appetite and tax bracket. Highly responsive to premium wealth plan.',
-    addedByUserId: 'usr_area_1',
-    addedByName: 'Liam Chen',
-    addedByDesignation: 'Area Incharge - Metro Sector A',
-    assignedRegion: 'North Division',
-    assignedTeamMember: 'Liam Chen',
-    createdAt: new Date(Date.now() - 6 * 86400000).toISOString(),
-    updatedAt: new Date(Date.now() - 3 * 86400000).toISOString(),
-  },
-  {
-    id: 'lead_102',
-    name: 'Elena Rostova',
-    age: 36,
-    gender: 'Female',
-    annualIncome: 1900000,
-    occupation: 'Cardiothoracic Surgeon',
-    narration: 'Holds ₹12,00,000 in fixed deposit treasury bonds and commercial real estate funds. Interested in comprehensive child education endowment.',
-    status: 'Process',
-    statusRemarks: 'Tailored proposal sent. Undergoing documentation review.',
-    addedByUserId: 'usr_reg_north',
-    addedByName: 'Sophia Martinez',
-    addedByDesignation: 'Regional Incharge - North Division',
-    assignedRegion: 'North Division',
-    assignedTeamMember: 'Liam Chen',
-    createdAt: new Date(Date.now() - 5 * 86400000).toISOString(),
-    updatedAt: new Date(Date.now() - 2 * 86400000).toISOString(),
-  },
-  {
-    id: 'lead_103',
-    name: 'Karthik Subramanian',
-    age: 29,
-    gender: 'Male',
-    annualIncome: 980000,
-    occupation: 'Lead Product Designer',
-    narration: 'Currently has systematic investment plan (SIP) of ₹12,000/mo and gold ETF holdings (₹1,80,000). Wants term insurance and retirement fund.',
-    status: 'Ready to Invest',
-    statusRemarks: 'Successfully closed premium plan. Initial deposit verified and policy generated.',
-    addedByUserId: 'usr_area_2',
-    addedByName: 'Priya Sharma',
-    addedByDesignation: 'Area Incharge - Coastal Belt',
-    assignedRegion: 'South Division',
-    assignedTeamMember: 'Priya Sharma',
-    createdAt: new Date(Date.now() - 4 * 86400000).toISOString(),
-    updatedAt: new Date(Date.now() - 1 * 86400000).toISOString(),
-  },
-  {
-    id: 'lead_104',
-    name: 'Amara Okafor',
-    age: 48,
-    gender: 'Female',
-    annualIncome: 2200000,
-    occupation: 'Business Enterprise Owner (Logistics)',
-    narration: 'Retains business surplus in liquid debt funds (₹25,00,000) and commercial land reserves. Needs keyman insurance and corporate tax shield.',
-    status: 'Pending',
-    statusRemarks: 'Initial phone consultation completed. Scheduled in-person executive review next Tuesday.',
-    addedByUserId: 'usr_head_1',
-    addedByName: 'JPM MF (Head Incharge)',
-    addedByDesignation: 'Head Incharge',
-    assignedRegion: 'South Division',
-    assignedTeamMember: 'David Vikram Rao',
-    createdAt: new Date(Date.now() - 3 * 86400000).toISOString(),
-    updatedAt: new Date(Date.now() - 3 * 86400000).toISOString(),
-  },
-  {
-    id: 'lead_105',
-    name: 'Gabriel Morales',
-    age: 33,
-    gender: 'Male',
-    annualIncome: 820000,
-    occupation: 'Renewable Energy Consultant',
-    narration: 'High-yield savings account holding ₹2,50,000 emergency fund. Looking for green energy bond investments and health coverage.',
-    status: 'Other',
-    otherStatusNarration: 'Client currently waiting for annual bonus payout in November before initiating investment allocation.',
-    statusRemarks: 'Consultation completed; scheduled follow-up on bonus cycle.',
-    addedByUserId: 'usr_area_1',
-    addedByName: 'Liam Chen',
-    addedByDesignation: 'Area Incharge - Metro Sector A',
-    assignedRegion: 'North Division',
-    assignedTeamMember: 'Liam Chen',
-    createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
-    updatedAt: new Date(Date.now() - 1 * 86400000).toISOString(),
-  },
-];
+// Only the Head login is created, and only when the online database has no Head account yet
+// (a brand-new database). All other users, leads and regions live in the online Firestore.
+const HEAD_BOOTSTRAP_USER: StoredUser = {
+  id: 'usr_head_1',
+  username: 'JPM_MF',
+  password: 'JPM_MF',
+  name: 'JPM MF (Head Incharge)',
+  designation: 'Head Incharge',
+  role: 'head',
+  region: 'Universal HQ',
+  status: 'active',
+  createdAt: new Date().toISOString(),
+  createdBy: 'System Superadmin',
+};
 
 let isInitialized = false;
 
@@ -250,22 +167,12 @@ export async function ensureFirestoreDatabaseSeeded(): Promise<void> {
   if (isInitialized) return;
   const usersPath = 'users';
   try {
-    // Sample data is written ONLY into a brand-new database (no Head account yet).
-    // After that it is never re-created, so anything deleted in the app stays deleted
-    // (even if every lead or every sample user has been removed).
+    // The Head account is created ONLY in a brand-new database. Nothing else is ever
+    // re-created, so anything deleted in the app stays deleted.
     const headDocRef = doc(db, usersPath, 'usr_head_1');
     const headSnap = await getDoc(headDocRef);
     if (!headSnap.exists()) {
-      for (const u of INITIAL_USERS) {
-        await setDoc(doc(db, usersPath, u.id), u);
-      }
-      const leadsPath = 'leads';
-      const leadsSnap = await getDocs(collection(db, leadsPath));
-      if (leadsSnap.empty) {
-        for (const l of INITIAL_LEADS) {
-          await setDoc(doc(db, leadsPath, l.id), l);
-        }
-      }
+      await setDoc(doc(db, usersPath, HEAD_BOOTSTRAP_USER.id), HEAD_BOOTSTRAP_USER);
     }
     isInitialized = true;
   } catch (error) {
@@ -477,60 +384,52 @@ export const firebaseDbService = {
   },
 
   // ---- Regions (managed by Head) ----
-  // The region list lives in ONE document. It uses the 'test' collection because the
-  // deployed Firestore rules already allow reads/writes there, so creating and deleting
-  // regions works without changing any security rules.
+  // Each region is its own document in the 'regions' collection (its own table).
+  // If the live Firestore rules do not allow that collection yet, the same list is kept in
+  // one document in the already-permitted 'test' collection so the feature still works.
   async getRegions(): Promise<string[]> {
-    const path = REGIONS_DOC_PATH;
     try {
-      const ref = doc(db, REGIONS_COLLECTION, REGIONS_DOC_ID);
-      const snap = await getDoc(ref);
-      const stored = snap.exists() ? (snap.data() as { names?: unknown }).names : undefined;
-      if (Array.isArray(stored)) {
-        return stored.filter((n): n is string => typeof n === 'string' && n.trim() !== '');
+      const snap = await getDocs(collection(db, REGIONS_COLLECTION));
+      const names: string[] = [];
+      snap.forEach((d) => {
+        const n = (d.data() as { name?: unknown }).name;
+        if (typeof n === 'string' && n.trim()) names.push(n.trim());
+      });
+      if (names.length === 0 && !(await regionsTableSeeded())) {
+        for (const n of DEFAULT_REGIONS) {
+          await setDoc(doc(db, REGIONS_COLLECTION, regionDocId(n)), { name: n, createdAt: new Date().toISOString() });
+        }
+        await markRegionsTableSeeded();
+        return [...DEFAULT_REGIONS];
       }
-      // First run: seed the four default divisions
-      await setDoc(ref, { names: [...DEFAULT_REGIONS] });
-      return [...DEFAULT_REGIONS];
+      return names;
     } catch (error) {
-      handleFirestoreError(error, OperationType.GET, path);
+      if (!isPermissionError(error)) handleFirestoreError(error, OperationType.LIST, REGIONS_COLLECTION);
+      return legacyRegions.get();
     }
   },
 
   async createRegion(name: string): Promise<string> {
     const clean = name.trim().replace(/\s+/g, ' ');
     if (!clean) throw new Error('Please enter a region name.');
-    const path = REGIONS_DOC_PATH;
     try {
-      const ref = doc(db, REGIONS_COLLECTION, REGIONS_DOC_ID);
-      const snap = await getDoc(ref);
-      const current: string[] =
-        snap.exists() && Array.isArray((snap.data() as { names?: unknown }).names)
-          ? ((snap.data() as { names: string[] }).names)
-          : [...DEFAULT_REGIONS];
-      if (current.some((r) => r.toLowerCase() === clean.toLowerCase())) {
-        throw new Error(`Region "${clean}" already exists.`);
-      }
-      await setDoc(ref, { names: [...current, clean] });
+      const ref = doc(db, REGIONS_COLLECTION, regionDocId(clean));
+      if ((await getDoc(ref)).exists()) throw new Error(`Region "${clean}" already exists.`);
+      await setDoc(ref, { name: clean, createdAt: new Date().toISOString() });
       return clean;
     } catch (error) {
       if (error instanceof Error && error.message.includes('already exists')) throw error;
-      handleFirestoreError(error, OperationType.WRITE, path);
+      if (!isPermissionError(error)) handleFirestoreError(error, OperationType.CREATE, REGIONS_COLLECTION);
+      return legacyRegions.add(clean);
     }
   },
 
   async deleteRegion(name: string): Promise<void> {
-    const path = REGIONS_DOC_PATH;
     try {
-      const ref = doc(db, REGIONS_COLLECTION, REGIONS_DOC_ID);
-      const snap = await getDoc(ref);
-      const current: string[] =
-        snap.exists() && Array.isArray((snap.data() as { names?: unknown }).names)
-          ? ((snap.data() as { names: string[] }).names)
-          : [...DEFAULT_REGIONS];
-      await setDoc(ref, { names: current.filter((r) => r.toLowerCase() !== name.toLowerCase()) });
+      await deleteDoc(doc(db, REGIONS_COLLECTION, regionDocId(name)));
     } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, path);
+      if (!isPermissionError(error)) handleFirestoreError(error, OperationType.DELETE, REGIONS_COLLECTION);
+      await legacyRegions.remove(name);
     }
   },
 
@@ -643,21 +542,6 @@ export const firebaseDbService = {
       await deleteDoc(doc(db, 'leads', id));
     } catch (error) {
       handleFirestoreError(error, OperationType.DELETE, path);
-    }
-  },
-
-  async resetData(): Promise<void> {
-    const usersPath = 'users';
-    const leadsPath = 'leads';
-    try {
-      for (const u of INITIAL_USERS) {
-        await setDoc(doc(db, usersPath, u.id), u);
-      }
-      for (const l of INITIAL_LEADS) {
-        await setDoc(doc(db, leadsPath, l.id), l);
-      }
-    } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, 'reset');
     }
   },
 };
