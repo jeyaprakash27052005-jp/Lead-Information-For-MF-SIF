@@ -1,0 +1,170 @@
+{
+  "entities": {
+    "user": {
+      "title": "User",
+      "description": "User profile with role-based access for Head, Regional Incharge, and Area Incharge",
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "description": "Unique username or user ID (e.g. JPM_MF)",
+          "maxLength": 64
+        },
+        "password": {
+          "type": "string",
+          "description": "User password for sign in",
+          "maxLength": 128
+        },
+        "name": {
+          "type": "string",
+          "description": "Full name of the officer",
+          "maxLength": 128
+        },
+        "designation": {
+          "type": "string",
+          "description": "Official designation/title",
+          "maxLength": 128
+        },
+        "role": {
+          "type": "string",
+          "description": "Role tier",
+          "enum": ["head", "regional_incharge", "area_incharge"]
+        },
+        "region": {
+          "type": "string",
+          "description": "Assigned geographical division or territory",
+          "maxLength": 128
+        },
+        "status": {
+          "type": "string",
+          "description": "Account status",
+          "enum": ["active", "inactive"]
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of user creation"
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "ID or name of the creator"
+        }
+      },
+      "required": ["username", "name", "designation", "role", "region", "status"]
+    },
+    "lead": {
+      "title": "Lead",
+      "description": "Lead profile record with demographics, financial capacity, savings notes, and officer origin",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Prospect client name",
+          "maxLength": 128
+        },
+        "age": {
+          "type": "number",
+          "description": "Age in years"
+        },
+        "gender": {
+          "type": "string",
+          "description": "Gender identity",
+          "enum": ["Male", "Female", "Other"]
+        },
+        "annualIncome": {
+          "type": "number",
+          "description": "Annual income amount"
+        },
+        "occupation": {
+          "type": "string",
+          "description": "Occupation or profession",
+          "maxLength": 128
+        },
+        "narration": {
+          "type": "string",
+          "description": "Narration for any other savings or financial background",
+          "maxLength": 1000
+        },
+        "status": {
+          "type": "string",
+          "description": "Current lead status",
+          "enum": ["Pending", "Ready to Invest", "Process", "Other"]
+        },
+        "statusRemarks": {
+          "type": "string",
+          "description": "Status progression remarks or notes",
+          "maxLength": 500
+        },
+        "otherStatusNarration": {
+          "type": "string",
+          "description": "Separate narration when status is Other",
+          "maxLength": 1000
+        },
+        "addedByUserId": {
+          "type": "string",
+          "description": "User ID of the officer who created this lead"
+        },
+        "addedByName": {
+          "type": "string",
+          "description": "Full name of the officer who added this lead",
+          "maxLength": 128
+        },
+        "addedByDesignation": {
+          "type": "string",
+          "description": "Designation of the officer who added this lead",
+          "maxLength": 128
+        },
+        "assignedRegion": {
+          "type": "string",
+          "description": "Territory or region of the lead",
+          "maxLength": 128
+        },
+        "assignedTeamMember": {
+          "type": "string",
+          "description": "Assigned team member name"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of creation"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of last update"
+        }
+      },
+      "required": ["name", "age", "gender", "annualIncome", "occupation", "status", "addedByName", "addedByDesignation", "assignedRegion"]
+    },
+    "testConnection": {
+      "title": "TestConnection",
+      "description": "Diagnostic document for client connectivity testing",
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/user"
+      },
+      "description": "Collection of all authorized users and incharge credentials"
+    },
+    "/leads/{leadId}": {
+      "schema": {
+        "$ref": "#/entities/lead"
+      },
+      "description": "Collection of prospect leads with complete demographic and financial data"
+    },
+    "/test/{docId}": {
+      "schema": {
+        "$ref": "#/entities/testConnection"
+      },
+      "description": "Diagnostic connection verification documents"
+    }
+  }
+}

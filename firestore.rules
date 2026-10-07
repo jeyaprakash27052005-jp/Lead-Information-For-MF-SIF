@@ -1,0 +1,43 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    match /users/{userId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(userId)
+        && request.resource.data.username is string && request.resource.data.username.size() <= 64
+        && request.resource.data.name is string && request.resource.data.name.size() <= 128
+        && request.resource.data.designation is string && request.resource.data.designation.size() <= 128
+        && request.resource.data.role in ['head', 'regional_incharge', 'area_incharge']
+        && request.resource.data.region is string && request.resource.data.region.size() <= 128
+        && request.resource.data.status in ['active', 'inactive'];
+      allow delete: if isValidId(userId);
+    }
+
+    match /leads/{leadId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(leadId)
+        && request.resource.data.name is string && request.resource.data.name.size() <= 128
+        && request.resource.data.age is number && request.resource.data.age >= 0 && request.resource.data.age <= 150
+        && request.resource.data.gender in ['Male', 'Female', 'Other']
+        && request.resource.data.annualIncome is number && request.resource.data.annualIncome >= 0
+        && request.resource.data.occupation is string && request.resource.data.occupation.size() <= 128
+        && request.resource.data.status in ['Pending', 'Ready to Invest', 'Process', 'Other']
+        && request.resource.data.addedByName is string && request.resource.data.addedByName.size() <= 128
+        && request.resource.data.addedByDesignation is string && request.resource.data.addedByDesignation.size() <= 128
+        && request.resource.data.assignedRegion is string && request.resource.data.assignedRegion.size() <= 128;
+      allow delete: if isValidId(leadId);
+    }
+
+    match /test/{docId} {
+      allow get, list, write: if true;
+    }
+  }
+}

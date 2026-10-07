@@ -1,0 +1,6 @@
+{
+  "name": "Lead Information",
+  "description": "Enterprise lead management platform with multi-tier role access for Head, Regional Incharge, and Area Incharge.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
