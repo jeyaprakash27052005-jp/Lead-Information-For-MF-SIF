@@ -21,6 +21,7 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [storedRegions, setStoredRegions] = useState<string[] | null>(null);
   const [activeTab, setActiveTab] = useState<ViewTab>('all-leads');
   const [loading, setLoading] = useState(true);
   const [feedbackMessage, setFeedbackMessage] = useState<{
@@ -55,6 +56,12 @@ export default function App() {
       ]);
       setUsers(fetchedUsers);
       setLeads(fetchedLeads);
+      // Regions are optional: if the regions collection isn't reachable yet, fall back to defaults
+      try {
+        setStoredRegions(await apiService.getRegions());
+      } catch (regionErr) {
+        console.warn('Could not load regions, using defaults:', regionErr);
+      }
     } catch (err) {
       console.error('Failed to load online database:', err);
       showFeedback('Failed to reach online database. Please check connection.', 'error');
@@ -169,6 +176,28 @@ export default function App() {
     showFeedback(`User account @${created.username} for ${created.name} created in online database.`);
   };
 
+  // Region management (Head only)
+  const handleCreateRegion = async (name: string) => {
+    if (currentUser?.role !== 'head') throw new Error('Only the Head can create regions.');
+    const created = await apiService.createRegion(name);
+    setStoredRegions((prev) => [...(prev ?? regionList), created]);
+    showFeedback(`Region "${created}" created.`);
+  };
+
+  const handleDeleteRegion = async (name: string) => {
+    if (currentUser?.role !== 'head') throw new Error('Only the Head can delete regions.');
+    const userCount = users.filter((u) => u.region.toLowerCase() === name.toLowerCase()).length;
+    const leadCount = leads.filter((l) => l.assignedRegion.toLowerCase() === name.toLowerCase()).length;
+    if (userCount > 0 || leadCount > 0) {
+      throw new Error(
+        `"${name}" still has ${userCount} user account(s) and ${leadCount} lead(s). Move or delete them first, then delete the region.`
+      );
+    }
+    await apiService.deleteRegion(name);
+    setStoredRegions((prev) => (prev ?? regionList).filter((r) => r.toLowerCase() !== name.toLowerCase()));
+    showFeedback(`Region "${name}" deleted.`);
+  };
+
   const handleToggleUserStatus = async (userId: string, newStatus: 'active' | 'inactive') => {
     const updated = await apiService.updateUserStatus(userId, newStatus);
     setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
@@ -220,7 +249,7 @@ export default function App() {
   }
 
   // All assignable regions (defaults + any region created via Add User)
-  const regionList = getAllRegions(users, leads);
+  const regionList = getAllRegions(users, leads, storedRegions);
 
   // Calculate assigned leads for current user
   const assignedLeads = leads.filter((l) => {
@@ -366,6 +395,8 @@ export default function App() {
             users={users}
             currentUser={currentUser}
             onAddUser={handleAddUser}
+            onCreateRegion={handleCreateRegion}
+            onDeleteRegion={handleDeleteRegion}
             onToggleStatus={handleToggleUserStatus}
             onDeleteUser={handleDeleteUser}
             onEditUserProfile={(user) => {

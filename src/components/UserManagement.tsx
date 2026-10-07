@@ -33,6 +33,8 @@ interface UserManagementProps {
   onToggleStatus: (userId: string, newStatus: 'active' | 'inactive') => Promise<void>;
   onDeleteUser: (userId: string) => Promise<void>;
   onEditUserProfile: (user: User) => void;
+  onCreateRegion?: (name: string) => Promise<void>;
+  onDeleteRegion?: (name: string) => Promise<void>;
   regions?: string[];
 }
 
@@ -43,6 +45,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({
   onToggleStatus,
   onDeleteUser,
   onEditUserProfile,
+  onCreateRegion,
+  onDeleteRegion,
   regions = DEFAULT_REGIONS,
 }) => {
   const isHead = currentUser.role === 'head';
@@ -63,6 +67,61 @@ export const UserManagement: React.FC<UserManagementProps> = ({
   const CREATE_REGION = '__create_new_region__';
   const [isCreatingRegion, setIsCreatingRegion] = useState(false);
   const [newRegionName, setNewRegionName] = useState('');
+
+  // Region management (Head only)
+  const [regionModal, setRegionModal] = useState<'create' | 'delete' | null>(null);
+  const [regionInput, setRegionInput] = useState('');
+  const [regionToDelete, setRegionToDelete] = useState('');
+  const [regionBusy, setRegionBusy] = useState(false);
+  const [regionError, setRegionError] = useState<string | null>(null);
+
+  const closeRegionModal = () => {
+    setRegionModal(null);
+    setRegionInput('');
+    setRegionToDelete('');
+    setRegionError(null);
+  };
+
+  const submitCreateRegion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const typed = regionInput.trim().replace(/\s+/g, ' ');
+    if (!typed) {
+      setRegionError('Please enter a region name.');
+      return;
+    }
+    if (regions.some((r) => r.toLowerCase() === typed.toLowerCase())) {
+      setRegionError(`Region "${typed}" already exists.`);
+      return;
+    }
+    setRegionBusy(true);
+    setRegionError(null);
+    try {
+      await onCreateRegion?.(typed);
+      closeRegionModal();
+    } catch (err) {
+      setRegionError(err instanceof Error ? err.message : 'Failed to create region');
+    } finally {
+      setRegionBusy(false);
+    }
+  };
+
+  const submitDeleteRegion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!regionToDelete) {
+      setRegionError('Please select the region to delete.');
+      return;
+    }
+    setRegionBusy(true);
+    setRegionError(null);
+    try {
+      await onDeleteRegion?.(regionToDelete);
+      closeRegionModal();
+    } catch (err) {
+      setRegionError(err instanceof Error ? err.message : 'Failed to delete region');
+    } finally {
+      setRegionBusy(false);
+    }
+  };
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -188,30 +247,6 @@ export const UserManagement: React.FC<UserManagementProps> = ({
     return false;
   };
 
-  // Group accounts by Assigned Region (HQ / unlisted regions first, then every region)
-  const groups: { region: string; members: User[] }[] = [];
-  const hqMembers = users.filter((u) => !regions.some((r) => r.toLowerCase() === u.region.toLowerCase()));
-  const hqNames = Array.from(new Set(hqMembers.map((u) => u.region)));
-  hqNames.forEach((name) =>
-    groups.push({ region: name, members: hqMembers.filter((u) => u.region === name) })
-  );
-  regions.forEach((r) =>
-    groups.push({ region: r, members: users.filter((u) => u.region.toLowerCase() === r.toLowerCase()) })
-  );
-
-  // Open the Add User dialog with a region already chosen
-  const openAddForRegion = (reg: string) => {
-    setRegion(reg);
-    setIsCreatingRegion(false);
-    setNewRegionName('');
-    setError(null);
-    setIsAddModalOpen(true);
-  };
-
-  // Head can add to any region; Regional Incharge only to their own region
-  const canAddToRegion = (reg: string) =>
-    isHead || (isRegional && reg.toLowerCase() === currentUser.region.toLowerCase());
-
   return (
     <div className="space-y-6">
       {/* Top Banner & User Creation Action */}
@@ -230,16 +265,36 @@ export const UserManagement: React.FC<UserManagementProps> = ({
           </p>
         </div>
 
-        {/* Head and Regional Incharge have the Add Users feature */}
-        {canCreateUsers && (
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 transition-colors shadow-xs shrink-0 cursor-pointer"
-          >
-            <UserPlus className="w-4 h-4 text-indigo-400" />
-            <span>{isHead ? 'Add New User Account' : 'Add Area Incharge'}</span>
-          </button>
-        )}
+        {/* Head and Regional Incharge have the Add Users feature; Head also manages regions */}
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          {isHead && (
+            <>
+              <button
+                onClick={() => setRegionModal('create')}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors cursor-pointer"
+              >
+                <Building2 className="w-4 h-4" />
+                <span>Create Region</span>
+              </button>
+              <button
+                onClick={() => setRegionModal('delete')}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors cursor-pointer"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Delete Region</span>
+              </button>
+            </>
+          )}
+          {canCreateUsers && (
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 transition-colors shadow-xs cursor-pointer"
+            >
+              <UserPlus className="w-4 h-4 text-indigo-400" />
+              <span>{isHead ? 'Add New User Account' : 'Add Area Incharge'}</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Users Table */}
@@ -258,39 +313,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {groups.map((group) => (
-                <React.Fragment key={`grp-${group.region}`}>
-                  <tr className="bg-slate-100/80 border-y border-slate-200">
-                    <td colSpan={7} className="py-2 px-4">
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
-                          <Building2 className="w-3.5 h-3.5 text-slate-500" />
-                          {group.region}
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold normal-case tracking-normal bg-white text-slate-600 border border-slate-200">
-                            {group.members.length} {group.members.length === 1 ? 'account' : 'accounts'}
-                          </span>
-                        </div>
-                        {canAddToRegion(group.region) && (
-                          <button
-                            onClick={() => openAddForRegion(group.region)}
-                            className="flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold text-indigo-700 bg-white hover:bg-indigo-50 border border-indigo-200 transition-colors cursor-pointer normal-case tracking-normal"
-                            title={`Add a user account to ${group.region}`}
-                          >
-                            <UserPlus className="w-3 h-3" />
-                            <span>Add user to this region</span>
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                  {group.members.length === 0 && (
-                    <tr>
-                      <td colSpan={7} className="py-3 px-4 text-[11px] text-slate-400 italic">
-                        No accounts in this region yet.
-                      </td>
-                    </tr>
-                  )}
-                  {group.members.map((u) => {
+              {users.map((u) => {
                 const canAct = canManageUser(u);
                 const isWorking = actionInProgressId === u.id;
 
@@ -423,8 +446,6 @@ export const UserManagement: React.FC<UserManagementProps> = ({
                   </tr>
                 );
               })}
-                </React.Fragment>
-              ))}
             </tbody>
           </table>
         </div>
@@ -647,6 +668,114 @@ export const UserManagement: React.FC<UserManagementProps> = ({
                   className="px-5 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors shadow-xs"
                 >
                   {loading ? 'Creating...' : 'Create User Account'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Create / Delete Region Modal (Head only) */}
+      {isHead && regionModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div
+            className="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden"
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300">
+                  <Building2 className="w-5 h-5" />
+                </div>
+                <h2 className="text-base font-bold text-white tracking-tight">
+                  {regionModal === 'create' ? 'Create Region' : 'Delete Region'}
+                </h2>
+              </div>
+              <button
+                onClick={closeRegionModal}
+                className="text-slate-400 hover:text-white p-1 rounded-md"
+                title="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={regionModal === 'create' ? submitCreateRegion : submitDeleteRegion}>
+              <div className="p-6 space-y-3">
+                {regionError && (
+                  <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                    <span>{regionError}</span>
+                  </div>
+                )}
+
+                {regionModal === 'create' ? (
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Region Name <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      autoFocus
+                      value={regionInput}
+                      onChange={(e) => setRegionInput(e.target.value)}
+                      maxLength={64}
+                      placeholder="e.g. Central Division"
+                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <p className="text-[11px] text-slate-500 mt-1.5">
+                      The new region becomes available for users, leads, reports and metrics.
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Select Region to Delete <span className="text-rose-500">*</span>
+                    </label>
+                    <select
+                      value={regionToDelete}
+                      onChange={(e) => setRegionToDelete(e.target.value)}
+                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500 bg-white"
+                    >
+                      <option value="">Choose a region…</option>
+                      {regions.map((r) => {
+                        const count = users.filter((u) => u.region.toLowerCase() === r.toLowerCase()).length;
+                        return (
+                          <option key={r} value={r}>
+                            {r} ({count} {count === 1 ? 'account' : 'accounts'})
+                          </option>
+                        );
+                      })}
+                    </select>
+                    <p className="text-[11px] text-slate-500 mt-1.5">
+                      A region can be deleted only when it has no user accounts and no leads.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-slate-50 px-6 py-3.5 border-t border-slate-200 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={closeRegionModal}
+                  disabled={regionBusy}
+                  className="px-4 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-800 bg-white border border-slate-200 rounded-md transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={regionBusy}
+                  className={`px-5 py-1.5 text-xs font-semibold text-white rounded-md transition-colors shadow-xs ${
+                    regionModal === 'create' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-rose-600 hover:bg-rose-700'
+                  }`}
+                >
+                  {regionBusy
+                    ? 'Working...'
+                    : regionModal === 'create'
+                    ? 'Create Region'
+                    : 'Delete Region'}
                 </button>
               </div>
             </form>

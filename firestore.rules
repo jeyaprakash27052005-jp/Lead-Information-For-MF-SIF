@@ -36,6 +36,15 @@ service cloud.firestore {
       allow delete: if isValidId(leadId);
     }
 
+    match /regions/{regionId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(regionId)
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 64;
+      allow delete: if isValidId(regionId);
+    }
+
     match /test/{docId} {
       allow get, list, write: if true;
     }

@@ -13,6 +13,11 @@ import {
 } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 import { User, Lead, LeadStatus } from '../types';
+import { DEFAULT_REGIONS } from '../utils/regions';
+
+// Firestore document id for a region name (letters, digits, underscore only)
+const regionDocId = (name: string) =>
+  name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'region';
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
@@ -465,6 +470,54 @@ export const firebaseDbService = {
     const path = `users/${userId}`;
     try {
       await deleteDoc(doc(db, 'users', userId));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, path);
+    }
+  },
+
+  // ---- Regions (managed by Head) ----
+  // Returns the stored region names. Seeds the four default divisions the first time.
+  async getRegions(): Promise<string[]> {
+    const path = 'regions';
+    try {
+      const snap = await getDocs(collection(db, path));
+      let names: string[] = [];
+      snap.forEach((d) => {
+        const n = (d.data() as { name?: string }).name;
+        if (typeof n === 'string' && n.trim()) names.push(n.trim());
+      });
+      if (names.length === 0) {
+        for (const n of DEFAULT_REGIONS) {
+          await setDoc(doc(db, path, regionDocId(n)), { name: n, createdAt: new Date().toISOString() });
+        }
+        names = [...DEFAULT_REGIONS];
+      }
+      return names;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.LIST, path);
+    }
+  },
+
+  async createRegion(name: string): Promise<string> {
+    const clean = name.trim().replace(/\s+/g, ' ');
+    if (!clean) throw new Error('Please enter a region name.');
+    const path = `regions/${regionDocId(clean)}`;
+    try {
+      const ref = doc(db, 'regions', regionDocId(clean));
+      const existing = await getDoc(ref);
+      if (existing.exists()) throw new Error(`Region "${clean}" already exists.`);
+      await setDoc(ref, { name: clean, createdAt: new Date().toISOString() });
+      return clean;
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already exists')) throw error;
+      handleFirestoreError(error, OperationType.CREATE, path);
+    }
+  },
+
+  async deleteRegion(name: string): Promise<void> {
+    const path = `regions/${regionDocId(name)}`;
+    try {
+      await deleteDoc(doc(db, 'regions', regionDocId(name)));
     } catch (error) {
       handleFirestoreError(error, OperationType.DELETE, path);
     }
