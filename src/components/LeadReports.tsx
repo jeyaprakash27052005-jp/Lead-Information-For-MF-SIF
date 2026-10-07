@@ -13,22 +13,24 @@ import {
   ShieldCheck,
   CheckCircle2
 } from 'lucide-react';
+import { DEFAULT_REGIONS } from '../utils/regions';
 import { formatInr, formatInrCompact, formatInrNumber } from '../utils/currency';
 
 interface LeadReportsProps {
   leads: Lead[];
   currentUser: User;
   onViewLead: (lead: Lead) => void;
+  regions?: string[];
 }
 
 export const LeadReports: React.FC<LeadReportsProps> = ({
   leads,
   onViewLead,
+  regions = DEFAULT_REGIONS,
 }) => {
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [selectedRegion, setSelectedRegion] = useState<string>('ALL');
 
-  const regions = ['North Division', 'South Division', 'East Division', 'West Division'];
   const statuses: LeadStatus[] = ['Pending', 'Ready to Invest', 'Process', 'Other'];
 
   // Filter leads according to selected status and region

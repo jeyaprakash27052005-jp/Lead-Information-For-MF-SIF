@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   AlertCircle
 } from 'lucide-react';
+import { DEFAULT_REGIONS } from '../utils/regions';
 import { formatInr } from '../utils/currency';
 
 interface LeadFormModalProps {
@@ -19,6 +20,7 @@ interface LeadFormModalProps {
   currentUser: User;
   users: User[];
   initialData?: Lead | null;
+  regions?: string[];
 }
 
 export const LeadFormModal: React.FC<LeadFormModalProps> = ({
@@ -28,6 +30,7 @@ export const LeadFormModal: React.FC<LeadFormModalProps> = ({
   currentUser,
   users,
   initialData,
+  regions = DEFAULT_REGIONS,
 }) => {
   if (!isOpen) return null;
 
@@ -61,7 +64,6 @@ export const LeadFormModal: React.FC<LeadFormModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const regions = ['North Division', 'South Division', 'East Division', 'West Division'];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

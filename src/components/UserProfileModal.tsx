@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../types';
 import { X, User as UserIcon, Building2, ShieldCheck, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { DEFAULT_REGIONS } from '../utils/regions';
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ interface UserProfileModalProps {
     }
   ) => Promise<void>;
   isEditingSelf?: boolean;
+  regions?: string[];
 }
 
 export const UserProfileModal: React.FC<UserProfileModalProps> = ({
@@ -24,6 +26,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   user,
   onSaveProfile,
   isEditingSelf = false,
+  regions: regionOptions = DEFAULT_REGIONS,
 }) => {
   if (!isOpen || !user) return null;
 
@@ -48,10 +51,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   const regions = [
     'All Regions (National HQ)',
-    'North Division',
-    'South Division',
-    'East Division',
-    'West Division',
+    ...regionOptions,
+    ...(region && region !== 'All Regions (National HQ)' && !regionOptions.includes(region) ? [region] : []),
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {

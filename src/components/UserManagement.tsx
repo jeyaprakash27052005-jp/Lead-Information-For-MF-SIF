@@ -15,6 +15,7 @@ import {
   X,
   Edit
 } from 'lucide-react';
+import { DEFAULT_REGIONS } from '../utils/regions';
 
 interface UserManagementProps {
   users: User[];
@@ -32,6 +33,7 @@ interface UserManagementProps {
   onToggleStatus: (userId: string, newStatus: 'active' | 'inactive') => Promise<void>;
   onDeleteUser: (userId: string) => Promise<void>;
   onEditUserProfile: (user: User) => void;
+  regions?: string[];
 }
 
 export const UserManagement: React.FC<UserManagementProps> = ({
@@ -41,6 +43,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
   onToggleStatus,
   onDeleteUser,
   onEditUserProfile,
+  regions = DEFAULT_REGIONS,
 }) => {
   const isHead = currentUser.role === 'head';
   const isRegional = currentUser.role === 'regional_incharge';
@@ -56,6 +59,10 @@ export const UserManagement: React.FC<UserManagementProps> = ({
   const [region, setRegion] = useState(
     currentUser.region !== 'All Regions (National HQ)' ? currentUser.region : 'North Division'
   );
+
+  const CREATE_REGION = '__create_new_region__';
+  const [isCreatingRegion, setIsCreatingRegion] = useState(false);
+  const [newRegionName, setNewRegionName] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,13 +83,24 @@ export const UserManagement: React.FC<UserManagementProps> = ({
     onConfirm: async () => {},
   });
 
-  const regions = ['North Division', 'South Division', 'East Division', 'West Division'];
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim() || !name.trim() || !designation.trim()) {
       setError('Please fill all required user fields');
       return;
+    }
+
+    // Resolve the region (existing, or a newly created one - Head only)
+    let finalRegion = isRegional ? currentUser.region : region;
+    if (isHead && isCreatingRegion) {
+      const typed = newRegionName.trim().replace(/\s+/g, ' ');
+      if (!typed) {
+        setError('Please enter the name of the new region');
+        return;
+      }
+      const existing = regions.find((r) => r.toLowerCase() === typed.toLowerCase());
+      finalRegion = existing ?? typed;
     }
 
     setLoading(true);
@@ -95,7 +113,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
         name: name.trim(),
         designation: designation.trim(),
         role: isRegional ? 'area_incharge' : role,
-        region: isRegional ? currentUser.region : region,
+        region: finalRegion,
         createdBy: `${currentUser.name} (${currentUser.designation})`,
         creatorRole: currentUser.role,
       });
@@ -105,6 +123,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({
       setName('');
       setDesignation('');
       setPassword('password123');
+      setIsCreatingRegion(false);
+      setNewRegionName('');
       setIsAddModalOpen(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create user');
@@ -168,6 +188,30 @@ export const UserManagement: React.FC<UserManagementProps> = ({
     return false;
   };
 
+  // Group accounts by Assigned Region (HQ / unlisted regions first, then every region)
+  const groups: { region: string; members: User[] }[] = [];
+  const hqMembers = users.filter((u) => !regions.some((r) => r.toLowerCase() === u.region.toLowerCase()));
+  const hqNames = Array.from(new Set(hqMembers.map((u) => u.region)));
+  hqNames.forEach((name) =>
+    groups.push({ region: name, members: hqMembers.filter((u) => u.region === name) })
+  );
+  regions.forEach((r) =>
+    groups.push({ region: r, members: users.filter((u) => u.region.toLowerCase() === r.toLowerCase()) })
+  );
+
+  // Open the Add User dialog with a region already chosen
+  const openAddForRegion = (reg: string) => {
+    setRegion(reg);
+    setIsCreatingRegion(false);
+    setNewRegionName('');
+    setError(null);
+    setIsAddModalOpen(true);
+  };
+
+  // Head can add to any region; Regional Incharge only to their own region
+  const canAddToRegion = (reg: string) =>
+    isHead || (isRegional && reg.toLowerCase() === currentUser.region.toLowerCase());
+
   return (
     <div className="space-y-6">
       {/* Top Banner & User Creation Action */}
@@ -214,7 +258,39 @@ export const UserManagement: React.FC<UserManagementProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {users.map((u) => {
+              {groups.map((group) => (
+                <React.Fragment key={`grp-${group.region}`}>
+                  <tr className="bg-slate-100/80 border-y border-slate-200">
+                    <td colSpan={7} className="py-2 px-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
+                          <Building2 className="w-3.5 h-3.5 text-slate-500" />
+                          {group.region}
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold normal-case tracking-normal bg-white text-slate-600 border border-slate-200">
+                            {group.members.length} {group.members.length === 1 ? 'account' : 'accounts'}
+                          </span>
+                        </div>
+                        {canAddToRegion(group.region) && (
+                          <button
+                            onClick={() => openAddForRegion(group.region)}
+                            className="flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold text-indigo-700 bg-white hover:bg-indigo-50 border border-indigo-200 transition-colors cursor-pointer normal-case tracking-normal"
+                            title={`Add a user account to ${group.region}`}
+                          >
+                            <UserPlus className="w-3 h-3" />
+                            <span>Add user to this region</span>
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                  {group.members.length === 0 && (
+                    <tr>
+                      <td colSpan={7} className="py-3 px-4 text-[11px] text-slate-400 italic">
+                        No accounts in this region yet.
+                      </td>
+                    </tr>
+                  )}
+                  {group.members.map((u) => {
                 const canAct = canManageUser(u);
                 const isWorking = actionInProgressId === u.id;
 
@@ -347,6 +423,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({
                   </tr>
                 );
               })}
+                </React.Fragment>
+              ))}
             </tbody>
           </table>
         </div>
@@ -520,9 +598,16 @@ export const UserManagement: React.FC<UserManagementProps> = ({
                     Assigned Region
                   </label>
                   <select
-                    value={isRegional ? currentUser.region : region}
+                    value={isRegional ? currentUser.region : isCreatingRegion ? CREATE_REGION : region}
                     disabled={isRegional}
-                    onChange={(e) => setRegion(e.target.value)}
+                    onChange={(e) => {
+                      if (e.target.value === CREATE_REGION) {
+                        setIsCreatingRegion(true);
+                      } else {
+                        setIsCreatingRegion(false);
+                        setRegion(e.target.value);
+                      }
+                    }}
                     className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500 bg-white"
                   >
                     {(isRegional ? [currentUser.region] : regions).map((reg) => (
@@ -530,8 +615,20 @@ export const UserManagement: React.FC<UserManagementProps> = ({
                         {reg}
                       </option>
                     ))}
+                  {isHead && <option value={CREATE_REGION}>+ Create new region…</option>}
                   </select>
                 </div>
+                  {isHead && isCreatingRegion && (
+                    <input
+                      type="text"
+                      autoFocus
+                      value={newRegionName}
+                      onChange={(e) => setNewRegionName(e.target.value)}
+                      placeholder="New region name, e.g. Central Division"
+                      maxLength={64}
+                      className="mt-2 w-full px-3 py-2 text-xs border border-indigo-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500 bg-indigo-50/40"
+                    />
+                  )}
               </div>
 
               {/* Modal Footer */}

@@ -9,9 +9,11 @@ import {
   TrendingUp,
   HelpCircle
 } from 'lucide-react';
+import { DEFAULT_REGIONS } from '../utils/regions';
 import { formatInr, formatInrCompact, formatInrNumber } from '../utils/currency';
 
 interface RegionalMetricsProps {
+  regions?: string[];
   leads: Lead[];
   users: User[];
   currentUser: User;
@@ -21,11 +23,11 @@ export const RegionalMetrics: React.FC<RegionalMetricsProps> = ({
   leads,
   users,
   currentUser,
+  regions: allRegions = DEFAULT_REGIONS,
 }) => {
   const isHead = currentUser.role === 'head';
 
   // Determine which regions to display according to incharge profile mention
-  const allRegions = ['North Division', 'South Division', 'East Division', 'West Division'];
   
   // If the incharge profile specifies a specific region, display according to their profile mention!
   const targetRegions = isHead

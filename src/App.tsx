@@ -15,6 +15,7 @@ import { ChangePasswordModal } from './components/ChangePasswordModal';
 import { UserProfileModal } from './components/UserProfileModal';
 import { LoginPage } from './components/LoginPage';
 import { PlusCircle } from 'lucide-react';
+import { getAllRegions } from './utils/regions';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -218,6 +219,9 @@ export default function App() {
     return <LoginPage onLogin={handleLogin} />;
   }
 
+  // All assignable regions (defaults + any region created via Add User)
+  const regionList = getAllRegions(users, leads);
+
   // Calculate assigned leads for current user
   const assignedLeads = leads.filter((l) => {
     if (currentUser.role === 'regional_incharge') {
@@ -286,6 +290,7 @@ export default function App() {
         {/* VIEW 1: All Leads Directory ("the all user lead will show all user") */}
         {activeTab === 'all-leads' && (
           <LeadsTable
+            regions={regionList}
             leads={leads}
             currentUser={currentUser}
             onViewLead={(lead) => setDetailsModalLead(lead)}
@@ -307,6 +312,7 @@ export default function App() {
         {/* VIEW 2: Assigned Leads (Regional Incharge & Area Incharge) */}
         {activeTab === 'assigned-leads' && (
           <LeadsTable
+            regions={regionList}
             leads={assignedLeads}
             currentUser={currentUser}
             onViewLead={(lead) => setDetailsModalLead(lead)}
@@ -356,6 +362,7 @@ export default function App() {
         {/* VIEW 4: User Management (Head & Regional Incharge) */}
         {activeTab === 'user-management' && (
           <UserManagement
+            regions={regionList}
             users={users}
             currentUser={currentUser}
             onAddUser={handleAddUser}
@@ -371,6 +378,7 @@ export default function App() {
         {/* VIEW 5: Regional Performance Metrics (Head & Regional Incharge) */}
         {activeTab === 'regional-metrics' && (
           <RegionalMetrics
+            regions={regionList}
             leads={leads}
             users={users}
             currentUser={currentUser}
@@ -380,6 +388,7 @@ export default function App() {
         {/* VIEW 6: Overall Lead Report & Download Hub (Status-wise and Regional-wise) */}
         {activeTab === 'lead-reports' && (
           <LeadReports
+            regions={regionList}
             leads={leads}
             currentUser={currentUser}
             onViewLead={(lead) => setDetailsModalLead(lead)}
@@ -404,6 +413,7 @@ export default function App() {
 
       {/* MODAL 1: Lead Information Form Modal (Add / Edit) */}
       <LeadFormModal
+        regions={regionList}
         isOpen={isAddLeadModalOpen}
         onClose={() => {
           setIsAddLeadModalOpen(false);
@@ -445,6 +455,7 @@ export default function App() {
 
       {/* MODAL 5: User Profile Update Modal (Head profile and other users profile) */}
       <UserProfileModal
+        regions={regionList}
         isOpen={isProfileModalOpen}
         onClose={() => {
           setIsProfileModalOpen(false);

@@ -17,6 +17,7 @@ import {
   PlusCircle,
   Building2
 } from 'lucide-react';
+import { DEFAULT_REGIONS } from '../utils/regions';
 import { formatInr, formatInrCompact, formatInrNumber } from '../utils/currency';
 
 interface LeadsTableProps {
@@ -27,6 +28,7 @@ interface LeadsTableProps {
   onEditLead: (lead: Lead) => void;
   onDeleteLead: (id: string) => Promise<void>;
   onAddNewLead?: () => void;
+  regions?: string[];
   title?: string;
   subtitle?: string;
 }
@@ -39,6 +41,7 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
   onEditLead,
   onDeleteLead,
   onAddNewLead,
+  regions,
   title = 'All Leads Directory',
   subtitle = 'Universal lead roster visible across all roles',
 }) => {
@@ -160,10 +163,11 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
               className="px-2.5 py-1.5 text-xs border border-slate-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-indigo-500 bg-white text-slate-700 font-medium"
             >
               <option value="ALL">All Regions</option>
-              <option value="North Division">North Division</option>
-              <option value="South Division">South Division</option>
-              <option value="East Division">East Division</option>
-              <option value="West Division">West Division</option>
+              {(regions ?? DEFAULT_REGIONS).map((reg) => (
+                <option key={reg} value={reg}>
+                  {reg}
+                </option>
+              ))}
             </select>
 
             {/* Add Lead Button */}
