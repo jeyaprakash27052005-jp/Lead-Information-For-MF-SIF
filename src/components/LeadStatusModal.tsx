@@ -69,12 +69,11 @@ const STATUS_OPTIONS: {
   },
 ];
 
-export const LeadStatusModal: React.FC<LeadStatusModalProps> = ({
+const LeadStatusModalInner: React.FC<Omit<LeadStatusModalProps, 'lead'> & { lead: Lead }> = ({
   lead,
   onClose,
   onSaveStatus,
 }) => {
-  if (!lead) return null;
 
   const [selectedStatus, setSelectedStatus] = useState<LeadStatus>(lead.status);
   const [remarks, setRemarks] = useState(lead.statusRemarks || '');
@@ -344,3 +343,7 @@ export const LeadStatusModal: React.FC<LeadStatusModalProps> = ({
     </div>
   );
 };
+
+// Wrapper keeps the early return outside the hooks of the inner component
+export const LeadStatusModal: React.FC<LeadStatusModalProps> = (props) =>
+  props.lead ? <LeadStatusModalInner key={props.lead.id} {...props} lead={props.lead} /> : null;

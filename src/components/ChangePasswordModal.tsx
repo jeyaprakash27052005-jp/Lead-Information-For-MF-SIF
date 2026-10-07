@@ -10,13 +10,12 @@ interface ChangePasswordModalProps {
   onSuccess: () => void;
 }
 
-export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
+const ChangePasswordModalInner: React.FC<ChangePasswordModalProps> = ({
   isOpen,
   onClose,
   currentUser,
   onSuccess,
 }) => {
-  if (!isOpen) return null;
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -177,3 +176,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
     </div>
   );
 };
+
+// Wrapper keeps the early return outside the hooks of the inner component
+export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = (props) =>
+  props.isOpen ? <ChangePasswordModalInner {...props} /> : null;

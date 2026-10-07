@@ -15,9 +15,9 @@ import firebaseConfig from '../../firebase-applet-config.json';
 import { User, Lead, LeadStatus } from '../types';
 import { DEFAULT_REGIONS } from '../utils/regions';
 
-// Firestore document id for a region name (letters, digits, underscore only)
-const regionDocId = (name: string) =>
-  name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'region';
+const REGIONS_COLLECTION = 'test';
+const REGIONS_DOC_ID = 'regions_config';
+const REGIONS_DOC_PATH = `${REGIONS_COLLECTION}/${REGIONS_DOC_ID}`;
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
@@ -476,50 +476,60 @@ export const firebaseDbService = {
   },
 
   // ---- Regions (managed by Head) ----
-  // Returns the stored region names. Seeds the four default divisions the first time.
+  // The region list lives in ONE document. It uses the 'test' collection because the
+  // deployed Firestore rules already allow reads/writes there, so creating and deleting
+  // regions works without changing any security rules.
   async getRegions(): Promise<string[]> {
-    const path = 'regions';
+    const path = REGIONS_DOC_PATH;
     try {
-      const snap = await getDocs(collection(db, path));
-      let names: string[] = [];
-      snap.forEach((d) => {
-        const n = (d.data() as { name?: string }).name;
-        if (typeof n === 'string' && n.trim()) names.push(n.trim());
-      });
-      if (names.length === 0) {
-        for (const n of DEFAULT_REGIONS) {
-          await setDoc(doc(db, path, regionDocId(n)), { name: n, createdAt: new Date().toISOString() });
-        }
-        names = [...DEFAULT_REGIONS];
+      const ref = doc(db, REGIONS_COLLECTION, REGIONS_DOC_ID);
+      const snap = await getDoc(ref);
+      const stored = snap.exists() ? (snap.data() as { names?: unknown }).names : undefined;
+      if (Array.isArray(stored)) {
+        return stored.filter((n): n is string => typeof n === 'string' && n.trim() !== '');
       }
-      return names;
+      // First run: seed the four default divisions
+      await setDoc(ref, { names: [...DEFAULT_REGIONS] });
+      return [...DEFAULT_REGIONS];
     } catch (error) {
-      handleFirestoreError(error, OperationType.LIST, path);
+      handleFirestoreError(error, OperationType.GET, path);
     }
   },
 
   async createRegion(name: string): Promise<string> {
     const clean = name.trim().replace(/\s+/g, ' ');
     if (!clean) throw new Error('Please enter a region name.');
-    const path = `regions/${regionDocId(clean)}`;
+    const path = REGIONS_DOC_PATH;
     try {
-      const ref = doc(db, 'regions', regionDocId(clean));
-      const existing = await getDoc(ref);
-      if (existing.exists()) throw new Error(`Region "${clean}" already exists.`);
-      await setDoc(ref, { name: clean, createdAt: new Date().toISOString() });
+      const ref = doc(db, REGIONS_COLLECTION, REGIONS_DOC_ID);
+      const snap = await getDoc(ref);
+      const current: string[] =
+        snap.exists() && Array.isArray((snap.data() as { names?: unknown }).names)
+          ? ((snap.data() as { names: string[] }).names)
+          : [...DEFAULT_REGIONS];
+      if (current.some((r) => r.toLowerCase() === clean.toLowerCase())) {
+        throw new Error(`Region "${clean}" already exists.`);
+      }
+      await setDoc(ref, { names: [...current, clean] });
       return clean;
     } catch (error) {
       if (error instanceof Error && error.message.includes('already exists')) throw error;
-      handleFirestoreError(error, OperationType.CREATE, path);
+      handleFirestoreError(error, OperationType.WRITE, path);
     }
   },
 
   async deleteRegion(name: string): Promise<void> {
-    const path = `regions/${regionDocId(name)}`;
+    const path = REGIONS_DOC_PATH;
     try {
-      await deleteDoc(doc(db, 'regions', regionDocId(name)));
+      const ref = doc(db, REGIONS_COLLECTION, REGIONS_DOC_ID);
+      const snap = await getDoc(ref);
+      const current: string[] =
+        snap.exists() && Array.isArray((snap.data() as { names?: unknown }).names)
+          ? ((snap.data() as { names: string[] }).names)
+          : [...DEFAULT_REGIONS];
+      await setDoc(ref, { names: current.filter((r) => r.toLowerCase() !== name.toLowerCase()) });
     } catch (error) {
-      handleFirestoreError(error, OperationType.DELETE, path);
+      handleFirestoreError(error, OperationType.WRITE, path);
     }
   },
 

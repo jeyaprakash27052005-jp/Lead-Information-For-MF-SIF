@@ -20,7 +20,7 @@ interface UserProfileModalProps {
   regions?: string[];
 }
 
-export const UserProfileModal: React.FC<UserProfileModalProps> = ({
+const UserProfileModalInner: React.FC<Omit<UserProfileModalProps, 'user'> & { user: User }> = ({
   isOpen,
   onClose,
   user,
@@ -28,7 +28,6 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   isEditingSelf = false,
   regions: regionOptions = DEFAULT_REGIONS,
 }) => {
-  if (!isOpen || !user) return null;
 
   const [name, setName] = useState(user.name);
   const [designation, setDesignation] = useState(user.designation);
@@ -228,3 +227,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
     </div>
   );
 };
+
+// Wrapper keeps the early return outside the hooks of the inner component
+export const UserProfileModal: React.FC<UserProfileModalProps> = (props) =>
+  props.isOpen && props.user ? <UserProfileModalInner key={props.user.id} {...props} user={props.user} /> : null;

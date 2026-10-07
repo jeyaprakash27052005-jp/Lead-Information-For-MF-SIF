@@ -23,7 +23,7 @@ interface LeadFormModalProps {
   regions?: string[];
 }
 
-export const LeadFormModal: React.FC<LeadFormModalProps> = ({
+const LeadFormModalInner: React.FC<LeadFormModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
@@ -32,7 +32,6 @@ export const LeadFormModal: React.FC<LeadFormModalProps> = ({
   initialData,
   regions = DEFAULT_REGIONS,
 }) => {
-  if (!isOpen) return null;
 
   const [name, setName] = useState(initialData?.name || '');
   const [age, setAge] = useState<number | ''>(initialData?.age || '');
@@ -399,3 +398,7 @@ export const LeadFormModal: React.FC<LeadFormModalProps> = ({
     </div>
   );
 };
+
+// Wrapper keeps the early return outside the hooks of the inner component
+export const LeadFormModal: React.FC<LeadFormModalProps> = (props) =>
+  props.isOpen ? <LeadFormModalInner {...props} /> : null;
