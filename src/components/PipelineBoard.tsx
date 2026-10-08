@@ -14,6 +14,8 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { formatInr, formatInrCompact, formatInrNumber } from '../utils/currency';
+import { formatIndianMobile } from '../utils/validation';
+import { ReadinessChips } from './ReadinessChips';
 
 interface PipelineBoardProps {
   leads: Lead[];
@@ -198,9 +200,17 @@ export const PipelineBoard: React.FC<PipelineBoardProps> = ({
                         </div>
 
                         {/* Savings Narration Excerpt */}
-                        <div className="mt-1.5 p-1.5 rounded bg-slate-50 text-[10px] text-slate-600 line-clamp-2 italic border border-slate-100">
-                          "{lead.narration}"
-                        </div>
+                        {lead.mobile && (
+                          <div className="mt-1.5 text-[11px] text-slate-600 font-medium">
+                            {formatIndianMobile(lead.mobile)}
+                          </div>
+                        )}
+                        <ReadinessChips lead={lead} />
+                        {lead.narration && (
+                          <div className="mt-1.5 p-1.5 rounded bg-slate-50 text-[10px] text-slate-600 line-clamp-2 italic border border-slate-100">
+                            "{lead.narration}"
+                          </div>
+                        )}
 
                         {/* Other Status Narration if Other status is active */}
                         {lead.status === 'Other' && lead.otherStatusNarration && (

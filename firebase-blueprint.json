@@ -99,7 +99,7 @@
         },
         "narration": {
           "type": "string",
-          "description": "Narration for any other savings or financial background",
+          "description": "Optional narration for any other savings or financial background",
           "maxLength": 1000
         },
         "status": {
@@ -152,6 +152,32 @@
         "updatedAt": {
           "type": "string",
           "description": "ISO timestamp of last update"
+        },
+        "mobile": {
+          "type": "string",
+          "description": "10-digit Indian mobile number, unique per lead",
+          "pattern": "^[6-9][0-9]{9}$"
+        },
+        "panAvailable": {
+          "type": "boolean",
+          "description": "Whether the lead has a PAN"
+        },
+        "panNumber": {
+          "type": "string",
+          "description": "PAN number (only when PAN is available)",
+          "pattern": "^[A-Z]{5}[0-9]{4}[A-Z]$"
+        },
+        "dematAvailable": {
+          "type": "boolean",
+          "description": "Whether the lead has a Demat account"
+        },
+        "kycComplete": {
+          "type": "boolean",
+          "description": "Whether KYC is complete"
+        },
+        "sipAutopayActive": {
+          "type": "boolean",
+          "description": "Whether SIP auto-payment is activated"
         }
       },
       "required": [

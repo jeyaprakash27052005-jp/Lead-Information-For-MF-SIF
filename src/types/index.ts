@@ -25,7 +25,13 @@ export interface Lead {
   gender: 'Male' | 'Female' | 'Other';
   annualIncome: number;
   occupation: string;
-  narration: string;
+  narration?: string;
+  mobile?: string;
+  panAvailable?: boolean;
+  panNumber?: string;
+  dematAvailable?: boolean;
+  kycComplete?: boolean;
+  sipAutopayActive?: boolean;
   status: LeadStatus;
   statusRemarks?: string;
   otherStatusNarration?: string;

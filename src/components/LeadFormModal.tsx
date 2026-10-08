@@ -8,10 +8,12 @@ import {
   FileText,
   User as UserIcon,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  Phone
 } from 'lucide-react';
 import { DEFAULT_REGIONS, isHqRegion } from '../utils/regions';
 import { formatInr } from '../utils/currency';
+import { normalizeIndianMobile, isValidPan } from '../utils/validation';
 
 interface LeadFormModalProps {
   isOpen: boolean;
@@ -42,6 +44,12 @@ const LeadFormModalInner: React.FC<LeadFormModalProps> = ({
     initialData?.annualIncome || ''
   );
   const [occupation, setOccupation] = useState(initialData?.occupation || '');
+  const [mobile, setMobile] = useState(initialData?.mobile || '');
+  const [panAvailable, setPanAvailable] = useState(!!initialData?.panAvailable);
+  const [panNumber, setPanNumber] = useState(initialData?.panNumber || '');
+  const [dematAvailable, setDematAvailable] = useState(!!initialData?.dematAvailable);
+  const [kycComplete, setKycComplete] = useState(!!initialData?.kycComplete);
+  const [sipAutopayActive, setSipAutopayActive] = useState(!!initialData?.sipAutopayActive);
   const [narration, setNarration] = useState(initialData?.narration || '');
   const [status, setStatus] = useState<LeadStatus>(initialData?.status || 'Pending');
   const [otherStatusNarration, setOtherStatusNarration] = useState(
@@ -82,8 +90,13 @@ const LeadFormModalInner: React.FC<LeadFormModalProps> = ({
       setError('Please enter lead occupation');
       return;
     }
-    if (!narration.trim()) {
-      setError('Please provide narration for any other savings or investments');
+    const cleanMobile = normalizeIndianMobile(mobile);
+    if (!cleanMobile) {
+      setError('Please enter a valid 10-digit Indian mobile number (starting with 6, 7, 8 or 9).');
+      return;
+    }
+    if (panAvailable && !isValidPan(panNumber)) {
+      setError('PAN is marked Available. Please enter a valid PAN number (format: ABCDE1234F).');
       return;
     }
 
@@ -102,6 +115,12 @@ const LeadFormModalInner: React.FC<LeadFormModalProps> = ({
         gender,
         annualIncome: Number(annualIncome),
         occupation: occupation.trim(),
+        mobile: cleanMobile,
+        panAvailable,
+        panNumber: panAvailable ? panNumber.trim().toUpperCase() : undefined,
+        dematAvailable,
+        kycComplete,
+        sipAutopayActive,
         narration: narration.trim(),
         status,
         statusRemarks: statusRemarks.trim(),
@@ -252,6 +271,29 @@ const LeadFormModalInner: React.FC<LeadFormModalProps> = ({
               </div>
             </div>
 
+            {/* Mobile number (unique per lead) */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                Mobile Number <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                <span className="absolute left-9 top-2 text-xs font-semibold text-slate-500">+91</span>
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  required
+                  value={mobile}
+                  onChange={(e) => setMobile(e.target.value.replace(/[^\d+\s-]/g, '').slice(0, 16))}
+                  placeholder="10-digit Indian mobile, e.g. 9876543210"
+                  className="w-full pl-16 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-semibold"
+                />
+              </div>
+              <p className="text-[11px] text-slate-500 mt-1">
+                Each mobile number can be registered for only one lead.
+              </p>
+            </div>
+
             {/* Occupation */}
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
@@ -270,19 +312,81 @@ const LeadFormModalInner: React.FC<LeadFormModalProps> = ({
               </div>
             </div>
 
+            {/* Investment readiness checklist */}
+            <div className="p-3.5 rounded-lg border border-slate-200 bg-slate-50/60">
+              <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">
+                Investment Readiness
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <label className="flex items-center gap-2 p-2.5 rounded-md bg-white border border-slate-200 cursor-pointer text-xs font-semibold text-slate-800">
+                  <input
+                    type="checkbox"
+                    checked={panAvailable}
+                    onChange={(e) => {if (!e.target.checked) setPanNumber(''); setPanAvailable(e.target.checked);}}
+                    className="w-4 h-4 accent-indigo-600"
+                  />
+                  PAN Available
+                </label>
+                <label className="flex items-center gap-2 p-2.5 rounded-md bg-white border border-slate-200 cursor-pointer text-xs font-semibold text-slate-800">
+                  <input
+                    type="checkbox"
+                    checked={dematAvailable}
+                    onChange={(e) => {setDematAvailable(e.target.checked);}}
+                    className="w-4 h-4 accent-indigo-600"
+                  />
+                  Demat Account Available
+                </label>
+                <label className="flex items-center gap-2 p-2.5 rounded-md bg-white border border-slate-200 cursor-pointer text-xs font-semibold text-slate-800">
+                  <input
+                    type="checkbox"
+                    checked={kycComplete}
+                    onChange={(e) => {setKycComplete(e.target.checked);}}
+                    className="w-4 h-4 accent-indigo-600"
+                  />
+                  KYC Complete
+                </label>
+                <label className="flex items-center gap-2 p-2.5 rounded-md bg-white border border-slate-200 cursor-pointer text-xs font-semibold text-slate-800">
+                  <input
+                    type="checkbox"
+                    checked={sipAutopayActive}
+                    onChange={(e) => {setSipAutopayActive(e.target.checked);}}
+                    className="w-4 h-4 accent-indigo-600"
+                  />
+                  SIP Auto-payment Activated
+                </label>
+              </div>
+
+              {panAvailable && (
+                <div className="mt-3">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    PAN Number <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={panNumber}
+                    onChange={(e) =>
+                      setPanNumber(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10))
+                    }
+                    placeholder="e.g. ABCDE1234F"
+                    maxLength={10}
+                    className="w-full sm:w-64 px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono tracking-wider"
+                  />
+                </div>
+              )}
+            </div>
+
             {/* Narration for any other saving - EXPLICIT USER REQUIREMENT */}
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
                   <FileText className="w-3.5 h-3.5 text-indigo-600" />
-                  Narration for Any Other Saving <span className="text-rose-500">*</span>
+                  Narration for Any Other Saving <span className="text-slate-400 normal-case font-medium">(optional)</span>
                 </label>
                 <span className="text-[11px] text-slate-400">
                   Pensions, mutual funds, gold, real estate, deposits
                 </span>
               </div>
               <textarea
-                required
                 value={narration}
                 onChange={(e) => setNarration(e.target.value)}
                 rows={3}

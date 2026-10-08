@@ -15,10 +15,13 @@ import {
   FileText,
   ShieldCheck,
   PlusCircle,
-  Building2
+  Building2,
+  Phone
 } from 'lucide-react';
 import { DEFAULT_REGIONS } from '../utils/regions';
 import { formatInr, formatInrCompact, formatInrNumber } from '../utils/currency';
+import { formatIndianMobile } from '../utils/validation';
+import { ReadinessChips } from './ReadinessChips';
 
 interface LeadsTableProps {
   leads: Lead[];
@@ -84,7 +87,9 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
       lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       lead.occupation.toLowerCase().includes(searchTerm.toLowerCase()) ||
       lead.addedByName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.narration.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (lead.narration || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (lead.mobile || '').includes(searchTerm.replace(/[\s+-]/g, '')) && searchTerm.trim() !== '' ||
+      (lead.panNumber || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       lead.id.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = statusFilter === 'ALL' || lead.status === statusFilter;
@@ -237,6 +242,13 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
                           <Briefcase className="w-3 h-3 text-slate-400" />
                           <span>{lead.occupation}</span>
                         </div>
+                        {lead.mobile && (
+                          <div className="text-[11px] text-slate-600 flex items-center gap-1 mt-0.5 font-medium">
+                            <Phone className="w-3 h-3 text-slate-400" />
+                            <span>{formatIndianMobile(lead.mobile)}</span>
+                          </div>
+                        )}
+                        <ReadinessChips lead={lead} />
                       </td>
 
                       {/* Demographics */}

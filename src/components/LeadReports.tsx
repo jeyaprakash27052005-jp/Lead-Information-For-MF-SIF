@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { DEFAULT_REGIONS } from '../utils/regions';
 import { formatInr, formatInrCompact, formatInrNumber } from '../utils/currency';
+import { formatIndianMobile } from '../utils/validation';
+import { ReadinessChips } from './ReadinessChips';
 
 interface LeadReportsProps {
   leads: Lead[];
@@ -49,6 +51,12 @@ export const LeadReports: React.FC<LeadReportsProps> = ({
       'Gender',
       'Annual Income (INR)',
       'Occupation',
+      'Mobile Number',
+      'PAN Available',
+      'PAN Number',
+      'Demat Account Available',
+      'KYC Complete',
+      'SIP Auto-payment Activated',
       'Savings Narration',
       'Status',
       'Other Status Narration',
@@ -67,6 +75,12 @@ export const LeadReports: React.FC<LeadReportsProps> = ({
       `"${l.gender}"`,
       l.annualIncome,
       `"${l.occupation.replace(/"/g, '""')}"`,
+      `"${l.mobile || ''}"`,
+      `"${l.panAvailable ? 'Yes' : 'No'}"`,
+      `"${l.panAvailable ? l.panNumber || '' : ''}"`,
+      `"${l.dematAvailable ? 'Yes' : 'No'}"`,
+      `"${l.kycComplete ? 'Yes' : 'No'}"`,
+      `"${l.sipAutopayActive ? 'Yes' : 'No'}"`,
       `"${(l.narration || '').replace(/"/g, '""')}"`,
       `"${l.status}"`,
       `"${(l.otherStatusNarration || '').replace(/"/g, '""')}"`,
@@ -292,6 +306,10 @@ export const LeadReports: React.FC<LeadReportsProps> = ({
                   >
                     <td className="py-3.5 px-4 font-bold text-slate-900">
                       {lead.name}
+                      {lead.mobile && (
+                        <div className="text-[11px] font-medium text-slate-500">{formatIndianMobile(lead.mobile)}</div>
+                      )}
+                      <ReadinessChips lead={lead} />
                     </td>
 
                     <td className="py-3.5 px-4 text-slate-600">

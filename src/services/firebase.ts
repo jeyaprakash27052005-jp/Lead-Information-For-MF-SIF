@@ -15,6 +15,7 @@ import {
 import firebaseConfig from '../../firebase-applet-config.json';
 import { User, Lead, LeadStatus } from '../types';
 import { DEFAULT_REGIONS } from '../utils/regions';
+import { normalizeIndianMobile, isValidPan } from '../utils/validation';
 
 const REGIONS_COLLECTION = 'regions';
 const regionDocId = (name: string) =>
@@ -181,6 +182,46 @@ export async function ensureFirestoreDatabaseSeeded(): Promise<void> {
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, usersPath);
   }
+}
+
+// Checks the mobile number (valid Indian number, not used by any other lead) and the PAN.
+// Returns the cleaned values to store. Throws a plain Error with a readable message.
+async function validateLeadContact(
+  data: Partial<Lead>,
+  excludeLeadId?: string
+): Promise<Partial<Lead>> {
+  const out: Partial<Lead> = {};
+  if (data.mobile !== undefined) {
+    const mobile = normalizeIndianMobile(data.mobile);
+    if (!mobile) {
+      throw new Error('Please enter a valid 10-digit Indian mobile number (starting with 6, 7, 8 or 9).');
+    }
+    let snap;
+    try {
+      snap = await getDocs(collection(db, 'leads'));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.LIST, 'leads');
+    }
+    let owner: string | null = null;
+    snap!.forEach((d) => {
+      const l = d.data() as Lead;
+      if (l.mobile === mobile && d.id !== excludeLeadId) owner = l.name;
+    });
+    if (owner) {
+      throw new Error(`Mobile number ${mobile} is already registered for lead "${owner}". Each mobile number can belong to only one lead.`);
+    }
+    out.mobile = mobile;
+  }
+  if (data.panAvailable) {
+    const pan = (data.panNumber || '').trim().toUpperCase();
+    if (!isValidPan(pan)) {
+      throw new Error('PAN is marked Available. Please enter a valid PAN number (format: ABCDE1234F).');
+    }
+    out.panNumber = pan;
+  } else if (data.panAvailable === false) {
+    out.panNumber = undefined;
+  }
+  return out;
 }
 
 export const firebaseDbService = {
@@ -456,6 +497,8 @@ export const firebaseDbService = {
   async createLead(leadData: Omit<Lead, 'id' | 'createdAt' | 'updatedAt'>): Promise<Lead> {
     await ensureFirestoreDatabaseSeeded();
     const path = 'leads';
+    // Validation errors are thrown as-is (not wrapped) so the form can show them
+    leadData = { ...leadData, ...(await validateLeadContact(leadData)) };
     try {
       const newId = `lead_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
       const now = new Date().toISOString();
@@ -479,6 +522,9 @@ export const firebaseDbService = {
   async updateLead(id: string, leadData: Partial<Lead>): Promise<Lead> {
     await ensureFirestoreDatabaseSeeded();
     const path = `leads/${id}`;
+    if (leadData.mobile !== undefined || leadData.panAvailable !== undefined) {
+      leadData = { ...leadData, ...(await validateLeadContact(leadData, id)) };
+    }
     try {
       const leadRef = doc(db, 'leads', id);
       const snap = await getDoc(leadRef);
@@ -501,6 +547,11 @@ export const firebaseDbService = {
         if (updated[k] === undefined) delete updated[k];
       });
       const payload: Record<string, any> = { ...updated };
+      if (!updated.panAvailable) {
+        // no PAN on record: remove any old number
+        delete updated.panNumber;
+        payload.panNumber = deleteField();
+      }
       if (updated.status !== 'Other') {
         // narration only applies to the "Other" status: remove any old one
         delete updated.otherStatusNarration;

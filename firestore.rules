@@ -32,7 +32,13 @@ service cloud.firestore {
         && request.resource.data.status in ['Pending', 'Ready to Invest', 'Process', 'Other']
         && request.resource.data.addedByName is string && request.resource.data.addedByName.size() <= 128
         && request.resource.data.addedByDesignation is string && request.resource.data.addedByDesignation.size() <= 128
-        && request.resource.data.assignedRegion is string && request.resource.data.assignedRegion.size() <= 128;
+        && request.resource.data.assignedRegion is string && request.resource.data.assignedRegion.size() <= 128
+        && (!('mobile' in request.resource.data) || (request.resource.data.mobile is string && request.resource.data.mobile.matches('^[6-9][0-9]{9}$')))
+        && (!('panNumber' in request.resource.data) || (request.resource.data.panNumber is string && request.resource.data.panNumber.matches('^[A-Z]{5}[0-9]{4}[A-Z]$')))
+        && (!('panAvailable' in request.resource.data) || request.resource.data.panAvailable is bool)
+        && (!('dematAvailable' in request.resource.data) || request.resource.data.dematAvailable is bool)
+        && (!('kycComplete' in request.resource.data) || request.resource.data.kycComplete is bool)
+        && (!('sipAutopayActive' in request.resource.data) || request.resource.data.sipAutopayActive is bool);
       allow delete: if isValidId(leadId);
     }
 

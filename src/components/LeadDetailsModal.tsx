@@ -14,6 +14,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { formatInr, formatInrCompact, formatInrNumber } from '../utils/currency';
+import { formatIndianMobile } from '../utils/validation';
 
 interface LeadDetailsModalProps {
   lead: Lead | null;
@@ -152,7 +153,13 @@ export const LeadDetailsModal: React.FC<LeadDetailsModalProps> = ({
                   {formattedIncome}
                 </span>
               </div>
-              <div className="p-3.5 sm:col-span-2">
+              <div className="p-3.5">
+                <span className="text-slate-500 block text-[11px]">Mobile Number</span>
+                <span className="font-semibold text-slate-900 text-sm">
+                  {lead.mobile ? formatIndianMobile(lead.mobile) : 'Not recorded'}
+                </span>
+              </div>
+              <div className="p-3.5">
                 <span className="text-slate-500 block text-[11px]">Occupation</span>
                 <span className="font-semibold text-slate-900 text-sm flex items-center gap-1">
                   <Briefcase className="w-3.5 h-3.5 text-slate-400" />
@@ -162,11 +169,37 @@ export const LeadDetailsModal: React.FC<LeadDetailsModalProps> = ({
             </div>
           </div>
 
-          {/* Narration for any other savings - Explicit Requirement */}
+          {/* Investment readiness */}
+          <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
+            <div className="mb-2 text-slate-700 font-bold text-xs uppercase tracking-wider">
+              Investment Readiness
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              {[
+                ['PAN', lead.panAvailable ? `Available${lead.panNumber ? ` (${lead.panNumber})` : ''}` : 'Not available', !!lead.panAvailable],
+                ['Demat Account', lead.dematAvailable ? 'Available' : 'Not available', !!lead.dematAvailable],
+                ['KYC', lead.kycComplete ? 'Complete' : 'Not complete', !!lead.kycComplete],
+                ['SIP Auto-payment', lead.sipAutopayActive ? 'Activated' : 'Not activated', !!lead.sipAutopayActive],
+              ].map(([label, value, on]) => (
+                <div
+                  key={label as string}
+                  className={`p-2.5 rounded-md border ${on ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-slate-200'}`}
+                >
+                  <span className="text-slate-500 block text-[11px]">{label as string}</span>
+                  <span className={`font-semibold ${on ? 'text-emerald-700' : 'text-slate-500'}`}>
+                    {on ? '✓ ' : '✗ '}
+                    {value as string}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Narration for any other savings (optional) */}
           <div className="p-4 rounded-lg bg-amber-50/40 border border-amber-200">
             <div className="flex items-center gap-1.5 mb-1.5 text-amber-900 font-bold text-xs uppercase tracking-wider">
               <FileText className="w-3.5 h-3.5 text-amber-700" />
-              Narration For Any Other Saving / Investments
+              Narration For Any Other Saving / Investments <span className="normal-case font-medium text-amber-700/70">(optional)</span>
             </div>
             <p className="text-xs sm:text-sm text-slate-800 leading-relaxed whitespace-pre-line bg-white p-3 rounded border border-amber-100">
               {lead.narration || 'No additional saving narration recorded.'}
