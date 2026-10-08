@@ -1,7 +1,8 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import {
-  getFirestore,
+  initializeFirestore,
+  deleteField,
   doc,
   getDoc,
   getDocFromServer,
@@ -80,7 +81,9 @@ const legacyRegions = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+// Firestore rejects fields whose value is `undefined` (e.g. an optional narration that was not
+// filled in). Ignore them instead of failing the save.
+export const db = initializeFirestore(app, { ignoreUndefinedProperties: true }, firebaseConfig.firestoreDatabaseId);
 export const auth = getAuth(app);
 
 export enum OperationType {
@@ -155,7 +158,7 @@ const HEAD_BOOTSTRAP_USER: StoredUser = {
   name: 'JPM MF (Head Incharge)',
   designation: 'Head Incharge',
   role: 'head',
-  region: 'Universal HQ',
+  region: 'All Regions (National HQ)',
   status: 'active',
   createdAt: new Date().toISOString(),
   createdBy: 'System Superadmin',
@@ -456,12 +459,15 @@ export const firebaseDbService = {
     try {
       const newId = `lead_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
       const now = new Date().toISOString();
-      const newLead: Lead = {
+      const newLead = {
         ...leadData,
         id: newId,
         createdAt: now,
         updatedAt: now,
-      };
+      } as Lead;
+      (Object.keys(newLead) as (keyof Lead)[]).forEach((k) => {
+        if (newLead[k] === undefined) delete newLead[k];
+      });
 
       await setDoc(doc(db, path, newId), newLead);
       return newLead;
@@ -491,7 +497,16 @@ export const firebaseDbService = {
         updatedAt: new Date().toISOString(),
       };
 
-      await updateDoc(leadRef, updated as Record<string, any>);
+      (Object.keys(updated) as (keyof Lead)[]).forEach((k) => {
+        if (updated[k] === undefined) delete updated[k];
+      });
+      const payload: Record<string, any> = { ...updated };
+      if (updated.status !== 'Other') {
+        // narration only applies to the "Other" status: remove any old one
+        delete updated.otherStatusNarration;
+        payload.otherStatusNarration = deleteField();
+      }
+      await updateDoc(leadRef, payload);
       return updated;
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, path);
@@ -525,11 +540,15 @@ export const firebaseDbService = {
         updates.otherStatusNarration = otherStatusNarration;
       }
 
-      await updateDoc(leadRef, updates as Record<string, any>);
-      return {
-        ...existing,
-        ...updates,
-      };
+      const payload: Record<string, any> = { ...updates };
+      const result: Lead = { ...existing, ...updates };
+      if (status !== 'Other') {
+        // narration only applies to the "Other" status: remove any old one
+        payload.otherStatusNarration = deleteField();
+        delete result.otherStatusNarration;
+      }
+      await updateDoc(leadRef, payload);
+      return result;
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, path);
     }

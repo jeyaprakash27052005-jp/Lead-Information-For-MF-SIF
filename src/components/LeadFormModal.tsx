@@ -10,7 +10,7 @@ import {
   ShieldCheck,
   AlertCircle
 } from 'lucide-react';
-import { DEFAULT_REGIONS } from '../utils/regions';
+import { DEFAULT_REGIONS, isHqRegion } from '../utils/regions';
 import { formatInr } from '../utils/currency';
 
 interface LeadFormModalProps {
@@ -54,7 +54,7 @@ const LeadFormModalInner: React.FC<LeadFormModalProps> = ({
   // Region and team assignment
   const [assignedRegion, setAssignedRegion] = useState(
     initialData?.assignedRegion ||
-      (currentUser.region !== 'All Regions (National HQ)' ? currentUser.region : 'North Division')
+      (!isHqRegion(currentUser.region) ? currentUser.region : regions[0] ?? 'North Division')
   );
   const [assignedTeamMember, setAssignedTeamMember] = useState(
     initialData?.assignedTeamMember || currentUser.name

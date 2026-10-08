@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../types';
 import { X, User as UserIcon, Building2, ShieldCheck, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { DEFAULT_REGIONS } from '../utils/regions';
+import { DEFAULT_REGIONS, NATIONAL_HQ_REGION, isHqRegion } from '../utils/regions';
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -31,7 +31,7 @@ const UserProfileModalInner: React.FC<Omit<UserProfileModalProps, 'user'> & { us
 
   const [name, setName] = useState(user.name);
   const [designation, setDesignation] = useState(user.designation);
-  const [region, setRegion] = useState(user.region);
+  const [region, setRegion] = useState(isHqRegion(user.region) ? NATIONAL_HQ_REGION : user.region);
   const [username, setUsername] = useState(user.username);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +41,7 @@ const UserProfileModalInner: React.FC<Omit<UserProfileModalProps, 'user'> & { us
     if (user) {
       setName(user.name);
       setDesignation(user.designation);
-      setRegion(user.region);
+      setRegion(isHqRegion(user.region) ? NATIONAL_HQ_REGION : user.region);
       setUsername(user.username);
       setError(null);
       setSuccess(false);
@@ -51,7 +51,7 @@ const UserProfileModalInner: React.FC<Omit<UserProfileModalProps, 'user'> & { us
   const regions = [
     'All Regions (National HQ)',
     ...regionOptions,
-    ...(region && region !== 'All Regions (National HQ)' && !regionOptions.includes(region) ? [region] : []),
+    ...(region && !isHqRegion(region) && !regionOptions.includes(region) ? [region] : []),
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {

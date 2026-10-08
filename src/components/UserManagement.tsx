@@ -15,7 +15,7 @@ import {
   X,
   Edit
 } from 'lucide-react';
-import { DEFAULT_REGIONS } from '../utils/regions';
+import { DEFAULT_REGIONS, isHqRegion } from '../utils/regions';
 
 interface UserManagementProps {
   users: User[];
@@ -61,7 +61,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
   const [designation, setDesignation] = useState('');
   const [role, setRole] = useState<UserRole>('area_incharge');
   const [region, setRegion] = useState(
-    currentUser.region !== 'All Regions (National HQ)' ? currentUser.region : 'North Division'
+    !isHqRegion(currentUser.region) ? currentUser.region : regions[0] ?? 'North Division'
   );
 
   const CREATE_REGION = '__create_new_region__';
