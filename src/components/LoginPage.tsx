@@ -47,7 +47,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToCustome
               Online Management Portal
             </span>
             <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded px-2 py-0.5">
-              lead-information-MF-Sid.vercel.app
+              lead-information-mf-sir.vercel.app
             </span>
           </div>
         </div>

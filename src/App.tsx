@@ -30,8 +30,29 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<ViewTab>('all-leads');
   const [loading, setLoading] = useState(true);
   const [portalMode, setPortalMode] = useState<'admin' | 'customer'>(() => {
+    // 1. Check hostname/domain (e.g. MF-SIF-investment-calculator.vercel.app vs lead-information-mf-sir.vercel.app)
+    if (typeof window !== 'undefined') {
+      const host = window.location.hostname.toLowerCase();
+      if (
+        host.includes('mf-sif-investment-calculator') ||
+        host.includes('investment-calculator') ||
+        host.includes('customer')
+      ) {
+        return 'customer';
+      }
+      if (
+        host.includes('lead-information') ||
+        host.includes('admin')
+      ) {
+        return 'admin';
+      }
+    }
+    // 2. Check query params or pathname (/customer vs /admin)
     const params = new URLSearchParams(window.location.search);
-    return params.get('portal') === 'customer' || params.get('mode') === 'customer' ? 'customer' : 'admin';
+    if (params.get('portal') === 'customer' || params.get('mode') === 'customer' || window.location.pathname.startsWith('/customer')) {
+      return 'customer';
+    }
+    return 'admin';
   });
   const [feedbackMessage, setFeedbackMessage] = useState<{
     text: string;

@@ -237,10 +237,10 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
               type="button"
               onClick={onSwitchToAdmin}
               className="px-3 py-1.5 rounded-lg text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-colors flex items-center gap-1.5 cursor-pointer"
-              title="Switch to Admin Web App (lead-information-MF-Sid.vercel.app)"
+              title="Switch to Admin Web App (lead-information-mf-sir.vercel.app)"
             >
               <ExternalLink className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Admin App (lead-information-MF-Sid.vercel.app)</span>
+              <span>Admin App (lead-information-mf-sir.vercel.app)</span>
             </button>
 
             <button
@@ -514,17 +514,17 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
             className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-200 bg-slate-800 hover:bg-slate-700 transition-colors flex items-center gap-1.5 cursor-pointer border border-slate-700"
           >
             <Copy className="w-3.5 h-3.5" />
-            <span>{linkCopied ? 'Link Copied!' : 'Copy Portal Link'}</span>
+            <span>{linkCopied ? 'Link Copied!' : 'Copy Link (MF-SIF-investment-calculator.vercel.app)'}</span>
           </button>
 
           <button
             type="button"
             onClick={onSwitchToAdmin}
             className="px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 transition-colors flex items-center gap-1.5 cursor-pointer shadow-md"
-            title="Switch to Staff Admin Portal: lead-information-MF-Sid.vercel.app"
+            title="Switch to Staff Admin Portal: lead-information-mf-sir.vercel.app"
           >
             <ExternalLink className="w-3.5 h-3.5" />
-            <span>Admin App (lead-information-MF-Sid.vercel.app)</span>
+            <span>Admin App (lead-information-mf-sir.vercel.app)</span>
           </button>
         </div>
       </div>

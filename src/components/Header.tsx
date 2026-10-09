@@ -99,13 +99,13 @@ export const Header: React.FC<HeaderProps> = ({
                   Online DB
                 </span>
                 <a
-                  href="https://lead-information-mf-sid.vercel.app"
+                  href="https://lead-information-mf-sir.vercel.app"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hidden lg:inline-flex items-center gap-1 text-[10px] font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded px-1.5 py-0.5 transition-colors"
                   title="Open live admin deployment on Vercel"
                 >
-                  <span>lead-information-mf-sid.vercel.app</span>
+                  <span>lead-information-mf-sir.vercel.app</span>
                   <ExternalLink className="w-2.5 h-2.5" />
                 </a>
               </div>
@@ -122,10 +122,10 @@ export const Header: React.FC<HeaderProps> = ({
                 type="button"
                 onClick={onSwitchToAdminPortal}
                 className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer"
-                title="Switch to Staff Admin Portal: lead-information-MF-Sid.vercel.app"
+                title="Switch to Staff Admin Portal: lead-information-mf-sir.vercel.app"
               >
                 <ExternalLink className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Admin App (lead-information-MF-Sid.vercel.app)</span>
+                <span>Admin App (lead-information-mf-sir.vercel.app)</span>
               </button>
             ) : (
               <div className="flex items-center gap-1.5">
@@ -133,10 +133,10 @@ export const Header: React.FC<HeaderProps> = ({
                   type="button"
                   onClick={onSwitchToCustomerPortal}
                   className="px-3 py-1.5 rounded-lg text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-colors flex items-center gap-1.5 cursor-pointer"
-                  title="Open Customer Registration & Calculator Web Portal"
+                  title="Open Customer Registration & Calculator Web Portal (MF-SIF-investment-calculator.vercel.app)"
                 >
                   <Globe className="w-3.5 h-3.5 text-indigo-600" />
-                  <span>Customer Portal</span>
+                  <span>Customer App (MF-SIF-investment-calculator)</span>
                 </button>
                 <button
                   type="button"
