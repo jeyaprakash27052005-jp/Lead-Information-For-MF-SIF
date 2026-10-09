@@ -221,6 +221,7 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
+            {currentUser.role !== 'customer' && (
             <button
               type="button"
               onClick={onSwitchToAdmin}
@@ -230,6 +231,7 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
               <Shield className="w-3.5 h-3.5 text-indigo-600" />
               <span>Admin Portal</span>
             </button>
+            )}
 
             <button
               type="button"

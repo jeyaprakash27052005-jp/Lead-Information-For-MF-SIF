@@ -81,16 +81,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
   const handleAdAction = (linkUrl?: string) => {
     if (!linkUrl) return;
-    if (linkUrl === 'mf-calc') {
-      setActiveCalcTab('mf');
-      window.scrollTo({ top: 480, behavior: 'smooth' });
-    } else if (linkUrl === 'nps-calc') {
-      setActiveCalcTab('nps');
-      window.scrollTo({ top: 480, behavior: 'smooth' });
-    } else if (linkUrl === 'register') {
+    if (linkUrl === 'register') {
       onOpenCustomerRegister();
-    } else if (linkUrl.startsWith('http')) {
-      window.open(linkUrl, '_blank');
+    } else if (/^https?:\/\//i.test(linkUrl)) {
+      window.open(linkUrl, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -189,7 +183,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       )}
 
                       <div className="pt-2 flex flex-wrap items-center gap-3">
-                        {ad.linkUrl && (
+                        {ad.linkUrl && (ad.linkUrl === 'register' || /^https?:\/\//i.test(ad.linkUrl)) && (
                           <button
                             type="button"
                             onClick={() => handleAdAction(ad.linkUrl)}

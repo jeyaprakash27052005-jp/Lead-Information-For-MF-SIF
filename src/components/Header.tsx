@@ -35,7 +35,6 @@ export const Header: React.FC<HeaderProps> = ({
   onSwitchToAdminPortal,
   isCustomerView,
 }) => {
-  const [showSwitchMenu, setShowSwitchMenu] = React.useState(false);
   const getRoleBadge = (role: User['role']) => {
     switch (role) {
       case 'head':
@@ -96,7 +95,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Quick Dual App Links / External Sub-Domain Reference */}
           <div className="hidden md:flex items-center gap-2">
-            {isCustomerView ? (
+            {currentUser?.role === 'customer' ? null : isCustomerView ? (
               <button
                 type="button"
                 onClick={onSwitchToAdminPortal}
@@ -124,54 +123,6 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Current User Info & Actions */}
           {currentUser && (
             <div className="flex items-center gap-4">
-              {/* Quick Switch Role Helper (Super useful for checking Head / Regional / Area views) */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowSwitchMenu(!showSwitchMenu)}
-                  className="hidden md:flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-md transition-colors"
-                  title="Switch to another user to test role permissions"
-                >
-                  <span>Switch Role</span>
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-                </button>
-
-                {showSwitchMenu && (
-                  <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-xl border border-slate-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                    <div className="px-3 py-1.5 border-b border-slate-100">
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                        Switch Active Account
-                      </p>
-                    </div>
-                    <div className="max-h-64 overflow-y-auto py-1">
-                      {users.map((u) => (
-                        <button
-                          key={u.id}
-                          onClick={() => {
-                            onSwitchUser(u);
-                            setShowSwitchMenu(false);
-                          }}
-                          className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 transition-colors ${
-                            currentUser.id === u.id ? 'bg-indigo-50/70 font-semibold' : ''
-                          }`}
-                        >
-                          <div>
-                            <div className="text-slate-900">{u.name}</div>
-                            <div className="text-slate-500 text-[11px]">{u.designation}</div>
-                          </div>
-                          <span className={`text-[10px] px-1.5 py-0.5 rounded uppercase font-bold ${
-                            u.role === 'head' ? 'bg-indigo-100 text-indigo-800' :
-                            u.role === 'regional_incharge' ? 'bg-emerald-100 text-emerald-800' :
-                            'bg-sky-100 text-sky-800'
-                          }`}>
-                            {u.role === 'head' ? 'Head' : u.role === 'regional_incharge' ? 'Regional' : 'Area'}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
               {/* User Identity Dossier */}
               <div className="flex items-center gap-3 pl-2 border-l border-slate-200">
                 <div className="text-right hidden sm:block">

@@ -36,7 +36,8 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
   const [title, setTitle] = useState('');
   const [subtitle, setSubtitle] = useState('');
   const [badge, setBadge] = useState('Special Offer');
-  const [linkUrl, setLinkUrl] = useState<'mf-calc' | 'nps-calc' | 'register' | string>('mf-calc');
+  const [linkUrl, setLinkUrl] = useState<'none' | 'register' | 'custom' | string>('none');
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [customLinkUrl, setCustomLinkUrl] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -109,43 +110,86 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
     }
   };
 
+  const resetForm = () => {
+    setTitle('');
+    setSubtitle('');
+    setBadge('Special Offer');
+    setLinkUrl('none');
+    setCustomLinkUrl('');
+    setImageUrl('');
+    setImagePreview(null);
+    setImageFileName(null);
+    setEditingId(null);
+    setError(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleStartEdit = (ad: AdBanner) => {
+    setEditingId(ad.id);
+    setTitle(ad.title);
+    setSubtitle(ad.subtitle || '');
+    setBadge(ad.badge || '');
+    if (!ad.linkUrl || ad.linkUrl === 'mf-calc' || ad.linkUrl === 'nps-calc') {
+      setLinkUrl('none');
+      setCustomLinkUrl('');
+    } else if (ad.linkUrl === 'register') {
+      setLinkUrl('register');
+      setCustomLinkUrl('');
+    } else {
+      setLinkUrl('custom');
+      setCustomLinkUrl(ad.linkUrl);
+    }
+    setImageUrl(ad.imageUrl);
+    setImagePreview(ad.imageUrl);
+    setImageFileName(null);
+    setError(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleAddAdSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) {
       setError('Please enter an ad title / headline');
       return;
     }
-    const finalImageUrl = imageUrl.trim() || imagePreview;
+    const finalImageUrl = imageUrl || imagePreview;
     if (!finalImageUrl) {
-      setError('Please upload an image file (JPG, JPEG, PNG, GIF) or provide an image URL');
+      setError('Please upload an image file (JPG, JPEG, PNG or GIF)');
       return;
     }
 
     setIsUploading(true);
     setError(null);
     try {
-      const targetLink = linkUrl === 'custom' ? customLinkUrl.trim() : linkUrl;
-      const newAd = await adsStorageService.createAd({
-        title: title.trim(),
-        subtitle: subtitle.trim() || undefined,
-        badge: badge.trim() || undefined,
-        imageUrl: finalImageUrl,
-        linkUrl: targetLink || undefined,
-        isActive: true,
-        order: ads.length + 1,
-      });
-
-      setAds((prev) => [...prev, newAd]);
-      // Reset form
-      setTitle('');
-      setSubtitle('');
-      setImageUrl('');
-      setImagePreview(null);
-      setImageFileName(null);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-      if (onNotify) onNotify('Advertisement banner added successfully!', 'success');
+      const targetLink =
+        linkUrl === 'custom' ? customLinkUrl.trim() : linkUrl === 'none' ? '' : linkUrl;
+      if (editingId) {
+        const updated = await adsStorageService.updateAd(editingId, {
+          title: title.trim(),
+          subtitle: subtitle.trim(),
+          badge: badge.trim(),
+          imageUrl: finalImageUrl,
+          linkUrl: targetLink,
+        });
+        setAds((prev) => prev.map((a) => (a.id === updated.id ? updated : a)));
+        if (onNotify) onNotify('Advertisement updated successfully!', 'success');
+      } else {
+        const newAd = await adsStorageService.createAd({
+          title: title.trim(),
+          subtitle: subtitle.trim() || undefined,
+          badge: badge.trim() || undefined,
+          imageUrl: finalImageUrl,
+          linkUrl: targetLink || undefined,
+          isActive: true,
+          order: ads.length + 1,
+        });
+        setAds((prev) => [...prev, newAd]);
+        if (onNotify) onNotify('Advertisement banner added successfully!', 'success');
+      }
+      resetForm();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to add advertisement');
+      setError(err instanceof Error ? err.message : 'Failed to save advertisement');
     } finally {
       setIsUploading(false);
     }
@@ -166,6 +210,7 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
     try {
       await adsStorageService.deleteAd(id);
       setAds((prev) => prev.filter((a) => a.id !== id));
+      if (editingId === id) resetForm();
       if (onNotify) onNotify(`Ad "${adTitle}" deleted.`, 'info');
     } catch (_e) {
       if (onNotify) onNotify('Failed to delete ad', 'error');
@@ -282,7 +327,7 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
           <div className="flex items-center gap-2">
             <Plus className="w-4 h-4 text-indigo-600" />
             <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-              Add New Moving Advertisement
+              {editingId ? 'Edit Advertisement' : 'Add New Moving Advertisement'}
             </h2>
           </div>
           <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold">
@@ -371,38 +416,22 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
                 </p>
               </div>
 
-              {/* Or paste image URL */}
+              {/* Thumbnail Preview */}
               <div>
-                <label className="block text-[11px] font-semibold text-slate-500 mb-1">
-                  Or Paste External Image URL:
-                </label>
-                <div className="relative">
-                  <Link className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
-                  <input
-                    type="url"
-                    value={imageUrl}
-                    onChange={(e) => {
-                      setImageUrl(e.target.value);
-                      setImagePreview(e.target.value);
-                    }}
-                    placeholder="https://example.com/banner.jpg"
-                    className="w-full pl-8 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-
-                {/* Thumbnail Preview */}
-                {imagePreview && (
-                  <div className="mt-2 flex items-center gap-2">
+                {imagePreview ? (
+                  <div className="flex items-center gap-3">
                     <img
                       src={imagePreview}
                       alt="Upload Preview"
-                      className="w-14 h-10 object-cover rounded-lg border border-slate-300"
+                      className="w-28 h-20 object-cover rounded-lg border border-slate-300"
                     />
                     <span className="text-[11px] text-emerald-700 font-bold flex items-center gap-1">
                       <CheckCircle2 className="w-3.5 h-3.5" />
-                      Image loaded & ready
+                      {editingId && !imageFileName ? 'Current image (upload a file to replace)' : 'Image ready'}
                     </span>
                   </div>
+                ) : (
+                  <p className="text-[11px] text-slate-400">No image selected yet.</p>
                 )}
               </div>
             </div>
@@ -419,8 +448,7 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
                 onChange={(e) => setLinkUrl(e.target.value)}
                 className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
               >
-                <option value="mf-calc">Open Mutual Fund (SIF) Calculator</option>
-                <option value="nps-calc">Open NPS Pension Calculator</option>
+                <option value="none">No click action</option>
                 <option value="register">Open Customer Registration Form</option>
                 <option value="custom">Custom External URL</option>
               </select>
@@ -442,14 +470,23 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
             )}
           </div>
 
-          <div className="pt-2 flex justify-end">
+          <div className="pt-2 flex justify-end gap-2">
+            {editingId && (
+              <button
+                type="button"
+                onClick={resetForm}
+                className="px-5 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold border border-slate-300 cursor-pointer"
+              >
+                Cancel Edit
+              </button>
+            )}
             <button
               type="submit"
               disabled={isUploading}
               className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
             >
               <Plus className="w-4 h-4 text-indigo-400" />
-              <span>{isUploading ? 'Publishing Advertisement...' : 'Publish Moving Ad'}</span>
+              <span>{isUploading ? 'Saving...' : editingId ? 'Save Changes' : 'Publish Moving Ad'}</span>
             </button>
           </div>
         </form>
@@ -554,6 +591,16 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
                         <span>Disabled</span>
                       </>
                     )}
+                  </button>
+
+                  {/* Edit Button */}
+                  <button
+                    type="button"
+                    onClick={() => handleStartEdit(ad)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 cursor-pointer"
+                    title="Edit Advertisement"
+                  >
+                    Edit
                   </button>
 
                   {/* Delete Button */}
