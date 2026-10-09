@@ -451,12 +451,12 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
 
         {/* View 2: Mutual Fund Calculator */}
         {customerActiveView === 'mf-calc' && (
-          <MutualFundCalculator schemes={schemes} />
+          <MutualFundCalculator schemes={schemes} customerName={currentUser?.name} />
         )}
 
         {/* View 3: NPS Calculator */}
         {customerActiveView === 'nps-calc' && (
-          <NPSCalculator schemes={schemes} />
+          <NPSCalculator schemes={schemes} customerName={currentUser?.name} />
         )}
 
         {/* View 4: Browse Schemes */}
@@ -501,10 +501,10 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
             Investor & Customer Web Portal
           </div>
           <h1 className="text-xl md:text-2xl font-black text-white tracking-tight">
-            Mutual Fund & NPS Investment Services
+            Mutual fund (SIF) and NPS scheme return calculating site
           </h1>
           <p className="text-xs text-slate-300 mt-1">
-            Register your customer account, access return calculators, and get assigned to an authorized regional incharge.
+            Calculate mutual fund compounding returns, NPS pension projections, download PDF statements, or register your investor account.
           </p>
         </div>
 

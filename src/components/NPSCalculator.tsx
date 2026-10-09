@@ -8,18 +8,24 @@ import {
   CheckCircle2,
   Gift,
   Coins,
-  ArrowRight
+  ArrowRight,
+  Eye,
+  Download,
+  X
 } from 'lucide-react';
 import { formatInr, formatInrCompact } from '../utils/currency';
+import { generateNPSPDF } from '../utils/pdfGenerator';
 
 interface NPSCalculatorProps {
   schemes: InvestmentScheme[];
   onApplyScheme?: (schemeName: string, amount: number) => void;
+  customerName?: string;
 }
 
 export const NPSCalculator: React.FC<NPSCalculatorProps> = ({
   schemes,
   onApplyScheme,
+  customerName,
 }) => {
   const npsSchemes = schemes.filter((s) => s.type === 'nps');
 
@@ -33,6 +39,8 @@ export const NPSCalculator: React.FC<NPSCalculatorProps> = ({
   const [expectedReturnRate, setExpectedReturnRate] = useState<number>(10);
   const [annuityPercent, setAnnuityPercent] = useState<number>(40); // min 40%
   const [annuityReturnRate, setAnnuityReturnRate] = useState<number>(6.5);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [pdfGenerating, setPdfGenerating] = useState(false);
 
   const handleSchemeChange = (schemeId: string) => {
     setSelectedSchemeId(schemeId);
@@ -162,38 +170,31 @@ export const NPSCalculator: React.FC<NPSCalculatorProps> = ({
                   type="text"
                   value={customSchemeName}
                   onChange={(e) => setCustomSchemeName(e.target.value)}
-                  placeholder="Enter custom NPS pension scheme name..."
-                  className="w-full px-3 py-2 text-xs border border-blue-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-blue-500 bg-blue-50/20"
+                  placeholder="Enter custom NPS plan name (e.g. HDFC Pension Scheme E)"
+                  className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             )}
           </div>
 
-          {/* Age Configuration */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* Age Inputs */}
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between">
-                <span>Current Age</span>
-                <span className="text-blue-600">{currentAge} yrs</span>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                Current Age (Years)
               </label>
               <input
                 type="number"
                 min="18"
                 max="65"
                 value={currentAge}
-                onChange={(e) => {
-                  const val = parseInt(e.target.value, 10) || 18;
-                  setCurrentAge(val);
-                  if (val >= retirementAge) setRetirementAge(val + 5);
-                }}
+                onChange={(e) => setCurrentAge(parseInt(e.target.value, 10) || 18)}
                 className="w-full px-3 py-2 text-xs font-bold text-slate-900 border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-blue-500"
               />
             </div>
-
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 flex items-center justify-between">
-                <span>Retirement Age</span>
-                <span className="text-blue-600">{retirementAge} yrs</span>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                Retirement Age (Years)
               </label>
               <input
                 type="number"
@@ -313,6 +314,68 @@ export const NPSCalculator: React.FC<NPSCalculatorProps> = ({
               />
             </div>
           </div>
+
+          {/* Action Buttons: View Calculation & Download PDF Report */}
+          <div className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => setShowViewModal(true)}
+              className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              title="View comprehensive NPS scheme calculation"
+            >
+              <Eye className="w-4 h-4 text-blue-400" />
+              <span>View Calculation</span>
+            </button>
+
+            <button
+              type="button"
+              disabled={pdfGenerating}
+              onClick={() => {
+                setPdfGenerating(true);
+                try {
+                  generateNPSPDF({
+                    schemeName: activeSchemeName,
+                    currentAge,
+                    retirementAge,
+                    yearsToInvest: result.yearsToInvest,
+                    monthlyContribution,
+                    expectedReturnRate,
+                    annuityPercent,
+                    annuityReturnRate,
+                    totalInvested: result.totalInvested,
+                    accumulatedCorpus: result.accumulatedCorpus,
+                    lumpSumCorpus: result.lumpSumCorpus,
+                    annuityCorpus: result.annuityCorpus,
+                    monthlyPension: result.monthlyPension,
+                    estimatedTaxSavedYearly: result.estimatedTaxSavedYearly,
+                    yearlyBreakdown: result.yearlyBreakdown,
+                    customerName,
+                  }, 'download');
+                } finally {
+                  setPdfGenerating(false);
+                }
+              }}
+              className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              title="Download official NPS calculation PDF report"
+            >
+              <Download className="w-4 h-4 text-blue-200" />
+              <span>{pdfGenerating ? 'Generating PDF...' : 'Download PDF Report'}</span>
+            </button>
+          </div>
+
+          {/* Quick Apply / Consultation option */}
+          {onApplyScheme && (
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={() => onApplyScheme(activeSchemeName, monthlyContribution)}
+                className="w-full py-2 px-3 rounded-xl border border-blue-200 bg-blue-50/70 hover:bg-blue-100 text-blue-800 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>Express Interest in this NPS Scheme</span>
+                <ArrowRight className="w-3.5 h-3.5 text-blue-600" />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Right Output: Pension & Corpus Summary */}
@@ -394,17 +457,6 @@ export const NPSCalculator: React.FC<NPSCalculatorProps> = ({
                 ~{formatInr(Math.round(result.estimatedTaxSavedYearly))}/yr
               </span>
             </div>
-
-            {onApplyScheme && (
-              <button
-                type="button"
-                onClick={() => onApplyScheme(activeSchemeName, monthlyContribution)}
-                className="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span>Apply for this NPS Scheme as Lead</span>
-                <ArrowRight className="w-4 h-4 text-blue-400" />
-              </button>
-            )}
           </div>
 
           {/* Age-by-Age Progression Table */}
@@ -437,6 +489,162 @@ export const NPSCalculator: React.FC<NPSCalculatorProps> = ({
           </div>
         </div>
       </div>
+
+      {/* View Calculation Modal */}
+      {showViewModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border border-slate-200 overflow-hidden max-h-[90vh] flex flex-col">
+            {/* Modal Header */}
+            <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider block">
+                  National Pension System (NPS) Projection Dossier
+                </span>
+                <h3 className="text-base font-bold text-white mt-0.5">
+                  {activeSchemeName}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowViewModal(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto space-y-5 text-xs">
+              {/* Parameters Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] font-bold text-slate-400 block uppercase">Age Horizon</span>
+                  <span className="font-bold text-slate-900 text-xs mt-0.5 block">
+                    {currentAge} → {retirementAge} yrs
+                  </span>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] font-bold text-slate-400 block uppercase">Monthly Saving</span>
+                  <span className="font-bold text-slate-900 text-xs mt-0.5 block">
+                    {formatInr(monthlyContribution)}
+                  </span>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] font-bold text-slate-400 block uppercase">Growth Rate</span>
+                  <span className="font-bold text-blue-700 text-xs mt-0.5 block">
+                    {expectedReturnRate}% p.a.
+                  </span>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] font-bold text-slate-400 block uppercase">Annuity Share</span>
+                  <span className="font-bold text-emerald-700 text-xs mt-0.5 block">
+                    {annuityPercent}% ({annuityReturnRate}%)
+                  </span>
+                </div>
+              </div>
+
+              {/* Pension & Corpus Banner */}
+              <div className="p-5 rounded-xl bg-gradient-to-br from-blue-700 via-indigo-800 to-slate-900 text-white shadow-md">
+                <span className="text-[11px] font-semibold text-blue-200 uppercase tracking-wider block">
+                  Projected Monthly Pension Payout
+                </span>
+                <div className="text-2xl sm:text-3xl font-black mt-1 text-amber-300">
+                  {formatInr(Math.round(result.monthlyPension))} <span className="text-sm font-normal text-blue-200">/ month</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-blue-500/40 text-[11px]">
+                  <div>
+                    <span className="text-blue-200 text-[10px] block">Total Corpus</span>
+                    <span className="font-bold text-white">{formatInr(Math.round(result.accumulatedCorpus))}</span>
+                  </div>
+                  <div>
+                    <span className="text-blue-200 text-[10px] block">Lump Sum ({result.lumpSumPercent}%)</span>
+                    <span className="font-bold text-emerald-300">{formatInr(Math.round(result.lumpSumCorpus))}</span>
+                  </div>
+                  <div>
+                    <span className="text-blue-200 text-[10px] block">Total Invested</span>
+                    <span className="font-bold text-slate-300">{formatInr(Math.round(result.totalInvested))}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Roadmap Milestones */}
+              <div>
+                <h4 className="font-bold text-slate-800 mb-2">Age-Wise Corpus Roadmap</h4>
+                <div className="border border-slate-200 rounded-xl overflow-hidden max-h-48 overflow-y-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="bg-slate-50 text-[10px] font-bold text-slate-500 uppercase border-b border-slate-200">
+                        <th className="py-2 px-3">Subscriber Age</th>
+                        <th className="py-2 px-3">Total Invested</th>
+                        <th className="py-2 px-3">Accumulated Corpus</th>
+                        <th className="py-2 px-3 text-right">Estimated Pension</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {result.yearlyBreakdown
+                        .filter((_, idx) => idx % 5 === 0 || idx === result.yearlyBreakdown.length - 1)
+                        .map((d) => {
+                          const estPension = (d.corpus * (annuityPercent / 100) * (annuityReturnRate / 100)) / 12;
+                          return (
+                            <tr key={d.age} className="hover:bg-slate-50">
+                              <td className="py-1.5 px-3 font-semibold text-slate-800">Age {d.age}</td>
+                              <td className="py-1.5 px-3 text-slate-600">{formatInr(Math.round(d.invested))}</td>
+                              <td className="py-1.5 px-3 font-bold text-blue-900">{formatInr(Math.round(d.corpus))}</td>
+                              <td className="py-1.5 px-3 text-right font-semibold text-emerald-700">{formatInr(Math.round(estPension))}/mo</td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer with Download PDF button */}
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3">
+              <span className="text-[11px] text-slate-500 hidden sm:inline">
+                Mutual fund (SIF) and NPS scheme return calculating site
+              </span>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setShowViewModal(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-100 cursor-pointer"
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    generateNPSPDF({
+                      schemeName: activeSchemeName,
+                      currentAge,
+                      retirementAge,
+                      yearsToInvest: result.yearsToInvest,
+                      monthlyContribution,
+                      expectedReturnRate,
+                      annuityPercent,
+                      annuityReturnRate,
+                      totalInvested: result.totalInvested,
+                      accumulatedCorpus: result.accumulatedCorpus,
+                      lumpSumCorpus: result.lumpSumCorpus,
+                      annuityCorpus: result.annuityCorpus,
+                      monthlyPension: result.monthlyPension,
+                      estimatedTaxSavedYearly: result.estimatedTaxSavedYearly,
+                      yearlyBreakdown: result.yearlyBreakdown,
+                      customerName,
+                    }, 'download');
+                  }}
+                  className="flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download PDF Statement</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

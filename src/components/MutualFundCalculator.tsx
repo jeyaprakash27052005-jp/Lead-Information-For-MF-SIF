@@ -9,18 +9,25 @@ import {
   Sparkles,
   PieChart,
   CheckCircle2,
-  ArrowRight
+  ArrowRight,
+  Eye,
+  Download,
+  X,
+  FileText
 } from 'lucide-react';
 import { formatInr, formatInrCompact } from '../utils/currency';
+import { generateMutualFundPDF } from '../utils/pdfGenerator';
 
 interface MutualFundCalculatorProps {
   schemes: InvestmentScheme[];
   onApplyScheme?: (schemeName: string, amount: number) => void;
+  customerName?: string;
 }
 
 export const MutualFundCalculator: React.FC<MutualFundCalculatorProps> = ({
   schemes,
   onApplyScheme,
+  customerName,
 }) => {
   const mfSchemes = schemes.filter((s) => s.type === 'mutual_fund');
 
@@ -34,6 +41,8 @@ export const MutualFundCalculator: React.FC<MutualFundCalculatorProps> = ({
   const [expectedRate, setExpectedRate] = useState<number>(14);
   const [tenureYears, setTenureYears] = useState<number>(10);
   const [annualStepUp, setAnnualStepUp] = useState<number>(0);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [pdfGenerating, setPdfGenerating] = useState(false);
 
   // Sync rate when scheme is picked
   const handleSchemeChange = (schemeId: string) => {
@@ -306,28 +315,66 @@ export const MutualFundCalculator: React.FC<MutualFundCalculatorProps> = ({
             </div>
           </div>
 
-          {/* Optional Annual Step-up for SIP */}
-          {calcType === 'sip' && (
-            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                  Annual SIP Step-up (%)
-                </span>
-                <span className="text-xs font-bold text-amber-700">{annualStepUp}% yearly</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="25"
-                step="5"
-                value={annualStepUp}
-                onChange={(e) => setAnnualStepUp(parseInt(e.target.value, 10))}
-                className="w-full accent-amber-500 h-2 bg-slate-200 rounded-lg cursor-pointer"
-              />
-              <p className="text-[10px] text-slate-500 mt-1.5">
-                Increasing your SIP with annual salary hikes boosts your compounding corpus exponentially.
-              </p>
+          {/* Action Buttons: View Calculation & Download PDF */}
+          <div className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => setShowViewModal(true)}
+              className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              title="View full scheme calculation details"
+            >
+              <Eye className="w-4 h-4 text-indigo-400" />
+              <span>View Calculation</span>
+            </button>
+
+            <button
+              type="button"
+              disabled={pdfGenerating}
+              onClick={() => {
+                setPdfGenerating(true);
+                try {
+                  generateMutualFundPDF({
+                    schemeName: activeSchemeName,
+                    calcType,
+                    monthlyInvestment,
+                    lumpsumAmount,
+                    expectedRate,
+                    tenureYears,
+                    annualStepUp,
+                    invested: result.invested,
+                    gain: result.gain,
+                    maturity: result.maturity,
+                    yearlyData: result.yearlyData,
+                    customerName,
+                  }, 'download');
+                } finally {
+                  setPdfGenerating(false);
+                }
+              }}
+              className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              title="Download official PDF report of this scheme calculation"
+            >
+              <Download className="w-4 h-4 text-emerald-200" />
+              <span>{pdfGenerating ? 'Generating PDF...' : 'Download PDF Report'}</span>
+            </button>
+          </div>
+
+          {/* Quick Apply / Consultation option */}
+          {onApplyScheme && (
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={() =>
+                  onApplyScheme(
+                    activeSchemeName,
+                    calcType === 'sip' ? monthlyInvestment : lumpsumAmount
+                  )
+                }
+                className="w-full py-2 px-3 rounded-xl border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-800 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>Express Interest in this Scheme</span>
+                <ArrowRight className="w-3.5 h-3.5 text-indigo-600" />
+              </button>
             </div>
           )}
         </div>
@@ -464,6 +511,150 @@ export const MutualFundCalculator: React.FC<MutualFundCalculatorProps> = ({
           </div>
         </div>
       </div>
+      {/* View Calculation Modal */}
+      {showViewModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border border-slate-200 overflow-hidden max-h-[90vh] flex flex-col">
+            {/* Modal Header */}
+            <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block">
+                  Mutual Fund Return Calculation Dossier
+                </span>
+                <h3 className="text-base font-bold text-white mt-0.5">
+                  {activeSchemeName}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowViewModal(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto space-y-5 text-xs">
+              {/* Parameters Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] font-bold text-slate-400 block uppercase">Mode</span>
+                  <span className="font-bold text-slate-900 text-xs mt-0.5 block">
+                    {calcType === 'sip' ? 'Monthly SIP' : 'Lumpsum'}
+                  </span>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] font-bold text-slate-400 block uppercase">
+                    {calcType === 'sip' ? 'Monthly Amount' : 'Investment'}
+                  </span>
+                  <span className="font-bold text-slate-900 text-xs mt-0.5 block">
+                    {formatInr(calcType === 'sip' ? monthlyInvestment : lumpsumAmount)}
+                  </span>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] font-bold text-slate-400 block uppercase">Expected CAGR</span>
+                  <span className="font-bold text-indigo-700 text-xs mt-0.5 block">
+                    {expectedRate}% p.a.
+                  </span>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] font-bold text-slate-400 block uppercase">Time Horizon</span>
+                  <span className="font-bold text-slate-900 text-xs mt-0.5 block">
+                    {tenureYears} Years
+                  </span>
+                </div>
+              </div>
+
+              {/* Corpus Summary Banner */}
+              <div className="p-5 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-800 text-white shadow-md">
+                <span className="text-[11px] font-semibold text-emerald-100 uppercase tracking-wider block">
+                  Projected Maturity Corpus Value
+                </span>
+                <div className="text-2xl sm:text-3xl font-black mt-1">
+                  {formatInr(Math.round(result.maturity))}
+                </div>
+                <div className="flex items-center gap-4 mt-3 pt-3 border-t border-emerald-500/40 text-xs">
+                  <div>
+                    <span className="text-emerald-200 text-[10px] block">Total Invested</span>
+                    <span className="font-bold text-white">{formatInr(Math.round(result.invested))}</span>
+                  </div>
+                  <div className="pl-4 border-l border-emerald-500/40">
+                    <span className="text-emerald-200 text-[10px] block">Compounded Wealth Gain</span>
+                    <span className="font-bold text-emerald-100">+{formatInr(Math.round(result.gain))}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Trajectory Breakdown Table */}
+              <div>
+                <h4 className="font-bold text-slate-800 mb-2">Yearly Compounding Breakdown</h4>
+                <div className="border border-slate-200 rounded-xl overflow-hidden max-h-48 overflow-y-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="bg-slate-50 text-[10px] font-bold text-slate-500 uppercase border-b border-slate-200">
+                        <th className="py-2 px-3">Year</th>
+                        <th className="py-2 px-3">Invested</th>
+                        <th className="py-2 px-3">Estimated Gain</th>
+                        <th className="py-2 px-3 text-right">Maturity Value</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {result.yearlyData.map((d) => (
+                        <tr key={d.year} className="hover:bg-slate-50">
+                          <td className="py-1.5 px-3 font-semibold text-slate-800">Year {d.year}</td>
+                          <td className="py-1.5 px-3 text-slate-600">{formatInr(Math.round(d.invested))}</td>
+                          <td className="py-1.5 px-3 text-emerald-700 font-semibold">+{formatInr(Math.round(d.gain))}</td>
+                          <td className="py-1.5 px-3 text-right font-bold text-slate-900">{formatInr(Math.round(d.total))}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer with Download PDF button */}
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3">
+              <span className="text-[11px] text-slate-500 hidden sm:inline">
+                Mutual fund (SIF) and NPS scheme return calculating site
+              </span>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setShowViewModal(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-100 cursor-pointer"
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    generateMutualFundPDF({
+                      schemeName: activeSchemeName,
+                      calcType,
+                      monthlyInvestment,
+                      lumpsumAmount,
+                      expectedRate,
+                      tenureYears,
+                      annualStepUp,
+                      invested: result.invested,
+                      gain: result.gain,
+                      maturity: result.maturity,
+                      yearlyData: result.yearlyData,
+                      customerName,
+                    }, 'download');
+                  }}
+                  className="flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download PDF Statement</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

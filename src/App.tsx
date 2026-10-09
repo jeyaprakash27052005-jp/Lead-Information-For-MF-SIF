@@ -396,7 +396,7 @@ export default function App() {
         <div className="text-center">
           <div className="w-10 h-10 border-4 border-slate-900 border-t-indigo-600 rounded-full animate-spin mx-auto mb-3" />
           <h2 className="text-sm font-bold text-slate-800">Connecting to Online Database...</h2>
-          <p className="text-xs text-slate-500">Lead Information System</p>
+          <p className="text-xs text-slate-500">Mutual fund (SIF) and NPS scheme return calculating site</p>
         </div>
       </div>
     );

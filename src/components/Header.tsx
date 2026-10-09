@@ -92,25 +92,15 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold text-slate-900 tracking-tight leading-none">
-                  Lead Information
+                <h1 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight leading-none">
+                  Mutual fund (SIF) and NPS scheme return calculating site
                 </h1>
-                <span className="text-[11px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
-                  Online DB
+                <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
+                  Online
                 </span>
-                <a
-                  href="https://lead-information-mf-sir.vercel.app"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hidden lg:inline-flex items-center gap-1 text-[10px] font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded px-1.5 py-0.5 transition-colors"
-                  title="Open live admin deployment on Vercel"
-                >
-                  <span>lead-information-mf-sir.vercel.app</span>
-                  <ExternalLink className="w-2.5 h-2.5" />
-                </a>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                Lead Management & Mutual Fund / NPS Portal
+                Mutual Fund (SIF) & NPS Return Calculation & Administration Portal
               </p>
             </div>
           </div>
