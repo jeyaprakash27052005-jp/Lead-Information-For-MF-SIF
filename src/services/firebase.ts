@@ -13,9 +13,100 @@ import {
   getDocs
 } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
-import { User, Lead, LeadStatus } from '../types';
+import { User, Lead, LeadStatus, InvestmentScheme } from '../types';
 import { DEFAULT_REGIONS } from '../utils/regions';
 import { normalizeIndianMobile, isValidPan } from '../utils/validation';
+
+export const DEFAULT_SCHEMES: InvestmentScheme[] = [
+  {
+    id: 'mf_parag_parikh_flexi',
+    name: 'Parag Parikh Flexi Cap Fund',
+    type: 'mutual_fund',
+    category: 'Equity - Flexi Cap',
+    expectedReturnRate: 15.2,
+    riskLevel: 'Very High',
+    minInvestment: 1000,
+    fundHouse: 'PPFAS Mutual Fund',
+    description: 'Diversified equity fund investing across large, mid, and small cap companies with global exposure.',
+  },
+  {
+    id: 'mf_mirae_large_cap',
+    name: 'Mirae Asset Large Cap Fund',
+    type: 'mutual_fund',
+    category: 'Equity - Large Cap',
+    expectedReturnRate: 13.5,
+    riskLevel: 'High',
+    minInvestment: 1000,
+    fundHouse: 'Mirae Asset Mutual Fund',
+    description: 'Premier large-cap fund focusing on top 100 established market leaders in India.',
+  },
+  {
+    id: 'mf_sbi_balanced_advantage',
+    name: 'SBI Balanced Advantage Fund',
+    type: 'mutual_fund',
+    category: 'Hybrid - Dynamic Asset Allocation',
+    expectedReturnRate: 11.8,
+    riskLevel: 'Moderate',
+    minInvestment: 500,
+    fundHouse: 'SBI Mutual Fund',
+    description: 'Dynamically manages debt and equity exposure based on market valuation parameters.',
+  },
+  {
+    id: 'mf_nippon_small_cap',
+    name: 'Nippon India Small Cap Fund',
+    type: 'mutual_fund',
+    category: 'Equity - Small Cap',
+    expectedReturnRate: 18.0,
+    riskLevel: 'Very High',
+    minInvestment: 1000,
+    fundHouse: 'Nippon India Mutual Fund',
+    description: 'High-growth potential small-cap equities for aggressive wealth creation.',
+  },
+  {
+    id: 'mf_hdfc_corporate_bond',
+    name: 'HDFC Corporate Bond Fund',
+    type: 'mutual_fund',
+    category: 'Debt - Corporate Bond',
+    expectedReturnRate: 7.8,
+    riskLevel: 'Low',
+    minInvestment: 500,
+    fundHouse: 'HDFC Mutual Fund',
+    description: 'Invests minimum 80% in highest rated corporate bonds (AAA) with high liquidity.',
+  },
+  {
+    id: 'nps_scheme_e_equity',
+    name: 'NPS Tier I - Scheme E (Equity)',
+    type: 'nps',
+    category: 'NPS - Equity Market (High Growth)',
+    expectedReturnRate: 12.5,
+    riskLevel: 'High',
+    minInvestment: 500,
+    fundHouse: 'NPS Trust / PFRDA',
+    description: 'National Pension System equity fund investing in Nifty 50 and BSE Sensex stocks.',
+  },
+  {
+    id: 'nps_scheme_c_corporate',
+    name: 'NPS Tier I - Scheme C (Corporate Bonds)',
+    type: 'nps',
+    category: 'NPS - Corporate Debt',
+    expectedReturnRate: 9.2,
+    riskLevel: 'Moderate',
+    minInvestment: 500,
+    fundHouse: 'NPS Trust / PFRDA',
+    description: 'Fixed income debt instruments issued by infrastructure companies and public sector undertakings.',
+  },
+  {
+    id: 'nps_scheme_g_govt',
+    name: 'NPS Tier I - Scheme G (Government Securities)',
+    type: 'nps',
+    category: 'NPS - Sovereign Govt Bonds',
+    expectedReturnRate: 8.5,
+    riskLevel: 'Low',
+    minInvestment: 500,
+    fundHouse: 'NPS Trust / PFRDA',
+    description: '100% sovereign central and state government securities providing stable pension growth.',
+  },
+];
 
 const REGIONS_COLLECTION = 'regions';
 const regionDocId = (name: string) =>
@@ -651,5 +742,150 @@ export const firebaseDbService = {
     } catch (error) {
       handleFirestoreError(error, OperationType.DELETE, path);
     }
+  },
+
+  // ---- Investment Schemes (Mutual Fund & NPS) ----
+  async getSchemes(): Promise<InvestmentScheme[]> {
+    await ensureFirestoreDatabaseSeeded();
+    const path = 'schemes';
+    try {
+      const snap = await getDocs(collection(db, path));
+      const schemes: InvestmentScheme[] = [];
+      snap.forEach((d) => {
+        schemes.push({ ...d.data(), id: d.id } as InvestmentScheme);
+      });
+      if (schemes.length === 0) {
+        for (const s of DEFAULT_SCHEMES) {
+          await setDoc(doc(db, path, s.id), s);
+        }
+        return [...DEFAULT_SCHEMES];
+      }
+      return schemes;
+    } catch (error) {
+      console.warn('Could not read schemes from cloud, using defaults:', error);
+      return [...DEFAULT_SCHEMES];
+    }
+  },
+
+  async createScheme(schemeData: Omit<InvestmentScheme, 'id' | 'createdAt'>): Promise<InvestmentScheme> {
+    await ensureFirestoreDatabaseSeeded();
+    const path = 'schemes';
+    try {
+      const cleanName = schemeData.name.trim();
+      const newId = `sch_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+      const newScheme: InvestmentScheme = {
+        ...schemeData,
+        name: cleanName,
+        id: newId,
+        createdAt: new Date().toISOString(),
+      };
+      await setDoc(doc(db, path, newId), newScheme);
+      return newScheme;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, path);
+    }
+  },
+
+  async updateScheme(id: string, schemeData: Partial<InvestmentScheme>): Promise<InvestmentScheme> {
+    await ensureFirestoreDatabaseSeeded();
+    const path = `schemes/${id}`;
+    try {
+      const ref = doc(db, 'schemes', id);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) throw new Error('Scheme not found in database');
+      const existing = snap.data() as InvestmentScheme;
+      const updated: InvestmentScheme = {
+        ...existing,
+        ...schemeData,
+        id,
+      };
+      await updateDoc(ref, updated as Record<string, any>);
+      return updated;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, path);
+    }
+  },
+
+  async deleteScheme(id: string): Promise<void> {
+    await ensureFirestoreDatabaseSeeded();
+    const path = `schemes/${id}`;
+    try {
+      await deleteDoc(doc(db, 'schemes', id));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, path);
+    }
+  },
+
+  // ---- Customer Self-Registration & Account Generation ----
+  async registerCustomer(leadData: Omit<Lead, 'id' | 'createdAt' | 'updatedAt'>): Promise<{
+    user: User;
+    lead: Lead;
+    credentials: { userId: string; password: string };
+  }> {
+    await ensureFirestoreDatabaseSeeded();
+    const cleanMobile = normalizeIndianMobile(leadData.mobile || '');
+    if (!cleanMobile) {
+      throw new Error('Please enter a valid 10-digit Indian mobile number.');
+    }
+    const validatedContact = await validateLeadContact(leadData);
+    const validatedLeadData = { ...leadData, ...validatedContact };
+
+    // Check if customer user already exists
+    const usersSnap = await getDocs(collection(db, 'users'));
+    let existingUser: StoredUser | undefined = undefined;
+    for (const d of usersSnap.docs) {
+      const u = d.data() as StoredUser;
+      if (u.username === cleanMobile) {
+        existingUser = u;
+        break;
+      }
+    }
+
+    const leadId = `lead_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const now = new Date().toISOString();
+    const newLead: Lead = {
+      ...validatedLeadData,
+      id: leadId,
+      addedByName: `${leadData.name} (Self-Registered Customer)`,
+      addedByDesignation: 'Customer Self-Service',
+      addedByUserId: `usr_cust_${cleanMobile}`,
+      createdAt: now,
+      updatedAt: now,
+    };
+    (Object.keys(newLead) as (keyof Lead)[]).forEach((k) => {
+      if (newLead[k] === undefined) delete newLead[k];
+    });
+    await setDoc(doc(db, 'leads', leadId), newLead);
+
+    // Customer user ID and Password are identical as requested
+    const customerUsername = cleanMobile;
+    const customerPassword = cleanMobile;
+    const customerUserId = existingUser ? existingUser.id : `usr_cust_${cleanMobile}`;
+
+    const newCustomerUser: StoredUser = {
+      id: customerUserId,
+      username: customerUsername,
+      password: customerPassword,
+      name: leadData.name.trim(),
+      designation: 'Customer / Investor',
+      role: 'customer',
+      region: leadData.assignedRegion || 'National HQ',
+      status: 'active',
+      createdAt: now,
+      createdBy: 'Customer Self-Registration',
+      associatedLeadId: leadId,
+    };
+
+    await setDoc(doc(db, 'users', customerUserId), newCustomerUser);
+
+    const { password: _p, ...safeUser } = newCustomerUser;
+    return {
+      user: safeUser as User,
+      lead: newLead,
+      credentials: {
+        userId: customerUsername,
+        password: customerPassword,
+      },
+    };
   },
 };

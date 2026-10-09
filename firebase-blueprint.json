@@ -31,7 +31,8 @@
           "enum": [
             "head",
             "regional_incharge",
-            "area_incharge"
+            "area_incharge",
+            "customer"
           ]
         },
         "region": {
@@ -221,6 +222,44 @@
       "required": [
         "name"
       ]
+    },
+    "scheme": {
+      "title": "InvestmentScheme",
+      "description": "Mutual Fund and NPS investment scheme definitions with return benchmarks",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "type": {
+          "type": "string",
+          "enum": ["mutual_fund", "nps"]
+        },
+        "category": {
+          "type": "string"
+        },
+        "expectedReturnRate": {
+          "type": "number"
+        },
+        "riskLevel": {
+          "type": "string"
+        },
+        "minInvestment": {
+          "type": "number"
+        },
+        "description": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "type",
+        "category"
+      ]
     }
   },
   "firestore": {
@@ -235,6 +274,12 @@
         "$ref": "#/entities/lead"
       },
       "description": "Collection of prospect leads with complete demographic and financial data"
+    },
+    "/schemes/{schemeId}": {
+      "schema": {
+        "$ref": "#/entities/scheme"
+      },
+      "description": "Collection of available Mutual Fund and NPS investment schemes"
     },
     "/test/{docId}": {
       "schema": {

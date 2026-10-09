@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { User, Lead, LeadStatus, ViewTab } from './types';
+import { User, Lead, LeadStatus, ViewTab, InvestmentScheme } from './types';
 import { apiService, testConnection, getWriteVersion } from './services/api';
 import { Header } from './components/Header';
 import { Navigation } from './components/Navigation';
@@ -14,6 +14,10 @@ import { LeadReports } from './components/LeadReports';
 import { ChangePasswordModal } from './components/ChangePasswordModal';
 import { UserProfileModal } from './components/UserProfileModal';
 import { LoginPage } from './components/LoginPage';
+import { MutualFundCalculator } from './components/MutualFundCalculator';
+import { NPSCalculator } from './components/NPSCalculator';
+import { SchemeManagement } from './components/SchemeManagement';
+import { CustomerPortal } from './components/CustomerPortal';
 import { PlusCircle } from 'lucide-react';
 import { getAllRegions } from './utils/regions';
 
@@ -21,9 +25,14 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [schemes, setSchemes] = useState<InvestmentScheme[]>([]);
   const [storedRegions, setStoredRegions] = useState<string[] | null>(null);
   const [activeTab, setActiveTab] = useState<ViewTab>('all-leads');
   const [loading, setLoading] = useState(true);
+  const [portalMode, setPortalMode] = useState<'admin' | 'customer'>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('portal') === 'customer' || params.get('mode') === 'customer' ? 'customer' : 'admin';
+  });
   const [feedbackMessage, setFeedbackMessage] = useState<{
     text: string;
     type: 'success' | 'info' | 'error';
@@ -50,12 +59,14 @@ export default function App() {
   const loadData = async () => {
     try {
       await testConnection();
-      const [fetchedUsers, fetchedLeads] = await Promise.all([
+      const [fetchedUsers, fetchedLeads, fetchedSchemes] = await Promise.all([
         apiService.getUsers(),
         apiService.getLeads(),
+        apiService.getSchemes().catch(() => []),
       ]);
       setUsers(fetchedUsers);
       setLeads(fetchedLeads);
+      if (fetchedSchemes && fetchedSchemes.length > 0) setSchemes(fetchedSchemes);
       // Regions are optional: if the regions collection isn't reachable yet, fall back to defaults
       try {
         setStoredRegions(await apiService.getRegions());
@@ -83,16 +94,18 @@ export default function App() {
   const syncFromDatabase = async () => {
     const versionAtStart = getWriteVersion();
     try {
-      const [fetchedUsers, fetchedLeads, fetchedRegions] = await Promise.all([
+      const [fetchedUsers, fetchedLeads, fetchedRegions, fetchedSchemes] = await Promise.all([
         apiService.getUsers(),
         apiService.getLeads(),
         apiService.getRegions().catch(() => null),
+        apiService.getSchemes().catch(() => null),
       ]);
       // A write happened while we were fetching: this snapshot may be stale, skip it.
       if (getWriteVersion() !== versionAtStart) return;
       setUsers(fetchedUsers);
       setLeads(fetchedLeads);
       if (fetchedRegions) setStoredRegions(fetchedRegions);
+      if (fetchedSchemes) setSchemes(fetchedSchemes);
 
       const meId = currentUserIdRef.current;
       if (meId) {
@@ -304,6 +317,51 @@ export default function App() {
     showFeedback(`Profile for @${updated.username} updated in online database.`);
   };
 
+  // Scheme Management handlers
+  const handleCreateScheme = async (schemeData: Omit<InvestmentScheme, 'id' | 'createdAt'>) => {
+    const created = await apiService.createScheme(schemeData);
+    setSchemes((prev) => [...prev, created]);
+    showFeedback(`Scheme "${created.name}" created and published in calculators.`);
+  };
+
+  const handleUpdateScheme = async (id: string, updates: Partial<InvestmentScheme>) => {
+    const updated = await apiService.updateScheme(id, updates);
+    setSchemes((prev) => prev.map((s) => (s.id === id ? updated : s)));
+    showFeedback(`Scheme "${updated.name}" updated successfully.`);
+  };
+
+  const handleDeleteScheme = async (id: string) => {
+    await apiService.deleteScheme(id);
+    setSchemes((prev) => prev.filter((s) => s.id !== id));
+    showFeedback('Scheme removed from catalog.');
+  };
+
+  // Customer Self-Registration & Login
+  const handleCustomerRegister = async (
+    leadData: Omit<Lead, 'id' | 'createdAt' | 'updatedAt'>
+  ) => {
+    const res = await apiService.registerCustomer(leadData);
+    setLeads((prev) => [res.lead, ...prev]);
+    setUsers((prev) => [res.user, ...prev]);
+    setCurrentUser(res.user);
+    setPortalMode('customer');
+    showFeedback(`Investor registered! User ID & Password: ${res.credentials.userId}`);
+    return res;
+  };
+
+  const handleCustomerLogin = async (username: string, password?: string) => {
+    const res = await apiService.login(username, password || username);
+    setCurrentUser(res.user);
+    setPortalMode('customer');
+    showFeedback(`Welcome, ${res.user.name}`);
+  };
+
+  const handleApplySchemeFromCalc = (schemeName: string, amount: number) => {
+    setEditingLead(null);
+    setIsAddLeadModalOpen(true);
+    showFeedback(`Selected: ${schemeName}. Please enter investor dossier.`);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -316,13 +374,24 @@ export default function App() {
     );
   }
 
-  // Not logged in -> Show single unified login screen ("one login")
+  // Sync portalMode with browser URL for easy link sharing
+  const updatePortalMode = (mode: 'admin' | 'customer') => {
+    setPortalMode(mode);
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set('portal', mode);
+      window.history.replaceState({}, '', url.toString());
+    } catch (_e) {
+      // ignore
+    }
+  };
+
+  // Not logged in -> Show customer portal if in customer mode, or unified staff login
   if (!currentUser) {
     return (
-      <>
-        <LoginPage onLogin={handleLogin} />
+      <div className="min-h-screen bg-slate-100 flex flex-col antialiased">
         {feedbackMessage && (
-          <div className="fixed bottom-4 right-4 z-50">
+          <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-2 duration-200">
             <div
               className={`px-4 py-2.5 rounded-lg shadow-xl border text-xs font-semibold ${
                 feedbackMessage.type === 'error'
@@ -334,7 +403,27 @@ export default function App() {
             </div>
           </div>
         )}
-      </>
+
+        {portalMode === 'customer' ? (
+          <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <CustomerPortal
+              currentUser={null}
+              customerLead={null}
+              schemes={schemes}
+              regions={getAllRegions(users, leads, storedRegions)}
+              onCustomerRegister={handleCustomerRegister}
+              onCustomerLogin={handleCustomerLogin}
+              onCustomerLogout={handleLogout}
+              onSwitchToAdmin={() => updatePortalMode('admin')}
+            />
+          </div>
+        ) : (
+          <LoginPage
+            onLogin={handleLogin}
+            onSwitchToCustomerPortal={() => updatePortalMode('customer')}
+          />
+        )}
+      </div>
     );
   }
 
@@ -386,6 +475,15 @@ export default function App() {
           setProfileUserToEdit(currentUser);
           setIsProfileModalOpen(true);
         }}
+        onSwitchToCustomerPortal={() => {
+          updatePortalMode('customer');
+          setActiveTab('customer-portal');
+        }}
+        onSwitchToAdminPortal={() => {
+          updatePortalMode('admin');
+          setActiveTab('all-leads');
+        }}
+        isCustomerView={portalMode === 'customer' || currentUser.role === 'customer'}
       />
 
       {/* Role Navigation Bar */}
@@ -513,6 +611,63 @@ export default function App() {
             leads={leads}
             currentUser={currentUser}
             onViewLead={(lead) => setDetailsModalLead(lead)}
+          />
+        )}
+
+        {/* VIEW 7: Mutual Fund Return Calculator */}
+        {activeTab === 'mf-calculator' && (
+          <MutualFundCalculator
+            schemes={schemes}
+            onApplyScheme={handleApplySchemeFromCalc}
+          />
+        )}
+
+        {/* VIEW 8: NPS Pension Scheme Return Calculator */}
+        {activeTab === 'nps-calculator' && (
+          <NPSCalculator
+            schemes={schemes}
+            onApplyScheme={handleApplySchemeFromCalc}
+          />
+        )}
+
+        {/* VIEW 9: Schemes Management (Add, Edit, Delete for MF & NPS) */}
+        {activeTab === 'scheme-management' && (
+          <SchemeManagement
+            schemes={schemes}
+            currentUser={currentUser}
+            onCreateScheme={handleCreateScheme}
+            onUpdateScheme={handleUpdateScheme}
+            onDeleteScheme={handleDeleteScheme}
+            onOpenCalculator={(scheme) => {
+              if (scheme.type === 'mutual_fund') {
+                setActiveTab('mf-calculator');
+              } else {
+                setActiveTab('nps-calculator');
+              }
+            }}
+          />
+        )}
+
+        {/* VIEW 10: Customer Web Portal */}
+        {(activeTab === 'customer-portal' || portalMode === 'customer' || currentUser.role === 'customer') && (
+          <CustomerPortal
+            currentUser={currentUser}
+            customerLead={
+              leads.find(
+                (l) =>
+                  l.id === currentUser.associatedLeadId ||
+                  (l.mobile && currentUser.username.includes(l.mobile))
+              ) || null
+            }
+            schemes={schemes}
+            regions={regionList}
+            onCustomerRegister={handleCustomerRegister}
+            onCustomerLogin={handleCustomerLogin}
+            onCustomerLogout={handleLogout}
+            onSwitchToAdmin={() => {
+              updatePortalMode('admin');
+              setActiveTab('all-leads');
+            }}
           />
         )}
       </main>

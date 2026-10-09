@@ -1,4 +1,4 @@
-export type UserRole = 'head' | 'regional_incharge' | 'area_incharge';
+export type UserRole = 'head' | 'regional_incharge' | 'area_incharge' | 'customer';
 
 export interface User {
   id: string;
@@ -10,6 +10,22 @@ export interface User {
   status: 'active' | 'inactive';
   createdAt: string;
   createdBy: string;
+  associatedLeadId?: string;
+}
+
+export type SchemeType = 'mutual_fund' | 'nps';
+
+export interface InvestmentScheme {
+  id: string;
+  name: string;
+  type: SchemeType;
+  category: string;
+  expectedReturnRate: number;
+  riskLevel?: 'Low' | 'Moderate' | 'High' | 'Very High';
+  minInvestment?: number;
+  description?: string;
+  fundHouse?: string;
+  createdAt?: string;
 }
 
 export type LeadStatus =
@@ -51,4 +67,8 @@ export type ViewTab =
   | 'lead-status-pipeline'
   | 'user-management'
   | 'regional-metrics'
-  | 'lead-reports';
+  | 'lead-reports'
+  | 'mf-calculator'
+  | 'nps-calculator'
+  | 'scheme-management'
+  | 'customer-portal';

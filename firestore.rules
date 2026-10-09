@@ -15,7 +15,7 @@ service cloud.firestore {
         && request.resource.data.username is string && request.resource.data.username.size() <= 64
         && request.resource.data.name is string && request.resource.data.name.size() <= 128
         && request.resource.data.designation is string && request.resource.data.designation.size() <= 128
-        && request.resource.data.role in ['head', 'regional_incharge', 'area_incharge']
+        && request.resource.data.role in ['head', 'regional_incharge', 'area_incharge', 'customer']
         && request.resource.data.region is string && request.resource.data.region.size() <= 128
         && request.resource.data.status in ['active', 'inactive'];
       allow delete: if isValidId(userId);
@@ -40,6 +40,15 @@ service cloud.firestore {
         && (!('kycComplete' in request.resource.data) || request.resource.data.kycComplete is bool)
         && (!('sipAutopayActive' in request.resource.data) || request.resource.data.sipAutopayActive is bool);
       allow delete: if isValidId(leadId);
+    }
+
+    match /schemes/{schemeId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(schemeId)
+        && request.resource.data.name is string && request.resource.data.name.size() <= 128
+        && request.resource.data.type in ['mutual_fund', 'nps']
+        && request.resource.data.category is string;
+      allow delete: if isValidId(schemeId);
     }
 
     match /regions/{regionId} {

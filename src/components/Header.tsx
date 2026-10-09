@@ -1,6 +1,17 @@
 import React from 'react';
 import { User } from '../types';
-import { LogOut, ShieldCheck, UserCheck, Layers, Building2, ChevronDown, KeyRound } from 'lucide-react';
+import {
+  LogOut,
+  ShieldCheck,
+  UserCheck,
+  Layers,
+  Building2,
+  ChevronDown,
+  KeyRound,
+  Globe,
+  ExternalLink,
+  Copy
+} from 'lucide-react';
 
 interface HeaderProps {
   currentUser: User | null;
@@ -9,6 +20,9 @@ interface HeaderProps {
   onSwitchUser: (user: User) => void;
   onOpenChangePassword: () => void;
   onOpenEditProfile?: () => void;
+  onSwitchToCustomerPortal?: () => void;
+  onSwitchToAdminPortal?: () => void;
+  isCustomerView?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -18,8 +32,20 @@ export const Header: React.FC<HeaderProps> = ({
   onSwitchUser,
   onOpenChangePassword,
   onOpenEditProfile,
+  onSwitchToCustomerPortal,
+  onSwitchToAdminPortal,
+  isCustomerView,
 }) => {
   const [showSwitchMenu, setShowSwitchMenu] = React.useState(false);
+  const [linkCopied, setLinkCopied] = React.useState(false);
+
+  const copyCustomerLink = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('portal', 'customer');
+    navigator.clipboard.writeText(url.toString());
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2500);
+  };
 
   const getRoleBadge = (role: User['role']) => {
     switch (role) {
@@ -44,6 +70,13 @@ export const Header: React.FC<HeaderProps> = ({
             Area Incharge
           </span>
         );
+      case 'customer':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-teal-50 text-teal-700 border border-teal-200">
+            <UserCheck className="w-3.5 h-3.5" />
+            Customer / Investor
+          </span>
+        );
     }
   };
 
@@ -65,11 +98,56 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="text-[11px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
                   Online DB
                 </span>
+                <a
+                  href="https://lead-information-mf-sid.vercel.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hidden lg:inline-flex items-center gap-1 text-[10px] font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded px-1.5 py-0.5 transition-colors"
+                  title="Open live admin deployment on Vercel"
+                >
+                  <span>lead-information-mf-sid.vercel.app</span>
+                  <ExternalLink className="w-2.5 h-2.5" />
+                </a>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                Lead Management & Investment Store
+                Lead Management & Mutual Fund / NPS Portal
               </p>
             </div>
+          </div>
+
+          {/* Quick Dual App Links / Switcher */}
+          <div className="hidden md:flex items-center gap-2">
+            {isCustomerView ? (
+              <button
+                type="button"
+                onClick={onSwitchToAdminPortal}
+                className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+                title="Switch to Staff Admin Portal: lead-information-MF-Sid.vercel.app"
+              >
+                <ExternalLink className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Admin App (lead-information-MF-Sid.vercel.app)</span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={onSwitchToCustomerPortal}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+                  title="Open Customer Registration & Calculator Web Portal"
+                >
+                  <Globe className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Customer Portal</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={copyCustomerLink}
+                  className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
+                  title="Copy Customer Web App Link"
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Current User Info & Actions */}

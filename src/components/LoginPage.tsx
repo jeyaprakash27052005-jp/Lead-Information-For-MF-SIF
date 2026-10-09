@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Layers, Lock, User as UserIcon, ArrowRight, AlertCircle } from 'lucide-react';
+import { Layers, Lock, User as UserIcon, ArrowRight, AlertCircle, Globe } from 'lucide-react';
 
 interface LoginPageProps {
   onLogin: (username: string, password?: string) => Promise<void>;
+  onSwitchToCustomerPortal?: () => void;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToCustomerPortal }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -41,9 +42,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           <h1 className="mt-3 text-2xl font-black text-slate-900 tracking-tight">
             Lead Information
           </h1>
-          <p className="mt-1 text-xs text-slate-500 font-medium uppercase tracking-wider">
-            Online Management Portal
-          </p>
+          <div className="mt-1 flex items-center justify-center gap-2 flex-wrap">
+            <span className="text-xs text-slate-500 font-medium uppercase tracking-wider">
+              Online Management Portal
+            </span>
+            <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded px-2 py-0.5">
+              lead-information-MF-Sid.vercel.app
+            </span>
+          </div>
         </div>
       </div>
 
@@ -119,6 +125,22 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </form>
+
+          {onSwitchToCustomerPortal && (
+            <div className="mt-5 pt-4 border-t border-slate-100 text-center">
+              <span className="text-[11px] text-slate-500 block mb-2 font-medium">
+                Are you an investor looking to calculate returns or register?
+              </span>
+              <button
+                type="button"
+                onClick={onSwitchToCustomerPortal}
+                className="w-full py-2.5 px-3 rounded-lg border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              >
+                <Globe className="w-4 h-4 text-indigo-600" />
+                <span>Go to Customer & Investor Web Portal</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
