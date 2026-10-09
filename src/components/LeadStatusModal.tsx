@@ -15,6 +15,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { formatInr, formatInrCompact, formatInrNumber } from '../utils/currency';
+import { isValidPan } from '../utils/validation';
 
 interface LeadStatusModalProps {
   lead: Lead | null;
@@ -23,7 +24,14 @@ interface LeadStatusModalProps {
     id: string,
     newStatus: LeadStatus,
     remarks: string,
-    otherStatusNarration?: string
+    otherStatusNarration?: string,
+    readinessDetails?: {
+      panAvailable?: boolean;
+      panNumber?: string;
+      dematAvailable?: boolean;
+      kycComplete?: boolean;
+      sipAutopayActive?: boolean;
+    }
   ) => Promise<void>;
 }
 
@@ -80,6 +88,11 @@ const LeadStatusModalInner: React.FC<Omit<LeadStatusModalProps, 'lead'> & { lead
   const [otherStatusNarration, setOtherStatusNarration] = useState(
     lead.otherStatusNarration || ''
   );
+  const [panAvailable, setPanAvailable] = useState(!!lead.panAvailable);
+  const [panNumber, setPanNumber] = useState(lead.panNumber || '');
+  const [dematAvailable, setDematAvailable] = useState(!!lead.dematAvailable);
+  const [kycComplete, setKycComplete] = useState(!!lead.kycComplete);
+  const [sipAutopayActive, setSipAutopayActive] = useState(!!lead.sipAutopayActive);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -91,6 +104,10 @@ const LeadStatusModalInner: React.FC<Omit<LeadStatusModalProps, 'lead'> & { lead
       setError('Please provide the separate narration explaining the Other status.');
       return;
     }
+    if (selectedStatus === 'Ready to Invest' && panAvailable && !isValidPan(panNumber)) {
+      setError('PAN is marked Available. Please enter a valid PAN number (format: ABCDE1234F).');
+      return;
+    }
 
     setSaving(true);
     setError(null);
@@ -99,7 +116,16 @@ const LeadStatusModalInner: React.FC<Omit<LeadStatusModalProps, 'lead'> & { lead
         lead.id,
         selectedStatus,
         remarks,
-        selectedStatus === 'Other' ? otherStatusNarration.trim() : undefined
+        selectedStatus === 'Other' ? otherStatusNarration.trim() : undefined,
+        selectedStatus === 'Ready to Invest'
+          ? {
+              panAvailable,
+              panNumber: panAvailable ? panNumber.trim().toUpperCase() : undefined,
+              dematAvailable,
+              kycComplete,
+              sipAutopayActive,
+            }
+          : undefined
       );
       onClose();
     } catch (err) {
@@ -281,6 +307,80 @@ const LeadStatusModalInner: React.FC<Omit<LeadStatusModalProps, 'lead'> & { lead
                 })}
               </div>
             </div>
+
+            {/* INVESTMENT READINESS CHECKLIST: Active when 'Ready to Invest' is selected */}
+            {selectedStatus === 'Ready to Invest' && (
+              <div className="p-4 rounded-lg bg-emerald-50/70 border border-emerald-200 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-700" />
+                  <label className="text-xs font-bold text-emerald-900 uppercase tracking-wider">
+                    Investment Readiness Verification (Ready to Invest Requirements)
+                  </label>
+                </div>
+                <p className="text-[11px] text-emerald-700 mb-3">
+                  Please confirm the client's readiness details (PAN, Demat account, KYC, and SIP auto-payment):
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <label className="flex items-center gap-2 p-2.5 rounded-md bg-white border border-emerald-200 cursor-pointer text-xs font-semibold text-slate-800 hover:bg-emerald-50/30 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={panAvailable}
+                      onChange={(e) => {
+                        if (!e.target.checked) setPanNumber('');
+                        setPanAvailable(e.target.checked);
+                      }}
+                      className="w-4 h-4 accent-emerald-600"
+                    />
+                    PAN Number Available
+                  </label>
+                  <label className="flex items-center gap-2 p-2.5 rounded-md bg-white border border-emerald-200 cursor-pointer text-xs font-semibold text-slate-800 hover:bg-emerald-50/30 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={dematAvailable}
+                      onChange={(e) => setDematAvailable(e.target.checked)}
+                      className="w-4 h-4 accent-emerald-600"
+                    />
+                    Demat Account Available
+                  </label>
+                  <label className="flex items-center gap-2 p-2.5 rounded-md bg-white border border-emerald-200 cursor-pointer text-xs font-semibold text-slate-800 hover:bg-emerald-50/30 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={kycComplete}
+                      onChange={(e) => setKycComplete(e.target.checked)}
+                      className="w-4 h-4 accent-emerald-600"
+                    />
+                    KYC Complete
+                  </label>
+                  <label className="flex items-center gap-2 p-2.5 rounded-md bg-white border border-emerald-200 cursor-pointer text-xs font-semibold text-slate-800 hover:bg-emerald-50/30 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={sipAutopayActive}
+                      onChange={(e) => setSipAutopayActive(e.target.checked)}
+                      className="w-4 h-4 accent-emerald-600"
+                    />
+                    SIP Auto-payment Available / Activated
+                  </label>
+                </div>
+
+                {panAvailable && (
+                  <div className="mt-3 bg-white p-3 rounded-md border border-emerald-200">
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      PAN Number <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={panNumber}
+                      onChange={(e) =>
+                        setPanNumber(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10))
+                      }
+                      placeholder="e.g. ABCDE1234F"
+                      maxLength={10}
+                      className="w-full sm:w-64 px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-mono tracking-wider"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* MANDATORY USER REQUIREMENT: Separate Narration when 'Other' option is selected */}
             {selectedStatus === 'Other' && (

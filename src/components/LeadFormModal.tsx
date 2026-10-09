@@ -9,11 +9,20 @@ import {
   User as UserIcon,
   ShieldCheck,
   AlertCircle,
-  Phone
+  Phone,
+  CheckCircle2
 } from 'lucide-react';
 import { DEFAULT_REGIONS, isHqRegion } from '../utils/regions';
 import { formatInr } from '../utils/currency';
 import { normalizeIndianMobile, isValidPan } from '../utils/validation';
+
+const OCCUPATION_SUGGESTIONS = [
+  'Student',
+  'Salaried Employee',
+  'Business / Self-Employed',
+  'Professional',
+  'Retired',
+];
 
 interface LeadFormModalProps {
   isOpen: boolean;
@@ -50,6 +59,9 @@ const LeadFormModalInner: React.FC<LeadFormModalProps> = ({
   const [dematAvailable, setDematAvailable] = useState(!!initialData?.dematAvailable);
   const [kycComplete, setKycComplete] = useState(!!initialData?.kycComplete);
   const [sipAutopayActive, setSipAutopayActive] = useState(!!initialData?.sipAutopayActive);
+  const [showOptionalReadiness, setShowOptionalReadiness] = useState(
+    !!(initialData?.panAvailable || initialData?.dematAvailable || initialData?.kycComplete || initialData?.sipAutopayActive)
+  );
   const [narration, setNarration] = useState(initialData?.narration || '');
   const [status, setStatus] = useState<LeadStatus>(initialData?.status || 'Pending');
   const [otherStatusNarration, setOtherStatusNarration] = useState(
@@ -58,6 +70,9 @@ const LeadFormModalInner: React.FC<LeadFormModalProps> = ({
   const [statusRemarks, setStatusRemarks] = useState(
     initialData?.statusRemarks || 'Initial lead entry.'
   );
+
+  // Check if occupation is student to ask for family income
+  const isStudent = occupation.trim().toLowerCase().includes('student');
 
   // Region and team assignment
   const [assignedRegion, setAssignedRegion] = useState(
@@ -82,12 +97,12 @@ const LeadFormModalInner: React.FC<LeadFormModalProps> = ({
       setError('Please enter a valid age');
       return;
     }
-    if (annualIncome === '' || Number(annualIncome) < 0) {
-      setError('Please enter a valid annual income');
-      return;
-    }
     if (!occupation.trim()) {
       setError('Please enter lead occupation');
+      return;
+    }
+    if (annualIncome === '' || Number(annualIncome) < 0) {
+      setError(isStudent ? 'Please enter a valid family annual income' : 'Please enter a valid annual income');
       return;
     }
     const cleanMobile = normalizeIndianMobile(mobile);
@@ -243,9 +258,85 @@ const LeadFormModalInner: React.FC<LeadFormModalProps> = ({
                 </select>
               </div>
 
+              {/* Mobile number (unique per lead) */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Annual Income (₹) <span className="text-rose-500">*</span>
+                  Mobile Number <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                  <span className="absolute left-9 top-2 text-xs font-semibold text-slate-500">+91</span>
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    required
+                    value={mobile}
+                    onChange={(e) => setMobile(e.target.value.replace(/[^\d+\s-]/g, '').slice(0, 16))}
+                    placeholder="10-digit mobile"
+                    className="w-full pl-16 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-semibold"
+                  />
+                </div>
+              </div>
+
+              {/* Occupation with quick tags and custom input */}
+              <div className="sm:col-span-2">
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    Occupation <span className="text-rose-500">*</span>
+                  </label>
+                  <span className="text-[10px] text-slate-400">Click a tag or type custom</span>
+                </div>
+                <div className="relative">
+                  <Briefcase className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                  <input
+                    type="text"
+                    required
+                    value={occupation}
+                    onChange={(e) => setOccupation(e.target.value)}
+                    placeholder="e.g. Student, Software Architect, Doctor, Entrepreneur..."
+                    className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+                {/* Quick Occupation Selection Chips */}
+                <div className="flex flex-wrap gap-1.5 mt-1.5">
+                  {OCCUPATION_SUGGESTIONS.map((occ) => {
+                    const isSelected = occupation.trim().toLowerCase() === occ.toLowerCase();
+                    return (
+                      <button
+                        key={occ}
+                        type="button"
+                        onClick={() => setOccupation(occ)}
+                        className={`text-[11px] px-2 py-0.5 rounded-full border transition-colors cursor-pointer font-medium ${
+                          isSelected
+                            ? occ === 'Student'
+                              ? 'bg-amber-100 text-amber-900 border-amber-300 font-bold'
+                              : 'bg-indigo-100 text-indigo-900 border-indigo-300 font-bold'
+                            : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                        }`}
+                      >
+                        {occ === 'Student' ? '🎓 Student' : occ}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Annual Income - Dynamically asks for Family Income when occupation is student */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  {isStudent ? (
+                    <span className="flex items-center gap-1.5 flex-wrap">
+                      <span>Family Annual Income (₹)</span>
+                      <span className="text-rose-500">*</span>
+                      <span className="text-[10px] normal-case font-bold text-amber-800 bg-amber-100 px-1.5 py-0.2 rounded border border-amber-300">
+                        Student: Family Income
+                      </span>
+                    </span>
+                  ) : (
+                    <span>
+                      Annual Income (₹) <span className="text-rose-500">*</span>
+                    </span>
+                  )}
                 </label>
                 <div className="relative">
                   <IndianRupee className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -258,121 +349,28 @@ const LeadFormModalInner: React.FC<LeadFormModalProps> = ({
                     onChange={(e) =>
                       setAnnualIncome(e.target.value ? parseInt(e.target.value, 10) : '')
                     }
-                    placeholder="e.g. 1200000"
-                    className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-semibold"
+                    placeholder={isStudent ? 'e.g. 500000 (Family Income)' : 'e.g. 1200000'}
+                    className={`w-full pl-9 pr-3 py-2 text-xs border rounded-lg focus:outline-hidden focus:ring-2 font-semibold ${
+                      isStudent
+                        ? 'border-amber-300 focus:ring-amber-500 focus:border-amber-500 bg-amber-50/20'
+                        : 'border-slate-300 focus:ring-indigo-500 focus:border-indigo-500'
+                    }`}
                   />
                 </div>
-                <div className="mt-1.5 flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-2 py-1">
+                <div
+                  className={`mt-1.5 flex items-center gap-1 text-[11px] font-semibold rounded-md px-2 py-1 border ${
+                    isStudent
+                      ? 'text-amber-800 bg-amber-50 border-amber-200'
+                      : 'text-emerald-700 bg-emerald-50 border-emerald-200'
+                  }`}
+                >
                   <IndianRupee className="w-3 h-3 shrink-0" />
                   <span>
+                    {isStudent ? 'Family Income: ' : ''}
                     {annualIncome === '' ? '—' : formatInr(Number(annualIncome))}
                   </span>
                 </div>
               </div>
-            </div>
-
-            {/* Mobile number (unique per lead) */}
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Mobile Number <span className="text-rose-500">*</span>
-              </label>
-              <div className="relative">
-                <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-                <span className="absolute left-9 top-2 text-xs font-semibold text-slate-500">+91</span>
-                <input
-                  type="tel"
-                  inputMode="numeric"
-                  required
-                  value={mobile}
-                  onChange={(e) => setMobile(e.target.value.replace(/[^\d+\s-]/g, '').slice(0, 16))}
-                  placeholder="10-digit Indian mobile, e.g. 9876543210"
-                  className="w-full pl-16 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-semibold"
-                />
-              </div>
-              <p className="text-[11px] text-slate-500 mt-1">
-                Each mobile number can be registered for only one lead.
-              </p>
-            </div>
-
-            {/* Occupation */}
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Occupation <span className="text-rose-500">*</span>
-              </label>
-              <div className="relative">
-                <Briefcase className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-                <input
-                  type="text"
-                  required
-                  value={occupation}
-                  onChange={(e) => setOccupation(e.target.value)}
-                  placeholder="e.g. Senior Software Architect, Orthopedic Surgeon, Entrepreneur"
-                  className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                />
-              </div>
-            </div>
-
-            {/* Investment readiness checklist */}
-            <div className="p-3.5 rounded-lg border border-slate-200 bg-slate-50/60">
-              <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">
-                Investment Readiness
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                <label className="flex items-center gap-2 p-2.5 rounded-md bg-white border border-slate-200 cursor-pointer text-xs font-semibold text-slate-800">
-                  <input
-                    type="checkbox"
-                    checked={panAvailable}
-                    onChange={(e) => {if (!e.target.checked) setPanNumber(''); setPanAvailable(e.target.checked);}}
-                    className="w-4 h-4 accent-indigo-600"
-                  />
-                  PAN Available
-                </label>
-                <label className="flex items-center gap-2 p-2.5 rounded-md bg-white border border-slate-200 cursor-pointer text-xs font-semibold text-slate-800">
-                  <input
-                    type="checkbox"
-                    checked={dematAvailable}
-                    onChange={(e) => {setDematAvailable(e.target.checked);}}
-                    className="w-4 h-4 accent-indigo-600"
-                  />
-                  Demat Account Available
-                </label>
-                <label className="flex items-center gap-2 p-2.5 rounded-md bg-white border border-slate-200 cursor-pointer text-xs font-semibold text-slate-800">
-                  <input
-                    type="checkbox"
-                    checked={kycComplete}
-                    onChange={(e) => {setKycComplete(e.target.checked);}}
-                    className="w-4 h-4 accent-indigo-600"
-                  />
-                  KYC Complete
-                </label>
-                <label className="flex items-center gap-2 p-2.5 rounded-md bg-white border border-slate-200 cursor-pointer text-xs font-semibold text-slate-800">
-                  <input
-                    type="checkbox"
-                    checked={sipAutopayActive}
-                    onChange={(e) => {setSipAutopayActive(e.target.checked);}}
-                    className="w-4 h-4 accent-indigo-600"
-                  />
-                  SIP Auto-payment Activated
-                </label>
-              </div>
-
-              {panAvailable && (
-                <div className="mt-3">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    PAN Number <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={panNumber}
-                    onChange={(e) =>
-                      setPanNumber(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10))
-                    }
-                    placeholder="e.g. ABCDE1234F"
-                    maxLength={10}
-                    className="w-full sm:w-64 px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono tracking-wider"
-                  />
-                </div>
-              )}
             </div>
 
             {/* Narration for any other saving - EXPLICIT USER REQUIREMENT */}
@@ -429,6 +427,159 @@ const LeadFormModalInner: React.FC<LeadFormModalProps> = ({
                   ))}
                 </select>
               </div>
+
+              {/* INVESTMENT READINESS CHECKLIST: Requested when 'Ready to Invest' status is clicked */}
+              {status === 'Ready to Invest' && (
+                <div className="sm:col-span-2 p-4 rounded-lg bg-emerald-50/70 border border-emerald-200 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-700" />
+                    <label className="text-xs font-bold text-emerald-900 uppercase tracking-wider">
+                      Investment Readiness Checklist (Ready to Invest Requirements)
+                    </label>
+                  </div>
+                  <p className="text-[11px] text-emerald-700 mb-3">
+                    Status is "Ready to Invest". Verify PAN, Demat, KYC, and SIP auto-payment setup:
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <label className="flex items-center gap-2 p-2.5 rounded-md bg-white border border-emerald-200 cursor-pointer text-xs font-semibold text-slate-800 hover:bg-emerald-50/30 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={panAvailable}
+                        onChange={(e) => {
+                          if (!e.target.checked) setPanNumber('');
+                          setPanAvailable(e.target.checked);
+                        }}
+                        className="w-4 h-4 accent-emerald-600"
+                      />
+                      PAN Number Available
+                    </label>
+                    <label className="flex items-center gap-2 p-2.5 rounded-md bg-white border border-emerald-200 cursor-pointer text-xs font-semibold text-slate-800 hover:bg-emerald-50/30 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={dematAvailable}
+                        onChange={(e) => setDematAvailable(e.target.checked)}
+                        className="w-4 h-4 accent-emerald-600"
+                      />
+                      Demat Account Available
+                    </label>
+                    <label className="flex items-center gap-2 p-2.5 rounded-md bg-white border border-emerald-200 cursor-pointer text-xs font-semibold text-slate-800 hover:bg-emerald-50/30 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={kycComplete}
+                        onChange={(e) => setKycComplete(e.target.checked)}
+                        className="w-4 h-4 accent-emerald-600"
+                      />
+                      KYC Complete
+                    </label>
+                    <label className="flex items-center gap-2 p-2.5 rounded-md bg-white border border-emerald-200 cursor-pointer text-xs font-semibold text-slate-800 hover:bg-emerald-50/30 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={sipAutopayActive}
+                        onChange={(e) => setSipAutopayActive(e.target.checked)}
+                        className="w-4 h-4 accent-emerald-600"
+                      />
+                      SIP Auto-payment Available / Activated
+                    </label>
+                  </div>
+
+                  {panAvailable && (
+                    <div className="mt-3 bg-white p-3 rounded-md border border-emerald-200">
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                        PAN Number <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={panNumber}
+                        onChange={(e) =>
+                          setPanNumber(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10))
+                        }
+                        placeholder="e.g. ABCDE1234F"
+                        maxLength={10}
+                        className="w-full sm:w-64 px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-mono tracking-wider"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Optional readiness disclosure when status is not Ready to Invest */}
+              {status !== 'Ready to Invest' && (
+                <div className="sm:col-span-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowOptionalReadiness(!showOptionalReadiness)}
+                    className="text-[11px] font-semibold text-slate-500 hover:text-indigo-600 flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    {showOptionalReadiness
+                      ? '− Hide Investment Readiness Checklist'
+                      : '+ Optional: Specify Investment Readiness beforehand (PAN, KYC, Demat, SIP)'}
+                  </button>
+
+                  {showOptionalReadiness && (
+                    <div className="mt-2 p-3.5 rounded-lg border border-slate-200 bg-slate-50/60 animate-in fade-in duration-150">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <label className="flex items-center gap-2 p-2.5 rounded-md bg-white border border-slate-200 cursor-pointer text-xs font-semibold text-slate-800">
+                          <input
+                            type="checkbox"
+                            checked={panAvailable}
+                            onChange={(e) => {
+                              if (!e.target.checked) setPanNumber('');
+                              setPanAvailable(e.target.checked);
+                            }}
+                            className="w-4 h-4 accent-indigo-600"
+                          />
+                          PAN Available
+                        </label>
+                        <label className="flex items-center gap-2 p-2.5 rounded-md bg-white border border-slate-200 cursor-pointer text-xs font-semibold text-slate-800">
+                          <input
+                            type="checkbox"
+                            checked={dematAvailable}
+                            onChange={(e) => setDematAvailable(e.target.checked)}
+                            className="w-4 h-4 accent-indigo-600"
+                          />
+                          Demat Account Available
+                        </label>
+                        <label className="flex items-center gap-2 p-2.5 rounded-md bg-white border border-slate-200 cursor-pointer text-xs font-semibold text-slate-800">
+                          <input
+                            type="checkbox"
+                            checked={kycComplete}
+                            onChange={(e) => setKycComplete(e.target.checked)}
+                            className="w-4 h-4 accent-indigo-600"
+                          />
+                          KYC Complete
+                        </label>
+                        <label className="flex items-center gap-2 p-2.5 rounded-md bg-white border border-slate-200 cursor-pointer text-xs font-semibold text-slate-800">
+                          <input
+                            type="checkbox"
+                            checked={sipAutopayActive}
+                            onChange={(e) => setSipAutopayActive(e.target.checked)}
+                            className="w-4 h-4 accent-indigo-600"
+                          />
+                          SIP Auto-payment Activated
+                        </label>
+                      </div>
+
+                      {panAvailable && (
+                        <div className="mt-3">
+                          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                            PAN Number <span className="text-rose-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={panNumber}
+                            onChange={(e) =>
+                              setPanNumber(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10))
+                            }
+                            placeholder="e.g. ABCDE1234F"
+                            maxLength={10}
+                            className="w-full sm:w-64 px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono tracking-wider"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Separate narration if Other status is selected */}
               {status === 'Other' && (

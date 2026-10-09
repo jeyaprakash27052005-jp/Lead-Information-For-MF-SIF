@@ -568,10 +568,23 @@ export const firebaseDbService = {
     id: string,
     status: LeadStatus,
     statusRemarks?: string,
-    otherStatusNarration?: string
+    otherStatusNarration?: string,
+    readinessDetails?: {
+      panAvailable?: boolean;
+      panNumber?: string;
+      dematAvailable?: boolean;
+      kycComplete?: boolean;
+      sipAutopayActive?: boolean;
+    }
   ): Promise<Lead> {
     await ensureFirestoreDatabaseSeeded();
     const path = `leads/${id}`;
+    if (readinessDetails?.panAvailable) {
+      const pan = (readinessDetails.panNumber || '').trim().toUpperCase();
+      if (!isValidPan(pan)) {
+        throw new Error('PAN is marked Available. Please enter a valid PAN number (format: ABCDE1234F).');
+      }
+    }
     try {
       const leadRef = doc(db, 'leads', id);
       const snap = await getDoc(leadRef);
@@ -590,9 +603,31 @@ export const firebaseDbService = {
       if (otherStatusNarration !== undefined) {
         updates.otherStatusNarration = otherStatusNarration;
       }
+      if (readinessDetails) {
+        if (readinessDetails.panAvailable !== undefined) {
+          updates.panAvailable = readinessDetails.panAvailable;
+          if (readinessDetails.panAvailable && readinessDetails.panNumber) {
+            updates.panNumber = readinessDetails.panNumber.trim().toUpperCase();
+          }
+        }
+        if (readinessDetails.dematAvailable !== undefined) {
+          updates.dematAvailable = readinessDetails.dematAvailable;
+        }
+        if (readinessDetails.kycComplete !== undefined) {
+          updates.kycComplete = readinessDetails.kycComplete;
+        }
+        if (readinessDetails.sipAutopayActive !== undefined) {
+          updates.sipAutopayActive = readinessDetails.sipAutopayActive;
+        }
+      }
 
       const payload: Record<string, any> = { ...updates };
       const result: Lead = { ...existing, ...updates };
+      if (readinessDetails && !readinessDetails.panAvailable) {
+        delete updates.panNumber;
+        delete result.panNumber;
+        payload.panNumber = deleteField();
+      }
       if (status !== 'Other') {
         // narration only applies to the "Other" status: remove any old one
         payload.otherStatusNarration = deleteField();
@@ -601,6 +636,9 @@ export const firebaseDbService = {
       await updateDoc(leadRef, payload);
       return result;
     } catch (error) {
+      if (error instanceof Error && error.message.includes('PAN is marked Available')) {
+        throw error;
+      }
       handleFirestoreError(error, OperationType.UPDATE, path);
     }
   },

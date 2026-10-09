@@ -38,10 +38,5 @@
     "vite": "^8.3.0",
     "esbuild": "^0.27.0",
     "@tailwindcss/vite": "^4.3.3"
-  },
-  "resolutions": {
-    "vite": "^8.3.0",
-    "esbuild": "^0.27.0",
-    "@tailwindcss/vite": "^4.3.3"
   }
 }

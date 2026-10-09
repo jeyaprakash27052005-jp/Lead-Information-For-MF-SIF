@@ -194,13 +194,21 @@ export default function App() {
     id: string,
     newStatus: LeadStatus,
     remarks: string,
-    otherStatusNarration?: string
+    otherStatusNarration?: string,
+    readinessDetails?: {
+      panAvailable?: boolean;
+      panNumber?: string;
+      dematAvailable?: boolean;
+      kycComplete?: boolean;
+      sipAutopayActive?: boolean;
+    }
   ) => {
     const updated = await apiService.updateLeadStatus(
       id,
       newStatus,
       remarks,
-      otherStatusNarration
+      otherStatusNarration,
+      readinessDetails
     );
     setLeads((prev) => prev.map((l) => (l.id === updated.id ? updated : l)));
     showFeedback(`Lead "${updated.name}" status updated to "${newStatus}".`);

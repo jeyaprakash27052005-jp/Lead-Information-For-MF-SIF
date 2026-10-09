@@ -147,7 +147,9 @@ export const LeadDetailsModal: React.FC<LeadDetailsModalProps> = ({
                 <span className="font-semibold text-slate-900 text-sm">{lead.gender}</span>
               </div>
               <div className="p-3.5">
-                <span className="text-slate-500 block text-[11px]">Annual Income</span>
+                <span className="text-slate-500 block text-[11px]">
+                  {lead.occupation.toLowerCase().includes('student') ? 'Family Annual Income' : 'Annual Income'}
+                </span>
                 <span className="font-bold text-emerald-700 text-sm flex items-center gap-1">
                   <IndianRupee className="w-3.5 h-3.5" />
                   {formattedIncome}
