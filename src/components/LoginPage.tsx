@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Layers, Lock, User as UserIcon, ArrowRight, AlertCircle, Globe, Shield, Sparkles, LogIn } from 'lucide-react';
+import { Layers, ArrowLeft, Lock, User as UserIcon, ArrowRight, AlertCircle, Globe, Shield, Sparkles, LogIn } from 'lucide-react';
 
 interface LoginPageProps {
   onLogin: (username: string, password?: string) => Promise<void>;
   onSwitchToCustomerPortal?: () => void;
+  onBackToHome?: () => void;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToCustomerPortal }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToCustomerPortal, onBackToHome }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -51,6 +52,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToCustome
 
           {/* Top Right: Admin Login & Customer Login Controls */}
           <div className="flex items-center gap-2">
+            {onBackToHome && (
+              <button
+                type="button"
+                onClick={onBackToHome}
+                className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-700 hover:bg-slate-100 border border-slate-300 transition-colors flex items-center gap-1.5 cursor-pointer"
+                title="Back to Home Screen"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Home</span>
+              </button>
+            )}
             <button
               type="button"
               className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white shadow-xs flex items-center gap-1.5 border border-slate-900 cursor-default"

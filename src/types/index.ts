@@ -81,4 +81,7 @@ export type ViewTab =
   | 'regional-metrics'
   | 'lead-reports'
   | 'scheme-management'
-  | 'ads-management';
+  | 'ads-management'
+  | 'customer-portal'
+  | 'mf-calculator'
+  | 'nps-calculator';

@@ -18,6 +18,8 @@ import { MutualFundCalculator } from './components/MutualFundCalculator';
 import { NPSCalculator } from './components/NPSCalculator';
 import { SchemeManagement } from './components/SchemeManagement';
 import { CustomerPortal } from './components/CustomerPortal';
+import { HomeScreen } from './components/HomeScreen';
+import { AdsManagement } from './components/AdsManagement';
 import { PlusCircle } from 'lucide-react';
 import { getAllRegions } from './utils/regions';
 
@@ -30,7 +32,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<ViewTab>('all-leads');
   const [loading, setLoading] = useState(true);
   const [portalMode, setPortalMode] = useState<'admin' | 'customer'>(() => {
-    // 1. Check hostname/domain (e.g. MF-SIF-investment-calculator.vercel.app vs lead-information-mf-sir.vercel.app)
+    // 1. Check hostname/domain
     if (typeof window !== 'undefined') {
       const host = window.location.hostname.toLowerCase();
       if (
@@ -54,6 +56,9 @@ export default function App() {
     }
     return 'admin';
   });
+  // Public landing page (moving ads) shown first; Admin / Customer buttons open the matching login
+  const [showHome, setShowHome] = useState(true);
+  const [customerStartTab, setCustomerStartTab] = useState<'register' | 'login'>('login');
   const [feedbackMessage, setFeedbackMessage] = useState<{
     text: string;
     type: 'success' | 'info' | 'error';
@@ -197,6 +202,7 @@ export default function App() {
 
   const handleLogout = () => {
     setCurrentUser(null);
+    setShowHome(true);
     showFeedback('You have been securely logged out.', 'info');
   };
 
@@ -432,9 +438,29 @@ export default function App() {
           </div>
         )}
 
-        {portalMode === 'customer' ? (
+        {showHome ? (
+          <HomeScreen
+            schemes={schemes}
+            onOpenAdminLogin={() => {
+              updatePortalMode('admin');
+              setShowHome(false);
+            }}
+            onOpenCustomerLogin={() => {
+              setCustomerStartTab('login');
+              updatePortalMode('customer');
+              setShowHome(false);
+            }}
+            onOpenCustomerRegister={() => {
+              setCustomerStartTab('register');
+              updatePortalMode('customer');
+              setShowHome(false);
+            }}
+          />
+        ) : portalMode === 'customer' ? (
           <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <CustomerPortal
+              key={customerStartTab}
+              initialTab={customerStartTab}
               currentUser={null}
               customerLead={null}
               schemes={schemes}
@@ -443,12 +469,17 @@ export default function App() {
               onCustomerLogin={handleCustomerLogin}
               onCustomerLogout={handleLogout}
               onSwitchToAdmin={() => updatePortalMode('admin')}
+              onBackToHome={() => setShowHome(true)}
             />
           </div>
         ) : (
           <LoginPage
             onLogin={handleLogin}
-            onSwitchToCustomerPortal={() => updatePortalMode('customer')}
+            onSwitchToCustomerPortal={() => {
+              setCustomerStartTab('login');
+              updatePortalMode('customer');
+            }}
+            onBackToHome={() => setShowHome(true)}
           />
         )}
       </div>
@@ -537,7 +568,7 @@ export default function App() {
 
       {/* Main Content Area - White Professional Windows Canvas */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* VIEW: Customer Web Portal (Sub-Domain: MF-SIF-investment-calculator.vercel.app) */}
+        {/* VIEW: Customer Web Portal */}
         {(currentUser.role === 'customer' || activeTab === 'customer-portal') && (
           <CustomerPortal
             currentUser={currentUser}
@@ -671,6 +702,11 @@ export default function App() {
                 currentUser={currentUser}
                 onViewLead={(lead) => setDetailsModalLead(lead)}
               />
+            )}
+
+            {/* VIEW 10: Ads Management (Head uploads home screen ad images) */}
+            {activeTab === 'ads-management' && currentUser.role === 'head' && (
+              <AdsManagement onNotify={showFeedback} />
             )}
 
             {/* VIEW 9: Schemes Management (Add, Edit, Delete catalog for MF & NPS) */}

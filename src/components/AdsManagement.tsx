@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AdBanner } from '../types';
-import { adsStorageService } from '../services/adsStorage';
+import { adsStorageService, prepareAdImage } from '../services/adsStorage';
 import {
   Upload,
   Image as ImageIcon,
@@ -75,7 +75,7 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
   }, [ads.length, isPreviewPaused]);
 
   // Handle image file selection (JPG, JPEG, PNG, GIF)
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -89,21 +89,24 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Image file size exceeds 5MB. Please choose a smaller image file.');
+    if (file.size > 15 * 1024 * 1024) {
+      setError('Image file size exceeds 15MB. Please choose a smaller image file.');
       return;
     }
 
     setError(null);
-    setImageFileName(file.name);
-
-    const reader = new FileReader();
-    reader.onload = (loadEvent) => {
-      const base64Data = loadEvent.target?.result as string;
-      setImagePreview(base64Data);
-      setImageUrl(base64Data);
-    };
-    reader.readAsDataURL(file);
+    try {
+      const dataUrl = await prepareAdImage(file);
+      setImageFileName(file.name);
+      setImagePreview(dataUrl);
+      setImageUrl(dataUrl);
+    } catch (err) {
+      setImageFileName(null);
+      setImagePreview(null);
+      setImageUrl('');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      setError(err instanceof Error ? err.message : 'Could not process this image.');
+    }
   };
 
   const handleAddAdSubmit = async (e: React.FormEvent) => {
@@ -364,7 +367,7 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
                   {imageFileName ? `Selected: ${imageFileName}` : 'Click to Browse & Upload Image File'}
                 </div>
                 <p className="text-[10px] text-slate-500">
-                  Accepts JPG, JPEG, PNG, GIF (Max 5MB)
+                  Accepts JPG, JPEG, PNG, GIF (large images are shrunk automatically)
                 </p>
               </div>
 

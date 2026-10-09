@@ -47,6 +47,8 @@ interface CustomerPortalProps {
   onCustomerLogin: (username: string, password?: string) => Promise<void>;
   onCustomerLogout: () => void;
   onSwitchToAdmin: () => void;
+  initialTab?: 'register' | 'login';
+  onBackToHome?: () => void;
 }
 
 export const CustomerPortal: React.FC<CustomerPortalProps> = ({
@@ -58,8 +60,10 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
   onCustomerLogin,
   onCustomerLogout,
   onSwitchToAdmin,
+  initialTab = 'register',
+  onBackToHome,
 }) => {
-  const [activeTab, setActiveTab] = useState<'register' | 'login' | 'mf-calc' | 'nps-calc' | 'schemes'>('register');
+  const [activeTab, setActiveTab] = useState<'register' | 'login' | 'mf-calc' | 'nps-calc' | 'schemes'>(initialTab);
   const [customerActiveView, setCustomerActiveView] = useState<'dashboard' | 'mf-calc' | 'nps-calc' | 'schemes'>('dashboard');
 
   // Customer Registration Form State
@@ -92,7 +96,6 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [linkCopied, setLinkCopied] = useState(false);
 
   const isStudent = occupation.trim().toLowerCase().includes('student');
 
@@ -178,23 +181,17 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
     }
   };
 
-  const CUSTOMER_SUBDOMAIN_URL = 'https://MF-SIF-investment-calculator.vercel.app';
 
   const copyCredentials = () => {
     if (createdCredentials) {
       navigator.clipboard.writeText(
-        `Customer Portal Login Credentials:\nUser ID: ${createdCredentials.userId}\nPassword: ${createdCredentials.password}\nSub-Domain: ${CUSTOMER_SUBDOMAIN_URL}`
+        `Customer Portal Login Credentials:\nUser ID: ${createdCredentials.userId}\nPassword: ${createdCredentials.password}`
       );
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     }
   };
 
-  const copyPortalLink = () => {
-    navigator.clipboard.writeText(CUSTOMER_SUBDOMAIN_URL);
-    setLinkCopied(true);
-    setTimeout(() => setLinkCopied(false), 2500);
-  };
 
   // ----------------------------------------------------
   // LOGGED-IN CUSTOMER VIEW
@@ -499,6 +496,16 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          {onBackToHome && (
+            <button
+              type="button"
+              onClick={onBackToHome}
+              className="px-3.5 py-1.5 rounded-lg text-xs font-bold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-colors flex items-center gap-1.5 cursor-pointer"
+              title="Back to Home Screen"
+            >
+              <span>← Home</span>
+            </button>
+          )}
           <button
             type="button"
             onClick={onSwitchToAdmin}
@@ -1042,29 +1049,6 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
             <p className="text-[11px] text-slate-500 font-medium">
               Note: Your <strong>User ID and Password are identical</strong> ({createdCredentials.userId}).
             </p>
-
-            {/* Customer Sub-Domain Reference in Account Created Popup */}
-            <div className="p-3 rounded-xl bg-indigo-50/70 border border-indigo-200 text-left space-y-1">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700">
-                  Customer Sub-Domain
-                </span>
-                <span className="text-[11px] font-mono font-bold text-indigo-900">
-                  MF-SIF-investment-calculator.vercel.app
-                </span>
-              </div>
-              <p className="text-[10px] text-slate-500">
-                This link is the dedicated customer sub-domain for this project. Use it anytime to log in and calculate investments.
-              </p>
-              <button
-                type="button"
-                onClick={copyPortalLink}
-                className="w-full mt-1 py-1.5 px-3 rounded-lg bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-50 text-[11px] font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
-              >
-                <Copy className="w-3 h-3 text-indigo-600" />
-                <span>{linkCopied ? 'Sub-Domain Copied!' : 'Copy Customer Sub-Domain Link'}</span>
-              </button>
-            </div>
 
             <div className="flex flex-col gap-2 pt-2">
               <button

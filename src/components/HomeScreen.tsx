@@ -46,13 +46,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       try {
         const loaded = await adsStorageService.getAds();
         const active = loaded.filter((a) => a.isActive);
-        setAds(active.length > 0 ? active : loaded);
+        setAds(active);
       } catch (_e) {
         // ignore
       }
     };
     loadAds();
   }, []);
+
+  useEffect(() => {
+    if (currentSlide >= ads.length) setCurrentSlide(0);
+  }, [ads.length]);
 
   // Auto-move ads carousel
   useEffect(() => {
@@ -135,31 +139,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
       </header>
 
-      {/* Continuous Moving Ads Ticker Bar */}
-      <div className="bg-slate-900 text-white overflow-hidden py-2 border-b border-indigo-900">
-        <div className="flex items-center whitespace-nowrap animate-marquee gap-10 text-xs font-semibold">
-          <span className="flex items-center gap-2 text-indigo-300">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-            <span>High-Yield Systematic Investment Facility (SIF) • Compounding up to 18% p.a.</span>
-          </span>
-          <span className="flex items-center gap-2 text-emerald-300">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-            <span>NPS Tier I Pension Wealth • Save ₹50,000 Tax under Sec 80CCD(1B)</span>
-          </span>
-          <span className="flex items-center gap-2 text-sky-300">
-            <PieChart className="w-3.5 h-3.5 text-sky-400 shrink-0" />
-            <span>Instant Return Projections • View Detailed Calculations & Download PDF Reports</span>
-          </span>
-          <span className="flex items-center gap-2 text-amber-300">
-            <Coins className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-            <span>Moving Ads Screen • Admin can upload custom JPG, JPEG, PNG, GIF ad banners</span>
-          </span>
-        </div>
-      </div>
-
       {/* Main Home Screen Content */}
       <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-8 flex-1">
         {/* MOVING ADS ON THE SCREEN (CAROUSEL SLIDER) */}
+        {ads.length > 0 && (
         <section
           aria-label="Moving Promotional Ads"
           className="relative bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800"
@@ -272,16 +255,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 ))}
               </div>
             </div>
-          ) : (
-            <div className="p-8 text-center text-white space-y-3">
-              <Sparkles className="w-8 h-8 text-indigo-400 mx-auto" />
-              <h3 className="text-xl font-bold">Moving Ads Screen</h3>
-              <p className="text-xs text-slate-300">
-                Ads uploaded by admin in JPG, JPEG, PNG, or GIF will move dynamically here.
-              </p>
-            </div>
-          )}
+          ) : null}
         </section>
+        )}
 
         {/* QUICK ACCESS / CALL TO ACTION BANNER */}
         <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 rounded-2xl shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">

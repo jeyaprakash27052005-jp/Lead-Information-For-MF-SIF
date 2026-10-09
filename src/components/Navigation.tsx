@@ -11,7 +11,8 @@ import {
   TrendingUp,
   Shield,
   Layers,
-  Globe
+  Globe,
+  Image as ImageIcon
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -122,6 +123,16 @@ export const Navigation: React.FC<NavigationProps> = ({
       description: 'Add, update, or delete Mutual Fund & NPS schemes catalog',
     });
 
+    // Feature: Home Screen Ads (Head uploads JPG / JPEG / PNG / GIF banners)
+    if (isHead) {
+      items.push({
+        id: 'ads-management',
+        label: 'Home Screen Ads',
+        icon: <ImageIcon className="w-4 h-4" />,
+        description: 'Upload and manage the moving ad images shown on the Home Screen',
+      });
+    }
+
     // Feature: Regional Performance Metrics (Head & Regional Incharge)
     if (isHead || isRegional) {
       items.push({
@@ -152,12 +163,12 @@ export const Navigation: React.FC<NavigationProps> = ({
       });
     }
 
-    // Feature: Customer Web Portal (Sub-Domain MF-SIF-investment-calculator.vercel.app)
+    // Feature: Customer Web Portal
     items.push({
       id: 'customer-portal',
       label: 'Customer Web Portal',
       icon: <Globe className="w-4 h-4" />,
-      description: 'Open Customer Sub-Domain Portal (MF-SIF-investment-calculator.vercel.app)',
+      description: 'Open the Customer Web Portal',
     });
   }
 
