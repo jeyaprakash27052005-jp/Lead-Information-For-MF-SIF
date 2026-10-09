@@ -39,10 +39,10 @@ export const Header: React.FC<HeaderProps> = ({
   const [showSwitchMenu, setShowSwitchMenu] = React.useState(false);
   const [linkCopied, setLinkCopied] = React.useState(false);
 
+  const CUSTOMER_SUBDOMAIN_URL = 'https://MF-SIF-investment-calculator.vercel.app';
+
   const copyCustomerLink = () => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('portal', 'customer');
-    navigator.clipboard.writeText(url.toString());
+    navigator.clipboard.writeText(CUSTOMER_SUBDOMAIN_URL);
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 2500);
   };
@@ -115,37 +115,45 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Quick Dual App Links / Switcher */}
+          {/* Quick Dual App Links / External Sub-Domain Reference */}
           <div className="hidden md:flex items-center gap-2">
             {isCustomerView ? (
-              <button
-                type="button"
-                onClick={onSwitchToAdminPortal}
-                className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer"
-                title="Switch to Staff Admin Portal: lead-information-mf-sir.vercel.app"
+              <a
+                href="https://lead-information-mf-sir.vercel.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors flex items-center gap-1.5"
+                title="Open Staff Admin Portal: lead-information-mf-sir.vercel.app"
               >
                 <ExternalLink className="w-3.5 h-3.5 text-indigo-600" />
                 <span>Admin App (lead-information-mf-sir.vercel.app)</span>
-              </button>
+              </a>
             ) : (
               <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={onSwitchToCustomerPortal}
-                  className="px-3 py-1.5 rounded-lg text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-colors flex items-center gap-1.5 cursor-pointer"
-                  title="Open Customer Registration & Calculator Web Portal (MF-SIF-investment-calculator.vercel.app)"
+                <a
+                  href="https://MF-SIF-investment-calculator.vercel.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-colors flex items-center gap-1.5"
+                  title="Open Customer Sub-Domain: MF-SIF-investment-calculator.vercel.app"
                 >
                   <Globe className="w-3.5 h-3.5 text-indigo-600" />
-                  <span>Customer App (MF-SIF-investment-calculator)</span>
-                </button>
+                  <span>Customer Sub-Domain: MF-SIF-investment-calculator.vercel.app</span>
+                  <ExternalLink className="w-3 h-3 text-indigo-400" />
+                </a>
                 <button
                   type="button"
                   onClick={copyCustomerLink}
                   className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
-                  title="Copy Customer Web App Link"
+                  title="Copy Customer Sub-Domain Link (MF-SIF-investment-calculator.vercel.app)"
                 >
                   <Copy className="w-3.5 h-3.5" />
                 </button>
+                {linkCopied && (
+                  <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                    Copied: MF-SIF-investment-calculator.vercel.app
+                  </span>
+                )}
               </div>
             )}
           </div>

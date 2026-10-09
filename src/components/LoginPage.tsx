@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layers, Lock, User as UserIcon, ArrowRight, AlertCircle, Globe } from 'lucide-react';
+import { Layers, Lock, User as UserIcon, ArrowRight, AlertCircle, Globe, ExternalLink, Copy, Check } from 'lucide-react';
 
 interface LoginPageProps {
   onLogin: (username: string, password?: string) => Promise<void>;
@@ -11,6 +11,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToCustome
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,21 +127,44 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToCustome
             </button>
           </form>
 
-          {onSwitchToCustomerPortal && (
-            <div className="mt-5 pt-4 border-t border-slate-100 text-center">
-              <span className="text-[11px] text-slate-500 block mb-2 font-medium">
-                Are you an investor looking to calculate returns or register?
-              </span>
-              <button
-                type="button"
-                onClick={onSwitchToCustomerPortal}
-                className="w-full py-2.5 px-3 rounded-lg border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+          <div className="mt-5 pt-4 border-t border-slate-100 text-center space-y-2">
+            <span className="text-[11px] text-slate-500 block font-medium">
+              Are you an investor looking to create an account or calculate returns?
+            </span>
+            <div className="flex items-center gap-1.5">
+              <a
+                href="https://MF-SIF-investment-calculator.vercel.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 py-2 px-3 rounded-lg border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                title="Open Customer Sub-Domain: MF-SIF-investment-calculator.vercel.app"
               >
                 <Globe className="w-4 h-4 text-indigo-600" />
-                <span>Go to Customer & Investor Web Portal</span>
+                <span>Customer Sub-Domain Portal</span>
+                <ExternalLink className="w-3 h-3 text-indigo-500" />
+              </a>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText('https://MF-SIF-investment-calculator.vercel.app');
+                  setCopiedLink(true);
+                  setTimeout(() => setCopiedLink(false), 2000);
+                }}
+                className="p-2 rounded-lg border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 transition-colors cursor-pointer"
+                title="Copy Customer Sub-Domain Link"
+              >
+                {copiedLink ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-indigo-600" />}
               </button>
             </div>
-          )}
+            {copiedLink && (
+              <p className="text-[10px] text-emerald-600 font-bold">
+                Copied: https://MF-SIF-investment-calculator.vercel.app
+              </p>
+            )}
+            <p className="text-[10px] text-slate-400 font-mono">
+              Sub-Domain: MF-SIF-investment-calculator.vercel.app
+            </p>
+          </div>
         </div>
       </div>
     </div>

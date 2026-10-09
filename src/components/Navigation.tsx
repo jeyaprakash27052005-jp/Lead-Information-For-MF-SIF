@@ -114,28 +114,12 @@ export const Navigation: React.FC<NavigationProps> = ({
       description: 'Track progression, status remarks, and audit added by info',
     });
 
-    // Feature: Mutual Fund Calculator
-    items.push({
-      id: 'mf-calculator',
-      label: 'MF Return Calculator',
-      icon: <TrendingUp className="w-4 h-4" />,
-      description: 'Calculate SIP and lumpsum returns for mutual fund schemes',
-    });
-
-    // Feature: NPS Pension Calculator
-    items.push({
-      id: 'nps-calculator',
-      label: 'NPS Return Calculator',
-      icon: <Shield className="w-4 h-4" />,
-      description: 'Calculate NPS retirement corpus and monthly pension payouts',
-    });
-
-    // Feature: Schemes Management (Add / Edit / Delete)
+    // Feature: Schemes Management (Add / Edit / Delete catalog for customer calculators)
     items.push({
       id: 'scheme-management',
       label: 'Schemes Management',
       icon: <Layers className="w-4 h-4" />,
-      description: 'Add, update, or delete Mutual Fund & NPS schemes',
+      description: 'Add, update, or delete Mutual Fund & NPS schemes catalog',
     });
 
     // Feature: Regional Performance Metrics (Head & Regional Incharge)
@@ -167,14 +151,6 @@ export const Navigation: React.FC<NavigationProps> = ({
           : 'Manage team incharge IDs, deactivate or delete',
       });
     }
-
-    // Feature: Customer Web Portal
-    items.push({
-      id: 'customer-portal',
-      label: 'Customer Web Portal',
-      icon: <Globe className="w-4 h-4" />,
-      description: 'Open customer self-service registration and calculator portal',
-    });
   }
 
   return (

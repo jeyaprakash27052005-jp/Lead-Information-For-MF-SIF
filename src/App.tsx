@@ -188,6 +188,8 @@ export default function App() {
       setActiveTab('assigned-leads');
     } else if (res.user.role === 'area_incharge') {
       setActiveTab('assigned-leads');
+    } else if (res.user.role === 'customer') {
+      setActiveTab('customer-portal');
     } else {
       setActiveTab('all-leads');
     }
@@ -204,6 +206,11 @@ export default function App() {
       return;
     }
     setCurrentUser(user);
+    if (user.role === 'customer') {
+      setActiveTab('customer-portal');
+    } else if (activeTab === 'customer-portal' || activeTab === 'mf-calculator' || activeTab === 'nps-calculator') {
+      setActiveTab('all-leads');
+    }
     showFeedback(`Switched to ${user.name} (${user.designation})`);
   };
 
@@ -635,23 +642,23 @@ export default function App() {
           />
         )}
 
-        {/* VIEW 7: Mutual Fund Return Calculator */}
-        {activeTab === 'mf-calculator' && (
+        {/* VIEW 7: Mutual Fund Return Calculator (Customer Exclusive) */}
+        {currentUser.role === 'customer' && activeTab === 'mf-calculator' && (
           <MutualFundCalculator
             schemes={schemes}
             onApplyScheme={handleApplySchemeFromCalc}
           />
         )}
 
-        {/* VIEW 8: NPS Pension Scheme Return Calculator */}
-        {activeTab === 'nps-calculator' && (
+        {/* VIEW 8: NPS Pension Scheme Return Calculator (Customer Exclusive) */}
+        {currentUser.role === 'customer' && activeTab === 'nps-calculator' && (
           <NPSCalculator
             schemes={schemes}
             onApplyScheme={handleApplySchemeFromCalc}
           />
         )}
 
-        {/* VIEW 9: Schemes Management (Add, Edit, Delete for MF & NPS) */}
+        {/* VIEW 9: Schemes Management (Add, Edit, Delete catalog for MF & NPS) */}
         {activeTab === 'scheme-management' && (
           <SchemeManagement
             schemes={schemes}
@@ -659,18 +666,11 @@ export default function App() {
             onCreateScheme={handleCreateScheme}
             onUpdateScheme={handleUpdateScheme}
             onDeleteScheme={handleDeleteScheme}
-            onOpenCalculator={(scheme) => {
-              if (scheme.type === 'mutual_fund') {
-                setActiveTab('mf-calculator');
-              } else {
-                setActiveTab('nps-calculator');
-              }
-            }}
           />
         )}
 
-        {/* VIEW 10: Customer Web Portal */}
-        {(activeTab === 'customer-portal' || portalMode === 'customer' || currentUser.role === 'customer') && (
+        {/* VIEW 10: Customer Web Portal (Customer Exclusive / Sub-domain) */}
+        {(currentUser.role === 'customer' || portalMode === 'customer') && (
           <CustomerPortal
             currentUser={currentUser}
             customerLead={

@@ -13,7 +13,8 @@ import {
   Lock,
   User as UserIcon,
   X,
-  Edit
+  Edit,
+  Copy
 } from 'lucide-react';
 import { DEFAULT_REGIONS, isHqRegion } from '../utils/regions';
 
@@ -54,6 +55,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
   // Head and Regional Incharge can create accounts (Regional Incharge: Area Incharges in own region only)
   const canCreateUsers = isHead || isRegional;
 
+  const [subdomainCopied, setSubdomainCopied] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('password123');
@@ -295,6 +297,36 @@ export const UserManagement: React.FC<UserManagementProps> = ({
             </button>
           )}
         </div>
+      </div>
+
+      {/* Customer Sub-Domain Link Card for Incharges */}
+      <div className="bg-gradient-to-r from-indigo-50 via-sky-50 to-emerald-50 p-4 rounded-xl border border-indigo-200 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-indigo-600 text-white">
+              Customer Sub-Domain
+            </span>
+            <span className="font-mono font-bold text-indigo-900 text-xs">
+              MF-SIF-investment-calculator.vercel.app
+            </span>
+          </div>
+          <p className="text-xs text-slate-600 mt-1">
+            Dedicated customer web app sub-domain for self-registration and investment calculations. Share this link with clients.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            navigator.clipboard.writeText('https://MF-SIF-investment-calculator.vercel.app');
+            setSubdomainCopied(true);
+            setTimeout(() => setSubdomainCopied(false), 2500);
+          }}
+          className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold text-indigo-700 bg-white hover:bg-indigo-50 border border-indigo-300 shadow-2xs transition-all cursor-pointer shrink-0"
+          title="Copy Customer Sub-Domain Link"
+        >
+          <Copy className="w-4 h-4 text-indigo-600" />
+          <span>{subdomainCopied ? 'Sub-Domain Copied!' : 'Copy Customer Sub-Domain Link'}</span>
+        </button>
       </div>
 
       {/* Users Table */}
