@@ -55,6 +55,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
   // Head and Regional Incharge can create accounts (Regional Incharge: Area Incharges in own region only)
   const canCreateUsers = isHead || isRegional;
 
+  const [roleFilter, setRoleFilter] = useState<'all' | UserRole>('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('password123');
@@ -298,6 +299,44 @@ export const UserManagement: React.FC<UserManagementProps> = ({
         </div>
       </div>
 
+      {/* Role-wise Filter */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-2xs p-3 flex flex-wrap items-center gap-2">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mr-1">
+          Filter by Role
+        </span>
+        {([
+          ['all', 'All Users'],
+          ['head', 'Head'],
+          ['regional_incharge', 'Regional Incharge'],
+          ['area_incharge', 'Area Incharge'],
+          ['customer', 'Customer'],
+        ] as const).map(([value, label]) => {
+          const count = value === 'all' ? users.length : users.filter((u) => u.role === value).length;
+          const active = roleFilter === value;
+          return (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setRoleFilter(value)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors cursor-pointer flex items-center gap-1.5 ${
+                active
+                  ? 'bg-slate-900 text-white border-slate-900'
+                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+              }`}
+            >
+              <span>{label}</span>
+              <span
+                className={`px-1.5 rounded-full text-[10px] ${
+                  active ? 'bg-slate-700 text-indigo-200' : 'bg-slate-200 text-slate-700'
+                }`}
+              >
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
       {/* Users Table */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
@@ -314,7 +353,14 @@ export const UserManagement: React.FC<UserManagementProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {users.map((u) => {
+              {users.filter((u) => roleFilter === 'all' || u.role === roleFilter).length === 0 && (
+                <tr>
+                  <td colSpan={7} className="py-8 px-4 text-center text-slate-500">
+                    No users found for this role.
+                  </td>
+                </tr>
+              )}
+              {users.filter((u) => roleFilter === 'all' || u.role === roleFilter).map((u) => {
                 const canAct = canManageUser(u);
                 const isWorking = actionInProgressId === u.id;
 
