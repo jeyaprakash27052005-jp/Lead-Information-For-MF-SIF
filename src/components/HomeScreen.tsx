@@ -150,7 +150,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           onMouseLeave={() => setIsPaused(false)}
         >
           {ads.length > 0 ? (
-            <div className="relative min-h-[300px] sm:min-h-[360px] md:min-h-[400px] flex items-center">
+            <div className="relative min-h-[420px] sm:min-h-[500px] md:min-h-[560px] flex items-center">
               {ads.map((ad, index) => {
                 const isActive = index === currentSlide;
                 return (
@@ -259,182 +259,30 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </section>
         )}
 
-        {/* QUICK ACCESS / CALL TO ACTION BANNER */}
-        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 rounded-2xl shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-bold border border-emerald-500/30">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Free Instant Wealth Projection</span>
-            </div>
-            <h2 className="text-lg sm:text-xl font-black tracking-tight">
-              Calculate Mutual Fund (SIF) Compounding & NPS Pension
+        {/* Shown only while no ads have been uploaded yet */}
+        {ads.length === 0 && (
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-10 text-center space-y-5">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Welcome
             </h2>
-            <p className="text-xs text-slate-300">
-              Calculate exact investment maturity values, view transparent compounding breakdowns, and download official PDF statements.
-            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={onOpenCustomerLogin}
+                className="px-5 py-2.5 rounded-xl text-sm font-bold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-300 cursor-pointer"
+              >
+                Customer Login
+              </button>
+              <button
+                type="button"
+                onClick={onOpenAdminLogin}
+                className="px-5 py-2.5 rounded-xl text-sm font-bold bg-slate-900 text-white hover:bg-slate-800 cursor-pointer"
+              >
+                Admin Login
+              </button>
+            </div>
           </div>
-
-          <div className="flex items-center gap-2.5 shrink-0">
-            <button
-              type="button"
-              onClick={onOpenCustomerRegister}
-              className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
-            >
-              <UserPlus className="w-3.5 h-3.5" />
-              <span>Create Account</span>
-            </button>
-            <button
-              type="button"
-              onClick={onOpenCustomerLogin}
-              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-200 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all flex items-center gap-1.5 cursor-pointer"
-            >
-              <LogIn className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Sign In</span>
-            </button>
-          </div>
-        </div>
-
-        {/* CALCULATOR TABS & INTERACTIVE RETURN CALCULATORS */}
-        <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="flex border-b border-slate-200 overflow-x-auto scrollbar-thin">
-            <button
-              type="button"
-              onClick={() => setActiveCalcTab('mf')}
-              className={`py-3.5 px-5 text-xs font-bold whitespace-nowrap border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
-                activeCalcTab === 'mf'
-                  ? 'border-emerald-600 text-emerald-700 bg-emerald-50/20'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <TrendingUp className="w-4 h-4 text-emerald-600" />
-              <span>1. Mutual Fund (SIF) Calculator</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveCalcTab('nps')}
-              className={`py-3.5 px-5 text-xs font-bold whitespace-nowrap border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
-                activeCalcTab === 'nps'
-                  ? 'border-blue-600 text-blue-700 bg-blue-50/20'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <Shield className="w-4 h-4 text-blue-600" />
-              <span>2. NPS Scheme Calculator</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveCalcTab('schemes')}
-              className={`py-3.5 px-5 text-xs font-bold whitespace-nowrap border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
-                activeCalcTab === 'schemes'
-                  ? 'border-indigo-600 text-indigo-700 bg-indigo-50/20'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <Layers className="w-4 h-4 text-indigo-600" />
-              <span>3. Browse All Schemes ({schemes.length})</span>
-            </button>
-          </div>
-
-          <div className="p-4 sm:p-6">
-            {activeCalcTab === 'mf' && (
-              <div>
-                <div className="mb-4 flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-black text-slate-900">
-                      Systematic Investment Facility (SIF) & Lumpsum Compounding Calculator
-                    </h3>
-                    <p className="text-xs text-slate-500">
-                      Adjust monthly contribution, duration, and expected CAGR. Click <strong>View</strong> to inspect month-by-month compounding or <strong>Download PDF</strong> for an investment statement.
-                    </p>
-                  </div>
-                </div>
-                <MutualFundCalculator schemes={schemes} />
-              </div>
-            )}
-
-            {activeCalcTab === 'nps' && (
-              <div>
-                <div className="mb-4 flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-black text-slate-900">
-                      National Pension System (NPS Tier I) Return & Pension Calculator
-                    </h3>
-                    <p className="text-xs text-slate-500">
-                      Calculate your total retirement corpus, tax-free lump sum withdrawal (60%), and estimated monthly pension annuity (40%). Click <strong>View</strong> or <strong>Download PDF</strong>.
-                    </p>
-                  </div>
-                </div>
-                <NPSCalculator schemes={schemes} />
-              </div>
-            )}
-
-            {activeCalcTab === 'schemes' && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-black text-slate-900">
-                      Mutual Fund & NPS Approved Scheme Catalog
-                    </h3>
-                    <p className="text-xs text-slate-500">
-                      Official investment schemes available for investor calculation and portfolio allocation.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {schemes.map((s) => (
-                    <div
-                      key={s.id}
-                      className="p-4 rounded-xl border border-slate-200 bg-white hover:border-indigo-300 hover:shadow-md transition-all flex flex-col justify-between"
-                    >
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide ${
-                              s.type === 'mutual_fund'
-                                ? 'bg-emerald-100 text-emerald-800'
-                                : 'bg-blue-100 text-blue-800'
-                            }`}
-                          >
-                            {s.type === 'mutual_fund' ? 'Mutual Fund SIF' : 'NPS Tier I'}
-                          </span>
-                          <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                            {s.expectedReturnRate}% p.a.
-                          </span>
-                        </div>
-
-                        <h4 className="text-sm font-bold text-slate-900 line-clamp-1">{s.name}</h4>
-                        <p className="text-[11px] text-slate-500">{s.fundHouse || s.category}</p>
-                        {s.description && (
-                          <p className="text-xs text-slate-600 line-clamp-2">{s.description}</p>
-                        )}
-                      </div>
-
-                      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                        <span className="text-[11px] text-slate-500">
-                          Min: {s.minInvestment ? formatInr(s.minInvestment) : '₹500'}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (s.type === 'mutual_fund') setActiveCalcTab('mf');
-                            else setActiveCalcTab('nps');
-                          }}
-                          className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 cursor-pointer"
-                        >
-                          <span>Calculate</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </section>
+        )}
       </main>
 
       {/* Footer */}
