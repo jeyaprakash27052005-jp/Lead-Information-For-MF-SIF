@@ -60,6 +60,15 @@ service cloud.firestore {
       allow delete: if isValidId(regionId);
     }
 
+    match /ads/{adId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(adId)
+        && request.resource.data.title is string
+        && request.resource.data.imageUrl is string
+        && request.resource.data.isActive is bool;
+      allow delete: if isValidId(adId);
+    }
+
     match /test/{docId} {
       allow get, list, write: if true;
     }

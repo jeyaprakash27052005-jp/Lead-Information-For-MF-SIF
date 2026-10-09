@@ -60,6 +60,18 @@ export interface Lead {
   updatedAt: string;
 }
 
+export interface AdBanner {
+  id: string;
+  title: string;
+  subtitle?: string;
+  imageUrl: string; // supports base64 Data URL or http/https URL (jpg, jpeg, png, gif)
+  linkUrl?: string; // target action: 'mf-calc' | 'nps-calc' | 'register' or external url
+  badge?: string; // e.g. "Special Offer", "High Return", "Tax Saver", "NPS Pension", "New Fund"
+  isActive: boolean;
+  order: number;
+  createdAt: string;
+}
+
 export type ViewTab =
   | 'all-leads'
   | 'assigned-leads'
@@ -68,7 +80,5 @@ export type ViewTab =
   | 'user-management'
   | 'regional-metrics'
   | 'lead-reports'
-  | 'mf-calculator'
-  | 'nps-calculator'
   | 'scheme-management'
-  | 'customer-portal';
+  | 'ads-management';
