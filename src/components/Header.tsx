@@ -118,28 +118,34 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Quick Dual App Links / External Sub-Domain Reference */}
           <div className="hidden md:flex items-center gap-2">
             {isCustomerView ? (
-              <a
-                href="https://lead-information-mf-sir.vercel.app"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors flex items-center gap-1.5"
-                title="Open Staff Admin Portal: lead-information-mf-sir.vercel.app"
+              <button
+                type="button"
+                onClick={onSwitchToAdminPortal}
+                className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+                title="Switch to Staff Admin Portal: lead-information-mf-sir.vercel.app"
               >
                 <ExternalLink className="w-3.5 h-3.5 text-indigo-600" />
                 <span>Admin App (lead-information-mf-sir.vercel.app)</span>
-              </a>
+              </button>
             ) : (
               <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={onSwitchToCustomerPortal}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+                  title="Open Customer Web Portal (MF-SIF-investment-calculator.vercel.app)"
+                >
+                  <Globe className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Customer Web Portal</span>
+                </button>
                 <a
                   href="https://MF-SIF-investment-calculator.vercel.app"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1.5 rounded-lg text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-colors flex items-center gap-1.5"
-                  title="Open Customer Sub-Domain: MF-SIF-investment-calculator.vercel.app"
+                  className="p-1.5 rounded-lg text-indigo-600 hover:bg-indigo-50 border border-indigo-200 transition-colors"
+                  title="Visit Live Sub-Domain: https://MF-SIF-investment-calculator.vercel.app"
                 >
-                  <Globe className="w-3.5 h-3.5 text-indigo-600" />
-                  <span>Customer Sub-Domain: MF-SIF-investment-calculator.vercel.app</span>
-                  <ExternalLink className="w-3 h-3 text-indigo-400" />
+                  <ExternalLink className="w-3.5 h-3.5" />
                 </a>
                 <button
                   type="button"

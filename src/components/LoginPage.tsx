@@ -132,17 +132,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToCustome
               Are you an investor looking to create an account or calculate returns?
             </span>
             <div className="flex items-center gap-1.5">
-              <a
-                href="https://MF-SIF-investment-calculator.vercel.app"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 py-2 px-3 rounded-lg border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
-                title="Open Customer Sub-Domain: MF-SIF-investment-calculator.vercel.app"
+              <button
+                type="button"
+                onClick={() => {
+                  if (onSwitchToCustomerPortal) {
+                    onSwitchToCustomerPortal();
+                  }
+                }}
+                className="flex-1 py-2 px-3 rounded-lg border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                title="Open Customer Web Portal (MF-SIF-investment-calculator.vercel.app)"
               >
                 <Globe className="w-4 h-4 text-indigo-600" />
-                <span>Customer Sub-Domain Portal</span>
-                <ExternalLink className="w-3 h-3 text-indigo-500" />
-              </a>
+                <span>Open Customer Web Portal</span>
+              </button>
               <button
                 type="button"
                 onClick={() => {
@@ -151,7 +153,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToCustome
                   setTimeout(() => setCopiedLink(false), 2000);
                 }}
                 className="p-2 rounded-lg border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 transition-colors cursor-pointer"
-                title="Copy Customer Sub-Domain Link"
+                title="Copy Customer Sub-Domain Link (MF-SIF-investment-calculator.vercel.app)"
               >
                 {copiedLink ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-indigo-600" />}
               </button>

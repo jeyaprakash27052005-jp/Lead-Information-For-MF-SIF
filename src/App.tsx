@@ -511,7 +511,7 @@ export default function App() {
           updatePortalMode('admin');
           setActiveTab('all-leads');
         }}
-        isCustomerView={portalMode === 'customer' || currentUser.role === 'customer'}
+        isCustomerView={portalMode === 'customer' || currentUser.role === 'customer' || activeTab === 'customer-portal'}
       />
 
       {/* Role Navigation Bar */}
@@ -524,6 +524,11 @@ export default function App() {
             setIsAddLeadModalOpen(true);
           } else {
             setActiveTab(tab);
+            if (tab === 'customer-portal') {
+              updatePortalMode('customer');
+            } else {
+              updatePortalMode('admin');
+            }
           }
         }}
         leadsCount={leads.length}
@@ -532,145 +537,8 @@ export default function App() {
 
       {/* Main Content Area - White Professional Windows Canvas */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* VIEW 1: All Leads Directory ("the all user lead will show all user") */}
-        {activeTab === 'all-leads' && (
-          <LeadsTable
-            regions={regionList}
-            leads={leads}
-            currentUser={currentUser}
-            onViewLead={(lead) => setDetailsModalLead(lead)}
-            onUpdateStatus={(lead) => setStatusModalLead(lead)}
-            onEditLead={(lead) => {
-              setEditingLead(lead);
-              setIsAddLeadModalOpen(true);
-            }}
-            onDeleteLead={handleDeleteLead}
-            onAddNewLead={() => {
-              setEditingLead(null);
-              setIsAddLeadModalOpen(true);
-            }}
-            title="All Leads Directory"
-            subtitle="Universal lead database visible across all user accounts"
-          />
-        )}
-
-        {/* VIEW 2: Assigned Leads (Regional Incharge & Area Incharge) */}
-        {activeTab === 'assigned-leads' && (
-          <LeadsTable
-            regions={regionList}
-            leads={assignedLeads}
-            currentUser={currentUser}
-            onViewLead={(lead) => setDetailsModalLead(lead)}
-            onUpdateStatus={(lead) => setStatusModalLead(lead)}
-            onEditLead={(lead) => {
-              setEditingLead(lead);
-              setIsAddLeadModalOpen(true);
-            }}
-            onDeleteLead={handleDeleteLead}
-            onAddNewLead={() => {
-              setEditingLead(null);
-              setIsAddLeadModalOpen(true);
-            }}
-            title={
-              currentUser.role === 'regional_incharge'
-                ? `Assigned Leads: ${currentUser.region}`
-                : `Assigned Leads: ${currentUser.name}`
-            }
-            subtitle={
-              currentUser.role === 'regional_incharge'
-                ? `Filtering exclusively to leads located within your regional division`
-                : `Your personal and assigned area portfolio`
-            }
-          />
-        )}
-
-        {/* VIEW 3: Lead Status Pipeline Board */}
-        {activeTab === 'lead-status-pipeline' && (
-          <PipelineBoard
-            leads={
-              currentUser.role === 'regional_incharge'
-                ? leads.filter((l) => l.assignedRegion.toLowerCase() === currentUser.region.toLowerCase())
-                : leads
-            }
-            currentUser={currentUser}
-            onViewLead={(lead) => setDetailsModalLead(lead)}
-            onUpdateStatus={(lead) => setStatusModalLead(lead)}
-            onEditLead={(lead) => {
-              setEditingLead(lead);
-              setIsAddLeadModalOpen(true);
-            }}
-            onDeleteLead={handleDeleteLead}
-            onQuickMoveStatus={handleQuickMoveStatus}
-          />
-        )}
-
-        {/* VIEW 4: User Management (Head & Regional Incharge) */}
-        {activeTab === 'user-management' && (
-          <UserManagement
-            regions={regionList}
-            users={users}
-            currentUser={currentUser}
-            onAddUser={handleAddUser}
-            onCreateRegion={handleCreateRegion}
-            onDeleteRegion={handleDeleteRegion}
-            onToggleStatus={handleToggleUserStatus}
-            onDeleteUser={handleDeleteUser}
-            onEditUserProfile={(user) => {
-              setProfileUserToEdit(user);
-              setIsProfileModalOpen(true);
-            }}
-          />
-        )}
-
-        {/* VIEW 5: Regional Performance Metrics (Head & Regional Incharge) */}
-        {activeTab === 'regional-metrics' && (
-          <RegionalMetrics
-            regions={regionList}
-            leads={leads}
-            users={users}
-            currentUser={currentUser}
-          />
-        )}
-
-        {/* VIEW 6: Overall Lead Report & Download Hub (Status-wise and Regional-wise) */}
-        {activeTab === 'lead-reports' && (
-          <LeadReports
-            regions={regionList}
-            leads={leads}
-            currentUser={currentUser}
-            onViewLead={(lead) => setDetailsModalLead(lead)}
-          />
-        )}
-
-        {/* VIEW 7: Mutual Fund Return Calculator (Customer Exclusive) */}
-        {currentUser.role === 'customer' && activeTab === 'mf-calculator' && (
-          <MutualFundCalculator
-            schemes={schemes}
-            onApplyScheme={handleApplySchemeFromCalc}
-          />
-        )}
-
-        {/* VIEW 8: NPS Pension Scheme Return Calculator (Customer Exclusive) */}
-        {currentUser.role === 'customer' && activeTab === 'nps-calculator' && (
-          <NPSCalculator
-            schemes={schemes}
-            onApplyScheme={handleApplySchemeFromCalc}
-          />
-        )}
-
-        {/* VIEW 9: Schemes Management (Add, Edit, Delete catalog for MF & NPS) */}
-        {activeTab === 'scheme-management' && (
-          <SchemeManagement
-            schemes={schemes}
-            currentUser={currentUser}
-            onCreateScheme={handleCreateScheme}
-            onUpdateScheme={handleUpdateScheme}
-            onDeleteScheme={handleDeleteScheme}
-          />
-        )}
-
-        {/* VIEW 10: Customer Web Portal (Customer Exclusive / Sub-domain) */}
-        {(currentUser.role === 'customer' || portalMode === 'customer') && (
+        {/* VIEW: Customer Web Portal (Sub-Domain: MF-SIF-investment-calculator.vercel.app) */}
+        {(currentUser.role === 'customer' || activeTab === 'customer-portal') && (
           <CustomerPortal
             currentUser={currentUser}
             customerLead={
@@ -691,10 +559,136 @@ export default function App() {
             }}
           />
         )}
+
+        {/* ADMIN VIEWS: Only rendered when current user is not a customer and not viewing customer portal */}
+        {currentUser.role !== 'customer' && activeTab !== 'customer-portal' && (
+          <>
+            {/* VIEW 1: All Leads Directory ("the all user lead will show all user") */}
+            {activeTab === 'all-leads' && (
+              <LeadsTable
+                regions={regionList}
+                leads={leads}
+                currentUser={currentUser}
+                onViewLead={(lead) => setDetailsModalLead(lead)}
+                onUpdateStatus={(lead) => setStatusModalLead(lead)}
+                onEditLead={(lead) => {
+                  setEditingLead(lead);
+                  setIsAddLeadModalOpen(true);
+                }}
+                onDeleteLead={handleDeleteLead}
+                onAddNewLead={() => {
+                  setEditingLead(null);
+                  setIsAddLeadModalOpen(true);
+                }}
+                title="All Leads Directory"
+                subtitle="Universal lead database visible across all user accounts"
+              />
+            )}
+
+            {/* VIEW 2: Assigned Leads (Regional Incharge & Area Incharge) */}
+            {activeTab === 'assigned-leads' && (
+              <LeadsTable
+                regions={regionList}
+                leads={assignedLeads}
+                currentUser={currentUser}
+                onViewLead={(lead) => setDetailsModalLead(lead)}
+                onUpdateStatus={(lead) => setStatusModalLead(lead)}
+                onEditLead={(lead) => {
+                  setEditingLead(lead);
+                  setIsAddLeadModalOpen(true);
+                }}
+                onDeleteLead={handleDeleteLead}
+                onAddNewLead={() => {
+                  setEditingLead(null);
+                  setIsAddLeadModalOpen(true);
+                }}
+                title={
+                  currentUser.role === 'regional_incharge'
+                    ? `Assigned Leads: ${currentUser.region}`
+                    : `Assigned Leads: ${currentUser.name}`
+                }
+                subtitle={
+                  currentUser.role === 'regional_incharge'
+                    ? `Filtering exclusively to leads located within your regional division`
+                    : `Your personal and assigned area portfolio`
+                }
+              />
+            )}
+
+            {/* VIEW 3: Lead Status Pipeline Board */}
+            {activeTab === 'lead-status-pipeline' && (
+              <PipelineBoard
+                leads={
+                  currentUser.role === 'regional_incharge'
+                    ? leads.filter((l) => l.assignedRegion.toLowerCase() === currentUser.region.toLowerCase())
+                    : leads
+                }
+                currentUser={currentUser}
+                onViewLead={(lead) => setDetailsModalLead(lead)}
+                onUpdateStatus={(lead) => setStatusModalLead(lead)}
+                onEditLead={(lead) => {
+                  setEditingLead(lead);
+                  setIsAddLeadModalOpen(true);
+                }}
+                onDeleteLead={handleDeleteLead}
+                onQuickMoveStatus={handleQuickMoveStatus}
+              />
+            )}
+
+            {/* VIEW 4: User Management (Head & Regional Incharge) */}
+            {activeTab === 'user-management' && (
+              <UserManagement
+                regions={regionList}
+                users={users}
+                currentUser={currentUser}
+                onAddUser={handleAddUser}
+                onCreateRegion={handleCreateRegion}
+                onDeleteRegion={handleDeleteRegion}
+                onToggleStatus={handleToggleUserStatus}
+                onDeleteUser={handleDeleteUser}
+                onEditUserProfile={(user) => {
+                  setProfileUserToEdit(user);
+                  setIsProfileModalOpen(true);
+                }}
+              />
+            )}
+
+            {/* VIEW 5: Regional Performance Metrics (Head & Regional Incharge) */}
+            {activeTab === 'regional-metrics' && (
+              <RegionalMetrics
+                regions={regionList}
+                leads={leads}
+                users={users}
+                currentUser={currentUser}
+              />
+            )}
+
+            {/* VIEW 6: Overall Lead Report & Download Hub (Status-wise and Regional-wise) */}
+            {activeTab === 'lead-reports' && (
+              <LeadReports
+                regions={regionList}
+                leads={leads}
+                currentUser={currentUser}
+                onViewLead={(lead) => setDetailsModalLead(lead)}
+              />
+            )}
+
+            {/* VIEW 9: Schemes Management (Add, Edit, Delete catalog for MF & NPS) */}
+            {activeTab === 'scheme-management' && (
+              <SchemeManagement
+                schemes={schemes}
+                currentUser={currentUser}
+                onCreateScheme={handleCreateScheme}
+                onUpdateScheme={handleUpdateScheme}
+                onDeleteScheme={handleDeleteScheme}
+              />
+            )}
+          </>
+        )}
       </main>
 
       {/* Floating Action Button for Quick Lead Addition for authorized roles */}
-      {(currentUser.role === 'head' || currentUser.role === 'area_incharge') && (
+      {(currentUser.role === 'head' || currentUser.role === 'area_incharge') && activeTab !== 'customer-portal' && (
         <button
           onClick={() => {
             setEditingLead(null);

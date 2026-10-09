@@ -151,6 +151,14 @@ export const Navigation: React.FC<NavigationProps> = ({
           : 'Manage team incharge IDs, deactivate or delete',
       });
     }
+
+    // Feature: Customer Web Portal (Sub-Domain MF-SIF-investment-calculator.vercel.app)
+    items.push({
+      id: 'customer-portal',
+      label: 'Customer Web Portal',
+      icon: <Globe className="w-4 h-4" />,
+      description: 'Open Customer Sub-Domain Portal (MF-SIF-investment-calculator.vercel.app)',
+    });
   }
 
   return (

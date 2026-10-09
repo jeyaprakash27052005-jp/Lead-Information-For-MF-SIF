@@ -234,16 +234,15 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
               <span>{linkCopied ? 'Sub-Domain Copied!' : 'Share Sub-Domain Link (MF-SIF-investment-calculator.vercel.app)'}</span>
             </button>
 
-            <a
-              href="https://lead-information-mf-sir.vercel.app"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-colors flex items-center gap-1.5"
-              title="Open Admin Web App on Vercel"
+            <button
+              type="button"
+              onClick={onSwitchToAdmin}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+              title="Open Admin Staff App (lead-information-mf-sir.vercel.app)"
             >
               <ExternalLink className="w-3.5 h-3.5 text-indigo-600" />
               <span>Admin App (lead-information-mf-sir.vercel.app)</span>
-            </a>
+            </button>
 
             <button
               type="button"
@@ -520,16 +519,15 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
             <span>{linkCopied ? 'Sub-Domain Copied!' : 'Copy Link (MF-SIF-investment-calculator.vercel.app)'}</span>
           </button>
 
-          <a
-            href="https://lead-information-mf-sir.vercel.app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 transition-colors flex items-center gap-1.5 shadow-md"
+          <button
+            type="button"
+            onClick={onSwitchToAdmin}
+            className="px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 transition-colors flex items-center gap-1.5 shadow-md cursor-pointer"
             title="Open Staff Admin Portal: lead-information-mf-sir.vercel.app"
           >
             <ExternalLink className="w-3.5 h-3.5" />
             <span>Admin App (lead-information-mf-sir.vercel.app)</span>
-          </a>
+          </button>
         </div>
       </div>
 
