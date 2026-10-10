@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { InvestmentScheme, SchemeType, User } from '../types';
 import { ConfirmModal } from './ConfirmModal';
+import { SchemeImportModal } from './SchemeImportModal';
 import {
   Layers,
   Plus,
@@ -14,7 +15,8 @@ import {
   IndianRupee,
   Percent,
   X,
-  Sparkles
+  Sparkles,
+  FileSpreadsheet
 } from 'lucide-react';
 import { formatInr } from '../utils/currency';
 
@@ -38,6 +40,7 @@ export const SchemeManagement: React.FC<SchemeManagementProps> = ({
   const [activeTab, setActiveTab] = useState<'all' | 'mutual_fund' | 'nps'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
   const [editingScheme, setEditingScheme] = useState<InvestmentScheme | null>(null);
   const [pendingDelete, setPendingDelete] = useState<InvestmentScheme | null>(null);
   const [saving, setSaving] = useState(false);
@@ -152,15 +155,25 @@ export const SchemeManagement: React.FC<SchemeManagementProps> = ({
           </p>
         </div>
 
-        {/* Action Button */}
-        <button
-          type="button"
-          onClick={openCreateModal}
-          className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add New Scheme</span>
-        </button>
+        {/* Action Buttons */}
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => setIsImportOpen(true)}
+            className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer"
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            <span>Import from Excel</span>
+          </button>
+          <button
+            type="button"
+            onClick={openCreateModal}
+            className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add New Scheme</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}
@@ -533,6 +546,15 @@ export const SchemeManagement: React.FC<SchemeManagementProps> = ({
         }}
         onCancel={() => setPendingDelete(null)}
       />
+
+      {isImportOpen && (
+        <SchemeImportModal
+          schemes={schemes}
+          onCreateScheme={onCreateScheme}
+          onUpdateScheme={onUpdateScheme}
+          onClose={() => setIsImportOpen(false)}
+        />
+      )}
     </div>
   );
 };
