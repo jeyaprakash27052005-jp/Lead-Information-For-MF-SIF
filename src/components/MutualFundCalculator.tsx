@@ -32,36 +32,22 @@ export const MutualFundCalculator: React.FC<MutualFundCalculatorProps> = ({
   const mfSchemes = schemes.filter((s) => s.type === 'mutual_fund');
 
   const [calcType, setCalcType] = useState<'sip' | 'lumpsum'>('sip');
-  const [selectedSchemeId, setSelectedSchemeId] = useState<string>(
-    mfSchemes[0]?.id || 'custom'
-  );
-  const [customSchemeName, setCustomSchemeName] = useState('');
+  const [selectedSchemeId, setSelectedSchemeId] = useState<string>(mfSchemes[0]?.id || '');
   const [monthlyInvestment, setMonthlyInvestment] = useState<number>(5000);
   const [lumpsumAmount, setLumpsumAmount] = useState<number>(100000);
-  const [expectedRate, setExpectedRate] = useState<number>(14);
   const [tenureYears, setTenureYears] = useState<number>(10);
   const [annualStepUp, setAnnualStepUp] = useState<number>(0);
   const [showViewModal, setShowViewModal] = useState(false);
   const [pdfGenerating, setPdfGenerating] = useState(false);
 
-  // Sync rate when scheme is picked
+  // The expected return is fixed by the admin (Schemes Management) and cannot be changed here
+  const selectedScheme = mfSchemes.find((s) => s.id === selectedSchemeId) || mfSchemes[0];
+  const expectedRate = selectedScheme?.expectedReturnRate ?? 0;
+  const activeSchemeName = selectedScheme?.name || 'Selected Mutual Fund Scheme';
+
   const handleSchemeChange = (schemeId: string) => {
     setSelectedSchemeId(schemeId);
-    if (schemeId !== 'custom') {
-      const found = mfSchemes.find((s) => s.id === schemeId);
-      if (found) {
-        setExpectedRate(found.expectedReturnRate);
-      }
-    }
   };
-
-  const activeSchemeName = useMemo(() => {
-    if (selectedSchemeId === 'custom') {
-      return customSchemeName.trim() || 'Custom Equity Mutual Fund';
-    }
-    const found = mfSchemes.find((s) => s.id === selectedSchemeId);
-    return found?.name || 'Selected Mutual Fund Scheme';
-  }, [selectedSchemeId, customSchemeName, mfSchemes]);
 
   // Calculations
   const result = useMemo(() => {
@@ -185,7 +171,7 @@ export const MutualFundCalculator: React.FC<MutualFundCalculatorProps> = ({
               <span className="text-[11px] text-indigo-600 font-semibold">Active Benchmark</span>
             </label>
             <select
-              value={selectedSchemeId}
+              value={selectedScheme?.id || ''}
               onChange={(e) => handleSchemeChange(e.target.value)}
               className="w-full px-3 py-2.5 text-xs font-semibold border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500 bg-white"
             >
@@ -194,20 +180,8 @@ export const MutualFundCalculator: React.FC<MutualFundCalculatorProps> = ({
                   {s.name} ({s.category} • ~{s.expectedReturnRate}%)
                 </option>
               ))}
-              <option value="custom">+ Custom Scheme Name</option>
             </select>
 
-            {selectedSchemeId === 'custom' && (
-              <div className="mt-2.5">
-                <input
-                  type="text"
-                  value={customSchemeName}
-                  onChange={(e) => setCustomSchemeName(e.target.value)}
-                  placeholder="Enter custom mutual fund scheme name..."
-                  className="w-full px-3 py-2 text-xs border border-indigo-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500 bg-indigo-50/20"
-                />
-              </div>
-            )}
           </div>
 
           {/* Investment Amount Input */}
@@ -262,56 +236,41 @@ export const MutualFundCalculator: React.FC<MutualFundCalculatorProps> = ({
             </div>
           </div>
 
-          {/* Expected Annual Return Rate Slider & Input */}
+          {/* Investment Tenure (Years) - pick one option from the list */}
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                Expected Annual Return Rate (% p.a.)
-              </label>
-              <div className="flex items-center gap-1 bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md font-bold text-xs border border-indigo-200">
-                <Percent className="w-3 h-3" />
-                <span>{expectedRate}%</span>
-              </div>
-            </div>
-            <input
-              type="range"
-              min="4"
-              max="30"
-              step="0.5"
-              value={expectedRate}
-              onChange={(e) => setExpectedRate(parseFloat(e.target.value))}
-              className="w-full accent-indigo-600 h-2 bg-slate-200 rounded-lg cursor-pointer mb-2"
-            />
-            <div className="flex justify-between text-[10px] text-slate-400 font-semibold">
-              <span>Debt/Conservative (7-8%)</span>
-              <span>Balanced (11-13%)</span>
-              <span>Aggressive Equity (15-18%)</span>
-            </div>
-          </div>
-
-          {/* Investment Tenure (Years) */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                 Investment Time Horizon (Years)
               </label>
               <span className="font-bold text-xs text-indigo-600">{tenureYears} Years</span>
             </div>
-            <input
-              type="range"
-              min="1"
-              max="35"
-              step="1"
-              value={tenureYears}
-              onChange={(e) => setTenureYears(parseInt(e.target.value, 10))}
-              className="w-full accent-indigo-600 h-2 bg-slate-200 rounded-lg cursor-pointer mb-2"
-            />
-            <div className="flex justify-between text-[10px] text-slate-400 font-semibold">
-              <span>1 Yr</span>
-              <span>5 Yrs</span>
-              <span>10 Yrs</span>
-              <span>20 Yrs</span>
-              <span>35 Yrs</span>
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2" role="radiogroup" aria-label="Investment time horizon in years">
+              {[1, 2, 3, 5, 7, 10, 12, 15, 20, 25, 30].map((yrs) => {
+                const checked = tenureYears === yrs;
+                return (
+                  <button
+                    key={yrs}
+                    type="button"
+                    role="radio"
+                    aria-checked={checked}
+                    onClick={() => setTenureYears(yrs)}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-bold transition-colors cursor-pointer ${
+                      checked
+                        ? 'bg-indigo-50 border-indigo-500 text-indigo-800'
+                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    <span
+                      className={`w-4 h-4 rounded border flex items-center justify-center text-[10px] leading-none ${
+                        checked ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 text-transparent'
+                      }`}
+                    >
+                      ✓
+                    </span>
+                    <span>{yrs} {yrs === 1 ? 'Year' : 'Years'}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
