@@ -379,6 +379,7 @@ export default function App() {
     setUsers((prev) => [res.user, ...prev]);
     setCurrentUser(res.user);
     setPortalMode('customer');
+    setActiveTab('customer-portal');
     showFeedback(`Investor registered! User ID & Password: ${res.credentials.userId}`);
     return res;
   };
@@ -546,26 +547,28 @@ export default function App() {
         isCustomerView={portalMode === 'customer' || currentUser.role === 'customer' || activeTab === 'customer-portal'}
       />
 
-      {/* Role Navigation Bar */}
-      <Navigation
-        currentUser={currentUser}
-        activeTab={activeTab}
-        onTabChange={(tab) => {
-          if (tab === 'add-lead') {
-            setEditingLead(null);
-            setIsAddLeadModalOpen(true);
-          } else {
-            setActiveTab(tab);
-            if (tab === 'customer-portal') {
-              updatePortalMode('customer');
+      {/* Role Navigation Bar (customers use the tab bar inside their own dashboard) */}
+      {currentUser.role !== 'customer' && (
+        <Navigation
+          currentUser={currentUser}
+          activeTab={activeTab}
+          onTabChange={(tab) => {
+            if (tab === 'add-lead') {
+              setEditingLead(null);
+              setIsAddLeadModalOpen(true);
             } else {
-              updatePortalMode('admin');
+              setActiveTab(tab);
+              if (tab === 'customer-portal') {
+                updatePortalMode('customer');
+              } else {
+                updatePortalMode('admin');
+              }
             }
-          }
-        }}
-        leadsCount={leads.length}
-        assignedCount={assignedLeads.length}
-      />
+          }}
+          leadsCount={leads.length}
+          assignedCount={assignedLeads.length}
+        />
+      )}
 
       {/* Main Content Area - White Professional Windows Canvas */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
