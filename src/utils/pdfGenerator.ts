@@ -95,14 +95,10 @@ export function generateMutualFundPDF(data: MutualFundCalculationReport, action:
 
   if (data.calcType === 'sip') {
     doc.text(`Monthly Contribution: ${formatInr(data.monthlyInvestment)}`, 110, 58);
-    if (data.annualStepUp && data.annualStepUp > 0) {
-      doc.text(`Annual Step-up: +${data.annualStepUp}% every year`, 110, 65);
-    } else {
-      doc.text(`Annual Step-up: 0% (Standard SIP)`, 110, 65);
-    }
+    doc.text(`Formula: M = S x [((1+i)^n - 1) / i] x (1+i)`, 110, 65);
   } else {
     doc.text(`Lumpsum Investment: ${formatInr(data.lumpsumAmount)}`, 110, 58);
-    doc.text(`Investment Duration: ${data.tenureYears} Years`, 110, 65);
+    doc.text(`Formula: M = P x (1+R)^N  |  Duration: ${data.tenureYears} Years`, 110, 65);
   }
 
   // 3. Highlighted Result Cards (Total Corpus, Invested, Wealth Gain)

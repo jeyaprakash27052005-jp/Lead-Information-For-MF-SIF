@@ -36,7 +36,6 @@ export const MutualFundCalculator: React.FC<MutualFundCalculatorProps> = ({
   const [monthlyInvestment, setMonthlyInvestment] = useState<number>(5000);
   const [lumpsumAmount, setLumpsumAmount] = useState<number>(100000);
   const [tenureYears, setTenureYears] = useState<number>(10);
-  const [annualStepUp, setAnnualStepUp] = useState<number>(0);
   const [showViewModal, setShowViewModal] = useState(false);
   const [pdfGenerating, setPdfGenerating] = useState(false);
 
@@ -49,20 +48,29 @@ export const MutualFundCalculator: React.FC<MutualFundCalculatorProps> = ({
     setSelectedSchemeId(schemeId);
   };
 
-  // Calculations
+  // Calculations (standard formulas)
+  //  SIP:      M = S x [ ((1 + i)^n - 1) / i ] x (1 + i)
+  //            S = monthly SIP amount, i = annual return / 12 / 100, n = years x 12
+  //  Lumpsum:  M = P x (1 + R)^N
+  //            P = principal, R = annual return as a decimal, N = years
+  const monthlyRate = expectedRate / 12 / 100;
+  const totalMonths = tenureYears * 12;
+  const annualRateDecimal = expectedRate / 100;
+
   const result = useMemo(() => {
-    const rateMonthly = expectedRate / 100 / 12;
-    const totalMonths = tenureYears * 12;
+    const sipFutureValue = (monthlyAmount: number, months: number) =>
+      monthlyRate === 0
+        ? monthlyAmount * months
+        : monthlyAmount * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate) * (1 + monthlyRate);
+
+    const yearlyData = [];
 
     if (calcType === 'lumpsum') {
       const principal = lumpsumAmount;
-      const maturity = principal * Math.pow(1 + expectedRate / 100, tenureYears);
-      const profit = maturity - principal;
+      const maturity = principal * Math.pow(1 + annualRateDecimal, tenureYears);
 
-      // Yearly breakdown
-      const yearlyData = [];
       for (let y = 1; y <= tenureYears; y++) {
-        const yValue = principal * Math.pow(1 + expectedRate / 100, y);
+        const yValue = principal * Math.pow(1 + annualRateDecimal, y);
         yearlyData.push({
           year: y,
           invested: principal,
@@ -71,48 +79,25 @@ export const MutualFundCalculator: React.FC<MutualFundCalculatorProps> = ({
         });
       }
 
-      return {
-        invested: principal,
-        gain: profit,
-        maturity,
-        yearlyData,
-      };
-    } else {
-      // SIP with optional step-up
-      let totalInvested = 0;
-      let maturity = 0;
-      let currentMonthly = monthlyInvestment;
-      const yearlyData = [];
-
-      for (let y = 1; y <= tenureYears; y++) {
-        for (let m = 1; m <= 12; m++) {
-          totalInvested += currentMonthly;
-          // Remaining months to compound
-          const monthsRemaining = totalMonths - ((y - 1) * 12 + m) + 1;
-          maturity += currentMonthly * Math.pow(1 + rateMonthly, monthsRemaining);
-        }
-
-        yearlyData.push({
-          year: y,
-          invested: totalInvested,
-          gain: Math.max(0, maturity - totalInvested),
-          total: maturity,
-        });
-
-        if (annualStepUp > 0) {
-          currentMonthly = Math.round(currentMonthly * (1 + annualStepUp / 100));
-        }
-      }
-
-      const gain = Math.max(0, maturity - totalInvested);
-      return {
-        invested: totalInvested,
-        gain,
-        maturity,
-        yearlyData,
-      };
+      return { invested: principal, gain: maturity - principal, maturity, yearlyData };
     }
-  }, [calcType, monthlyInvestment, lumpsumAmount, expectedRate, tenureYears, annualStepUp]);
+
+    const invested = monthlyInvestment * totalMonths;
+    const maturity = sipFutureValue(monthlyInvestment, totalMonths);
+
+    for (let y = 1; y <= tenureYears; y++) {
+      const investedSoFar = monthlyInvestment * y * 12;
+      const value = sipFutureValue(monthlyInvestment, y * 12);
+      yearlyData.push({
+        year: y,
+        invested: investedSoFar,
+        gain: value - investedSoFar,
+        total: value,
+      });
+    }
+
+    return { invested, gain: maturity - invested, maturity, yearlyData };
+  }, [calcType, monthlyInvestment, lumpsumAmount, monthlyRate, annualRateDecimal, totalMonths, tenureYears]);
 
   const investedPercent = result.maturity > 0 ? (result.invested / result.maturity) * 100 : 50;
   const gainPercent = result.maturity > 0 ? (result.gain / result.maturity) * 100 : 50;
@@ -299,7 +284,6 @@ export const MutualFundCalculator: React.FC<MutualFundCalculatorProps> = ({
                     lumpsumAmount,
                     expectedRate,
                     tenureYears,
-                    annualStepUp,
                     invested: result.invested,
                     gain: result.gain,
                     maturity: result.maturity,
@@ -525,6 +509,32 @@ export const MutualFundCalculator: React.FC<MutualFundCalculatorProps> = ({
                 </div>
               </div>
 
+              {/* Formula Used */}
+              <div className="p-4 rounded-xl bg-indigo-50/60 border border-indigo-200 space-y-1.5">
+                <span className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider block">
+                  Formula Used
+                </span>
+                {calcType === 'sip' ? (
+                  <>
+                    <p className="font-mono text-[11px] font-bold text-slate-900">
+                      M = S × [ ((1 + i)^n − 1) / i ] × (1 + i)
+                    </p>
+                    <p className="text-[11px] text-slate-600">
+                      S = {formatInr(monthlyInvestment)} (monthly SIP) • i = {expectedRate} / 12 / 100 ={' '}
+                      {monthlyRate.toFixed(6)} • n = {tenureYears} × 12 = {totalMonths} installments
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-mono text-[11px] font-bold text-slate-900">M = P × (1 + R)^N</p>
+                    <p className="text-[11px] text-slate-600">
+                      P = {formatInr(lumpsumAmount)} (principal) • R = {annualRateDecimal} ({expectedRate}% p.a.) • N ={' '}
+                      {tenureYears} years
+                    </p>
+                  </>
+                )}
+              </div>
+
               {/* Corpus Summary Banner */}
               <div className="p-5 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-800 text-white shadow-md">
                 <span className="text-[11px] font-semibold text-emerald-100 uppercase tracking-wider block">
@@ -596,8 +606,7 @@ export const MutualFundCalculator: React.FC<MutualFundCalculatorProps> = ({
                       lumpsumAmount,
                       expectedRate,
                       tenureYears,
-                      annualStepUp,
-                      invested: result.invested,
+                        invested: result.invested,
                       gain: result.gain,
                       maturity: result.maturity,
                       yearlyData: result.yearlyData,
