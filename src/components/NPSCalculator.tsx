@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { InvestmentScheme } from '../types';
 import {
   Shield,
@@ -29,9 +29,7 @@ export const NPSCalculator: React.FC<NPSCalculatorProps> = ({
 }) => {
   const npsSchemes = schemes.filter((s) => s.type === 'nps');
 
-  const [selectedSchemeId, setSelectedSchemeId] = useState<string>(
-    npsSchemes[0]?.id || 'custom'
-  );
+  const [selectedSchemeId, setSelectedSchemeId] = useState<string>(npsSchemes[0]?.id || 'custom');
   const [customSchemeName, setCustomSchemeName] = useState('');
   const [currentAge, setCurrentAge] = useState<number>(30);
   const [retirementAge, setRetirementAge] = useState<number>(60);
@@ -41,6 +39,18 @@ export const NPSCalculator: React.FC<NPSCalculatorProps> = ({
   const [annuityReturnRate, setAnnuityReturnRate] = useState<number>(6.5);
   const [showViewModal, setShowViewModal] = useState(false);
   const [pdfGenerating, setPdfGenerating] = useState(false);
+
+  // Keep the scheme selection and its benchmark return in step with the scheme list
+  // (the list can still be empty when the calculator first opens)
+  useEffect(() => {
+    if (npsSchemes.length === 0) return;
+    const current = npsSchemes.find((x) => x.id === selectedSchemeId);
+    if (selectedSchemeId === 'custom' && customSchemeName.trim()) return;
+    const target = current || npsSchemes[0];
+    if (target.id !== selectedSchemeId) setSelectedSchemeId(target.id);
+    setExpectedReturnRate(target.expectedReturnRate);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [npsSchemes.map((x) => `${x.id}:${x.expectedReturnRate}`).join('|'), selectedSchemeId]);
 
   const handleSchemeChange = (schemeId: string) => {
     setSelectedSchemeId(schemeId);
@@ -62,27 +72,28 @@ export const NPSCalculator: React.FC<NPSCalculatorProps> = ({
 
   // Calculations
   const result = useMemo(() => {
+    // A = P (1 + r/n)^(nt) applied to every monthly contribution P and summed:
+    // A = P x [ ((1 + r/n)^(nt) - 1) / (r/n) ] x (1 + r/n)
+    // r = annual return (decimal), n = 12 (monthly compounding), t = retirement age - current age
     const yearsToInvest = Math.max(1, retirementAge - currentAge);
-    const months = yearsToInvest * 12;
-    const rateMonthly = expectedReturnRate / 100 / 12;
+    const n = 12;
+    const r = expectedReturnRate / 100;
+    const i = r / n;
+    const corpusAfter = (months: number) =>
+      i === 0
+        ? monthlyContribution * months
+        : monthlyContribution * ((Math.pow(1 + i, months) - 1) / i) * (1 + i);
 
-    let totalInvested = 0;
-    let accumulatedCorpus = 0;
     const yearlyBreakdown = [];
-
     for (let y = 1; y <= yearsToInvest; y++) {
-      for (let m = 1; m <= 12; m++) {
-        totalInvested += monthlyContribution;
-        const remainingMonths = months - ((y - 1) * 12 + m) + 1;
-        accumulatedCorpus += monthlyContribution * Math.pow(1 + rateMonthly, remainingMonths);
-      }
-
       yearlyBreakdown.push({
         age: currentAge + y,
-        invested: totalInvested,
-        corpus: accumulatedCorpus,
+        invested: monthlyContribution * n * y,
+        corpus: corpusAfter(n * y),
       });
     }
+    const totalInvested = monthlyContribution * n * yearsToInvest;
+    const accumulatedCorpus = corpusAfter(n * yearsToInvest);
 
     const lumpSumPercent = 100 - annuityPercent;
     const lumpSumCorpus = (accumulatedCorpus * lumpSumPercent) / 100;
@@ -541,6 +552,23 @@ export const NPSCalculator: React.FC<NPSCalculatorProps> = ({
                     {annuityPercent}% ({annuityReturnRate}%)
                   </span>
                 </div>
+              </div>
+
+              {/* Formula Used */}
+              <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-200 space-y-1.5">
+                <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider block">
+                  Formula Used
+                </span>
+                <p className="font-mono text-[11px] font-bold text-slate-900">
+                  A = P × (1 + r/n)^(nt) &nbsp;— each monthly contribution compounds and is summed:
+                </p>
+                <p className="font-mono text-[11px] font-bold text-slate-900">
+                  A = P × [ ((1 + r/n)^(nt) − 1) / (r/n) ] × (1 + r/n)
+                </p>
+                <p className="text-[11px] text-slate-600">
+                  P = {formatInr(monthlyContribution)} per month • r = {expectedReturnRate / 100} ({expectedReturnRate}% p.a.) • n = 12 (monthly) • t ={' '}
+                  {result.yearsToInvest} years ({retirementAge} − {currentAge})
+                </p>
               </div>
 
               {/* Pension & Corpus Banner */}

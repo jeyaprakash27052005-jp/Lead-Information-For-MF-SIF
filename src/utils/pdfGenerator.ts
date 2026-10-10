@@ -259,6 +259,7 @@ export function generateNPSPDF(data: NPSCalculationReport, action: 'download' | 
   doc.text(`Monthly Contribution: ${formatInr(data.monthlyContribution)}`, 110, 58);
   doc.text(`Expected Growth Rate: ${data.expectedReturnRate}% p.a.`, 110, 65);
   doc.text(`Annuity Allocation: ${data.annuityPercent}% (at ${data.annuityReturnRate}% return)`, 110, 72);
+  doc.text('Formula: A = P x (1 + r/n)^(nt), n = 12 (monthly), t = retirement age - current age', 20, 76);
 
   // 3. Highlight Result Cards
   // Total Accumulated Corpus

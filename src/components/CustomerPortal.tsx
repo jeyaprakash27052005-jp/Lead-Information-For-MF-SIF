@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 import { User, Lead, InvestmentScheme } from '../types';
 import { MutualFundCalculator } from './MutualFundCalculator';
 import { NPSCalculator } from './NPSCalculator';
@@ -49,6 +49,8 @@ interface CustomerPortalProps {
   onSwitchToAdmin: () => void;
   initialTab?: 'register' | 'login';
   onBackToHome?: () => void;
+  activeView?: 'dashboard' | 'mf-calc' | 'nps-calc' | 'schemes';
+  onViewChange?: (view: 'dashboard' | 'mf-calc' | 'nps-calc' | 'schemes') => void;
 }
 
 export const CustomerPortal: React.FC<CustomerPortalProps> = ({
@@ -62,9 +64,21 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
   onSwitchToAdmin,
   initialTab = 'register',
   onBackToHome,
+  activeView,
+  onViewChange,
 }) => {
   const [activeTab, setActiveTab] = useState<'register' | 'login' | 'mf-calc' | 'nps-calc' | 'schemes'>(initialTab);
-  const [customerActiveView, setCustomerActiveView] = useState<'dashboard' | 'mf-calc' | 'nps-calc' | 'schemes'>('dashboard');
+  const [customerActiveView, setCustomerActiveViewState] = useState<'dashboard' | 'mf-calc' | 'nps-calc' | 'schemes'>(activeView || 'dashboard');
+
+  // Top navigation (in the app shell) and the tab buttons below it control the same view
+  useEffect(() => {
+    if (activeView) setCustomerActiveViewState(activeView);
+  }, [activeView]);
+
+  const setCustomerActiveView = (view: 'dashboard' | 'mf-calc' | 'nps-calc' | 'schemes') => {
+    setCustomerActiveViewState(view);
+    onViewChange?.(view);
+  };
 
   // Customer Registration Form State
   const [name, setName] = useState('');

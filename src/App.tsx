@@ -387,6 +387,7 @@ export default function App() {
     const res = await apiService.login(username, password || username);
     setCurrentUser(res.user);
     setPortalMode('customer');
+    setActiveTab('customer-portal');
     showFeedback(`Welcome, ${res.user.name}`);
   };
 
@@ -588,6 +589,29 @@ export default function App() {
               updatePortalMode('admin');
               setActiveTab('all-leads');
             }}
+            activeView={
+              currentUser.role !== 'customer'
+                ? undefined
+                : activeTab === 'mf-calculator'
+                ? 'mf-calc'
+                : activeTab === 'nps-calculator'
+                ? 'nps-calc'
+                : activeTab === 'scheme-management'
+                ? 'schemes'
+                : 'dashboard'
+            }
+            onViewChange={(view) =>
+              currentUser.role === 'customer' &&
+              setActiveTab(
+                view === 'mf-calc'
+                  ? 'mf-calculator'
+                  : view === 'nps-calc'
+                  ? 'nps-calculator'
+                  : view === 'schemes'
+                  ? 'scheme-management'
+                  : 'customer-portal'
+              )
+            }
           />
         )}
 
