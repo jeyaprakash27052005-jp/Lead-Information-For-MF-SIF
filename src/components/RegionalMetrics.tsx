@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { SelectFilter, DateRangeFilter, ClearFilters, isoDay } from './FilterControls';
 import { Lead, User } from '../types';
 import {
   BarChart3,
@@ -20,12 +21,20 @@ interface RegionalMetricsProps {
 }
 
 export const RegionalMetrics: React.FC<RegionalMetricsProps> = ({
-  leads,
+  leads: allLeads,
   users,
   currentUser,
   regions: allRegions = DEFAULT_REGIONS,
 }) => {
   const isHead = currentUser.role === 'head';
+  const [regionFilter, setRegionFilter] = useState('ALL');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const leads = allLeads.filter(
+    (l) =>
+      (!dateFrom || (isoDay(l.createdAt) && isoDay(l.createdAt) >= dateFrom)) &&
+      (!dateTo || (isoDay(l.createdAt) && isoDay(l.createdAt) <= dateTo))
+  );
 
   // Determine which regions to display according to incharge profile mention
   
@@ -35,7 +44,8 @@ export const RegionalMetrics: React.FC<RegionalMetricsProps> = ({
     : allRegions.filter((r) => r.toLowerCase() === currentUser.region.toLowerCase() || currentUser.region.includes(r.split(' ')[0]));
 
   // If none matched, fallback to incharge's exact profile region
-  const displayedRegions = targetRegions.length > 0 ? targetRegions : [currentUser.region];
+  const availableRegions = targetRegions.length > 0 ? targetRegions : [currentUser.region];
+  const displayedRegions = regionFilter === 'ALL' ? availableRegions : availableRegions.filter((r) => r === regionFilter);
 
   // Compute metrics per region
   const regionalData = displayedRegions.map((region) => {
@@ -84,7 +94,24 @@ export const RegionalMetrics: React.FC<RegionalMetricsProps> = ({
                 : `Performance metrics for ${currentUser.region} (According to your Incharge Profile)`}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {availableRegions.length > 1 && (
+              <SelectFilter
+                value={regionFilter}
+                onChange={setRegionFilter}
+                allLabel="All Regions"
+                options={availableRegions.map((r) => ({ value: r, label: r }))}
+              />
+            )}
+            <DateRangeFilter from={dateFrom} to={dateTo} onFrom={setDateFrom} onTo={setDateTo} />
+            <ClearFilters
+              show={regionFilter !== 'ALL' || dateFrom !== '' || dateTo !== ''}
+              onClick={() => {
+                setRegionFilter('ALL');
+                setDateFrom('');
+                setDateTo('');
+              }}
+            />
             <span className="text-xs font-semibold px-3 py-1 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center gap-1.5">
               <Building2 className="w-3.5 h-3.5" />
               Profile Region: {currentUser.region}

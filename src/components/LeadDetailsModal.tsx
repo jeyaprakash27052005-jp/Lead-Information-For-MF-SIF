@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatDateTime } from '../utils/dateTime';
 import { Lead } from '../types';
 import {
   X,
@@ -248,11 +249,11 @@ export const LeadDetailsModal: React.FC<LeadDetailsModalProps> = ({
           <div className="flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-slate-100">
             <span className="flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5" />
-              Created: {new Date(lead.createdAt).toLocaleDateString()}
+              Created: {formatDateTime(lead.createdAt)}
             </span>
             <span className="flex items-center gap-1">
               <Clock className="w-3.5 h-3.5" />
-              Updated: {new Date(lead.updatedAt).toLocaleDateString()}
+              Updated: {formatDateTime(lead.updatedAt)}
             </span>
           </div>
         </div>

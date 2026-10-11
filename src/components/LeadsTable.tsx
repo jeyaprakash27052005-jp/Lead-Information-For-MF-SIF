@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { SelectFilter, DateRangeFilter, ClearFilters, isoDay } from './FilterControls';
+
 import { Lead, User } from '../types';
 import { ConfirmModal } from './ConfirmModal';
 import {
@@ -16,12 +18,14 @@ import {
   ShieldCheck,
   PlusCircle,
   Building2,
-  Phone
+  Phone,
+  Clock
 } from 'lucide-react';
 import { DEFAULT_REGIONS } from '../utils/regions';
 import { formatInr, formatInrCompact, formatInrNumber } from '../utils/currency';
 import { formatIndianMobile } from '../utils/validation';
 import { ReadinessChips } from './ReadinessChips';
+import { formatDateTime } from '../utils/dateTime';
 
 interface LeadsTableProps {
   leads: Lead[];
@@ -51,6 +55,9 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [regionFilter, setRegionFilter] = useState('ALL');
+  const [addedByFilter, setAddedByFilter] = useState('ALL');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
@@ -95,7 +102,11 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
     const matchesStatus = statusFilter === 'ALL' || lead.status === statusFilter;
     const matchesRegion = regionFilter === 'ALL' || lead.assignedRegion === regionFilter;
 
-    return matchesSearch && matchesStatus && matchesRegion;
+    const matchesAddedBy = addedByFilter === 'ALL' || lead.addedByName === addedByFilter;
+    const day = isoDay(lead.createdAt);
+    const matchesDate = (!dateFrom || (day && day >= dateFrom)) && (!dateTo || (day && day <= dateTo));
+
+    return matchesSearch && matchesStatus && matchesRegion && matchesAddedBy && matchesDate;
   });
 
   const handleDeleteClick = (id: string, name: string) => {
@@ -174,6 +185,29 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
                 </option>
               ))}
             </select>
+
+            {/* Added By Filter */}
+            <SelectFilter
+              value={addedByFilter}
+              onChange={setAddedByFilter}
+              allLabel="All Officers"
+              options={Array.from(new Set(leads.map((l) => l.addedByName))).sort().map((n) => ({ value: n, label: n }))}
+            />
+
+            {/* Date Range Filter */}
+            <DateRangeFilter from={dateFrom} to={dateTo} onFrom={setDateFrom} onTo={setDateTo} />
+
+            <ClearFilters
+              show={searchTerm !== '' || statusFilter !== 'ALL' || regionFilter !== 'ALL' || addedByFilter !== 'ALL' || dateFrom !== '' || dateTo !== ''}
+              onClick={() => {
+                setSearchTerm('');
+                setStatusFilter('ALL');
+                setRegionFilter('ALL');
+                setAddedByFilter('ALL');
+                setDateFrom('');
+                setDateTo('');
+              }}
+            />
 
             {/* Add Lead Button */}
             {canAdd && onAddNewLead && (
@@ -315,6 +349,10 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
                         <div className="text-[11px] font-medium text-indigo-700 flex items-center gap-1 mt-0.5">
                           <Building2 className="w-3 h-3 text-indigo-400" />
                           <span>{lead.addedByDesignation}</span>
+                        </div>
+                        <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5" title="Date and time this lead was added">
+                          <Clock className="w-3 h-3 text-slate-400" />
+                          <span>Added {formatDateTime(lead.createdAt)}</span>
                         </div>
                       </td>
 

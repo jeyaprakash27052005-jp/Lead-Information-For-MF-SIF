@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { formatDateTime } from '../utils/dateTime';
+import { SearchBox, SelectFilter, DateRangeFilter, ClearFilters, isoDay } from './FilterControls';
+
 import { Lead, LeadStatus, User } from '../types';
 import {
   Download,
@@ -32,6 +35,9 @@ export const LeadReports: React.FC<LeadReportsProps> = ({
 }) => {
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [selectedRegion, setSelectedRegion] = useState<string>('ALL');
+  const [reportSearch, setReportSearch] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   const statuses: LeadStatus[] = ['Pending', 'Ready to Invest', 'Process', 'Other'];
 
@@ -39,7 +45,16 @@ export const LeadReports: React.FC<LeadReportsProps> = ({
   const filteredLeads = leads.filter((l) => {
     const matchesStatus = selectedStatus === 'ALL' || l.status === selectedStatus;
     const matchesRegion = selectedRegion === 'ALL' || l.assignedRegion === selectedRegion;
-    return matchesStatus && matchesRegion;
+    const q = reportSearch.trim().toLowerCase();
+    const matchesSearch =
+      !q ||
+      l.name.toLowerCase().includes(q) ||
+      l.occupation.toLowerCase().includes(q) ||
+      l.addedByName.toLowerCase().includes(q) ||
+      (l.mobile || '').includes(q.replace(/[\s+-]/g, ''));
+    const day = isoDay(l.createdAt);
+    const matchesDate = (!dateFrom || (day && day >= dateFrom)) && (!dateTo || (day && day <= dateTo));
+    return matchesStatus && matchesRegion && matchesSearch && matchesDate;
   });
 
   // Helper to generate and download CSV
@@ -65,7 +80,7 @@ export const LeadReports: React.FC<LeadReportsProps> = ({
       'Added By Designation',
       'Assigned Region',
       'Assigned Team Member',
-      'Created Date',
+      'Created Date & Time',
     ];
 
     const rows = leadsToExport.map((l) => [
@@ -89,7 +104,7 @@ export const LeadReports: React.FC<LeadReportsProps> = ({
       `"${l.addedByDesignation.replace(/"/g, '""')}"`,
       `"${l.assignedRegion}"`,
       `"${(l.assignedTeamMember || '').replace(/"/g, '""')}"`,
-      `"${new Date(l.createdAt).toLocaleDateString()}"`,
+      `"${formatDateTime(l.createdAt)}"`,
     ]);
 
     const csvContent =
@@ -248,6 +263,18 @@ export const LeadReports: React.FC<LeadReportsProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <SearchBox value={reportSearch} onChange={setReportSearch} placeholder="Search name, mobile, officer..." />
+            <DateRangeFilter from={dateFrom} to={dateTo} onFrom={setDateFrom} onTo={setDateTo} />
+            <ClearFilters
+              show={reportSearch !== '' || dateFrom !== '' || dateTo !== '' || selectedStatus !== 'ALL' || selectedRegion !== 'ALL'}
+              onClick={() => {
+                setReportSearch('');
+                setDateFrom('');
+                setDateTo('');
+                setSelectedStatus('ALL');
+                setSelectedRegion('ALL');
+              }}
+            />
             {/* Status Filter */}
             <select
               value={selectedStatus}
@@ -364,7 +391,7 @@ export const LeadReports: React.FC<LeadReportsProps> = ({
                     <td className="py-3.5 px-4 text-slate-400 text-[11px]">
                       <span className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
-                        {new Date(lead.createdAt).toLocaleDateString()}
+                        {formatDateTime(lead.createdAt)}
                       </span>
                     </td>
                   </tr>

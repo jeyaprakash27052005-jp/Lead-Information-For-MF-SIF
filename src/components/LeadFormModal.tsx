@@ -32,6 +32,10 @@ interface LeadFormModalProps {
   users: User[];
   initialData?: Lead | null;
   regions?: string[];
+  /** 'page' renders the form inline as a normal admin page instead of a pop-up window */
+  variant?: 'modal' | 'page';
+  /** page variant: called after a lead is saved (the page resets for the next lead) */
+  onSaved?: () => void;
 }
 
 const LeadFormModalInner: React.FC<LeadFormModalProps> = ({
@@ -42,7 +46,10 @@ const LeadFormModalInner: React.FC<LeadFormModalProps> = ({
   users,
   initialData,
   regions = DEFAULT_REGIONS,
+  variant = 'modal',
+  onSaved,
 }) => {
+  const isPage = variant === 'page';
 
   const [name, setName] = useState(initialData?.name || '');
   const [age, setAge] = useState<number | ''>(initialData?.age || '');
@@ -146,7 +153,11 @@ const LeadFormModalInner: React.FC<LeadFormModalProps> = ({
         assignedRegion,
         assignedTeamMember,
       });
-      onClose();
+      if (isPage && onSaved) {
+        onSaved();
+      } else {
+        onClose();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save lead information');
     } finally {
@@ -155,11 +166,21 @@ const LeadFormModalInner: React.FC<LeadFormModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div
+      className={
+        isPage
+          ? 'w-full'
+          : 'fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4'
+      }
+    >
       <div
-        className="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
-        role="dialog"
-        aria-modal="true"
+        className={
+          isPage
+            ? 'bg-white rounded-xl shadow-xs border border-slate-200 w-full max-w-4xl mx-auto overflow-hidden'
+            : 'bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200'
+        }
+        role={isPage ? undefined : 'dialog'}
+        aria-modal={isPage ? undefined : true}
       >
         {/* Modal Window Header */}
         <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
@@ -176,17 +197,19 @@ const LeadFormModalInner: React.FC<LeadFormModalProps> = ({
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded-md transition-colors"
-            title="Close dialog"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          {!isPage && (
+            <button
+              onClick={onClose}
+              className="text-slate-400 hover:text-white p-1 rounded-md transition-colors"
+              title="Close dialog"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="p-6 space-y-4 max-h-[78vh] overflow-y-auto">
+          <div className={isPage ? 'p-6 space-y-4' : 'p-6 space-y-4 max-h-[78vh] overflow-y-auto'}>
             {error && (
               <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
@@ -632,14 +655,16 @@ const LeadFormModalInner: React.FC<LeadFormModalProps> = ({
 
           {/* Modal Footer */}
           <div className="bg-slate-50 px-6 py-3.5 border-t border-slate-200 flex items-center justify-end gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={loading}
-              className="px-4 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-800 bg-white border border-slate-200 rounded-md transition-colors"
-            >
-              Cancel
-            </button>
+            {!isPage && (
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={loading}
+                className="px-4 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-800 bg-white border border-slate-200 rounded-md transition-colors"
+              >
+                Cancel
+              </button>
+            )}
             <button
               type="submit"
               disabled={loading}

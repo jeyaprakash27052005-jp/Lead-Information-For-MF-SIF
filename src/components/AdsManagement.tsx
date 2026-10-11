@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AdBanner } from '../types';
 import { adsStorageService, prepareAdImage } from '../services/adsStorage';
+import { SearchBox, SelectFilter, ClearFilters, FilterBar } from './FilterControls';
 import {
   Upload,
   Image as ImageIcon,
@@ -38,6 +39,8 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
   const [badge, setBadge] = useState('Special Offer');
   const [linkUrl, setLinkUrl] = useState<'none' | 'register' | 'custom' | string>('none');
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [adSearch, setAdSearch] = useState('');
+  const [adStatusFilter, setAdStatusFilter] = useState('ALL');
   const [customLinkUrl, setCustomLinkUrl] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -108,6 +111,13 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
       if (fileInputRef.current) fileInputRef.current.value = '';
       setError(err instanceof Error ? err.message : 'Could not process this image.');
     }
+  };
+
+  const adMatches = (ad: AdBanner) => {
+    const q = adSearch.trim().toLowerCase();
+    const textOk = !q || ad.title.toLowerCase().includes(q) || (ad.subtitle || '').toLowerCase().includes(q) || (ad.badge || '').toLowerCase().includes(q);
+    const statusOk = adStatusFilter === 'ALL' || (adStatusFilter === 'active' ? ad.isActive : !ad.isActive);
+    return textOk && statusOk;
   };
 
   const resetForm = () => {
@@ -503,13 +513,37 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
           </span>
         </div>
 
+        {ads.length > 0 && (
+          <div className="p-3 border-b border-slate-100">
+            <FilterBar summary={`Showing ${ads.filter(adMatches).length} of ${ads.length} ads`}>
+              <SearchBox value={adSearch} onChange={setAdSearch} placeholder="Search title or badge..." />
+              <SelectFilter
+                value={adStatusFilter}
+                onChange={setAdStatusFilter}
+                allLabel="All Ads"
+                options={[
+                  { value: 'active', label: 'Visible on Home Screen' },
+                  { value: 'hidden', label: 'Hidden' },
+                ]}
+              />
+              <ClearFilters
+                show={adSearch !== '' || adStatusFilter !== 'ALL'}
+                onClick={() => {
+                  setAdSearch('');
+                  setAdStatusFilter('ALL');
+                }}
+              />
+            </FilterBar>
+          </div>
+        )}
+
         {ads.length === 0 ? (
           <div className="p-8 text-center text-xs text-slate-500">
             No advertisements added yet. Use the form above to upload your first JPG, JPEG, PNG, or GIF ad.
           </div>
         ) : (
           <div className="divide-y divide-slate-100">
-            {ads.map((ad, index) => (
+            {ads.map((ad, index) => !adMatches(ad) ? null : (
               <div
                 key={ad.id}
                 className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-slate-50/60 transition-colors"

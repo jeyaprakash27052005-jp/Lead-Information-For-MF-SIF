@@ -20,6 +20,7 @@ import { SchemeManagement } from './components/SchemeManagement';
 import { CustomerPortal } from './components/CustomerPortal';
 import { HomeScreen } from './components/HomeScreen';
 import { AdsManagement } from './components/AdsManagement';
+import { AddLeadPage } from './components/AddLeadPage';
 import { PlusCircle } from 'lucide-react';
 import { getAllRegions } from './utils/regions';
 
@@ -555,7 +556,8 @@ export default function App() {
           onTabChange={(tab) => {
             if (tab === 'add-lead') {
               setEditingLead(null);
-              setIsAddLeadModalOpen(true);
+              setActiveTab('add-lead');
+              updatePortalMode('admin');
             } else {
               setActiveTab(tab);
               if (tab === 'customer-portal') {
@@ -636,10 +638,23 @@ export default function App() {
                 onDeleteLead={handleDeleteLead}
                 onAddNewLead={() => {
                   setEditingLead(null);
-                  setIsAddLeadModalOpen(true);
+                  setActiveTab('add-lead');
                 }}
                 title="All Leads Directory"
                 subtitle="Universal lead database visible across all user accounts"
+              />
+            )}
+
+            {/* VIEW: Add New Lead (separate admin page) */}
+            {activeTab === 'add-lead' && (currentUser.role === 'head' || currentUser.role === 'area_incharge') && (
+              <AddLeadPage
+                leads={leads}
+                currentUser={currentUser}
+                users={users}
+                regions={regionList}
+                onSubmit={handleCreateOrUpdateLead}
+                onViewLead={(lead) => setDetailsModalLead(lead)}
+                onViewAllLeads={() => setActiveTab('all-leads')}
               />
             )}
 
@@ -658,7 +673,7 @@ export default function App() {
                 onDeleteLead={handleDeleteLead}
                 onAddNewLead={() => {
                   setEditingLead(null);
-                  setIsAddLeadModalOpen(true);
+                  setActiveTab('add-lead');
                 }}
                 title={
                   currentUser.role === 'regional_incharge'
@@ -751,11 +766,11 @@ export default function App() {
       </main>
 
       {/* Floating Action Button for Quick Lead Addition for authorized roles */}
-      {(currentUser.role === 'head' || currentUser.role === 'area_incharge') && activeTab !== 'customer-portal' && (
+      {(currentUser.role === 'head' || currentUser.role === 'area_incharge') && activeTab !== 'customer-portal' && activeTab !== 'add-lead' && (
         <button
           onClick={() => {
             setEditingLead(null);
-            setIsAddLeadModalOpen(true);
+            setActiveTab('add-lead');
           }}
           className="fixed bottom-6 right-6 z-40 bg-slate-900 hover:bg-slate-800 text-white p-3.5 rounded-full shadow-2xl flex items-center gap-2 text-xs font-bold transition-all cursor-pointer border border-slate-700"
           title="Add New Lead Information"

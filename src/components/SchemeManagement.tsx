@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { InvestmentScheme, SchemeType, User } from '../types';
 import { ConfirmModal } from './ConfirmModal';
 import { SchemeImportModal } from './SchemeImportModal';
+import { SelectFilter, ClearFilters } from './FilterControls';
 import {
   Layers,
   Plus,
@@ -39,6 +40,8 @@ export const SchemeManagement: React.FC<SchemeManagementProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'all' | 'mutual_fund' | 'nps'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [riskFilter, setRiskFilter] = useState('ALL');
+  const [categoryFilter, setCategoryFilter] = useState('ALL');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [editingScheme, setEditingScheme] = useState<InvestmentScheme | null>(null);
@@ -135,7 +138,9 @@ export const SchemeManagement: React.FC<SchemeManagementProps> = ({
       s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       s.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (s.fundHouse || '').toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesTab && matchesSearch;
+    const matchesRisk = riskFilter === 'ALL' || s.riskLevel === riskFilter;
+    const matchesCategory = categoryFilter === 'ALL' || s.category === categoryFilter;
+    return matchesTab && matchesSearch && matchesRisk && matchesCategory;
   });
 
   return (
@@ -217,6 +222,27 @@ export const SchemeManagement: React.FC<SchemeManagementProps> = ({
           </button>
         </div>
 
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+        <SelectFilter
+          value={riskFilter}
+          onChange={setRiskFilter}
+          allLabel="All Risk Levels"
+          options={['Low', 'Moderate', 'High', 'Very High'].map((r) => ({ value: r, label: r }))}
+        />
+        <SelectFilter
+          value={categoryFilter}
+          onChange={setCategoryFilter}
+          allLabel="All Categories"
+          options={Array.from(new Set(schemes.filter((x) => activeTab === 'all' || x.type === activeTab).map((x) => x.category))).sort().map((c) => ({ value: c, label: c }))}
+        />
+        <ClearFilters
+          show={riskFilter !== 'ALL' || categoryFilter !== 'ALL' || searchTerm !== ''}
+          onClick={() => {
+            setRiskFilter('ALL');
+            setCategoryFilter('ALL');
+            setSearchTerm('');
+          }}
+        />
         {/* Search Input */}
         <div className="relative w-full sm:w-72">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -227,6 +253,7 @@ export const SchemeManagement: React.FC<SchemeManagementProps> = ({
             placeholder="Search schemes by name or category..."
             className="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
           />
+        </div>
         </div>
       </div>
 

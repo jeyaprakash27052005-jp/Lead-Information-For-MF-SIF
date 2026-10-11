@@ -16,6 +16,8 @@ import {
 import { formatInr, formatInrCompact, formatInrNumber } from '../utils/currency';
 import { formatIndianMobile } from '../utils/validation';
 import { ReadinessChips } from './ReadinessChips';
+import { SearchBox, SelectFilter, DateRangeFilter, ClearFilters, FilterBar, isoDay } from './FilterControls';
+
 
 interface PipelineBoardProps {
   leads: Lead[];
@@ -35,14 +37,37 @@ const COLUMNS: { status: LeadStatus; label: string; headerColor: string }[] = [
 ];
 
 export const PipelineBoard: React.FC<PipelineBoardProps> = ({
-  leads,
+  leads: allLeads,
   onViewLead,
   onUpdateStatus,
   onEditLead,
   onDeleteLead,
 }) => {
+  const [search, setSearch] = useState('');
+  const [regionFilter, setRegionFilter] = useState('ALL');
+  const [addedByFilter, setAddedByFilter] = useState('ALL');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
+
+  const q = search.trim().toLowerCase();
+  const leads = allLeads.filter(
+    (l) =>
+      (regionFilter === 'ALL' || l.assignedRegion === regionFilter) &&
+      (addedByFilter === 'ALL' || l.addedByName === addedByFilter) &&
+      (!dateFrom || (isoDay(l.createdAt) && isoDay(l.createdAt) >= dateFrom)) &&
+      (!dateTo || (isoDay(l.createdAt) && isoDay(l.createdAt) <= dateTo)) &&
+      (!q ||
+        l.name.toLowerCase().includes(q) ||
+        l.occupation.toLowerCase().includes(q) ||
+        l.addedByName.toLowerCase().includes(q) ||
+        (l.mobile || '').includes(q.replace(/[\s+-]/g, '')) ||
+        l.id.toLowerCase().includes(q))
+  );
+  const pipelineRegions = Array.from(new Set(allLeads.map((l) => l.assignedRegion))).sort();
+  const pipelineOfficers = Array.from(new Set(allLeads.map((l) => l.addedByName))).sort();
+  const pipelineFiltersOn = q !== '' || regionFilter !== 'ALL' || addedByFilter !== 'ALL' || dateFrom !== '' || dateTo !== '';
 
   // Close menus on click outside
   React.useEffect(() => {
@@ -71,6 +96,23 @@ export const PipelineBoard: React.FC<PipelineBoardProps> = ({
           </p>
         </div>
       </div>
+
+      <FilterBar summary={`Showing ${leads.length} of ${allLeads.length} leads`}>
+        <SearchBox value={search} onChange={setSearch} placeholder="Search name, mobile, occupation..." />
+        <SelectFilter value={regionFilter} onChange={setRegionFilter} allLabel="All Regions" options={pipelineRegions.map((r) => ({ value: r, label: r }))} />
+        <SelectFilter value={addedByFilter} onChange={setAddedByFilter} allLabel="All Officers" options={pipelineOfficers.map((r) => ({ value: r, label: r }))} />
+        <DateRangeFilter from={dateFrom} to={dateTo} onFrom={setDateFrom} onTo={setDateTo} />
+        <ClearFilters
+          show={pipelineFiltersOn}
+          onClick={() => {
+            setSearch('');
+            setRegionFilter('ALL');
+            setAddedByFilter('ALL');
+            setDateFrom('');
+            setDateTo('');
+          }}
+        />
+      </FilterBar>
 
       {/* Kanban Pipeline Columns */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

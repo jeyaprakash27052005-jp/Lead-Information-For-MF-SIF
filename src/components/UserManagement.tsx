@@ -17,6 +17,7 @@ import {
   Copy
 } from 'lucide-react';
 import { DEFAULT_REGIONS, isHqRegion } from '../utils/regions';
+import { SearchBox, SelectFilter, ClearFilters } from './FilterControls';
 
 interface UserManagementProps {
   users: User[];
@@ -56,6 +57,18 @@ export const UserManagement: React.FC<UserManagementProps> = ({
   const canCreateUsers = isHead || isRegional;
 
   const [roleFilter, setRoleFilter] = useState<'all' | UserRole>('all');
+  const [userSearch, setUserSearch] = useState('');
+  const [userStatusFilter, setUserStatusFilter] = useState('ALL');
+  const [userRegionFilter, setUserRegionFilter] = useState('ALL');
+  const userQuery = userSearch.trim().toLowerCase();
+  const matchesUserFilters = (u: User) =>
+    (roleFilter === 'all' || u.role === roleFilter) &&
+    (userStatusFilter === 'ALL' || u.status === userStatusFilter) &&
+    (userRegionFilter === 'ALL' || u.region === userRegionFilter) &&
+    (!userQuery ||
+      u.name.toLowerCase().includes(userQuery) ||
+      u.username.toLowerCase().includes(userQuery) ||
+      (u.designation || '').toLowerCase().includes(userQuery));
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('password123');
@@ -335,6 +348,33 @@ export const UserManagement: React.FC<UserManagementProps> = ({
             </button>
           );
         })}
+        <div className="w-full flex flex-wrap items-center gap-2 pt-1">
+          <SearchBox value={userSearch} onChange={setUserSearch} placeholder="Search name, user ID, designation..." />
+          <SelectFilter
+            value={userStatusFilter}
+            onChange={setUserStatusFilter}
+            allLabel="All Statuses"
+            options={[
+              { value: 'active', label: 'Active' },
+              { value: 'inactive', label: 'Inactive' },
+            ]}
+          />
+          <SelectFilter
+            value={userRegionFilter}
+            onChange={setUserRegionFilter}
+            allLabel="All Regions"
+            options={Array.from(new Set(users.map((u) => u.region))).sort().map((r) => ({ value: r, label: r }))}
+          />
+          <ClearFilters
+            show={userSearch !== '' || userStatusFilter !== 'ALL' || userRegionFilter !== 'ALL' || roleFilter !== 'all'}
+            onClick={() => {
+              setUserSearch('');
+              setUserStatusFilter('ALL');
+              setUserRegionFilter('ALL');
+              setRoleFilter('all');
+            }}
+          />
+        </div>
       </div>
 
       {/* Users Table */}
@@ -353,14 +393,14 @@ export const UserManagement: React.FC<UserManagementProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {users.filter((u) => roleFilter === 'all' || u.role === roleFilter).length === 0 && (
+              {users.filter(matchesUserFilters).length === 0 && (
                 <tr>
                   <td colSpan={7} className="py-8 px-4 text-center text-slate-500">
                     No users found for this role.
                   </td>
                 </tr>
               )}
-              {users.filter((u) => roleFilter === 'all' || u.role === roleFilter).map((u) => {
+              {users.filter(matchesUserFilters).map((u) => {
                 const canAct = canManageUser(u);
                 const isWorking = actionInProgressId === u.id;
 
