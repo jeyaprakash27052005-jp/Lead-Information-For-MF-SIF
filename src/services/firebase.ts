@@ -13,8 +13,8 @@ import {
   getDocs
 } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
-import { User, Lead, LeadStatus, InvestmentScheme } from '../types';
-import { DEFAULT_REGIONS } from '../utils/regions';
+import { User, Lead, LeadStatus, InvestmentScheme, HealthReport } from '../types';
+import { DEFAULT_REGIONS, NATIONAL_HQ_REGION } from '../utils/regions';
 import { normalizeIndianMobile, isValidPan } from '../utils/validation';
 
 export const DEFAULT_SCHEMES: InvestmentScheme[] = [
@@ -440,6 +440,25 @@ export const firebaseDbService = {
     }
   },
 
+  async updateUserPermissions(userId: string, permissions: Partial<import('../types').CustomerPermissions>): Promise<User> {
+    await ensureFirestoreDatabaseSeeded();
+    const path = `users/${userId}`;
+    try {
+      const userRef = doc(db, 'users', userId);
+      const snap = await getDoc(userRef);
+      if (!snap.exists()) {
+        throw new Error('User not found in online database');
+      }
+      await updateDoc(userRef, { permissions });
+      const updatedSnap = await getDoc(userRef);
+      const data = updatedSnap.data() as StoredUser;
+      const { password: _p, ...safeUser } = data;
+      return safeUser as User;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, path);
+    }
+  },
+
   async updateUserProfile(
     userId: string,
     profileData: {
@@ -565,6 +584,123 @@ export const firebaseDbService = {
     } catch (error) {
       if (!isPermissionError(error)) handleFirestoreError(error, OperationType.DELETE, REGIONS_COLLECTION);
       await legacyRegions.remove(name);
+    }
+  },
+
+  // ----- Finance Health Check-up reports -----
+  async saveHealthReport(report: Omit<HealthReport, 'id' | 'createdAt'>): Promise<HealthReport> {
+    await ensureFirestoreDatabaseSeeded();
+    const path = 'healthReports';
+    try {
+      const id = `hr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      const full: HealthReport = { ...report, id, createdAt: new Date().toISOString() };
+      (Object.keys(full) as (keyof HealthReport)[]).forEach((k) => {
+        if (full[k] === undefined) delete full[k];
+      });
+      await setDoc(doc(db, path, id), full);
+      return full;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, path);
+    }
+  },
+
+  async getHealthReports(): Promise<HealthReport[]> {
+    await ensureFirestoreDatabaseSeeded();
+    const path = 'healthReports';
+    try {
+      const snap = await getDocs(collection(db, path));
+      const list: HealthReport[] = [];
+      snap.forEach((d) => list.push(d.data() as HealthReport));
+      return list.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.LIST, path);
+    }
+  },
+
+  /**
+   * Called when the person asks to download the report: stores their e-mail and mobile number on the
+   * report and adds them to the admin portal as a "Finance Health Check-up Report Customer" lead.
+   * If the mobile number already belongs to a lead, the report is linked to that lead instead of adding a duplicate.
+   */
+  async attachHealthReportContact(
+    reportId: string,
+    contact: { email: string; mobile: string }
+  ): Promise<{ leadId: string; existingLead: boolean }> {
+    await ensureFirestoreDatabaseSeeded();
+    const mobile = normalizeIndianMobile(contact.mobile);
+    if (!mobile) throw new Error('Please enter a valid 10-digit Indian mobile number (starting with 6, 7, 8 or 9).');
+    const email = contact.email.trim().toLowerCase();
+    try {
+      const reportRef = doc(db, 'healthReports', reportId);
+      const reportSnap = await getDoc(reportRef);
+      if (!reportSnap.exists()) throw new Error('Report not found. Please view the report again.');
+      const report = reportSnap.data() as HealthReport;
+      const now = new Date().toISOString();
+
+      const leadsSnap = await getDocs(collection(db, 'leads'));
+      let existing: Lead | undefined;
+      leadsSnap.forEach((d) => {
+        const l = d.data() as Lead;
+        if (l.mobile === mobile) existing = l;
+      });
+
+      const weak = Object.entries(report.categoryScores)
+        .sort((a, b) => a[1] - b[1])
+        .slice(0, 2)
+        .map(([k]) => k)
+        .join(', ');
+      let leadId: string;
+      if (existing) {
+        leadId = (existing as Lead).id;
+        await updateDoc(doc(db, 'leads', leadId), {
+          email,
+          healthReportId: reportId,
+          healthScore: report.overallScore,
+          healthBand: report.band,
+          updatedAt: now,
+        });
+      } else {
+        leadId = `lead_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        const lead: Lead = {
+          id: leadId,
+          name: report.name,
+          age: report.age,
+          gender: report.gender,
+          annualIncome: report.annualIncome,
+          occupation: report.occupation,
+          mobile,
+          email,
+          narration: `Finance health score ${report.overallScore}/100 (${report.band}). Money style: ${report.moneyStyle}. Weakest areas: ${weak}.`,
+          status: 'Pending',
+          statusRemarks: 'Downloaded the Finance Health Check-up report',
+          addedByUserId: 'finance_health_checkup',
+          addedByName: `${report.name} (Finance Health Check-up)`,
+          addedByDesignation: 'Finance Health Check-up Report Customer',
+          assignedRegion: report.region || NATIONAL_HQ_REGION,
+          leadSource: 'finance_health_checkup',
+          healthReportId: reportId,
+          healthScore: report.overallScore,
+          healthBand: report.band,
+          createdAt: now,
+          updatedAt: now,
+        };
+        await setDoc(doc(db, 'leads', leadId), lead);
+      }
+      await updateDoc(reportRef, { email, mobile, leadId, contactAt: now });
+      return { leadId, existingLead: !!existing };
+    } catch (error) {
+      if (error instanceof Error && /valid 10-digit|Report not found/.test(error.message)) throw error;
+      handleFirestoreError(error, OperationType.UPDATE, `healthReports/${reportId}`);
+    }
+  },
+
+  async deleteHealthReport(id: string): Promise<void> {
+    await ensureFirestoreDatabaseSeeded();
+    const path = `healthReports/${id}`;
+    try {
+      await deleteDoc(doc(db, 'healthReports', id));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, path);
     }
   },
 

@@ -12,7 +12,8 @@ import {
   Shield,
   Layers,
   Globe,
-  Image as ImageIcon
+  Image as ImageIcon,
+  HeartPulse
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -21,6 +22,8 @@ interface NavigationProps {
   onTabChange: (tab: ViewTab) => void;
   leadsCount: number;
   assignedCount: number;
+  /** false in the stand-alone Admin portal, which has no link to the customer site */
+  allowCustomerPortal?: boolean;
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
@@ -29,6 +32,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   onTabChange,
   leadsCount,
   assignedCount,
+  allowCustomerPortal = true,
 }) => {
   const isHead = currentUser.role === 'head';
   const isRegional = currentUser.role === 'regional_incharge';
@@ -97,8 +101,8 @@ export const Navigation: React.FC<NavigationProps> = ({
       });
     }
 
-    // Feature: Add Leads (Head & Area Incharge)
-    if (isHead || isArea) {
+    // Feature: Add Leads (Head, Regional Incharge & Area Incharge)
+    if (isHead || isRegional || isArea) {
       items.push({
         id: 'add-lead',
         label: 'Add New Lead',
@@ -122,6 +126,16 @@ export const Navigation: React.FC<NavigationProps> = ({
       icon: <Layers className="w-4 h-4" />,
       description: 'Add, update, or delete Mutual Fund & NPS schemes catalog',
     });
+
+    // Feature: Finance Health Check-up reports (Head & Regional Incharge)
+    if (isHead || isRegional) {
+      items.push({
+        id: 'health-reports',
+        label: 'Health Check-up Reports',
+        icon: <HeartPulse className="w-4 h-4" />,
+        description: 'Everyone who took the Finance Health Check-up, with scores, contact details and PDF reports',
+      });
+    }
 
     // Feature: Home Screen Ads (Head uploads JPG / JPEG / PNG / GIF banners)
     if (isHead) {
@@ -164,12 +178,14 @@ export const Navigation: React.FC<NavigationProps> = ({
     }
 
     // Feature: Customer Web Portal
-    items.push({
-      id: 'customer-portal',
-      label: 'Customer Web Portal',
-      icon: <Globe className="w-4 h-4" />,
-      description: 'Open the Customer Web Portal',
-    });
+    if (allowCustomerPortal) {
+      items.push({
+        id: 'customer-portal',
+        label: 'Customer Web Portal',
+        icon: <Globe className="w-4 h-4" />,
+        description: 'Open the Customer Web Portal',
+      });
+    }
   }
 
   return (

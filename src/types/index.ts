@@ -11,6 +11,15 @@ export interface User {
   createdAt: string;
   createdBy: string;
   associatedLeadId?: string;
+  /** Features an admin (Head / Regional Incharge) has switched on or off for this customer */
+  permissions?: Partial<CustomerPermissions>;
+}
+
+export interface CustomerPermissions {
+  mfCalculator: boolean;
+  npsCalculator: boolean;
+  schemesCatalog: boolean;
+  healthCheckup: boolean;
 }
 
 export type SchemeType = 'mutual_fund' | 'nps';
@@ -56,6 +65,12 @@ export interface Lead {
   addedByDesignation: string;
   assignedRegion: string;
   assignedTeamMember?: string;
+  /** Where the lead came from (normal entries have no source) */
+  leadSource?: 'finance_health_checkup';
+  email?: string;
+  healthReportId?: string;
+  healthScore?: number;
+  healthBand?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -84,4 +99,27 @@ export type ViewTab =
   | 'ads-management'
   | 'customer-portal'
   | 'mf-calculator'
-  | 'nps-calculator';
+  | 'nps-calculator'
+  | 'health-reports'
+  | 'health-checkup';
+
+export interface HealthReport {
+  id: string;
+  name: string;
+  age: number;
+  gender: 'Male' | 'Female' | 'Other';
+  occupation: string;
+  annualIncome: number;
+  region: string;
+  answers: Record<string, number>;
+  overallScore: number;
+  band: string;
+  categoryScores: Record<string, number>;
+  moneyStyle: string;
+  source: 'health_portal' | 'customer_portal';
+  email?: string;
+  mobile?: string;
+  leadId?: string;
+  contactAt?: string;
+  createdAt: string;
+}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { User, Lead, LeadStatus, ViewTab, InvestmentScheme } from './types';
+import { User, Lead, LeadStatus, ViewTab, InvestmentScheme, CustomerPermissions, HealthReport } from './types';
 import { apiService, testConnection, getWriteVersion } from './services/api';
 import { Header } from './components/Header';
 import { Navigation } from './components/Navigation';
@@ -21,10 +21,15 @@ import { CustomerPortal } from './components/CustomerPortal';
 import { HomeScreen } from './components/HomeScreen';
 import { AdsManagement } from './components/AdsManagement';
 import { AddLeadPage } from './components/AddLeadPage';
+import { HealthReportsAdmin } from './components/HealthReportsAdmin';
+import { HealthCheckup } from './components/HealthCheckup';
 import { PlusCircle } from 'lucide-react';
-import { getAllRegions } from './utils/regions';
+import { getAllRegions, NATIONAL_HQ_REGION } from './utils/regions';
 
-export default function App() {
+/** 'all' = the complete site; 'admin' / 'customer' = a stand-alone portal built from the same code */
+export type AppPortal = 'all' | 'admin' | 'customer';
+
+export default function App({ portal = 'all' }: { portal?: AppPortal } = {}) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -33,6 +38,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<ViewTab>('all-leads');
   const [loading, setLoading] = useState(true);
   const [portalMode, setPortalMode] = useState<'admin' | 'customer'>(() => {
+    if (portal === 'admin' || portal === 'customer') return portal;
     // 1. Check hostname/domain
     if (typeof window !== 'undefined') {
       const host = window.location.hostname.toLowerCase();
@@ -58,12 +64,17 @@ export default function App() {
     return 'admin';
   });
   // Public landing page (moving ads) shown first; Admin / Customer buttons open the matching login
-  const [showHome, setShowHome] = useState(true);
+  const [showHome, setShowHome] = useState(portal !== 'admin');
+  const [showHealth, setShowHealth] = useState(
+    () => portal === 'all' && new URLSearchParams(window.location.search).get('portal') === 'health'
+  );
   const [customerStartTab, setCustomerStartTab] = useState<'register' | 'login'>('login');
   const [feedbackMessage, setFeedbackMessage] = useState<{
     text: string;
     type: 'success' | 'info' | 'error';
   } | null>(null);
+
+  const [healthReports, setHealthReports] = useState<HealthReport[]>([]);
 
   // Modals state
   const [isAddLeadModalOpen, setIsAddLeadModalOpen] = useState(false);
@@ -94,6 +105,12 @@ export default function App() {
       setUsers(fetchedUsers);
       setLeads(fetchedLeads);
       if (fetchedSchemes && fetchedSchemes.length > 0) setSchemes(fetchedSchemes);
+      // Health check-up reports are optional: the rest of the app still works if they cannot be loaded
+      try {
+        setHealthReports(await apiService.getHealthReports());
+      } catch (healthErr) {
+        console.warn('Could not load health check-up reports:', healthErr);
+      }
       // Regions are optional: if the regions collection isn't reachable yet, fall back to defaults
       try {
         setStoredRegions(await apiService.getRegions());
@@ -187,6 +204,7 @@ export default function App() {
   const handleLogin = async (username: string, password?: string) => {
     const res = await apiService.login(username, password);
     setCurrentUser(res.user);
+    void loadData(); // pick up anything added since the page was opened (new leads, health check-up reports)
     showFeedback(`Welcome, ${res.user.name} (${res.user.designation})`);
 
     // Default tab based on role
@@ -203,7 +221,7 @@ export default function App() {
 
   const handleLogout = () => {
     setCurrentUser(null);
-    setShowHome(true);
+    setShowHome(portal !== 'admin');
     showFeedback('You have been securely logged out.', 'info');
   };
 
@@ -325,6 +343,12 @@ export default function App() {
     showFeedback(`Account for ${updated.name} marked as ${newStatus}.`);
   };
 
+  const handleUpdatePermissions = async (userId: string, permissions: CustomerPermissions) => {
+    const updated = await apiService.updateUserPermissions(userId, permissions);
+    setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
+    showFeedback(`Feature permissions saved for ${updated.name}.`);
+  };
+
   const handleDeleteUser = async (userId: string) => {
     await apiService.deleteUser(userId);
     setUsers((prev) => prev.filter((u) => u.id !== userId));
@@ -388,6 +412,7 @@ export default function App() {
   const handleCustomerLogin = async (username: string, password?: string) => {
     const res = await apiService.login(username, password || username);
     setCurrentUser(res.user);
+    void loadData();
     setPortalMode('customer');
     setActiveTab('customer-portal');
     showFeedback(`Welcome, ${res.user.name}`);
@@ -413,6 +438,7 @@ export default function App() {
 
   // Sync portalMode with browser URL for easy link sharing
   const updatePortalMode = (mode: 'admin' | 'customer') => {
+    if (portal !== 'all' && mode !== portal) return; // a stand-alone portal never switches to the other one
     setPortalMode(mode);
     try {
       const url = new URL(window.location.href);
@@ -441,9 +467,22 @@ export default function App() {
           </div>
         )}
 
-        {showHome ? (
+        {showHealth ? (
+          <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
+            <button
+              type="button"
+              onClick={() => setShowHealth(false)}
+              className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-700 hover:bg-slate-100 border border-slate-300 cursor-pointer"
+            >
+              ← Home
+            </button>
+            <HealthCheckup source="health_portal" />
+          </div>
+        ) : showHome ? (
           <HomeScreen
             schemes={schemes}
+            showAdminLogin={portal !== 'customer'}
+            onOpenHealthCheck={portal === 'all' ? () => setShowHealth(true) : undefined}
             onOpenAdminLogin={() => {
               updatePortalMode('admin');
               setShowHome(false);
@@ -471,18 +510,22 @@ export default function App() {
               onCustomerRegister={handleCustomerRegister}
               onCustomerLogin={handleCustomerLogin}
               onCustomerLogout={handleLogout}
-              onSwitchToAdmin={() => updatePortalMode('admin')}
+              onSwitchToAdmin={portal === 'all' ? () => updatePortalMode('admin') : undefined}
               onBackToHome={() => setShowHome(true)}
             />
           </div>
         ) : (
           <LoginPage
             onLogin={handleLogin}
-            onSwitchToCustomerPortal={() => {
-              setCustomerStartTab('login');
-              updatePortalMode('customer');
-            }}
-            onBackToHome={() => setShowHome(true)}
+            onSwitchToCustomerPortal={
+              portal === 'all'
+                ? () => {
+                    setCustomerStartTab('login');
+                    updatePortalMode('customer');
+                  }
+                : undefined
+            }
+            onBackToHome={portal === 'admin' ? undefined : () => setShowHome(true)}
           />
         )}
       </div>
@@ -537,14 +580,22 @@ export default function App() {
           setProfileUserToEdit(currentUser);
           setIsProfileModalOpen(true);
         }}
-        onSwitchToCustomerPortal={() => {
-          updatePortalMode('customer');
-          setActiveTab('customer-portal');
-        }}
-        onSwitchToAdminPortal={() => {
-          updatePortalMode('admin');
-          setActiveTab('all-leads');
-        }}
+        onSwitchToCustomerPortal={
+          portal === 'all'
+            ? () => {
+                updatePortalMode('customer');
+                setActiveTab('customer-portal');
+              }
+            : undefined
+        }
+        onSwitchToAdminPortal={
+          portal === 'all'
+            ? () => {
+                updatePortalMode('admin');
+                setActiveTab('all-leads');
+              }
+            : undefined
+        }
         isCustomerView={portalMode === 'customer' || currentUser.role === 'customer' || activeTab === 'customer-portal'}
       />
 
@@ -569,6 +620,7 @@ export default function App() {
           }}
           leadsCount={leads.length}
           assignedCount={assignedLeads.length}
+          allowCustomerPortal={portal === 'all'}
         />
       )}
 
@@ -590,10 +642,14 @@ export default function App() {
             onCustomerRegister={handleCustomerRegister}
             onCustomerLogin={handleCustomerLogin}
             onCustomerLogout={handleLogout}
-            onSwitchToAdmin={() => {
-              updatePortalMode('admin');
-              setActiveTab('all-leads');
-            }}
+            onSwitchToAdmin={
+              portal === 'all'
+                ? () => {
+                    updatePortalMode('admin');
+                    setActiveTab('all-leads');
+                  }
+                : undefined
+            }
             activeView={
               currentUser.role !== 'customer'
                 ? undefined
@@ -603,6 +659,8 @@ export default function App() {
                 ? 'nps-calc'
                 : activeTab === 'scheme-management'
                 ? 'schemes'
+                : activeTab === 'health-checkup'
+                ? 'health'
                 : 'dashboard'
             }
             onViewChange={(view) =>
@@ -614,6 +672,8 @@ export default function App() {
                   ? 'nps-calculator'
                   : view === 'schemes'
                   ? 'scheme-management'
+                  : view === 'health'
+                  ? 'health-checkup'
                   : 'customer-portal'
               )
             }
@@ -645,8 +705,26 @@ export default function App() {
               />
             )}
 
+            {/* VIEW: Finance Health Check-up reports (Head & Regional Incharge) */}
+            {activeTab === 'health-reports' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge') && (
+              <HealthReportsAdmin
+                reports={
+                  currentUser.role === 'head'
+                    ? healthReports
+                    : healthReports.filter((r) => r.region === currentUser.region || r.region === NATIONAL_HQ_REGION)
+                }
+                currentUser={currentUser}
+                onRefresh={async () => setHealthReports(await apiService.getHealthReports())}
+                onDelete={async (id) => {
+                  await apiService.deleteHealthReport(id);
+                  setHealthReports((prev) => prev.filter((r) => r.id !== id));
+                  showFeedback('Health check-up report deleted.');
+                }}
+              />
+            )}
+
             {/* VIEW: Add New Lead (separate admin page) */}
-            {activeTab === 'add-lead' && (currentUser.role === 'head' || currentUser.role === 'area_incharge') && (
+            {activeTab === 'add-lead' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge' || currentUser.role === 'area_incharge') && (
               <AddLeadPage
                 leads={leads}
                 currentUser={currentUser}
@@ -719,6 +797,7 @@ export default function App() {
                 onDeleteRegion={handleDeleteRegion}
                 onToggleStatus={handleToggleUserStatus}
                 onDeleteUser={handleDeleteUser}
+                onUpdatePermissions={handleUpdatePermissions}
                 onEditUserProfile={(user) => {
                   setProfileUserToEdit(user);
                   setIsProfileModalOpen(true);
@@ -766,7 +845,7 @@ export default function App() {
       </main>
 
       {/* Floating Action Button for Quick Lead Addition for authorized roles */}
-      {(currentUser.role === 'head' || currentUser.role === 'area_incharge') && activeTab !== 'customer-portal' && activeTab !== 'add-lead' && (
+      {(currentUser.role === 'head' || currentUser.role === 'regional_incharge' || currentUser.role === 'area_incharge') && activeTab !== 'customer-portal' && activeTab !== 'add-lead' && (
         <button
           onClick={() => {
             setEditingLead(null);

@@ -71,6 +71,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToCustome
               <Shield className="w-3.5 h-3.5 text-indigo-400" />
               <span>Admin Login</span>
             </button>
+            {onSwitchToCustomerPortal && (
             <button
               type="button"
               onClick={onSwitchToCustomerPortal}
@@ -80,6 +81,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToCustome
               <Globe className="w-3.5 h-3.5 text-emerald-600" />
               <span>Customer Login</span>
             </button>
+            )}
           </div>
         </div>
       </nav>
@@ -174,7 +176,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToCustome
               </button>
             </form>
 
-            {/* Quick Switch to Customer Portal */}
+            {/* Quick Switch to Customer Portal (only when the customer portal is part of this site) */}
+            {onSwitchToCustomerPortal && (
             <div className="mt-5 pt-4 border-t border-slate-100 text-center space-y-2">
               <span className="text-[11px] text-slate-500 block font-medium">
                 Are you an investor looking to create an account or calculate scheme returns?
@@ -188,6 +191,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToCustome
                 <span>Go to Customer Login & Scheme Return Calculator</span>
               </button>
             </div>
+            )}
           </div>
         </div>
       </div>

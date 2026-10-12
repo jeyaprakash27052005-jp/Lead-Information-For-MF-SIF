@@ -2,6 +2,10 @@ import React, { useState, useEffect} from 'react';
 import { User, Lead, InvestmentScheme } from '../types';
 import { MutualFundCalculator } from './MutualFundCalculator';
 import { NPSCalculator } from './NPSCalculator';
+import { HealthCheckup } from './HealthCheckup';
+import { resolvePermissions } from '../utils/permissions';
+
+export type CustomerView = 'dashboard' | 'mf-calc' | 'nps-calc' | 'schemes' | 'health';
 import {
   UserPlus,
   LogIn,
@@ -18,6 +22,7 @@ import {
   AlertCircle,
   Clock,
   Sparkles,
+  HeartPulse,
   Layers,
   ArrowRight,
   LogOut
@@ -46,11 +51,12 @@ interface CustomerPortalProps {
   }>;
   onCustomerLogin: (username: string, password?: string) => Promise<void>;
   onCustomerLogout: () => void;
-  onSwitchToAdmin: () => void;
+  /** left out in the stand-alone Customer portal, which has no link to the admin site */
+  onSwitchToAdmin?: () => void;
   initialTab?: 'register' | 'login';
   onBackToHome?: () => void;
-  activeView?: 'dashboard' | 'mf-calc' | 'nps-calc' | 'schemes';
-  onViewChange?: (view: 'dashboard' | 'mf-calc' | 'nps-calc' | 'schemes') => void;
+  activeView?: CustomerView;
+  onViewChange?: (view: CustomerView) => void;
 }
 
 export const CustomerPortal: React.FC<CustomerPortalProps> = ({
@@ -68,14 +74,14 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
   onViewChange,
 }) => {
   const [activeTab, setActiveTab] = useState<'register' | 'login' | 'mf-calc' | 'nps-calc' | 'schemes'>(initialTab);
-  const [customerActiveView, setCustomerActiveViewState] = useState<'dashboard' | 'mf-calc' | 'nps-calc' | 'schemes'>(activeView || 'dashboard');
+  const [customerActiveView, setCustomerActiveViewState] = useState<CustomerView>(activeView || 'dashboard');
 
   // Top navigation (in the app shell) and the tab buttons below it control the same view
   useEffect(() => {
     if (activeView) setCustomerActiveViewState(activeView);
   }, [activeView]);
 
-  const setCustomerActiveView = (view: 'dashboard' | 'mf-calc' | 'nps-calc' | 'schemes') => {
+  const setCustomerActiveView = (view: CustomerView) => {
     setCustomerActiveViewState(view);
     onViewChange?.(view);
   };
@@ -211,6 +217,15 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
   // LOGGED-IN CUSTOMER VIEW
   // ----------------------------------------------------
   if (currentUser && (currentUser.role === 'customer' || customerLead)) {
+    const perms = resolvePermissions(currentUser);
+    const viewAllowed: Record<CustomerView, boolean> = {
+      dashboard: true,
+      'mf-calc': perms.mfCalculator,
+      'nps-calc': perms.npsCalculator,
+      schemes: perms.schemesCatalog,
+      health: perms.healthCheckup,
+    };
+    const effectiveView: CustomerView = viewAllowed[customerActiveView] ? customerActiveView : 'dashboard';
     return (
       <div className="space-y-6">
         {/* Navigation & Switcher Bar */}
@@ -235,7 +250,7 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
-            {currentUser.role !== 'customer' && (
+            {currentUser.role !== 'customer' && onSwitchToAdmin && (
             <button
               type="button"
               onClick={onSwitchToAdmin}
@@ -264,7 +279,7 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
             type="button"
             onClick={() => setCustomerActiveView('dashboard')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-              customerActiveView === 'dashboard'
+              effectiveView === 'dashboard'
                 ? 'bg-slate-900 text-white shadow-sm'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
@@ -273,11 +288,12 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
             <span>My Application & Status</span>
           </button>
 
+          {perms.mfCalculator && (
           <button
             type="button"
             onClick={() => setCustomerActiveView('mf-calc')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-              customerActiveView === 'mf-calc'
+              effectiveView === 'mf-calc'
                 ? 'bg-emerald-600 text-white shadow-sm'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
@@ -285,12 +301,14 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
             <TrendingUp className="w-4 h-4" />
             <span>Mutual Fund Calculator</span>
           </button>
+          )}
 
+          {perms.npsCalculator && (
           <button
             type="button"
             onClick={() => setCustomerActiveView('nps-calc')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-              customerActiveView === 'nps-calc'
+              effectiveView === 'nps-calc'
                 ? 'bg-blue-600 text-white shadow-sm'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
@@ -298,12 +316,14 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
             <Shield className="w-4 h-4" />
             <span>NPS Pension Calculator</span>
           </button>
+          )}
 
+          {perms.schemesCatalog && (
           <button
             type="button"
             onClick={() => setCustomerActiveView('schemes')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-              customerActiveView === 'schemes'
+              effectiveView === 'schemes'
                 ? 'bg-indigo-600 text-white shadow-sm'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
@@ -311,10 +331,26 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
             <Layers className="w-4 h-4" />
             <span>Browse Published Schemes ({schemes.length})</span>
           </button>
+          )}
+
+          {perms.healthCheckup && (
+            <button
+              type="button"
+              onClick={() => setCustomerActiveView('health')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
+                effectiveView === 'health'
+                  ? 'bg-rose-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <HeartPulse className="w-4 h-4" />
+              <span>Finance Health Check-up</span>
+            </button>
+          )}
         </div>
 
         {/* View 1: Customer Application Status Dashboard */}
-        {customerActiveView === 'dashboard' && (
+        {effectiveView === 'dashboard' && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Application Status Card */}
@@ -421,6 +457,7 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
 
             {/* Quick Calculator Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {perms.mfCalculator && (
               <div
                 onClick={() => setCustomerActiveView('mf-calc')}
                 className="p-5 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-800 text-white shadow-md cursor-pointer hover:opacity-95 transition-all"
@@ -431,10 +468,12 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
                 </div>
                 <h4 className="text-base font-bold">Mutual Fund Return Calculator</h4>
                 <p className="text-xs text-emerald-100 mt-1">
-                  Simulate high-yield compounding returns across large cap, small cap, and flexi cap schemes.
+                  Find the future value of your lumpsum or SIP investment in any scheme.
                 </p>
               </div>
+              )}
 
+              {perms.npsCalculator && (
               <div
                 onClick={() => setCustomerActiveView('nps-calc')}
                 className="p-5 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-900 text-white shadow-md cursor-pointer hover:opacity-95 transition-all"
@@ -443,27 +482,38 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
                   <Shield className="w-6 h-6 text-blue-200" />
                   <ArrowRight className="w-4 h-4 text-blue-200" />
                 </div>
-                <h4 className="text-base font-bold">NPS Pension Scheme Calculator</h4>
+                <h4 className="text-base font-bold">NPS Scheme Calculator</h4>
                 <p className="text-xs text-blue-100 mt-1">
-                  Forecast your retirement corpus, monthly pension payout, and ₹50,000 tax deduction benefits.
+                  Find the future value of your lumpsum or SIP investment in NPS schemes.
                 </p>
               </div>
+              )}
             </div>
           </div>
         )}
 
         {/* View 2: Mutual Fund Calculator */}
-        {customerActiveView === 'mf-calc' && (
+        {effectiveView === 'mf-calc' && perms.mfCalculator && (
           <MutualFundCalculator schemes={schemes} customerName={currentUser?.name} />
         )}
 
         {/* View 3: NPS Calculator */}
-        {customerActiveView === 'nps-calc' && (
+        {effectiveView === 'nps-calc' && perms.npsCalculator && (
           <NPSCalculator schemes={schemes} customerName={currentUser?.name} />
         )}
 
+        {/* View 5: Finance Health Check-up (only when an admin has switched it on) */}
+        {effectiveView === 'health' && perms.healthCheckup && (
+          <HealthCheckup
+            source="customer_portal"
+            defaultName={currentUser?.name}
+            defaultMobile={currentUser?.username}
+            defaultRegion={currentUser?.region}
+          />
+        )}
+
         {/* View 4: Browse Schemes */}
-        {customerActiveView === 'schemes' && (
+        {effectiveView === 'schemes' && perms.schemesCatalog && (
           <div className="space-y-4">
             <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
               Available Mutual Fund & NPS Investment Schemes
@@ -522,15 +572,17 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
               <span>← Home</span>
             </button>
           )}
-          <button
-            type="button"
-            onClick={onSwitchToAdmin}
-            className="px-3.5 py-1.5 rounded-lg text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 transition-colors flex items-center gap-1.5 shadow-md cursor-pointer"
-            title="Open Admin Login"
-          >
-            <Shield className="w-3.5 h-3.5" />
-            <span>Admin Login</span>
-          </button>
+          {onSwitchToAdmin && (
+            <button
+              type="button"
+              onClick={onSwitchToAdmin}
+              className="px-3.5 py-1.5 rounded-lg text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 transition-colors flex items-center gap-1.5 shadow-md cursor-pointer"
+              title="Open Admin Login"
+            >
+              <Shield className="w-3.5 h-3.5" />
+              <span>Admin Login</span>
+            </button>
+          )}
         </div>
       </div>
 

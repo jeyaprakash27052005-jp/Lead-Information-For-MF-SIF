@@ -2,7 +2,9 @@ import React, { useRef, useState } from 'react';
 import { FileSpreadsheet, Download, Upload, X, CheckCircle2, AlertCircle } from 'lucide-react';
 import { InvestmentScheme } from '../types';
 import {
-  SCHEME_COLUMNS,
+  ImportKind,
+  KIND_LABEL,
+  getColumns,
   MAX_IMPORT_ROWS,
   ParsedSchemeRow,
   downloadSchemeTemplate,
@@ -10,6 +12,7 @@ import {
 } from '../utils/schemeExcel';
 
 interface SchemeImportModalProps {
+  kind: ImportKind;
   schemes: InvestmentScheme[];
   onCreateScheme: (scheme: Omit<InvestmentScheme, 'id' | 'createdAt'>) => Promise<void>;
   onUpdateScheme: (id: string, updates: Partial<InvestmentScheme>) => Promise<void>;
@@ -17,12 +20,15 @@ interface SchemeImportModalProps {
 }
 
 export const SchemeImportModal: React.FC<SchemeImportModalProps> = ({
+  kind,
   schemes,
   onCreateScheme,
   onUpdateScheme,
   onClose,
 }) => {
   const fileRef = useRef<HTMLInputElement>(null);
+  const columns = getColumns(kind);
+  const label = KIND_LABEL[kind];
   const [fileName, setFileName] = useState<string | null>(null);
   const [rows, setRows] = useState<ParsedSchemeRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +50,7 @@ export const SchemeImportModal: React.FC<SchemeImportModalProps> = ({
     setFileName(file.name);
     setBusy(true);
     try {
-      setRows(await parseSchemeExcel(file, schemes));
+      setRows(await parseSchemeExcel(file, schemes, kind));
     } catch (err) {
       setFileName(null);
       setError(err instanceof Error ? err.message : 'Could not read this file.');
@@ -56,7 +62,7 @@ export const SchemeImportModal: React.FC<SchemeImportModalProps> = ({
 
   const handleTemplate = async () => {
     try {
-      await downloadSchemeTemplate();
+      await downloadSchemeTemplate(kind);
     } catch (_e) {
       setError('Could not create the template file. Please try again.');
     }
@@ -98,9 +104,9 @@ export const SchemeImportModal: React.FC<SchemeImportModalProps> = ({
         <div className="px-6 py-4 bg-slate-900 text-white flex items-start justify-between gap-3">
           <div>
             <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-              <FileSpreadsheet className="w-3.5 h-3.5" /> Excel Import
+              <FileSpreadsheet className="w-3.5 h-3.5" /> {label} Excel Import
             </span>
-            <h3 className="text-base font-bold mt-0.5">Import Mutual Fund & NPS Schemes</h3>
+            <h3 className="text-base font-bold mt-0.5">Import {label} Schemes</h3>
           </div>
           <button
             type="button"
@@ -118,7 +124,7 @@ export const SchemeImportModal: React.FC<SchemeImportModalProps> = ({
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <p className="font-bold text-slate-900 text-sm">Excel format (.xlsx only)</p>
+                <p className="font-bold text-slate-900 text-sm">{label} schemes - Excel format (.xlsx only)</p>
                 <p className="text-slate-500 mt-0.5">
                   Put the headings below in row 1 and one scheme per row from row 2 (up to {MAX_IMPORT_ROWS} rows).
                 </p>
@@ -129,7 +135,7 @@ export const SchemeImportModal: React.FC<SchemeImportModalProps> = ({
                 className="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center gap-1.5 cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5" />
-                Download Excel Template
+                Download {label} Template
               </button>
             </div>
             <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
@@ -143,7 +149,7 @@ export const SchemeImportModal: React.FC<SchemeImportModalProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {SCHEME_COLUMNS.map((c) => (
+                  {columns.map((c) => (
                     <tr key={c.key}>
                       <td className="px-3 py-2 font-bold text-slate-800 whitespace-nowrap">{c.header}</td>
                       <td className="px-3 py-2">
@@ -163,7 +169,7 @@ export const SchemeImportModal: React.FC<SchemeImportModalProps> = ({
               </table>
             </div>
             <p className="text-slate-500">
-              A scheme with the same Type and Name that already exists is updated instead of added twice.
+              A {label} scheme with the same Name that already exists is updated instead of added twice.
             </p>
           </div>
 
@@ -213,7 +219,7 @@ export const SchemeImportModal: React.FC<SchemeImportModalProps> = ({
                   <thead className="bg-slate-100 text-[10px] uppercase tracking-wider text-slate-500 sticky top-0">
                     <tr>
                       <th className="px-3 py-2">Row</th>
-                      <th className="px-3 py-2">Type</th>
+                      <th className="px-3 py-2">Category</th>
                       <th className="px-3 py-2">Scheme</th>
                       <th className="px-3 py-2">Return</th>
                       <th className="px-3 py-2">Result</th>
@@ -223,7 +229,7 @@ export const SchemeImportModal: React.FC<SchemeImportModalProps> = ({
                     {rows.map((r) => (
                       <tr key={r.rowNumber} className={r.action === 'invalid' ? 'bg-rose-50/60' : ''}>
                         <td className="px-3 py-2 text-slate-500">{r.rowNumber}</td>
-                        <td className="px-3 py-2">{r.data ? (r.data.type === 'nps' ? 'NPS' : 'Mutual Fund') : '—'}</td>
+                        <td className="px-3 py-2">{r.data?.category || '—'}</td>
                         <td className="px-3 py-2 font-semibold text-slate-800">{r.data?.name || '—'}</td>
                         <td className="px-3 py-2">{r.data ? `${r.data.expectedReturnRate}%` : '—'}</td>
                         <td className="px-3 py-2">

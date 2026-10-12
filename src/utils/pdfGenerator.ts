@@ -36,7 +36,6 @@ export interface NPSCalculationReport {
   lumpSumCorpus: number;
   annuityCorpus: number;
   monthlyPension: number;
-  estimatedTaxSavedYearly: number;
   yearlyBreakdown: Array<{
     age: number;
     invested: number;
@@ -259,7 +258,6 @@ export function generateNPSPDF(data: NPSCalculationReport, action: 'download' | 
   doc.text(`Monthly Contribution: ${formatInr(data.monthlyContribution)}`, 110, 58);
   doc.text(`Expected Growth Rate: ${data.expectedReturnRate}% p.a.`, 110, 65);
   doc.text(`Annuity Allocation: ${data.annuityPercent}% (at ${data.annuityReturnRate}% return)`, 110, 72);
-  doc.text('Formula: A = P x (1 + r/n)^(nt), n = 12 (monthly), t = retirement age - current age', 20, 76);
 
   // 3. Highlight Result Cards
   // Total Accumulated Corpus
@@ -304,22 +302,18 @@ export function generateNPSPDF(data: NPSCalculationReport, action: 'download' | 
   doc.setFontSize(7);
   doc.text(`100% Tax-Exempt at retirement`, 140, 104);
 
-  // 4. Tax Savings Box
-  doc.setFillColor(254, 243, 199);
-  doc.setDrawColor(251, 191, 36);
-  doc.roundedRect(14, 112, 182, 14, 2, 2, 'FD');
-  doc.setTextColor(146, 64, 14);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  doc.text('Section 80CCD(1B) Tax Saving Benefit:', 20, 120);
+  // 4. Formula used
   doc.setFont('helvetica', 'normal');
-  doc.text(`Exclusive extra deduction of ₹50,000/year saves ~${formatInr(Math.round(data.estimatedTaxSavedYearly))} annually under 30% tax bracket.`, 82, 120);
+  doc.setFontSize(7);
+  doc.setTextColor(71, 85, 105);
+  doc.text('Formula: Corpus = P x [((1+i)^n - 1) / i] x (1+i), where P = monthly contribution, i = annual return / 12 / 100, n = years x 12', 14, 114);
+  doc.text('Lump sum = Corpus x (100% - annuity %);  Monthly pension = Corpus x annuity % x annuity rate / 12', 14, 119);
 
   // 5. Progression Roadmap Table
   doc.setTextColor(15, 23, 42);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(11);
-  doc.text('Milestone Progression Roadmap to Retirement', 14, 134);
+  doc.text('Milestone Progression Roadmap to Retirement', 14, 128);
 
   const tableRows = data.yearlyBreakdown
     .filter((_, idx) => idx % 5 === 0 || idx === data.yearlyBreakdown.length - 1)
@@ -332,7 +326,7 @@ export function generateNPSPDF(data: NPSCalculationReport, action: 'download' | 
     ]);
 
   autoTable(doc, {
-    startY: 138,
+    startY: 132,
     head: [['Subscriber Age', 'Total Contributed', 'Accumulated Corpus', 'Lump Sum Portion', 'Monthly Pension']],
     body: tableRows,
     theme: 'grid',

@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import { nodeHandler } from './server-lib/sendReport.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -9,7 +10,12 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
-app.use(express.json());
+app.use(express.json({ limit: '6mb' }));
+
+// E-mails the Finance Health Check-up PDF (same handler the Vercel function uses)
+app.post('/api/send-report', (req, res) => {
+  nodeHandler(req as never, res as never).catch(() => res.status(500).json({ error: 'Could not send the report.' }));
+});
 
 // Block any download of internal lock files, configs, or source files directly
 app.use((req, res, next) => {

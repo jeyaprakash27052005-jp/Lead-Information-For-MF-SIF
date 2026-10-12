@@ -126,7 +126,8 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
     }
   };
 
-  const canAdd = currentUser.role === 'head' || currentUser.role === 'area_incharge';
+  const canAdd =
+    currentUser.role === 'head' || currentUser.role === 'regional_incharge' || currentUser.role === 'area_incharge';
 
   return (
     <div className="space-y-4">
@@ -194,6 +195,17 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
               options={Array.from(new Set(leads.map((l) => l.addedByName))).sort().map((n) => ({ value: n, label: n }))}
             />
 
+            {/* Add Lead Button */}
+            {canAdd && onAddNewLead && (
+              <button
+                onClick={onAddNewLead}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-xs ml-auto"
+              >
+                <PlusCircle className="w-3.5 h-3.5 text-indigo-100" />
+                <span>Add Lead</span>
+              </button>
+            )}
+
             {/* Date Range Filter */}
             <DateRangeFilter from={dateFrom} to={dateTo} onFrom={setDateFrom} onTo={setDateTo} />
 
@@ -208,17 +220,6 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
                 setDateTo('');
               }}
             />
-
-            {/* Add Lead Button */}
-            {canAdd && onAddNewLead && (
-              <button
-                onClick={onAddNewLead}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 transition-colors shadow-xs ml-auto"
-              >
-                <PlusCircle className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Add Lead</span>
-              </button>
-            )}
           </div>
         </div>
       </div>

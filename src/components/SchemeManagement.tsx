@@ -43,7 +43,7 @@ export const SchemeManagement: React.FC<SchemeManagementProps> = ({
   const [riskFilter, setRiskFilter] = useState('ALL');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [importKind, setImportKind] = useState<'mutual_fund' | 'nps' | null>(null);
   const [editingScheme, setEditingScheme] = useState<InvestmentScheme | null>(null);
   const [pendingDelete, setPendingDelete] = useState<InvestmentScheme | null>(null);
   const [saving, setSaving] = useState(false);
@@ -164,11 +164,19 @@ export const SchemeManagement: React.FC<SchemeManagementProps> = ({
         <div className="flex flex-wrap items-center gap-2 shrink-0">
           <button
             type="button"
-            onClick={() => setIsImportOpen(true)}
+            onClick={() => setImportKind('mutual_fund')}
             className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer"
           >
             <FileSpreadsheet className="w-4 h-4" />
-            <span>Import from Excel</span>
+            <span>Import Mutual Funds (Excel)</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setImportKind('nps')}
+            className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer"
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            <span>Import NPS Schemes (Excel)</span>
           </button>
           <button
             type="button"
@@ -574,12 +582,13 @@ export const SchemeManagement: React.FC<SchemeManagementProps> = ({
         onCancel={() => setPendingDelete(null)}
       />
 
-      {isImportOpen && (
+      {importKind && (
         <SchemeImportModal
+          kind={importKind}
           schemes={schemes}
           onCreateScheme={onCreateScheme}
           onUpdateScheme={onUpdateScheme}
-          onClose={() => setIsImportOpen(false)}
+          onClose={() => setImportKind(null)}
         />
       )}
     </div>

@@ -9,7 +9,14 @@
     "preview": "vite preview",
     "start": "tsx server.ts",
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "dev:admin": "vite --config apps/admin/vite.config.ts",
+    "dev:customer": "vite --config apps/customer/vite.config.ts",
+    "dev:health": "vite --config apps/health-check/vite.config.ts",
+    "build:admin": "vite build --config apps/admin/vite.config.ts",
+    "build:customer": "vite build --config apps/customer/vite.config.ts",
+    "build:health": "vite build --config apps/health-check/vite.config.ts",
+    "build:apps": "npm run build:admin && npm run build:customer && npm run build:health"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

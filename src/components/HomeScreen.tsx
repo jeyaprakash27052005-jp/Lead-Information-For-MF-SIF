@@ -24,6 +24,10 @@ import { formatInr } from '../utils/currency';
 
 interface HomeScreenProps {
   schemes: InvestmentScheme[];
+  /** false in the stand-alone Customer portal */
+  showAdminLogin?: boolean;
+  /** when given, a Finance Health Check-up button is shown */
+  onOpenHealthCheck?: () => void;
   onOpenAdminLogin: () => void;
   onOpenCustomerLogin: () => void;
   onOpenCustomerRegister: () => void;
@@ -31,6 +35,8 @@ interface HomeScreenProps {
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
   schemes,
+  showAdminLogin = true,
+  onOpenHealthCheck,
   onOpenAdminLogin,
   onOpenCustomerLogin,
   onOpenCustomerRegister,
@@ -110,6 +116,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           {/* Top Right: Admin Login & Customer Login */}
           <div className="flex items-center gap-2">
+            {onOpenHealthCheck && (
+              <button
+                type="button"
+                onClick={onOpenHealthCheck}
+                className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-rose-50 text-rose-800 hover:bg-rose-100 border border-rose-300 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                title="Free Finance Health Check-up"
+              >
+                <span>Finance Health Check-up</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={onOpenCustomerLogin}
@@ -120,15 +136,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <span>Customer Login</span>
             </button>
 
-            <button
-              type="button"
-              onClick={onOpenAdminLogin}
-              className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white hover:bg-slate-800 border border-slate-900 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
-              title="Admin Login - Head & Officers Portal"
-            >
-              <Shield className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Admin Login</span>
-            </button>
+            {showAdminLogin && (
+              <button
+                type="button"
+                onClick={onOpenAdminLogin}
+                className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white hover:bg-slate-800 border border-slate-900 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                title="Admin Login - Head & Officers Portal"
+              >
+                <Shield className="w-3.5 h-3.5 text-indigo-400" />
+                <span>Admin Login</span>
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -267,13 +285,24 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               >
                 Customer Login
               </button>
-              <button
-                type="button"
-                onClick={onOpenAdminLogin}
-                className="px-5 py-2.5 rounded-xl text-sm font-bold bg-slate-900 text-white hover:bg-slate-800 cursor-pointer"
-              >
-                Admin Login
-              </button>
+              {showAdminLogin && (
+                <button
+                  type="button"
+                  onClick={onOpenAdminLogin}
+                  className="px-5 py-2.5 rounded-xl text-sm font-bold bg-slate-900 text-white hover:bg-slate-800 cursor-pointer"
+                >
+                  Admin Login
+                </button>
+              )}
+              {onOpenHealthCheck && (
+                <button
+                  type="button"
+                  onClick={onOpenHealthCheck}
+                  className="px-5 py-2.5 rounded-xl text-sm font-bold bg-rose-50 text-rose-800 hover:bg-rose-100 border border-rose-300 cursor-pointer"
+                >
+                  Finance Health Check-up
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -292,13 +321,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             >
               Customer Login
             </button>
-            <span>•</span>
-            <button
-              onClick={onOpenAdminLogin}
-              className="text-slate-700 hover:underline font-semibold cursor-pointer"
-            >
-              Admin Login
-            </button>
+            {showAdminLogin && (
+              <>
+                <span>•</span>
+                <button
+                  onClick={onOpenAdminLogin}
+                  className="text-slate-700 hover:underline font-semibold cursor-pointer"
+                >
+                  Admin Login
+                </button>
+              </>
+            )}
           </div>
         </div>
       </footer>

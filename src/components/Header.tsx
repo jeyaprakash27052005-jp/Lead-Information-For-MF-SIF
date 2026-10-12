@@ -96,6 +96,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Quick Dual App Links / External Sub-Domain Reference */}
           <div className="hidden md:flex items-center gap-2">
             {currentUser?.role === 'customer' ? null : isCustomerView ? (
+              !onSwitchToAdminPortal ? null : (
               <button
                 type="button"
                 onClick={onSwitchToAdminPortal}
@@ -105,7 +106,8 @@ export const Header: React.FC<HeaderProps> = ({
                 <ExternalLink className="w-3.5 h-3.5 text-indigo-600" />
                 <span>Admin Portal</span>
               </button>
-            ) : (
+              )
+            ) : !onSwitchToCustomerPortal ? null : (
               <div className="flex items-center gap-1.5">
                 <button
                   type="button"

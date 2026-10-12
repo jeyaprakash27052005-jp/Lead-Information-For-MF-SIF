@@ -69,6 +69,21 @@ service cloud.firestore {
       allow delete: if isValidId(adId);
     }
 
+    match /healthReports/{reportId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(reportId)
+        && request.resource.data.name is string && request.resource.data.name.size() <= 128
+        && request.resource.data.age is number && request.resource.data.age >= 0 && request.resource.data.age <= 150
+        && request.resource.data.gender in ['Male', 'Female', 'Other']
+        && request.resource.data.annualIncome is number && request.resource.data.annualIncome >= 0
+        && request.resource.data.overallScore is number && request.resource.data.overallScore >= 0 && request.resource.data.overallScore <= 100
+        && request.resource.data.answers is map
+        && request.resource.data.source in ['health_portal', 'customer_portal']
+        && (!('mobile' in request.resource.data) || (request.resource.data.mobile is string && request.resource.data.mobile.matches('^[6-9][0-9]{9}$')))
+        && (!('email' in request.resource.data) || (request.resource.data.email is string && request.resource.data.email.size() <= 120));
+      allow delete: if isValidId(reportId);
+    }
+
     match /test/{docId} {
       allow get, list, write: if true;
     }

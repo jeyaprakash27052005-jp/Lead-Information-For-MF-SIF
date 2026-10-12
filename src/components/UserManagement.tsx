@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, UserRole } from '../types';
+import { CustomerPermissions, User, UserRole } from '../types';
 import { ConfirmModal } from './ConfirmModal';
 import {
   UserPlus,
@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { DEFAULT_REGIONS, isHqRegion } from '../utils/regions';
 import { SearchBox, SelectFilter, ClearFilters } from './FilterControls';
+import { CustomerPermissionsModal } from './CustomerPermissionsModal';
 
 interface UserManagementProps {
   users: User[];
@@ -35,6 +36,7 @@ interface UserManagementProps {
   onToggleStatus: (userId: string, newStatus: 'active' | 'inactive') => Promise<void>;
   onDeleteUser: (userId: string) => Promise<void>;
   onEditUserProfile: (user: User) => void;
+  onUpdatePermissions?: (userId: string, permissions: CustomerPermissions) => Promise<void>;
   onCreateRegion?: (name: string) => Promise<void>;
   onDeleteRegion?: (name: string) => Promise<void>;
   regions?: string[];
@@ -47,6 +49,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
   onToggleStatus,
   onDeleteUser,
   onEditUserProfile,
+  onUpdatePermissions,
   onCreateRegion,
   onDeleteRegion,
   regions = DEFAULT_REGIONS,
@@ -56,6 +59,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
   // Head and Regional Incharge can create accounts (Regional Incharge: Area Incharges in own region only)
   const canCreateUsers = isHead || isRegional;
 
+  const [permUser, setPermUser] = useState<User | null>(null);
   const [roleFilter, setRoleFilter] = useState<'all' | UserRole>('all');
   const [userSearch, setUserSearch] = useState('');
   const [userStatusFilter, setUserStatusFilter] = useState('ALL');
@@ -497,6 +501,19 @@ export const UserManagement: React.FC<UserManagementProps> = ({
                           </button>
                         )}
 
+                        {/* Customer feature permissions - Head and Regional Incharge only */}
+                        {u.role === 'customer' &&
+                          onUpdatePermissions &&
+                          (isHead || (isRegional && u.region === currentUser.region)) && (
+                            <button
+                              onClick={() => setPermUser(u)}
+                              className="px-2.5 py-1 rounded text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors cursor-pointer"
+                              title={`Choose which features ${u.name} can use`}
+                            >
+                              Permissions
+                            </button>
+                          )}
+
                         {canAct ? (
                           <>
                             {/* Inactive / Active Toggle - EXPLICIT REQUIREMENT */}
@@ -523,7 +540,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </>
-                        ) : !isHead ? (
+                        ) : !isHead && u.role !== 'customer' ? (
                           <span className="text-[11px] text-slate-400 italic">
                             Protected System ID
                           </span>
@@ -537,6 +554,14 @@ export const UserManagement: React.FC<UserManagementProps> = ({
           </table>
         </div>
       </div>
+
+      {permUser && onUpdatePermissions && (
+        <CustomerPermissionsModal
+          customer={permUser}
+          onSave={onUpdatePermissions}
+          onClose={() => setPermUser(null)}
+        />
+      )}
 
       {/* Add User Modal Dialog */}
       {isAddModalOpen && (
