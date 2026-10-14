@@ -21,6 +21,10 @@ import { CustomerPortal } from './components/CustomerPortal';
 import { HomeScreen } from './components/HomeScreen';
 import { AdsManagement } from './components/AdsManagement';
 import { AddLeadPage } from './components/AddLeadPage';
+import { FeatureControls } from './components/FeatureControls';
+import { HealthQuestionsAdmin } from './components/HealthQuestionsAdmin';
+import { FeatureOff } from './components/FeatureOff';
+import { AppSettingsProvider, useAppSettings } from './context/AppSettings';
 import { HealthReportsAdmin } from './components/HealthReportsAdmin';
 import { HealthCheckup } from './components/HealthCheckup';
 import { PlusCircle } from 'lucide-react';
@@ -29,7 +33,16 @@ import { getAllRegions, NATIONAL_HQ_REGION } from './utils/regions';
 /** 'all' = the complete site; 'admin' / 'customer' = a stand-alone portal built from the same code */
 export type AppPortal = 'all' | 'admin' | 'customer';
 
-export default function App({ portal = 'all' }: { portal?: AppPortal } = {}) {
+export default function App(props: { portal?: AppPortal } = {}) {
+  return (
+    <AppSettingsProvider>
+      <AppInner {...props} />
+    </AppSettingsProvider>
+  );
+}
+
+function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
+  const { settings, loaded: settingsLoaded } = useAppSettings();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -424,7 +437,7 @@ export default function App({ portal = 'all' }: { portal?: AppPortal } = {}) {
     showFeedback(`Selected: ${schemeName}. Please enter investor dossier.`);
   };
 
-  if (loading) {
+  if (loading || !settingsLoaded) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
@@ -467,7 +480,9 @@ export default function App({ portal = 'all' }: { portal?: AppPortal } = {}) {
           </div>
         )}
 
-        {showHealth ? (
+        {!currentUser && portal === 'customer' && !settings.features.customerPortal ? (
+          <FeatureOff title="The Customer Portal is switched off" message="Please try again later or contact your relationship officer." />
+        ) : showHealth ? (
           <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
             <button
               type="button"
@@ -497,6 +512,11 @@ export default function App({ portal = 'all' }: { portal?: AppPortal } = {}) {
               updatePortalMode('customer');
               setShowHome(false);
             }}
+          />
+        ) : portalMode === 'customer' && !settings.features.customerPortal ? (
+          <FeatureOff
+            title="The Customer Portal is switched off"
+            message="Please try again later or contact your relationship officer."
           />
         ) : portalMode === 'customer' ? (
           <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -823,6 +843,14 @@ export default function App({ portal = 'all' }: { portal?: AppPortal } = {}) {
                 currentUser={currentUser}
                 onViewLead={(lead) => setDetailsModalLead(lead)}
               />
+            )}
+
+            {/* Health check-up questions + feature switches: Head and Regional Incharge only */}
+            {activeTab === 'health-questions' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge') && (
+              <HealthQuestionsAdmin currentUser={currentUser} onNotify={showFeedback} />
+            )}
+            {activeTab === 'feature-controls' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge') && (
+              <FeatureControls currentUser={currentUser} onNotify={showFeedback} />
             )}
 
             {/* VIEW 10: Ads Management (Head uploads home screen ad images) */}

@@ -4,6 +4,7 @@ import { MutualFundCalculator } from './MutualFundCalculator';
 import { NPSCalculator } from './NPSCalculator';
 import { HealthCheckup } from './HealthCheckup';
 import { resolvePermissions } from '../utils/permissions';
+import { useAppSettings } from '../context/AppSettings';
 
 export type CustomerView = 'dashboard' | 'mf-calc' | 'nps-calc' | 'schemes' | 'health';
 import {
@@ -73,7 +74,13 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
   activeView,
   onViewChange,
 }) => {
-  const [activeTab, setActiveTab] = useState<'register' | 'login' | 'mf-calc' | 'nps-calc' | 'schemes'>(initialTab);
+  const { settings } = useAppSettings();
+  const [activeTab, setActiveTab] = useState<'register' | 'login' | 'mf-calc' | 'nps-calc' | 'schemes'>(
+    !settings.features.customerRegistration && initialTab === 'register' ? 'login' : initialTab
+  );
+  useEffect(() => {
+    if (!settings.features.customerRegistration && activeTab === 'register') setActiveTab('login');
+  }, [settings.features.customerRegistration, activeTab]);
   const [customerActiveView, setCustomerActiveViewState] = useState<CustomerView>(activeView || 'dashboard');
 
   // Top navigation (in the app shell) and the tab buttons below it control the same view
@@ -217,7 +224,14 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
   // LOGGED-IN CUSTOMER VIEW
   // ----------------------------------------------------
   if (currentUser && (currentUser.role === 'customer' || customerLead)) {
-    const perms = resolvePermissions(currentUser);
+    // A customer can use a feature only when the admin switched it on for everyone AND allowed it for this customer
+    const own = resolvePermissions(currentUser);
+    const perms = {
+      mfCalculator: own.mfCalculator && settings.features.mfCalculator,
+      npsCalculator: own.npsCalculator && settings.features.npsCalculator,
+      schemesCatalog: own.schemesCatalog && settings.features.schemesCatalog,
+      healthCheckup: own.healthCheckup && settings.features.healthCheckup,
+    };
     const viewAllowed: Record<CustomerView, boolean> = {
       dashboard: true,
       'mf-calc': perms.mfCalculator,
@@ -589,6 +603,7 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
       {/* Auth Switcher Card */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="flex border-b border-slate-200 overflow-x-auto scrollbar-thin">
+          {settings.features.customerRegistration && (
           <button
             type="button"
             onClick={() => {
@@ -604,6 +619,7 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
             <UserPlus className="w-4 h-4" />
             <span>1. Create Account</span>
           </button>
+          )}
 
           <button
             type="button"

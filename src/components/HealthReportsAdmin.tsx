@@ -1,19 +1,30 @@
 import React, { useMemo, useState } from 'react';
-import { HeartPulse, Download, Eye, Trash2, X, RefreshCw, MessageCircle, Mail, Phone } from 'lucide-react';
+import { HeartPulse, Download, Eye, Trash2, X, RefreshCw, MessageCircle, Mail, Phone, Send } from 'lucide-react';
 import { HealthReport, User } from '../types';
 import { SearchBox, SelectFilter, DateRangeFilter, ClearFilters, isoDay } from './FilterControls';
 import { formatDateTime } from '../utils/dateTime';
 import { formatInr } from '../utils/currency';
 import {
-  HEALTH_CATEGORIES,
-  HEALTH_QUESTIONS,
+  DEFAULT_HEALTH_CONFIG,
+  HealthConfig,
   LIKERT,
   BAND_STYLE,
   HealthBand,
   computeHealthScore,
 } from '../utils/healthCheck';
-import { generateHealthReportPDF } from '../utils/healthReportPdf';
+import { apiService } from '../services/api';
+import { computeInvestmentPlan } from '../utils/healthInvestPlan';
+import { useAppSettings } from '../context/AppSettings';
+import { generateHealthReportPDF, blobToBase64 } from '../utils/healthReportPdf';
 import { ConfirmModal } from './ConfirmModal';
+
+const API_BASE: string = (import.meta.env?.VITE_REPORT_API_URL as string | undefined) || '';
+
+/** The questions this person actually answered (falls back to the starter set for old reports) */
+const configFor = (r: HealthReport): HealthConfig =>
+  r.questionSnapshot && r.categorySnapshot && r.questionSnapshot.length
+    ? { categories: r.categorySnapshot, questions: r.questionSnapshot }
+    : DEFAULT_HEALTH_CONFIG;
 
 interface HealthReportsAdminProps {
   reports: HealthReport[];
@@ -30,6 +41,13 @@ const SOURCE_LABEL: Record<HealthReport['source'], string> = {
 const bandOf = (r: HealthReport) => (r.band as HealthBand) in BAND_STYLE ? (r.band as HealthBand) : 'Fair';
 
 export const HealthReportsAdmin: React.FC<HealthReportsAdminProps> = ({ reports, currentUser, onRefresh, onDelete }) => {
+  const { settings } = useAppSettings();
+  const planFor = (r: HealthReport) =>
+    r.investmentPlan ||
+    computeInvestmentPlan(
+      { age: r.age, annualIncome: r.annualIncome, band: r.band as HealthBand },
+      { mfReturnRate: settings.mfReturnRate, npsReturnRate: settings.npsReturnRate }
+    );
   const [search, setSearch] = useState('');
   const [bandFilter, setBandFilter] = useState('ALL');
   const [sourceFilter, setSourceFilter] = useState('ALL');
@@ -70,7 +88,8 @@ export const HealthReportsAdmin: React.FC<HealthReportsAdminProps> = ({ reports,
         annualIncome: r.annualIncome,
         region: r.region,
         createdAt: r.createdAt,
-        score: computeHealthScore(r.answers),
+        score: computeHealthScore(r.answers, configFor(r)),
+        plan: planFor(r),
       },
       'download'
     );
@@ -84,7 +103,60 @@ export const HealthReportsAdmin: React.FC<HealthReportsAdminProps> = ({ reports,
     }
   };
 
-  const detail = selected ? computeHealthScore(selected.answers) : null;
+  const detail = selected ? computeHealthScore(selected.answers, configFor(selected)) : null;
+  const selectedCfg = selected ? configFor(selected) : DEFAULT_HEALTH_CONFIG;
+
+  const [resending, setResending] = useState<string | null>(null);
+  const [resendMsg, setResendMsg] = useState<string | null>(null);
+
+  /** Builds the report PDF again and e-mails it to the address the person gave */
+  const resendEmail = async (r: HealthReport) => {
+    if (!r.email || !r.mobile) return;
+    setResending(r.id);
+    setResendMsg(null);
+    try {
+      const blob = generateHealthReportPDF(
+        {
+          name: r.name,
+          age: r.age,
+          gender: r.gender,
+          occupation: r.occupation,
+          annualIncome: r.annualIncome,
+          region: r.region,
+          createdAt: r.createdAt,
+          score: computeHealthScore(r.answers, configFor(r)),
+          plan: planFor(r),
+        },
+        'blob'
+      ) as Blob;
+      const res = await fetch(`${API_BASE}/api/send-report`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: r.name,
+          email: r.email,
+          mobile: r.mobile,
+          score: r.overallScore,
+          band: r.band,
+          pdfBase64: await blobToBase64(blob),
+        }),
+      });
+      const j = await res.json().catch(() => null);
+      if (res.ok && j && j.emailSent) {
+        await apiService.markHealthReportEmail(r.id, 'sent');
+        setResendMsg(`Report e-mailed to ${r.email}.`);
+      } else {
+        const reason = String((j && (j.reason || j.error)) || (j ? `HTTP_${res.status}` : 'API_NOT_FOUND'));
+        await apiService.markHealthReportEmail(r.id, reason === 'EMAIL_NOT_CONFIGURED' || !j ? 'not_configured' : 'failed', reason);
+        setResendMsg(`Could not e-mail the report (${reason}). Check the e-mail settings in Feature Controls.`);
+      }
+    } catch (_e) {
+      setResendMsg('Could not reach the e-mail service. Please try again.');
+    } finally {
+      setResending(null);
+      await onRefresh();
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -200,6 +272,20 @@ export const HealthReportsAdmin: React.FC<HealthReportsAdminProps> = ({ reports,
                                 {r.email}
                               </div>
                             )}
+                            {r.email && (
+                              <div
+                                className={`text-[11px] font-bold ${
+                                  r.emailStatus === 'sent' ? 'text-emerald-700' : r.emailStatus ? 'text-rose-600' : 'text-slate-400'
+                                }`}
+                                title={r.emailError || ''}
+                              >
+                                {r.emailStatus === 'sent'
+                                  ? 'E-mail sent'
+                                  : r.emailStatus
+                                  ? `E-mail not sent${r.emailError ? ` (${r.emailError})` : ''}`
+                                  : 'E-mail not tried'}
+                              </div>
+                            )}
                           </div>
                         ) : (
                           <span className="text-slate-400">Viewed only — no download</span>
@@ -235,6 +321,17 @@ export const HealthReportsAdmin: React.FC<HealthReportsAdminProps> = ({ reports,
                           >
                             <Download className="w-3.5 h-3.5" />
                           </button>
+                          {r.email && r.mobile && (
+                            <button
+                              type="button"
+                              title="Send the report PDF by e-mail again"
+                              onClick={() => resendEmail(r)}
+                              disabled={resending === r.id}
+                              className="p-1.5 rounded-lg text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 cursor-pointer disabled:opacity-50"
+                            >
+                              <Send className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                           {r.mobile && (
                             <a
                               title="Message on WhatsApp"
@@ -268,6 +365,10 @@ export const HealthReportsAdmin: React.FC<HealthReportsAdminProps> = ({ reports,
           </div>
         )}
       </div>
+
+      {resendMsg && (
+        <div className="p-3 rounded-lg bg-sky-50 border border-sky-200 text-sky-800 text-xs font-semibold">{resendMsg}</div>
+      )}
 
       {/* Full report */}
       {selected && detail && (
@@ -319,10 +420,10 @@ export const HealthReportsAdmin: React.FC<HealthReportsAdminProps> = ({ reports,
               <div>
                 <h4 className="font-bold text-slate-900 text-sm mb-2">Answers</h4>
                 <div className="rounded-lg border border-slate-200 divide-y divide-slate-100">
-                  {HEALTH_CATEGORIES.map((cat) => (
+                  {selectedCfg.categories.map((cat) => (
                     <div key={cat.id} className="p-3 space-y-1.5">
                       <p className="font-bold text-slate-800">{cat.label}</p>
-                      {HEALTH_QUESTIONS.filter((q) => q.category === cat.id).map((q) => (
+                      {selectedCfg.questions.filter((q) => q.category === cat.id).map((q) => (
                         <div key={q.id} className="flex justify-between gap-3 text-slate-600">
                           <span>{q.text}</span>
                           <span className="font-semibold text-slate-800 whitespace-nowrap">

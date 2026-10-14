@@ -119,6 +119,35 @@ export const HEALTH_QUESTIONS: HealthQuestion[] = [
   { id: 'min3', category: 'mindset', text: 'I feel confident that I will be financially comfortable in the future.' },
 ];
 
+/** The question set shown to people. The admin team edits it; this is the starter set. */
+export interface HealthConfig {
+  categories: HealthCategory[];
+  questions: HealthQuestion[];
+  updatedAt?: string;
+  updatedBy?: string;
+}
+
+export const DEFAULT_HEALTH_CONFIG: HealthConfig = { categories: HEALTH_CATEGORIES, questions: HEALTH_QUESTIONS };
+
+/** Keeps only valid categories/questions and drops categories that have no questions */
+export const cleanHealthConfig = (raw: unknown): HealthConfig => {
+  const r = (raw && typeof raw === 'object' ? raw : {}) as Partial<HealthConfig>;
+  const cats = (Array.isArray(r.categories) ? r.categories : []).filter(
+    (c) => c && typeof c.id === 'string' && typeof c.label === 'string' && c.label.trim()
+  ) as HealthCategory[];
+  const catIds = new Set(cats.map((c) => c.id));
+  const qs = (Array.isArray(r.questions) ? r.questions : []).filter(
+    (q) => q && typeof q.id === 'string' && typeof q.text === 'string' && q.text.trim() && catIds.has(q.category)
+  ) as HealthQuestion[];
+  const used = new Set(qs.map((q) => q.category));
+  return {
+    categories: cats.filter((c) => used.has(c.id)),
+    questions: qs,
+    updatedAt: typeof r.updatedAt === 'string' ? r.updatedAt : undefined,
+    updatedBy: typeof r.updatedBy === 'string' ? r.updatedBy : undefined,
+  };
+};
+
 export type HealthBand = 'Excellent' | 'Good' | 'Fair' | 'At Risk' | 'Critical';
 
 export const bandFor = (score: number): HealthBand =>
@@ -151,12 +180,16 @@ export interface HealthScoreResult {
 
 const questionScore = (q: HealthQuestion, answer: number) => (q.reverse ? 6 - answer : answer);
 
-export const isComplete = (answers: Record<string, number>) =>
-  HEALTH_QUESTIONS.every((q) => Number.isInteger(answers[q.id]) && answers[q.id] >= 1 && answers[q.id] <= 5);
+export const isComplete = (answers: Record<string, number>, config: HealthConfig = DEFAULT_HEALTH_CONFIG) =>
+  config.questions.length > 0 &&
+  config.questions.every((q) => Number.isInteger(answers[q.id]) && answers[q.id] >= 1 && answers[q.id] <= 5);
 
-export function computeHealthScore(answers: Record<string, number>): HealthScoreResult {
-  const categories = HEALTH_CATEGORIES.map((c) => {
-    const qs = HEALTH_QUESTIONS.filter((q) => q.category === c.id);
+export function computeHealthScore(
+  answers: Record<string, number>,
+  config: HealthConfig = DEFAULT_HEALTH_CONFIG
+): HealthScoreResult {
+  const categories = config.categories.map((c) => {
+    const qs = config.questions.filter((q) => q.category === c.id);
     const avg = qs.reduce((sum, q) => sum + questionScore(q, answers[q.id] || 1), 0) / qs.length;
     const score = Math.round(((avg - 1) / 4) * 100);
     const tip = score >= 70 ? c.high : score >= 45 ? c.mid : c.low;
@@ -168,7 +201,7 @@ export function computeHealthScore(answers: Record<string, number>): HealthScore
   const strengths = byScore.filter((c) => c.score >= 65).slice(0, 2).map((c) => c.label);
   const priorities = [...byScore].reverse().filter((c) => c.score < 65).slice(0, 3).map((c) => c.label);
 
-  const sc = (id: string) => categories.find((c) => c.id === id)!.score;
+  const sc = (id: string) => categories.find((c) => c.id === id)?.score ?? 50;
   let moneyStyle = 'Balanced Builder';
   if (sc('investing') >= 70 && sc('savings') >= 70) moneyStyle = 'Goal-Driven Planner';
   else if (sc('savings') >= 70 && sc('investing') < 50) moneyStyle = 'Cautious Saver';

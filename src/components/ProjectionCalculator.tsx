@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from 'react';
-import { InvestmentScheme } from '../types';
-import { TrendingUp, Shield, IndianRupee, Eye, Download, X, ArrowRight } from 'lucide-react';
+import { TrendingUp, Shield, IndianRupee, Eye, Download, X } from 'lucide-react';
 import { formatInr } from '../utils/currency';
 import { NumField } from './NumField';
+import { useAppSettings } from '../context/AppSettings';
+import { FeatureOff } from './FeatureOff';
 import {
   InvestMode,
   SipFrequency,
@@ -19,9 +20,10 @@ import { generateProjectionPDF } from '../utils/projectionPdf';
 
 export interface ProjectionCalculatorProps {
   kind: 'mutual_fund' | 'nps';
-  schemes: InvestmentScheme[];
-  onApplyScheme?: (schemeName: string, amount: number) => void;
   customerName?: string;
+  /** kept so older callers still compile; the calculator no longer uses a scheme list */
+  schemes?: unknown;
+  onApplyScheme?: unknown;
 }
 
 const THEMES = {
@@ -89,16 +91,10 @@ const Segmented = <T extends string>({
   </div>
 );
 
-export const ProjectionCalculator: React.FC<ProjectionCalculatorProps> = ({
-  kind,
-  schemes,
-  onApplyScheme,
-  customerName,
-}) => {
+export const ProjectionCalculator: React.FC<ProjectionCalculatorProps> = ({ kind, customerName }) => {
   const theme = THEMES[kind];
-  const kindSchemes = schemes.filter((s) => s.type === kind);
-
-  const [selectedId, setSelectedId] = useState<string>(kindSchemes[0]?.id || '');
+  const { settings } = useAppSettings();
+  const label = kind === 'nps' ? 'NPS investment' : 'Mutual fund investment';
   const [mode, setMode] = useState<InvestMode>('sip');
   const [lumpStr, setLumpStr] = useState('100000');
   const [sipStr, setSipStr] = useState('5000');
@@ -107,8 +103,8 @@ export const ProjectionCalculator: React.FC<ProjectionCalculatorProps> = ({
   const [unit, setUnit] = useState<DurationUnit>('years');
   const [showView, setShowView] = useState(false);
 
-  const scheme = kindSchemes.find((s) => s.id === selectedId) || kindSchemes[0];
-  const rate = scheme?.expectedReturnRate ?? 0;
+  // The expected return is fixed by the Head / Regional Incharge in the admin portal
+  const rate = kind === 'nps' ? settings.npsReturnRate : settings.mfReturnRate;
 
   const num = (v: string) => (v.trim() === '' || v === '.' ? NaN : Number(v));
   const input: ProjectionInput = {
@@ -120,8 +116,8 @@ export const ProjectionCalculator: React.FC<ProjectionCalculatorProps> = ({
     durationUnit: unit,
     annualRatePct: rate,
   };
-  const errors = scheme ? validateProjection(input) : { rate: 'No scheme available' };
-  const isValid = !!scheme && Object.keys(errors).length === 0;
+  const errors = validateProjection(input);
+  const isValid = Object.keys(errors).length === 0;
 
   const result = useMemo(
     () => (isValid ? computeProjection(input) : null),
@@ -135,11 +131,9 @@ export const ProjectionCalculator: React.FC<ProjectionCalculatorProps> = ({
 
   const downloadPdf = () =>
     result &&
-    scheme &&
     generateProjectionPDF({
       kind,
-      schemeName: scheme.name,
-      category: scheme.category,
+      schemeName: label,
       input,
       result,
       customerName,
@@ -162,35 +156,10 @@ export const ProjectionCalculator: React.FC<ProjectionCalculatorProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Inputs */}
         <div className="lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-5">
-          {/* Scheme */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-              Select Scheme
-            </label>
-            {kindSchemes.length === 0 ? (
-              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3 font-semibold">
-                No schemes are available yet. Please check again later.
-              </p>
-            ) : (
-              <>
-                <select
-                  value={scheme?.id || ''}
-                  onChange={(e) => setSelectedId(e.target.value)}
-                  className="w-full px-3 py-2.5 text-xs font-semibold border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500 bg-white"
-                >
-                  {kindSchemes.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} ({s.category})
-                    </option>
-                  ))}
-                </select>
-                <p className="text-[11px] text-slate-500 mt-1.5">
-                  Expected return used for the calculation:{' '}
-                  <span className={`font-bold ${theme.link}`}>{rate}% per year</span> (set for this scheme)
-                </p>
-              </>
-            )}
-          </div>
+          <p className="text-[11px] text-slate-500 -mt-1">
+            Expected return used for the calculation:{' '}
+            <span className={`font-bold ${theme.link}`}>{rate}% per year</span> (fixed by the admin)
+          </p>
 
           {/* How to invest */}
           <div>
@@ -286,16 +255,6 @@ export const ProjectionCalculator: React.FC<ProjectionCalculatorProps> = ({
             </button>
           </div>
 
-          {onApplyScheme && scheme && (
-            <button
-              type="button"
-              onClick={() => onApplyScheme(scheme.name, usesSip ? input.sipAmount || 0 : input.lumpsumAmount || 0)}
-              className={`w-full py-2 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${theme.apply}`}
-            >
-              <span>{theme.applyText}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          )}
         </div>
 
         {/* Result */}
@@ -304,7 +263,7 @@ export const ProjectionCalculator: React.FC<ProjectionCalculatorProps> = ({
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 gap-2">
               <div className="min-w-0">
                 <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Projected value for</span>
-                <span className="font-bold text-slate-900 text-sm block truncate">{scheme?.name || '—'}</span>
+                <span className="font-bold text-slate-900 text-sm block truncate">{label}</span>
               </div>
               {isValid && (
                 <span className="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-bold border border-slate-200 whitespace-nowrap">
@@ -370,13 +329,13 @@ export const ProjectionCalculator: React.FC<ProjectionCalculatorProps> = ({
       </div>
 
       {/* View calculation */}
-      {showView && result && scheme && (
+      {showView && result && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col border border-slate-200 overflow-hidden">
             <div className="px-6 py-4 bg-slate-900 text-white flex items-start justify-between gap-3">
               <div>
                 <span className={`text-[10px] font-bold ${theme.eyebrow} uppercase tracking-wider`}>{theme.title}</span>
-                <h3 className="text-base font-bold mt-0.5">{scheme.name}</h3>
+                <h3 className="text-base font-bold mt-0.5">{label}</h3>
               </div>
               <button
                 type="button"

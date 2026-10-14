@@ -1,9 +1,11 @@
 import { HeartPulse } from 'lucide-react';
 import { HealthCheckup } from './components/HealthCheckup';
+import { AppSettingsProvider } from './context/AppSettings';
 
 /** Stand-alone Finance Health Check-up portal: open to everyone, no login. */
 export default function HealthCheckApp() {
   return (
+    <AppSettingsProvider>
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <header className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center gap-2.5">
@@ -20,5 +22,6 @@ export default function HealthCheckApp() {
         This check-up is based only on your own answers and is for general awareness. It is not financial, tax or legal advice.
       </footer>
     </div>
+    </AppSettingsProvider>
   );
 }

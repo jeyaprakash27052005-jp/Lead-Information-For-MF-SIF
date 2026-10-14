@@ -101,6 +101,8 @@ export type ViewTab =
   | 'mf-calculator'
   | 'nps-calculator'
   | 'health-reports'
+  | 'feature-controls'
+  | 'health-questions'
   | 'health-checkup';
 
 export interface HealthReport {
@@ -121,5 +123,48 @@ export interface HealthReport {
   mobile?: string;
   leadId?: string;
   contactAt?: string;
+  // Copy of the questions the person answered, so the admin always sees the same questions
+  questionSnapshot?: { id: string; category: string; text: string; reverse?: boolean }[];
+  categorySnapshot?: { id: string; label: string; intro: string; low: string; mid: string; high: string }[];
+  investmentPlan?: InvestmentPlan;
+  emailStatus?: 'sent' | 'failed' | 'not_configured';
+  emailError?: string;
+  emailAt?: string;
   createdAt: string;
+}
+
+/** How much to put into mutual funds and NPS each month, worked out from the health check-up answers */
+export interface InvestmentPlan {
+  monthlyIncome: number;
+  investPct: number; // % of monthly income suggested for investing
+  monthlyInvest: number;
+  mfMonthly: number;
+  npsMonthly: number;
+  mfRate: number; // % per year used for the projection
+  npsRate: number;
+  mfYears: number;
+  npsYears: number;
+  mfValue: number; // future value of the suggested SIP
+  npsValue: number;
+  note: string;
+}
+
+/** Switches that Head Incharge and Regional Incharge can turn on or off for the whole site */
+export interface AppFeatureFlags {
+  customerPortal: boolean; // the whole customer portal (login and dashboard)
+  healthPortal: boolean; // the stand-alone Finance Health Check-up portal
+  customerRegistration: boolean; // customers creating their own account
+  mfCalculator: boolean;
+  npsCalculator: boolean;
+  schemesCatalog: boolean; // Browse Published Schemes
+  healthCheckup: boolean; // Finance Health Check-up inside the customer portal
+  homeAds: boolean; // moving ads on the Home Screen
+}
+
+export interface AppSettings {
+  features: AppFeatureFlags;
+  mfReturnRate: number; // % per year used by the Mutual Fund calculator
+  npsReturnRate: number; // % per year used by the NPS calculator
+  updatedAt?: string;
+  updatedBy?: string;
 }

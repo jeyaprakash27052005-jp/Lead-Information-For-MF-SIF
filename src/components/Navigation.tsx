@@ -13,7 +13,9 @@ import {
   Layers,
   Globe,
   Image as ImageIcon,
-  HeartPulse
+  HeartPulse,
+  ToggleRight,
+  ListChecks
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -134,6 +136,22 @@ export const Navigation: React.FC<NavigationProps> = ({
         label: 'Health Check-up Reports',
         icon: <HeartPulse className="w-4 h-4" />,
         description: 'Everyone who took the Finance Health Check-up, with scores, contact details and PDF reports',
+      });
+    }
+
+    // Feature: Health check-up questions and site-wide feature switches (Head & Regional Incharge only)
+    if (isHead || isRegional) {
+      items.push({
+        id: 'health-questions',
+        label: 'Health Check-up Questions',
+        icon: <ListChecks className="w-4 h-4" />,
+        description: 'Add, edit and remove the questions asked in the Finance Health Check-up',
+      });
+      items.push({
+        id: 'feature-controls',
+        label: 'Feature Controls',
+        icon: <ToggleRight className="w-4 h-4" />,
+        description: 'Switch portals and features on or off, set the calculator return rates, check e-mail setup',
       });
     }
 

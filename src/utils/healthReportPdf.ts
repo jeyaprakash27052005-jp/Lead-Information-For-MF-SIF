@@ -1,6 +1,7 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { BAND_STYLE, BAND_SUMMARY, HealthScoreResult } from './healthCheck';
+import { InvestmentPlan } from '../types';
 
 const rs = (n: number) => `Rs. ${new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(Math.round(n))}`;
 
@@ -13,6 +14,7 @@ export interface HealthReportPdfInput {
   region?: string;
   createdAt?: string;
   score: HealthScoreResult;
+  plan?: InvestmentPlan;
 }
 
 export function generateHealthReportPDF(data: HealthReportPdfInput, action: 'download' | 'blob' = 'download') {
@@ -111,7 +113,45 @@ export function generateHealthReportPDF(data: HealthReportPdfInput, action: 'dow
     styles: { fontSize: 8.5, cellPadding: 2.2, valign: 'top' },
     columnStyles: { 0: { cellWidth: 40, fontStyle: 'bold' }, 1: { cellWidth: 16 } },
   });
-  const endY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8;
+  let endY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8;
+
+  // Suggested monthly investment in mutual funds and NPS
+  if (data.plan) {
+    const pl = data.plan;
+    if (endY > 215) {
+      doc.addPage();
+      endY = 20;
+    }
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(15, 23, 42);
+    doc.text('Suggested monthly investment', 14, endY);
+    autoTable(doc, {
+      startY: endY + 3,
+      head: [['Where', 'Per month', 'Expected value', 'How it is worked out']],
+      body: [
+        ['Mutual funds (SIP)', rs(pl.mfMonthly), `${rs(pl.mfValue)} after ${pl.mfYears} years`, `At ${pl.mfRate}% a year`],
+        [
+          'NPS (pension)',
+          rs(pl.npsMonthly),
+          pl.npsMonthly > 0 ? `${rs(pl.npsValue)} after ${pl.npsYears} years` : '-',
+          pl.npsMonthly > 0 ? `At ${pl.npsRate}% a year, until about age 60` : 'Not suggested at this age or amount',
+        ],
+        ['Total', rs(pl.monthlyInvest), '', `${pl.investPct}% of your monthly income of ${rs(pl.monthlyIncome)}`],
+      ],
+      theme: 'grid',
+      headStyles: { fillColor: [15, 23, 42], textColor: 255, fontSize: 9 },
+      styles: { fontSize: 8.5, cellPadding: 2.2, valign: 'top' },
+      columnStyles: { 0: { cellWidth: 38, fontStyle: 'bold' }, 1: { cellWidth: 28 } },
+    });
+    endY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 5;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(71, 85, 105);
+    const noteLines = doc.splitTextToSize(pl.note, 182);
+    doc.text(noteLines, 14, endY);
+    endY += noteLines.length * 4 + 5;
+  }
 
   doc.setFont('helvetica', 'italic');
   doc.setFontSize(7.5);

@@ -35,6 +35,51 @@ const rateLimited = (key: string) => {
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
 
+
+const brevoMessage = async (res: Response): Promise<string> => {
+  try {
+    const j = (await res.json()) as { message?: unknown; code?: unknown };
+    return `${typeof j.code === 'string' ? j.code + ': ' : ''}${typeof j.message === 'string' ? j.message : ''}`.slice(0, 250);
+  } catch (_e) {
+    return '';
+  }
+};
+
+const reasonFor = (status: number, detail: string): string => {
+  if (status === 401 || status === 403) return 'BREVO_KEY_INVALID';
+  if (/sender/i.test(detail)) return 'SENDER_NOT_VERIFIED';
+  return 'BREVO_REJECTED';
+};
+
+/** Checks the e-mail settings without sending anything to a customer */
+async function checkSetup(env: Record<string, string | undefined>, fetchImpl: typeof fetch): Promise<SendReportResult> {
+  const missing: string[] = [];
+  if (!env.BREVO_API_KEY) missing.push('BREVO_API_KEY');
+  if (!env.REPORT_FROM_EMAIL) missing.push('REPORT_FROM_EMAIL');
+  if (missing.length) return { status: 200, json: { ok: false, reason: 'EMAIL_NOT_CONFIGURED', missing } };
+  try {
+    const acc = await fetchImpl('https://api.brevo.com/v3/account', {
+      headers: { 'api-key': env.BREVO_API_KEY as string, accept: 'application/json' },
+    });
+    if (!acc.ok) {
+      const detail = await brevoMessage(acc);
+      return { status: 200, json: { ok: false, reason: reasonFor(acc.status, detail), detail } };
+    }
+    const sen = await fetchImpl('https://api.brevo.com/v3/senders', {
+      headers: { 'api-key': env.BREVO_API_KEY as string, accept: 'application/json' },
+    });
+    if (sen.ok) {
+      const j = (await sen.json()) as { senders?: { email?: string; active?: boolean }[] };
+      const mine = (j.senders || []).find((x) => (x.email || '').toLowerCase() === (env.REPORT_FROM_EMAIL as string).toLowerCase());
+      if (!mine) return { status: 200, json: { ok: false, reason: 'SENDER_NOT_VERIFIED', detail: 'This sender address is not added in Brevo.' } };
+      if (mine.active === false) return { status: 200, json: { ok: false, reason: 'SENDER_NOT_VERIFIED', detail: 'This sender address is added but not verified yet.' } };
+    }
+    return { status: 200, json: { ok: true } };
+  } catch (_e) {
+    return { status: 200, json: { ok: false, reason: 'UNREACHABLE', detail: 'The e-mail service could not be reached.' } };
+  }
+}
+
 export async function sendReportHandler(
   body: unknown,
   clientKey: string,
@@ -42,6 +87,9 @@ export async function sendReportHandler(
   fetchImpl: typeof fetch = fetch
 ): Promise<SendReportResult> {
   const b = (body && typeof body === 'object' ? body : {}) as Record<string, unknown>;
+  if (b.action === 'check') return checkSetup(env, fetchImpl);
+  const isTest = b.action === 'test';
+
   const name = typeof b.name === 'string' ? b.name.trim().slice(0, 100) : '';
   const email = typeof b.email === 'string' ? b.email.trim().toLowerCase() : '';
   const mobile = typeof b.mobile === 'string' ? b.mobile.trim() : '';
@@ -51,8 +99,8 @@ export async function sendReportHandler(
 
   if (!name) return { status: 400, json: { error: 'Name is required.' } };
   if (!EMAIL_RE.test(email) || email.length > 120) return { status: 400, json: { error: 'Enter a valid e-mail address.' } };
-  if (!MOBILE_RE.test(mobile)) return { status: 400, json: { error: 'Enter a valid 10-digit mobile number.' } };
-  if (!pdf || pdf.length > MAX_BASE64_LENGTH || !pdf.startsWith('JVBERi')) {
+  if (!isTest && !MOBILE_RE.test(mobile)) return { status: 400, json: { error: 'Enter a valid 10-digit mobile number.' } };
+  if (!isTest && (!pdf || pdf.length > MAX_BASE64_LENGTH || !pdf.startsWith('JVBERi'))) {
     return { status: 400, json: { error: 'The report file is missing or too large.' } };
   }
   if (rateLimited(`${clientKey}|${email}`)) {
@@ -62,10 +110,10 @@ export async function sendReportHandler(
   const apiKey = env.BREVO_API_KEY;
   const fromEmail = env.REPORT_FROM_EMAIL;
   if (!apiKey || !fromEmail) {
-    return { status: 503, json: { error: 'EMAIL_NOT_CONFIGURED', emailSent: false } };
+    return { status: 503, json: { error: 'EMAIL_NOT_CONFIGURED', reason: 'EMAIL_NOT_CONFIGURED', emailSent: false } };
   }
 
-  const subject = 'Your Finance Health Check-up Report';
+  const subject = isTest ? 'Test e-mail from the Finance Health Check-up site' : 'Your Finance Health Check-up Report';
   const html = `<p>Dear ${esc(name)},</p>
 <p>Thank you for taking the Finance Health Check-up. Your report is attached to this e-mail as a PDF${
     score !== null ? ` (financial health score: <b>${score}/100${band ? ' - ' + esc(band) : ''}</b>)` : ''
@@ -82,15 +130,16 @@ export async function sendReportHandler(
         sender: { name: env.REPORT_FROM_NAME || 'Finance Health Check-up', email: fromEmail },
         to: [{ email, name }],
         subject,
-        htmlContent: html,
-        attachment: [{ name: 'Finance-Health-Check-up-Report.pdf', content: pdf }],
+        htmlContent: isTest ? '<p>This is a test. Your e-mail settings work, and health check-up reports can be e-mailed.</p>' : html,
+        ...(isTest ? {} : { attachment: [{ name: 'Finance-Health-Check-up-Report.pdf', content: pdf }] }),
       }),
     });
   } catch (_e) {
-    return { status: 502, json: { error: 'The e-mail service could not be reached.', emailSent: false } };
+    return { status: 502, json: { error: 'The e-mail service could not be reached.', reason: 'UNREACHABLE', emailSent: false } };
   }
   if (!res.ok) {
-    return { status: 502, json: { error: 'The e-mail service did not accept the message.', emailSent: false } };
+    const detail = await brevoMessage(res);
+    return { status: 502, json: { error: 'The e-mail service did not accept the message.', reason: reasonFor(res.status, detail), detail, emailSent: false } };
   }
   return { status: 200, json: { emailSent: true } };
 }

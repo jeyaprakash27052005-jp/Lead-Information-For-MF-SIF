@@ -1,3 +1,4 @@
+import { useAppSettings } from '../context/AppSettings';
 import React, { useState, useEffect, useRef } from 'react';
 import { InvestmentScheme, AdBanner } from '../types';
 import { MutualFundCalculator } from './MutualFundCalculator';
@@ -41,7 +42,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onOpenCustomerLogin,
   onOpenCustomerRegister,
 }) => {
-  const [ads, setAds] = useState<AdBanner[]>([]);
+  const { settings } = useAppSettings();
+  const [allAds, setAds] = useState<AdBanner[]>([]);
+  const ads = settings.features.homeAds ? allAds : [];
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [activeCalcTab, setActiveCalcTab] = useState<'mf' | 'nps' | 'schemes'>('mf');
@@ -116,7 +119,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           {/* Top Right: Admin Login & Customer Login */}
           <div className="flex items-center gap-2">
-            {onOpenHealthCheck && (
+            {onOpenHealthCheck && settings.features.healthPortal && (
               <button
                 type="button"
                 onClick={onOpenHealthCheck}
@@ -126,6 +129,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 <span>Finance Health Check-up</span>
               </button>
             )}
+            {settings.features.customerPortal && (
             <button
               type="button"
               onClick={onOpenCustomerLogin}
@@ -135,6 +139,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <UserIcon className="w-3.5 h-3.5 text-emerald-600" />
               <span>Customer Login</span>
             </button>
+            )}
 
             {showAdminLogin && (
               <button
@@ -211,6 +216,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                             <ArrowRight className="w-4 h-4" />
                           </button>
                         )}
+                        {settings.features.customerPortal && settings.features.customerRegistration && (
                         <button
                           type="button"
                           onClick={onOpenCustomerRegister}
@@ -219,6 +225,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                           <UserPlus className="w-4 h-4" />
                           <span>Create Investor Account</span>
                         </button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -278,6 +285,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               Welcome
             </h2>
             <div className="flex flex-wrap items-center justify-center gap-3">
+              {settings.features.customerPortal && (
               <button
                 type="button"
                 onClick={onOpenCustomerLogin}
@@ -285,6 +293,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               >
                 Customer Login
               </button>
+              )}
               {showAdminLogin && (
                 <button
                   type="button"
@@ -294,7 +303,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   Admin Login
                 </button>
               )}
-              {onOpenHealthCheck && (
+              {onOpenHealthCheck && settings.features.healthPortal && (
                 <button
                   type="button"
                   onClick={onOpenHealthCheck}
@@ -315,15 +324,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             © {new Date().getFullYear()} Mutual fund (SIF) and NPS scheme return calculating site. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
-            <button
-              onClick={onOpenCustomerLogin}
-              className="text-indigo-600 hover:underline font-semibold cursor-pointer"
-            >
-              Customer Login
-            </button>
+            {settings.features.customerPortal && (
+              <button
+                onClick={onOpenCustomerLogin}
+                className="text-indigo-600 hover:underline font-semibold cursor-pointer"
+              >
+                Customer Login
+              </button>
+            )}
             {showAdminLogin && (
               <>
-                <span>•</span>
+                {settings.features.customerPortal && <span>•</span>}
                 <button
                   onClick={onOpenAdminLogin}
                   className="text-slate-700 hover:underline font-semibold cursor-pointer"

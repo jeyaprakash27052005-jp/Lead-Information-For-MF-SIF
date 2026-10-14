@@ -13,7 +13,9 @@ import {
   getDocs
 } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
-import { User, Lead, LeadStatus, InvestmentScheme, HealthReport } from '../types';
+import { User, Lead, LeadStatus, InvestmentScheme, HealthReport, AppSettings } from '../types';
+import { mergeSettings } from '../utils/appSettings';
+import { HealthConfig, cleanHealthConfig } from '../utils/healthCheck';
 import { DEFAULT_REGIONS, NATIONAL_HQ_REGION } from '../utils/regions';
 import { normalizeIndianMobile, isValidPan } from '../utils/validation';
 
@@ -601,6 +603,69 @@ export const firebaseDbService = {
       return full;
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, path);
+    }
+  },
+
+  // ---- Site settings (feature on/off switches and calculator rates) --------------------------
+  async getAppSettings(): Promise<AppSettings> {
+    try {
+      const snap = await getDoc(doc(db, 'settings', 'app'));
+      return mergeSettings(snap.exists() ? snap.data() : {});
+    } catch (_e) {
+      // If the database cannot be read yet, the site keeps working with the standard settings
+      return mergeSettings({});
+    }
+  },
+
+  async saveAppSettings(settings: AppSettings, updatedBy: string): Promise<AppSettings> {
+    await ensureFirestoreDatabaseSeeded();
+    const clean: AppSettings = { ...mergeSettings(settings), updatedAt: new Date().toISOString(), updatedBy };
+    try {
+      await setDoc(doc(db, 'settings', 'app'), JSON.parse(JSON.stringify(clean)));
+      return clean;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, 'settings/app');
+    }
+  },
+
+  // ---- Finance Health Check-up questions (written by the admin team) -------------------------
+  /** Returns null when the admin team has not saved their own question set yet */
+  async getHealthConfig(): Promise<HealthConfig | null> {
+    try {
+      const snap = await getDoc(doc(db, 'settings', 'healthCheck'));
+      if (!snap.exists()) return null;
+      const raw = snap.data() as Partial<HealthConfig>;
+      const cfg = cleanHealthConfig(raw);
+      // A saved empty set is real: the admin removed every question
+      return cfg;
+    } catch (_e) {
+      return null;
+    }
+  },
+
+  async saveHealthConfig(config: HealthConfig, updatedBy: string): Promise<HealthConfig> {
+    await ensureFirestoreDatabaseSeeded();
+    const clean: HealthConfig = { ...cleanHealthConfig(config), updatedAt: new Date().toISOString(), updatedBy };
+    try {
+      await setDoc(doc(db, 'settings', 'healthCheck'), JSON.parse(JSON.stringify(clean)));
+      return clean;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, 'settings/healthCheck');
+    }
+  },
+
+  async markHealthReportEmail(
+    reportId: string,
+    status: 'sent' | 'failed' | 'not_configured',
+    error?: string
+  ): Promise<void> {
+    const path = 'healthReports';
+    try {
+      const patch: Record<string, unknown> = { emailStatus: status, emailAt: new Date().toISOString() };
+      patch.emailError = error ? error.slice(0, 300) : deleteField();
+      await updateDoc(doc(db, path, reportId), patch);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, path);
     }
   },
 

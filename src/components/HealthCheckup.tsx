@@ -3,8 +3,7 @@ import { HeartPulse, ArrowLeft, ArrowRight, Download, RotateCcw, CheckCircle2, A
 import { apiService } from '../services/api';
 import { DEFAULT_REGIONS, NATIONAL_HQ_REGION } from '../utils/regions';
 import {
-  HEALTH_CATEGORIES,
-  HEALTH_QUESTIONS,
+  HealthConfig,
   LIKERT,
   BAND_STYLE,
   BAND_SUMMARY,
@@ -12,8 +11,11 @@ import {
   isComplete,
 } from '../utils/healthCheck';
 import { generateHealthReportPDF, blobToBase64 } from '../utils/healthReportPdf';
+import { computeInvestmentPlan } from '../utils/healthInvestPlan';
 import { formatInr } from '../utils/currency';
 import { NumField } from './NumField';
+import { useAppSettings } from '../context/AppSettings';
+import { FeatureOff } from './FeatureOff';
 
 interface HealthCheckupProps {
   source: 'health_portal' | 'customer_portal';
@@ -29,6 +31,10 @@ const MOBILE_RE = /^[6-9][0-9]{9}$/;
 type Gender = 'Male' | 'Female' | 'Other';
 
 export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultName, defaultMobile, defaultRegion }) => {
+  const { settings, loaded: settingsLoaded } = useAppSettings();
+  // undefined = still loading, null = the admin team has not added any questions yet
+  const [config, setConfig] = useState<HealthConfig | null | undefined>(undefined);
+  const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
   const [step, setStep] = useState(0); // 0 = about you, 1..N = question pages, N+1 = report
   const [name, setName] = useState(defaultName || '');
   const [ageStr, setAgeStr] = useState('');
@@ -49,7 +55,14 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
   const [mobile, setMobile] = useState(defaultMobile && MOBILE_RE.test(defaultMobile) ? defaultMobile : '');
   const [downloading, setDownloading] = useState(false);
   const [dlError, setDlError] = useState<string | null>(null);
-  const [dlResult, setDlResult] = useState<{ leadSaved: boolean; leadError?: string; email: 'sent' | 'not_configured' | 'failed' } | null>(null);
+  const [dlResult, setDlResult] = useState<{ leadSaved: boolean; leadError?: string; email: 'sent' | 'not_configured' | 'failed'; reason?: string } | null>(null);
+
+  useEffect(() => {
+    apiService
+      .getHealthConfig()
+      .then((c: HealthConfig | null) => setConfig(c))
+      .catch(() => setConfig(null));
+  }, []);
 
   useEffect(() => {
     apiService
@@ -58,7 +71,9 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
       .catch(() => undefined);
   }, []);
 
-  const totalPages = HEALTH_CATEGORIES.length;
+  const cfg: HealthConfig = config || { categories: [], questions: [] };
+  const cats = cfg.categories;
+  const totalPages = cats.length;
   const reportStep = totalPages + 1;
   const age = Number(ageStr);
   const income = Number(incomeStr);
@@ -71,10 +86,22 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
   if (incomeStr.trim() === '' || !(income >= 0)) profileErrors.income = 'Enter your yearly income (0 if none)';
   const profileOk = Object.keys(profileErrors).length === 0;
 
-  const pageQuestions = (page: number) => HEALTH_QUESTIONS.filter((q) => q.category === HEALTH_CATEGORIES[page - 1].id);
+  const pageQuestions = (page: number) => cfg.questions.filter((q) => q.category === cats[page - 1].id);
   const pageComplete = (page: number) => pageQuestions(page).every((q) => answers[q.id]);
 
-  const score = useMemo(() => (isComplete(answers) ? computeHealthScore(answers) : null), [answers]);
+  const plan = useMemo(
+    () =>
+      isComplete(answers, cfg)
+        ? computeInvestmentPlan(
+            { age, annualIncome: income, band: computeHealthScore(answers, cfg).band },
+            { mfReturnRate: settings.mfReturnRate, npsReturnRate: settings.npsReturnRate }
+          )
+        : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [answers, config, age, income, settings.mfReturnRate, settings.npsReturnRate]
+  );
+
+  const score = useMemo(() => (isComplete(answers, cfg) ? computeHealthScore(answers, cfg) : null), [answers, config]);
 
   const next = async () => {
     setShowErrors(true);
@@ -108,6 +135,9 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
     categoryScores: Object.fromEntries(score!.categories.map((c) => [c.id, c.score])),
     moneyStyle: score!.moneyStyle,
     source,
+    questionSnapshot: cfg.questions.map((q) => ({ id: q.id, category: q.category, text: q.text, reverse: !!q.reverse })),
+    investmentPlan: plan || undefined,
+    categorySnapshot: cfg.categories.map((c) => ({ id: c.id, label: c.label, intro: c.intro, low: c.low, mid: c.mid, high: c.high })),
   });
 
   const saveReport = async (): Promise<string | null> => {
@@ -146,7 +176,56 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
     annualIncome: income,
     region,
     score: score!,
+    plan: plan || undefined,
   });
+
+  /** Saves the report + contact details for the admin team and e-mails the PDF. Safe to run again (Try again). */
+  const deliver = async (blob: Blob) => {
+    let leadSaved = false;
+    let leadError: string | undefined;
+    let id: string | null = null;
+    try {
+      id = reportId || (await saveReport());
+      if (!id) throw new Error('Your report could not be saved right now.');
+      await apiService.attachHealthReportContact(id, { email: email.trim(), mobile: mobile.trim() });
+      leadSaved = true;
+    } catch (e) {
+      leadError = e instanceof Error ? e.message : 'Could not save your details.';
+    }
+
+    let emailStatus: 'sent' | 'not_configured' | 'failed' = 'failed';
+    let reason: string | undefined;
+    try {
+      const res = await fetch(`${API_BASE}/api/send-report`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          mobile: mobile.trim(),
+          score: score!.overall,
+          band: score!.band,
+          pdfBase64: await blobToBase64(blob),
+        }),
+      });
+      const j = await res.json().catch(() => null);
+      if (res.ok && j && j.emailSent) {
+        emailStatus = 'sent';
+      } else if (!j) {
+        reason = 'API_NOT_FOUND';
+        emailStatus = 'not_configured';
+      } else {
+        reason = String(j.reason || j.error || `HTTP_${res.status}`);
+        if (res.status === 404 || j.reason === 'EMAIL_NOT_CONFIGURED') emailStatus = 'not_configured';
+      }
+    } catch (_e) {
+      reason = 'NETWORK';
+    }
+
+    // Record the outcome so the admin team can see it and re-send from the admin portal
+    if (id) apiService.markHealthReportEmail(id, emailStatus, reason).catch(() => undefined);
+    setDlResult({ leadSaved, leadError, email: emailStatus, reason });
+  };
 
   const handleDownload = async () => {
     setDlError(null);
@@ -156,20 +235,9 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
     setDownloading(true);
     try {
       const blob = generateHealthReportPDF(pdfInput(), 'blob') as Blob;
+      setPdfBlob(blob);
 
-      // 1. store contact + add to the admin portal as a lead
-      let leadSaved = false;
-      let leadError: string | undefined;
-      try {
-        const id = reportId || (await saveReport());
-        if (!id) throw new Error('Your report could not be saved right now.');
-        await apiService.attachHealthReportContact(id, { email: email.trim(), mobile: mobile.trim() });
-        leadSaved = true;
-      } catch (e) {
-        leadError = e instanceof Error ? e.message : 'Could not save your details.';
-      }
-
-      // 2. give the PDF to the person right away
+      // give the PDF to the person right away
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -179,28 +247,7 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
       document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(url), 1500);
 
-      // 3. e-mail the PDF
-      let emailStatus: 'sent' | 'not_configured' | 'failed' = 'failed';
-      try {
-        const res = await fetch(`${API_BASE}/api/send-report`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: name.trim(),
-            email: email.trim(),
-            mobile: mobile.trim(),
-            score: score.overall,
-            band: score.band,
-            pdfBase64: await blobToBase64(blob),
-          }),
-        });
-        const j = await res.json().catch(() => ({}));
-        if (res.ok && j.emailSent) emailStatus = 'sent';
-        else if (res.status === 404 || j.error === 'EMAIL_NOT_CONFIGURED') emailStatus = 'not_configured';
-      } catch (_e) {
-        emailStatus = 'failed';
-      }
-      setDlResult({ leadSaved, leadError, email: emailStatus });
+      await deliver(blob);
     } catch (e) {
       setDlError(e instanceof Error ? e.message : 'Could not create the report PDF.');
     } finally {
@@ -208,7 +255,33 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
     }
   };
 
+  const handleRetry = async () => {
+    if (!pdfBlob) return;
+    setDownloading(true);
+    try {
+      await deliver(pdfBlob);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   // ------------------------------------------------------------------ render
+  const featureOn = source === 'health_portal' ? settings.features.healthPortal : settings.features.healthCheckup;
+  if (!settingsLoaded || config === undefined) {
+    return <p className="text-center text-xs font-semibold text-slate-500 py-16">Loading...</p>;
+  }
+  if (!featureOn) {
+    return <FeatureOff title="Finance Health Check-up is switched off" />;
+  }
+  if (!config || config.questions.length === 0) {
+    return (
+      <FeatureOff
+        title="The check-up is being prepared"
+        message="The questions have not been published yet. Please check back soon."
+      />
+    );
+  }
+
   const inputCls = (err?: string) =>
     `w-full px-3 py-2 text-sm font-bold text-slate-900 border rounded-lg focus:outline-hidden focus:ring-2 ${
       err && showErrors ? 'border-rose-400 focus:ring-rose-400' : 'border-slate-300 focus:ring-rose-500'
@@ -230,7 +303,7 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
       {step <= totalPages && (
         <div>
           <div className="flex justify-between text-[11px] font-bold text-slate-500 mb-1">
-            <span>{step === 0 ? 'About you' : HEALTH_CATEGORIES[step - 1].label}</span>
+            <span>{step === 0 ? 'About you' : cats[step - 1].label}</span>
             <span>
               Step {step + 1} of {totalPages + 1}
             </span>
@@ -296,8 +369,8 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
       {step >= 1 && step <= totalPages && (
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-5">
           <div>
-            <h3 className="text-sm font-bold text-slate-900">{HEALTH_CATEGORIES[step - 1].label}</h3>
-            <p className="text-xs text-slate-500">{HEALTH_CATEGORIES[step - 1].intro}</p>
+            <h3 className="text-sm font-bold text-slate-900">{cats[step - 1].label}</h3>
+            <p className="text-xs text-slate-500">{cats[step - 1].intro}</p>
           </div>
           {pageQuestions(step).map((q, idx) => {
             const missing = showErrors && !answers[q.id];
@@ -402,6 +475,40 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
               <p className="text-xs text-amber-900">{score.priorities.length ? score.priorities.join(', ') : 'No urgent areas. Keep reviewing regularly.'}</p>
             </div>
           </div>
+
+          {plan && (
+            <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
+              <h4 className="text-sm font-black text-slate-900">How much you can invest every month</h4>
+              {plan.monthlyInvest === 0 ? (
+                <p className="text-xs text-slate-600">{plan.note}</p>
+              ) : (
+                <>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-200">
+                      <span className="text-[11px] font-bold text-indigo-700 uppercase tracking-wider block">Mutual funds (SIP)</span>
+                      <span className="text-xl font-black text-indigo-900 block mt-0.5">{formatInr(plan.mfMonthly)} / month</span>
+                      <span className="text-[11px] text-indigo-800 block mt-1">
+                        About {formatInr(plan.mfValue)} after {plan.mfYears} years (at {plan.mfRate}% a year)
+                      </span>
+                    </div>
+                    <div className="p-4 rounded-xl bg-blue-50 border border-blue-200">
+                      <span className="text-[11px] font-bold text-blue-700 uppercase tracking-wider block">NPS (pension)</span>
+                      <span className="text-xl font-black text-blue-900 block mt-0.5">{formatInr(plan.npsMonthly)} / month</span>
+                      <span className="text-[11px] text-blue-800 block mt-1">
+                        {plan.npsMonthly > 0
+                          ? `About ${formatInr(plan.npsValue)} after ${plan.npsYears} years (at ${plan.npsRate}% a year)`
+                          : 'Not suggested at this age or amount'}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-700">
+                    Total <b>{formatInr(plan.monthlyInvest)}</b> a month = {plan.investPct}% of your monthly income of {formatInr(plan.monthlyIncome)}.
+                  </p>
+                  <p className="text-[11px] text-slate-500">{plan.note}</p>
+                </>
+              )}
+            </div>
+          )}
 
           <p className="text-[11px] text-slate-500">
             Prepared for {name.trim()} • Age {age} • {gender} • {occupation.trim()} • Income {formatInr(income)}
@@ -509,16 +616,29 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
                 )}
                 {dlResult.email === 'not_configured' && (
                   <p className="text-amber-700 font-semibold">
-                    E-mail delivery is not switched on yet, so the report was not e-mailed. Please keep the downloaded PDF.
+                    The e-mail service is not set up yet, so the report was not e-mailed. Please keep the downloaded PDF.
                   </p>
                 )}
                 {dlResult.email === 'failed' && (
                   <p className="text-amber-700 font-semibold">We could not e-mail the report right now. Please keep the downloaded PDF.</p>
                 )}
+                {dlResult.email !== 'sent' && dlResult.reason && (
+                  <p className="text-[11px] text-slate-400">Reason: {dlResult.reason}</p>
+                )}
                 {dlResult.leadSaved ? (
                   <p className="text-slate-600">Our team has your details and may contact you on {mobile}.</p>
                 ) : (
                   <p className="text-amber-700 font-semibold">{dlResult.leadError || 'We could not save your contact details.'}</p>
+                )}
+                {(dlResult.email !== 'sent' || !dlResult.leadSaved) && (
+                  <button
+                    type="button"
+                    onClick={handleRetry}
+                    disabled={downloading}
+                    className="w-full py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white text-xs font-bold cursor-pointer"
+                  >
+                    {downloading ? 'Trying again...' : 'Try again (save & e-mail)'}
+                  </button>
                 )}
                 <button
                   type="button"

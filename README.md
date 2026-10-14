@@ -59,3 +59,10 @@ npm run dev:admin      # also dev:customer, dev:health
 npm run build:admin    # also build:customer, build:health, build:apps (all three)
 npm run lint           # type-check
 ```
+
+## Admin controls (Head Incharge and Regional Incharge only)
+
+- **Health Check-up Questions** - every question in the Finance Health Check-up is added here (starter set available with one click). Press **Publish questions** to make them live. Until questions are published, the check-up shows "being prepared". Each report keeps its own copy of the questions the person answered.
+- **Feature Controls** - switch on or off: Customer Portal, Finance Health Check-up Portal, Customer Registration, Mutual Fund Calculator, NPS Calculator, Browse Published Schemes (off by default), Finance Health Check-up inside the customer portal, and Home Screen Ads. Also sets the expected return (% a year) used by the Mutual Fund and NPS calculators and by the "How much you can invest every month" part of the report.
+- **E-mail check** - the same page can check the e-mail settings and send a test e-mail. For this and for **Resend** in Health Check-up Reports, add `BREVO_API_KEY` and `REPORT_FROM_EMAIL` to the **Admin** Vercel project as well (plus the Customer and Health Check-up projects), then redeploy.
+- Publish `firestore.rules` in the Firebase console after every update (it now includes the `settings` documents).
