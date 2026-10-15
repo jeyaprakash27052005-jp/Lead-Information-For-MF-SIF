@@ -113,7 +113,7 @@ export interface HealthReport {
   occupation: string;
   annualIncome: number;
   region: string;
-  answers: Record<string, number>;
+  answers: Record<string, number | string | string[]>;
   overallScore: number;
   band: string;
   categoryScores: Record<string, number>;
@@ -124,7 +124,15 @@ export interface HealthReport {
   leadId?: string;
   contactAt?: string;
   // Copy of the questions the person answered, so the admin always sees the same questions
-  questionSnapshot?: { id: string; category: string; text: string; reverse?: boolean }[];
+  questionSnapshot?: {
+    id: string;
+    category: string;
+    text: string;
+    reverse?: boolean;
+    type?: 'scale' | 'choice' | 'list' | 'checklist' | 'text';
+    options?: { id: string; label: string; score: number }[];
+    required?: boolean;
+  }[];
   categorySnapshot?: { id: string; label: string; intro: string; low: string; mid: string; high: string }[];
   investmentPlan?: InvestmentPlan;
   emailStatus?: 'sent' | 'failed' | 'not_configured';

@@ -6,12 +6,88 @@
 // Overall score = average of the category scores.
 // ---------------------------------------------------------------------------
 
+/** How the customer answers a question - chosen by the admin when the question is added */
+export type AnswerType = 'scale' | 'choice' | 'list' | 'checklist' | 'text';
+
+export interface HealthOption {
+  id: string;
+  label: string;
+  /** Points 0-100 this option adds to the topic score */
+  score: number;
+}
+
+export type HealthAnswer = number | string | string[];
+export type HealthAnswers = Record<string, HealthAnswer>;
+
 export interface HealthQuestion {
   id: string;
   category: string;
   text: string;
   reverse?: boolean;
+  /** Missing means the agree / disagree scale (all older questions) */
+  type?: AnswerType;
+  /** For choice, list and checklist questions */
+  options?: HealthOption[];
+  /** Text box and check list are optional unless this is true; the other types are always required */
+  required?: boolean;
 }
+
+export const ANSWER_TYPES: { value: AnswerType; label: string; help: string; scored: boolean; hasOptions: boolean }[] = [
+  { value: 'scale', label: 'Agree / disagree scale', help: 'Strongly disagree to Strongly agree (5 steps).', scored: true, hasOptions: false },
+  { value: 'choice', label: 'Choice (radio buttons)', help: 'The customer picks one option. You set the points for each option.', scored: true, hasOptions: true },
+  { value: 'list', label: 'List box (drop-down)', help: 'The customer picks one option from a drop-down. You set the points for each option.', scored: true, hasOptions: true },
+  { value: 'checklist', label: 'Check list (tick many)', help: 'The customer ticks any options. The points of the ticked options add up (maximum 100).', scored: true, hasOptions: true },
+  { value: 'text', label: 'Text box', help: 'The customer types an answer. It is saved for your team and does not change the score.', scored: false, hasOptions: false },
+];
+
+export const questionType = (q: HealthQuestion): AnswerType => q.type || 'scale';
+export const isScoredQuestion = (q: HealthQuestion) => questionType(q) !== 'text';
+export const hasOptions = (q: HealthQuestion) => ['choice', 'list', 'checklist'].includes(questionType(q));
+export const isRequiredQuestion = (q: HealthQuestion) =>
+  questionType(q) === 'text' || questionType(q) === 'checklist' ? !!q.required : true;
+
+/** Has the person answered this question properly? */
+export const isAnswered = (q: HealthQuestion, a: HealthAnswer | undefined): boolean => {
+  const t = questionType(q);
+  if (t === 'scale') return typeof a === 'number' && Number.isInteger(a) && a >= 1 && a <= 5;
+  if (t === 'choice' || t === 'list') return typeof a === 'string' && !!q.options?.some((o) => o.id === a);
+  if (t === 'checklist') {
+    const arr = Array.isArray(a) ? a : [];
+    return arr.every((id) => q.options?.some((o) => o.id === id)) && (!q.required || arr.length > 0);
+  }
+  return !q.required || (typeof a === 'string' && a.trim().length > 0);
+};
+
+/** 0-100 points for one answer, or null when the question is not scored / not answered */
+export const questionPoints = (q: HealthQuestion, a: HealthAnswer | undefined): number | null => {
+  const t = questionType(q);
+  if (t === 'text') return null;
+  if (t === 'scale') {
+    if (typeof a !== 'number') return null;
+    const v = q.reverse ? 6 - a : a;
+    return Math.max(0, Math.min(100, ((v - 1) / 4) * 100));
+  }
+  if (t === 'choice' || t === 'list') {
+    const o = q.options?.find((x) => x.id === a);
+    return o ? o.score : null;
+  }
+  const picked = Array.isArray(a) ? a : [];
+  const sum = (q.options || []).filter((o) => picked.includes(o.id)).reduce((n, o) => n + o.score, 0);
+  return Math.min(100, sum);
+};
+
+/** The answer as readable text (for the admin report view) */
+export const answerText = (q: HealthQuestion, a: HealthAnswer | undefined): string => {
+  const t = questionType(q);
+  if (a === undefined || a === null || a === '' || (Array.isArray(a) && a.length === 0)) return '-';
+  if (t === 'scale') return LIKERT.find((l) => l.value === a)?.label || String(a);
+  if (t === 'choice' || t === 'list') return q.options?.find((o) => o.id === a)?.label || String(a);
+  if (t === 'checklist') {
+    const picked = Array.isArray(a) ? a : [];
+    return (q.options || []).filter((o) => picked.includes(o.id)).map((o) => o.label).join(', ') || '-';
+  }
+  return String(a);
+};
 
 export interface HealthCategory {
   id: string;
@@ -138,7 +214,25 @@ export const cleanHealthConfig = (raw: unknown): HealthConfig => {
   const catIds = new Set(cats.map((c) => c.id));
   const qs = (Array.isArray(r.questions) ? r.questions : []).filter(
     (q) => q && typeof q.id === 'string' && typeof q.text === 'string' && q.text.trim() && catIds.has(q.category)
-  ) as HealthQuestion[];
+  ).map((q): HealthQuestion => {
+    const type: AnswerType = (['scale', 'choice', 'list', 'checklist', 'text'] as string[]).includes(String(q.type))
+      ? (q.type as AnswerType)
+      : 'scale';
+    const out: HealthQuestion = { id: q.id, category: q.category, text: q.text.trim() };
+    if (q.reverse && type === 'scale') out.reverse = true;
+    if (type !== 'scale') out.type = type;
+    if (type === 'choice' || type === 'list' || type === 'checklist') {
+      out.options = (Array.isArray(q.options) ? q.options : [])
+        .filter((o) => o && typeof o.id === 'string' && typeof o.label === 'string' && o.label.trim())
+        .map((o) => ({
+          id: o.id,
+          label: o.label.trim(),
+          score: Math.max(0, Math.min(100, Math.round(Number(o.score) || 0))),
+        }));
+    }
+    if ((type === 'text' || type === 'checklist') && q.required) out.required = true;
+    return out;
+  }).filter((q) => !(['choice', 'list', 'checklist'].includes(q.type || '') && (q.options?.length || 0) < 2));
   const used = new Set(qs.map((q) => q.category));
   return {
     categories: cats.filter((c) => used.has(c.id)),
@@ -178,24 +272,26 @@ export interface HealthScoreResult {
   moneyStyle: string;
 }
 
-const questionScore = (q: HealthQuestion, answer: number) => (q.reverse ? 6 - answer : answer);
-
-export const isComplete = (answers: Record<string, number>, config: HealthConfig = DEFAULT_HEALTH_CONFIG) =>
-  config.questions.length > 0 &&
-  config.questions.every((q) => Number.isInteger(answers[q.id]) && answers[q.id] >= 1 && answers[q.id] <= 5);
+export const isComplete = (answers: HealthAnswers, config: HealthConfig = DEFAULT_HEALTH_CONFIG) =>
+  config.questions.length > 0 && config.questions.every((q) => isAnswered(q, answers[q.id]));
 
 export function computeHealthScore(
-  answers: Record<string, number>,
+  answers: HealthAnswers,
   config: HealthConfig = DEFAULT_HEALTH_CONFIG
 ): HealthScoreResult {
-  const categories = config.categories.map((c) => {
-    const qs = config.questions.filter((q) => q.category === c.id);
-    const avg = qs.reduce((sum, q) => sum + questionScore(q, answers[q.id] || 1), 0) / qs.length;
-    const score = Math.round(((avg - 1) / 4) * 100);
-    const tip = score >= 70 ? c.high : score >= 45 ? c.mid : c.low;
-    return { id: c.id, label: c.label, score, band: bandFor(score), tip };
-  });
-  const overall = Math.round(categories.reduce((s, c) => s + c.score, 0) / categories.length);
+  const categories = config.categories
+    .map((c) => {
+      const pts = config.questions
+        .filter((q) => q.category === c.id)
+        .map((q) => questionPoints(q, answers[q.id]))
+        .filter((v): v is number => v !== null);
+      if (pts.length === 0) return null; // a topic with only text questions has no score
+      const score = Math.round(pts.reduce((n, v) => n + v, 0) / pts.length);
+      const tip = score >= 70 ? c.high : score >= 45 ? c.mid : c.low;
+      return { id: c.id, label: c.label, score, band: bandFor(score), tip };
+    })
+    .filter((c): c is NonNullable<typeof c> => c !== null);
+  const overall = categories.length ? Math.round(categories.reduce((s, c) => s + c.score, 0) / categories.length) : 0;
 
   const byScore = [...categories].sort((a, b) => b.score - a.score);
   const strengths = byScore.filter((c) => c.score >= 65).slice(0, 2).map((c) => c.label);

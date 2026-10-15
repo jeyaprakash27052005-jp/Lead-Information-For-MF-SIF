@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ToggleRight, Save, Mail, CheckCircle2, AlertCircle, Send } from 'lucide-react';
 import { AppSettings, AppFeatureFlags, User } from '../types';
 import { apiService } from '../services/api';
+import { SaveErrorNotice, SaveProblem, describeSaveError } from './SaveErrorNotice';
 import { useAppSettings } from '../context/AppSettings';
 import { FEATURE_LABELS, mergeSettings } from '../utils/appSettings';
 
@@ -21,6 +22,8 @@ const REASON_TEXT: Record<string, string> = {
   API_NOT_FOUND: 'The e-mail function was not found on this site. Deploy the project that contains the /api folder.',
 };
 
+const NEEDS_CUSTOMER_PORTAL: (keyof AppFeatureFlags)[] = ['customerRegistration', 'mfCalculator', 'npsCalculator', 'schemesCatalog', 'healthCheckup'];
+
 /** Only Head Incharge and Regional Incharge can switch features on or off and set the calculator rates */
 export const FeatureControls: React.FC<FeatureControlsProps> = ({ currentUser, onNotify }) => {
   const { settings, setSettings } = useAppSettings();
@@ -30,6 +33,7 @@ export const FeatureControls: React.FC<FeatureControlsProps> = ({ currentUser, o
   const [npsStr, setNpsStr] = useState(String(settings.npsReturnRate));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [saveProblem, setSaveProblem] = useState<SaveProblem | null>(null);
 
   useEffect(() => {
     setDraft(settings);
@@ -61,6 +65,7 @@ export const FeatureControls: React.FC<FeatureControlsProps> = ({ currentUser, o
 
   const save = async () => {
     setError(null);
+    setSaveProblem(null);
     const mf = Number(mfStr);
     const nps = Number(npsStr);
     if (!(mf > 0 && mf <= 100) || !(nps > 0 && nps <= 100)) {
@@ -75,8 +80,8 @@ export const FeatureControls: React.FC<FeatureControlsProps> = ({ currentUser, o
       );
       setSettings(saved);
       onNotify('Feature settings saved. They apply to everyone straight away.', 'success');
-    } catch (_e) {
-      setError('Could not save. Check that the Firestore rules (including "settings") are published.');
+    } catch (e) {
+      setSaveProblem(describeSaveError(e, 'The feature settings'));
     } finally {
       setSaving(false);
     }
@@ -158,10 +163,15 @@ export const FeatureControls: React.FC<FeatureControlsProps> = ({ currentUser, o
         </button>
       </div>
 
-      {error && (
-        <p className="flex items-start gap-1.5 text-xs font-semibold text-rose-600">
-          <AlertCircle className="w-4 h-4 shrink-0" /> {error}
-        </p>
+      {/* Only one error is shown at a time */}
+      {saveProblem ? (
+        <SaveErrorNotice problem={saveProblem} />
+      ) : (
+        error && (
+          <p className="flex items-start gap-1.5 text-xs font-semibold text-rose-600">
+            <AlertCircle className="w-4 h-4 shrink-0" /> {error}
+          </p>
+        )
       )}
 
       {groups.map((g) => (
@@ -173,11 +183,14 @@ export const FeatureControls: React.FC<FeatureControlsProps> = ({ currentUser, o
             {g.keys.map((k) => {
               const meta = FEATURE_LABELS.find((f) => f.key === k)!;
               const on = draft.features[k];
+              // These features live inside the customer site, so they cannot work while the Customer Portal is off
+              const locked = NEEDS_CUSTOMER_PORTAL.includes(k) && !draft.features.customerPortal;
               return (
                 <li key={k} className="px-5 py-3 flex items-center justify-between gap-4">
                   <div>
                     <p className="text-sm font-bold text-slate-900">{meta.label}</p>
                     <p className="text-[11px] text-slate-500">{meta.help}</p>
+                    {locked && <p className="text-[11px] font-semibold text-amber-700">Switch the Customer Portal on to use this.</p>}
                   </div>
                   <button
                     type="button"
@@ -185,7 +198,8 @@ export const FeatureControls: React.FC<FeatureControlsProps> = ({ currentUser, o
                     aria-checked={on}
                     aria-label={meta.label}
                     onClick={() => toggle(k)}
-                    className={`relative w-12 h-6 rounded-full transition-colors shrink-0 cursor-pointer ${on ? 'bg-emerald-500' : 'bg-slate-300'}`}
+                    disabled={locked}
+                    className={`relative w-12 h-6 rounded-full transition-colors shrink-0 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${on ? 'bg-emerald-500' : 'bg-slate-300'}`}
                   >
                     <span
                       className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${on ? 'left-6' : 'left-0.5'}`}

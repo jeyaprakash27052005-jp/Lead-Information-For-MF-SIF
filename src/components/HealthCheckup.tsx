@@ -4,7 +4,10 @@ import { apiService } from '../services/api';
 import { DEFAULT_REGIONS, NATIONAL_HQ_REGION } from '../utils/regions';
 import {
   HealthConfig,
+  HealthAnswers,
   LIKERT,
+  isAnswered,
+  questionType,
   BAND_STYLE,
   BAND_SUMMARY,
   computeHealthScore,
@@ -43,7 +46,7 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
   const [incomeStr, setIncomeStr] = useState('');
   const [region, setRegion] = useState(defaultRegion || NATIONAL_HQ_REGION);
   const [regions, setRegions] = useState<string[]>(DEFAULT_REGIONS);
-  const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [answers, setAnswers] = useState<HealthAnswers>({});
   const [showErrors, setShowErrors] = useState(false);
 
   const [reportId, setReportId] = useState<string | null>(null);
@@ -87,7 +90,7 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
   const profileOk = Object.keys(profileErrors).length === 0;
 
   const pageQuestions = (page: number) => cfg.questions.filter((q) => q.category === cats[page - 1].id);
-  const pageComplete = (page: number) => pageQuestions(page).every((q) => answers[q.id]);
+  const pageComplete = (page: number) => pageQuestions(page).every((q) => isAnswered(q, answers[q.id]));
 
   const plan = useMemo(
     () =>
@@ -135,7 +138,15 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
     categoryScores: Object.fromEntries(score!.categories.map((c) => [c.id, c.score])),
     moneyStyle: score!.moneyStyle,
     source,
-    questionSnapshot: cfg.questions.map((q) => ({ id: q.id, category: q.category, text: q.text, reverse: !!q.reverse })),
+    questionSnapshot: cfg.questions.map((q) => ({
+      id: q.id,
+      category: q.category,
+      text: q.text,
+      reverse: !!q.reverse,
+      ...(q.type ? { type: q.type } : {}),
+      ...(q.options ? { options: q.options } : {}),
+      ...(q.required ? { required: true } : {}),
+    })),
     investmentPlan: plan || undefined,
     categorySnapshot: cfg.categories.map((c) => ({ id: c.id, label: c.label, intro: c.intro, low: c.low, mid: c.mid, high: c.high })),
   });
@@ -373,32 +384,117 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
             <p className="text-xs text-slate-500">{cats[step - 1].intro}</p>
           </div>
           {pageQuestions(step).map((q, idx) => {
-            const missing = showErrors && !answers[q.id];
+            const missing = showErrors && !isAnswered(q, answers[q.id]);
+            const qt = questionType(q);
+            const pickedIds = Array.isArray(answers[q.id]) ? (answers[q.id] as string[]) : [];
             return (
               <fieldset key={q.id} className={`p-3 rounded-xl border ${missing ? 'border-rose-300 bg-rose-50/40' : 'border-slate-200'}`}>
                 <legend className="px-1 text-xs font-bold text-slate-800">
                   {idx + 1}. {q.text}
                 </legend>
-                <div role="radiogroup" aria-label={q.text} className="grid grid-cols-5 gap-1.5 mt-2">
-                  {LIKERT.map((o) => {
-                    const on = answers[q.id] === o.value;
-                    return (
-                      <button
-                        key={o.value}
-                        type="button"
-                        role="radio"
-                        aria-checked={on}
-                        onClick={() => setAnswers((a) => ({ ...a, [q.id]: o.value }))}
-                        className={`px-1 py-2 rounded-lg border text-[10px] sm:text-[11px] font-bold leading-tight transition-colors cursor-pointer ${
-                          on ? 'bg-rose-600 text-white border-rose-600' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                        }`}
-                      >
+                {qt === 'scale' && (
+                  <div role="radiogroup" aria-label={q.text} className="grid grid-cols-5 gap-1.5 mt-2">
+                    {LIKERT.map((o) => {
+                      const on = answers[q.id] === o.value;
+                      return (
+                        <button
+                          key={o.value}
+                          type="button"
+                          role="radio"
+                          aria-checked={on}
+                          onClick={() => setAnswers((a) => ({ ...a, [q.id]: o.value }))}
+                          className={`px-1 py-2 rounded-lg border text-[10px] sm:text-[11px] font-bold leading-tight transition-colors cursor-pointer ${
+                            on ? 'bg-rose-600 text-white border-rose-600' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                          }`}
+                        >
+                          {o.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {qt === 'choice' && (
+                  <div role="radiogroup" aria-label={q.text} className="grid gap-1.5 mt-2">
+                    {(q.options || []).map((o) => {
+                      const on = answers[q.id] === o.id;
+                      return (
+                        <button
+                          key={o.id}
+                          type="button"
+                          role="radio"
+                          aria-checked={on}
+                          onClick={() => setAnswers((a) => ({ ...a, [q.id]: o.id }))}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-bold text-left transition-colors cursor-pointer ${
+                            on ? 'bg-rose-50 text-rose-800 border-rose-500' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                          }`}
+                        >
+                          <span className={`w-4 h-4 rounded-full border flex items-center justify-center ${on ? 'border-rose-600' : 'border-slate-300'}`}>
+                            {on && <span className="w-2 h-2 rounded-full bg-rose-600" />}
+                          </span>
+                          {o.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {qt === 'list' && (
+                  <select
+                    aria-label={q.text}
+                    value={typeof answers[q.id] === 'string' ? (answers[q.id] as string) : ''}
+                    onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))}
+                    className="mt-2 w-full px-3 py-2.5 text-sm font-semibold border border-slate-300 rounded-lg bg-white"
+                  >
+                    <option value="">Select an answer</option>
+                    {(q.options || []).map((o) => (
+                      <option key={o.id} value={o.id}>
                         {o.label}
-                      </button>
-                    );
-                  })}
-                </div>
-                {missing && <p className="text-[11px] font-semibold text-rose-600 mt-1.5">Please choose an answer</p>}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                {qt === 'checklist' && (
+                  <div role="group" aria-label={q.text} className="grid gap-1.5 mt-2">
+                    {(q.options || []).map((o) => {
+                      const on = pickedIds.includes(o.id);
+                      return (
+                        <label
+                          key={o.id}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-bold cursor-pointer transition-colors ${
+                            on ? 'bg-rose-50 text-rose-800 border-rose-500' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={on}
+                            onChange={(e) =>
+                              setAnswers((a) => {
+                                const cur = Array.isArray(a[q.id]) ? (a[q.id] as string[]) : [];
+                                return { ...a, [q.id]: e.target.checked ? [...cur, o.id] : cur.filter((id) => id !== o.id) };
+                              })
+                            }
+                          />
+                          {o.label}
+                        </label>
+                      );
+                    })}
+                    {!q.required && <p className="text-[11px] text-slate-400">Tick all that apply (you can leave this empty).</p>}
+                  </div>
+                )}
+
+                {qt === 'text' && (
+                  <textarea
+                    aria-label={q.text}
+                    value={typeof answers[q.id] === 'string' ? (answers[q.id] as string) : ''}
+                    onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value.slice(0, 500) }))}
+                    rows={3}
+                    placeholder={q.required ? 'Type your answer' : 'Type your answer (optional)'}
+                    className="mt-2 w-full px-3 py-2 text-sm font-semibold border border-slate-300 rounded-lg"
+                  />
+                )}
+                {missing && <p className="text-[11px] font-semibold text-rose-600 mt-1.5">{qt === 'text' ? 'Please type an answer' : 'Please choose an answer'}</p>}
               </fieldset>
             );
           })}

@@ -7,7 +7,7 @@ import { formatInr } from '../utils/currency';
 import {
   DEFAULT_HEALTH_CONFIG,
   HealthConfig,
-  LIKERT,
+  answerText,
   BAND_STYLE,
   HealthBand,
   computeHealthScore,
@@ -426,8 +426,8 @@ export const HealthReportsAdmin: React.FC<HealthReportsAdminProps> = ({ reports,
                       {selectedCfg.questions.filter((q) => q.category === cat.id).map((q) => (
                         <div key={q.id} className="flex justify-between gap-3 text-slate-600">
                           <span>{q.text}</span>
-                          <span className="font-semibold text-slate-800 whitespace-nowrap">
-                            {LIKERT.find((l) => l.value === selected.answers[q.id])?.label || '—'}
+                          <span className="font-semibold text-slate-800 text-right max-w-[55%] whitespace-pre-wrap break-words">
+                            {answerText(q, selected.answers[q.id])}
                           </span>
                         </div>
                       ))}
