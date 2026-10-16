@@ -26,6 +26,7 @@ interface HealthQuestionsAdminProps {
 const uid = (p: string) => `${p}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
 const MAX_QUESTIONS = 200;
 const MAX_OPTIONS = 12;
+const hasOptionsType = (t: AnswerType) => t === 'choice' || t === 'list' || t === 'checklist';
 
 const defaultOptions = (type: AnswerType): HealthOption[] =>
   type === 'checklist'
@@ -119,7 +120,6 @@ export const HealthQuestionsAdmin: React.FC<HealthQuestionsAdminProps> = ({ curr
   const [newType, setNewType] = useState<AnswerType>('scale');
   const [newOptions, setNewOptions] = useState<HealthOption[]>(defaultOptions('choice'));
   const [newRequired, setNewRequired] = useState(false);
-  const [editOptions, setEditOptions] = useState<HealthOption[]>([]);
   // add-category form
   const [catLabel, setCatLabel] = useState('');
   const [catIntro, setCatIntro] = useState('');
@@ -127,8 +127,18 @@ export const HealthQuestionsAdmin: React.FC<HealthQuestionsAdminProps> = ({ curr
   const [catMid, setCatMid] = useState('');
   const [catHigh, setCatHigh] = useState('');
   // editing
-  const [editQ, setEditQ] = useState<string | null>(null);
-  const [editText, setEditText] = useState('');
+  // Full edit form for one question / one topic
+  const [qDraft, setQDraft] = useState<{
+    id: string;
+    text: string;
+    category: string;
+    type: AnswerType;
+    options: HealthOption[];
+    reverse: boolean;
+    required: boolean;
+  } | null>(null);
+  const [catDraft, setCatDraft] = useState<HealthCategory | null>(null);
+  const [toDeleteQ, setToDeleteQ] = useState<HealthQuestion | null>(null);
   const [toDeleteCat, setToDeleteCat] = useState<HealthCategory | null>(null);
 
   const keyOf = (c: HealthCategory[], q: HealthQuestion[]) => JSON.stringify({ c, q });
@@ -214,6 +224,68 @@ export const HealthQuestionsAdmin: React.FC<HealthQuestionsAdminProps> = ({ curr
     setNewReverse(false);
     setNewRequired(false);
     if (typeInfo.hasOptions) setNewOptions(defaultOptions(newType));
+  };
+
+  const startEditQuestion = (q: HealthQuestion) => {
+    setError(null);
+    setCatDraft(null);
+    const t = questionType(q);
+    setQDraft({
+      id: q.id,
+      text: q.text,
+      category: q.category,
+      type: t,
+      options: q.options ? q.options.map((o) => ({ ...o })) : hasOptionsType(t) ? defaultOptions(t) : [],
+      reverse: !!q.reverse,
+      required: !!q.required,
+    });
+  };
+
+  const changeDraftType = (t: AnswerType) =>
+    setQDraft((d) =>
+      d
+        ? {
+            ...d,
+            type: t,
+            reverse: false,
+            required: false,
+            options: hasOptionsType(t) ? (d.options.length >= 2 && hasOptionsType(d.type) ? d.options : defaultOptions(t)) : [],
+          }
+        : d
+    );
+
+  const saveQuestionEdit = () => {
+    if (!qDraft) return;
+    setError(null);
+    if (qDraft.text.trim().length < 8) return setError('Write the question in full (at least 8 characters).');
+    if (!qDraft.category) return setError('Choose a topic for the question.');
+    let options: HealthOption[] | undefined;
+    if (hasOptionsType(qDraft.type)) {
+      const problem = optionsProblem(qDraft.options);
+      if (problem) return setError(problem);
+      options = qDraft.options.filter((o) => o.label.trim()).map((o) => ({ ...o, label: o.label.trim() }));
+    }
+    const updated: HealthQuestion = { id: qDraft.id, category: qDraft.category, text: qDraft.text.trim() };
+    if (qDraft.type === 'scale' && qDraft.reverse) updated.reverse = true;
+    if (qDraft.type !== 'scale') updated.type = qDraft.type;
+    if (options) updated.options = options;
+    if ((qDraft.type === 'text' || qDraft.type === 'checklist') && qDraft.required) updated.required = true;
+    setQs((p) => p.map((x) => (x.id === qDraft.id ? updated : x)));
+    setQDraft(null);
+  };
+
+  const saveTopicEdit = () => {
+    if (!catDraft) return;
+    if (!catDraft.label.trim()) return setError('The topic needs a name.');
+    setError(null);
+    setCats((p) =>
+      p.map((c) =>
+        c.id === catDraft.id
+          ? { ...c, label: catDraft.label.trim(), intro: catDraft.intro.trim(), low: catDraft.low.trim(), mid: catDraft.mid.trim(), high: catDraft.high.trim() }
+          : c
+      )
+    );
+    setCatDraft(null);
   };
 
   const move = (id: string, dir: -1 | 1) =>
@@ -451,133 +523,156 @@ export const HealthQuestionsAdmin: React.FC<HealthQuestionsAdminProps> = ({ curr
                 </p>
                 <p className="text-[11px] text-slate-500">{c.intro}</p>
               </div>
-              <button
-                type="button"
-                onClick={() => setToDeleteCat(c)}
-                title="Delete this topic and its questions"
-                className="p-1.5 rounded-lg text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 cursor-pointer"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setError(null);
+                    setQDraft(null);
+                    setCatDraft({ ...c });
+                  }}
+                  title="Edit this topic"
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 flex items-center gap-1 cursor-pointer"
+                >
+                  <Pencil className="w-3.5 h-3.5" /> Edit topic
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setToDeleteCat(c)}
+                  title="Delete this topic and its questions"
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 flex items-center gap-1 cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> Delete topic
+                </button>
+              </div>
             </div>
+            {catDraft && catDraft.id === c.id && (
+              <div className="px-5 py-4 bg-indigo-50/40 border-b border-slate-200 space-y-2 text-xs">
+                <p className="font-bold text-slate-800">Edit topic</p>
+                <input value={catDraft.label} onChange={(e) => setCatDraft({ ...catDraft, label: e.target.value })} aria-label="Topic name" className="w-full px-3 py-2 text-sm font-semibold border border-slate-300 rounded-lg" />
+                <input value={catDraft.intro} onChange={(e) => setCatDraft({ ...catDraft, intro: e.target.value })} aria-label="Topic intro" placeholder="One line shown above the questions" className="w-full px-3 py-2 text-sm font-semibold border border-slate-300 rounded-lg" />
+                <input value={catDraft.low} onChange={(e) => setCatDraft({ ...catDraft, low: e.target.value })} aria-label="Advice when the score is low" placeholder="Advice when the score is low" className="w-full px-3 py-2 text-sm font-semibold border border-slate-300 rounded-lg" />
+                <input value={catDraft.mid} onChange={(e) => setCatDraft({ ...catDraft, mid: e.target.value })} aria-label="Advice when the score is medium" placeholder="Advice when the score is medium" className="w-full px-3 py-2 text-sm font-semibold border border-slate-300 rounded-lg" />
+                <input value={catDraft.high} onChange={(e) => setCatDraft({ ...catDraft, high: e.target.value })} aria-label="Advice when the score is high" placeholder="Advice when the score is high" className="w-full px-3 py-2 text-sm font-semibold border border-slate-300 rounded-lg" />
+                <div className="flex justify-end gap-2 pt-1">
+                  <button type="button" onClick={() => setCatDraft(null)} className="px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold cursor-pointer">Cancel</button>
+                  <button type="button" onClick={saveTopicEdit} className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold cursor-pointer">Save topic</button>
+                </div>
+              </div>
+            )}
             {list.length === 0 ? (
               <p className="px-5 py-3 text-xs text-amber-700 font-semibold">No questions in this topic. Topics without questions are not saved.</p>
             ) : (
               <ul className="divide-y divide-slate-100">
-                {list.map((q) => (
-                  <li key={q.id} className="px-5 py-2.5 flex items-start gap-3 text-xs">
-                    <div className="flex-1 min-w-0">
-                      {editQ === q.id ? (
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <input
-                              value={editText}
-                              onChange={(e) => setEditText(e.target.value)}
-                              className="flex-1 px-2 py-1.5 text-xs font-semibold border border-slate-300 rounded-lg"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                if (editText.trim().length < 8) return setError('Write the question in full (at least 8 characters).');
-                                if (hasOptions(q)) {
-                                  const problem = optionsProblem(editOptions);
-                                  if (problem) return setError(problem);
-                                }
-                                setError(null);
-                                setQs((p) =>
-                                  p.map((x) =>
-                                    x.id === q.id
-                                      ? {
-                                          ...x,
-                                          text: editText.trim(),
-                                          ...(hasOptions(q)
-                                            ? { options: editOptions.filter((o) => o.label.trim()).map((o) => ({ ...o, label: o.label.trim() })) }
-                                            : {}),
-                                        }
-                                      : x
-                                  )
-                                );
-                                setEditQ(null);
-                              }}
-                              className="p-1.5 rounded-lg text-emerald-700 bg-emerald-50 border border-emerald-200 cursor-pointer"
-                              aria-label="Save edit"
-                            >
-                              <Check className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setEditQ(null)}
-                              className="p-1.5 rounded-lg text-slate-600 bg-slate-50 border border-slate-200 cursor-pointer"
-                              aria-label="Cancel edit"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                          {hasOptions(q) && <OptionsEditor options={editOptions} onChange={setEditOptions} type={questionType(q)} />}
-                        </div>
-                      ) : (
-                        <p className="font-semibold text-slate-800">{q.text}</p>
+                {list.map((q) =>
+                  qDraft && qDraft.id === q.id ? (
+                    <li key={q.id} className="px-5 py-4 bg-indigo-50/40 space-y-3 text-xs">
+                      <p className="font-bold text-slate-800">Edit question</p>
+                      <input
+                        value={qDraft.text}
+                        onChange={(e) => setQDraft({ ...qDraft, text: e.target.value })}
+                        aria-label="Question text"
+                        className="w-full px-3 py-2 text-sm font-semibold border border-slate-300 rounded-lg"
+                      />
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        <label className="block font-bold text-slate-700 uppercase tracking-wider">
+                          Topic
+                          <select
+                            value={qDraft.category}
+                            onChange={(e) => setQDraft({ ...qDraft, category: e.target.value })}
+                            aria-label="Topic of this question"
+                            className="mt-1 w-full px-3 py-2 text-sm font-semibold border border-slate-300 rounded-lg normal-case"
+                          >
+                            {cats.map((c2) => (
+                              <option key={c2.id} value={c2.id}>
+                                {c2.label}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <label className="block font-bold text-slate-700 uppercase tracking-wider">
+                          Answer type
+                          <select
+                            value={qDraft.type}
+                            onChange={(e) => changeDraftType(e.target.value as AnswerType)}
+                            aria-label="Answer type of this question"
+                            className="mt-1 w-full px-3 py-2 text-sm font-semibold border border-slate-300 rounded-lg normal-case"
+                          >
+                            {ANSWER_TYPES.map((t) => (
+                              <option key={t.value} value={t.value}>
+                                {t.label}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      </div>
+                      {hasOptionsType(qDraft.type) && (
+                        <OptionsEditor options={qDraft.options} onChange={(o) => setQDraft({ ...qDraft, options: o })} type={qDraft.type} />
                       )}
-                      <p className="mt-1 text-[11px] text-slate-500">
-                        <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-bold">
-                          {ANSWER_TYPES.find((t) => t.value === questionType(q))?.label}
-                        </span>
-                        {hasOptions(q) && q.options && (
-                          <span className="ml-2">{q.options.map((o) => `${o.label} (${o.score})`).join(' • ')}</span>
-                        )}
-                        {questionType(q) === 'text' && <span className="ml-2">Not scored</span>}
-                      </p>
-                      {questionType(q) === 'scale' && (
-                        <label className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={!!q.reverse}
-                            onChange={(e) => setQs((p) => p.map((x) => (x.id === q.id ? { ...x, reverse: e.target.checked || undefined } : x)))}
-                          />
+                      {qDraft.type === 'scale' && (
+                        <label className="flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
+                          <input type="checkbox" checked={qDraft.reverse} onChange={(e) => setQDraft({ ...qDraft, reverse: e.target.checked })} />
                           Negative habit (agreeing lowers the score)
                         </label>
                       )}
-                      {(questionType(q) === 'text' || questionType(q) === 'checklist') && (
-                        <label className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={!!q.required}
-                            onChange={(e) => setQs((p) => p.map((x) => (x.id === q.id ? { ...x, required: e.target.checked || undefined } : x)))}
-                          />
+                      {(qDraft.type === 'text' || qDraft.type === 'checklist') && (
+                        <label className="flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
+                          <input type="checkbox" checked={qDraft.required} onChange={(e) => setQDraft({ ...qDraft, required: e.target.checked })} />
                           The customer must answer this question
                         </label>
                       )}
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <button type="button" onClick={() => move(q.id, -1)} title="Move up" className="p-1.5 rounded-lg text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 cursor-pointer">
-                        <ArrowUp className="w-3.5 h-3.5" />
-                      </button>
-                      <button type="button" onClick={() => move(q.id, 1)} title="Move down" className="p-1.5 rounded-lg text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 cursor-pointer">
-                        <ArrowDown className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditQ(q.id);
-                          setEditText(q.text);
-                          setEditOptions(q.options ? q.options.map((o) => ({ ...o })) : []);
-                        }}
-                        title="Edit question"
-                        className="p-1.5 rounded-lg text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 cursor-pointer"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setQs((p) => p.filter((x) => x.id !== q.id))}
-                        title="Delete question"
-                        className="p-1.5 rounded-lg text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 cursor-pointer"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </li>
-                ))}
+                      <div className="flex justify-end gap-2">
+                        <button type="button" onClick={() => setQDraft(null)} className="px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold cursor-pointer">
+                          Cancel
+                        </button>
+                        <button type="button" onClick={saveQuestionEdit} className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold cursor-pointer">
+                          Save question
+                        </button>
+                      </div>
+                    </li>
+                  ) : (
+                    <li key={q.id} className="px-5 py-2.5 flex items-start gap-3 text-xs">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-slate-800">{q.text}</p>
+                        <p className="mt-1 text-[11px] text-slate-500">
+                          <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-bold">
+                            {ANSWER_TYPES.find((t) => t.value === questionType(q))?.label}
+                          </span>
+                          {hasOptions(q) && q.options && (
+                            <span className="ml-2">{q.options.map((o) => `${o.label} (${o.score})`).join(' • ')}</span>
+                          )}
+                          {questionType(q) === 'text' && <span className="ml-2">Not scored</span>}
+                          {q.reverse && <span className="ml-2 font-semibold text-amber-700">Negative habit</span>}
+                          {q.required && <span className="ml-2 font-semibold text-indigo-700">Must answer</span>}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button type="button" onClick={() => move(q.id, -1)} title="Move up" className="p-1.5 rounded-lg text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 cursor-pointer">
+                          <ArrowUp className="w-3.5 h-3.5" />
+                        </button>
+                        <button type="button" onClick={() => move(q.id, 1)} title="Move down" className="p-1.5 rounded-lg text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 cursor-pointer">
+                          <ArrowDown className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => startEditQuestion(q)}
+                          title="Edit question"
+                          className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 flex items-center gap-1 cursor-pointer"
+                        >
+                          <Pencil className="w-3.5 h-3.5" /> Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setToDeleteQ(q)}
+                          title="Delete question"
+                          className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 flex items-center gap-1 cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" /> Delete
+                        </button>
+                      </div>
+                    </li>
+                  )
+                )}
               </ul>
             )}
           </div>
@@ -587,6 +682,19 @@ export const HealthQuestionsAdmin: React.FC<HealthQuestionsAdminProps> = ({ curr
       <p className="text-[11px] text-slate-500">
         Reports that were already taken keep the questions the person answered, so changing questions never changes old reports.
       </p>
+
+      <ConfirmModal
+        isOpen={!!toDeleteQ}
+        title="Delete this question?"
+        message={`"${toDeleteQ?.text}" will be removed from the list. This is saved only when you publish. Reports already taken keep their own copy.`}
+        confirmLabel="Delete question"
+        onConfirm={() => {
+          if (toDeleteQ) setQs((p) => p.filter((x) => x.id !== toDeleteQ.id));
+          if (qDraft && toDeleteQ && qDraft.id === toDeleteQ.id) setQDraft(null);
+          setToDeleteQ(null);
+        }}
+        onCancel={() => setToDeleteQ(null)}
+      />
 
       <ConfirmModal
         isOpen={!!toDeleteCat}

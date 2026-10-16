@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { HeartPulse, ArrowLeft, ArrowRight, Download, RotateCcw, CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { apiService } from '../services/api';
 import { DEFAULT_REGIONS, NATIONAL_HQ_REGION } from '../utils/regions';
@@ -34,19 +34,31 @@ const MOBILE_RE = /^[6-9][0-9]{9}$/;
 type Gender = 'Male' | 'Female' | 'Other';
 
 export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultName, defaultMobile, defaultRegion }) => {
+  // A half-finished check-up survives a page refresh (kept only in this browser tab)
+  const DRAFT_KEY = `mfsif_health_draft_${source}`;
+  const draftRef = useRef<any>(null);
+  if (draftRef.current === null) {
+    try {
+      const raw = sessionStorage.getItem(DRAFT_KEY);
+      draftRef.current = raw ? JSON.parse(raw) : {};
+    } catch (_e) {
+      draftRef.current = {};
+    }
+  }
+  const draft = draftRef.current as Record<string, any>;
   const { settings, loaded: settingsLoaded } = useAppSettings();
   // undefined = still loading, null = the admin team has not added any questions yet
   const [config, setConfig] = useState<HealthConfig | null | undefined>(undefined);
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
-  const [step, setStep] = useState(0); // 0 = about you, 1..N = question pages, N+1 = report
-  const [name, setName] = useState(defaultName || '');
-  const [ageStr, setAgeStr] = useState('');
-  const [gender, setGender] = useState<Gender | ''>('');
-  const [occupation, setOccupation] = useState('');
-  const [incomeStr, setIncomeStr] = useState('');
-  const [region, setRegion] = useState(defaultRegion || NATIONAL_HQ_REGION);
+  const [step, setStep] = useState<number>(typeof draft.step === 'number' ? draft.step : 0); // 0 = about you, 1..N = question pages, N+1 = report
+  const [name, setName] = useState<string>(draft.name ?? (defaultName || ''));
+  const [ageStr, setAgeStr] = useState<string>(draft.ageStr ?? '');
+  const [gender, setGender] = useState<Gender | ''>(draft.gender ?? '');
+  const [occupation, setOccupation] = useState<string>(draft.occupation ?? '');
+  const [incomeStr, setIncomeStr] = useState<string>(draft.incomeStr ?? '');
+  const [region, setRegion] = useState<string>(draft.region ?? (defaultRegion || NATIONAL_HQ_REGION));
   const [regions, setRegions] = useState<string[]>(DEFAULT_REGIONS);
-  const [answers, setAnswers] = useState<HealthAnswers>({});
+  const [answers, setAnswers] = useState<HealthAnswers>(draft.answers && typeof draft.answers === 'object' ? draft.answers : {});
   const [showErrors, setShowErrors] = useState(false);
 
   const [reportId, setReportId] = useState<string | null>(null);
@@ -59,6 +71,23 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
   const [downloading, setDownloading] = useState(false);
   const [dlError, setDlError] = useState<string | null>(null);
   const [dlResult, setDlResult] = useState<{ leadSaved: boolean; leadError?: string; email: 'sent' | 'not_configured' | 'failed'; reason?: string } | null>(null);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ step, name, ageStr, gender, occupation, incomeStr, region, answers }));
+    } catch (_e) {
+      // storage blocked - the check-up still works, it just cannot survive a refresh
+    }
+  }, [step, name, ageStr, gender, occupation, incomeStr, region, answers]);
+
+  // The report page needs a saved report; after a refresh go back to the last question page instead
+  const clampedRef = useRef(false);
+  useEffect(() => {
+    if (config && !clampedRef.current) {
+      clampedRef.current = true;
+      if (step > config.categories.length) setStep(config.categories.length);
+    }
+  }, [config]);
 
   useEffect(() => {
     apiService

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { saveSession, readSession, clearSession, saveTab, readTab } from './utils/session';
 import { User, Lead, LeadStatus, ViewTab, InvestmentScheme, CustomerPermissions, HealthReport } from './types';
 import { apiService, testConnection, getWriteVersion } from './services/api';
 import { Header } from './components/Header';
@@ -82,6 +83,32 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
     () => portal === 'all' && new URLSearchParams(window.location.search).get('portal') === 'health'
   );
   const [customerStartTab, setCustomerStartTab] = useState<'register' | 'login'>('login');
+
+  // A refresh on a public screen (a login page, the health check-up) stays on that screen
+  const publicRef = useRef<any>(undefined);
+  if (publicRef.current === undefined) {
+    try {
+      publicRef.current = JSON.parse(sessionStorage.getItem('mfsif_public_v1') || 'null');
+    } catch (_e) {
+      publicRef.current = null;
+    }
+  }
+  useEffect(() => {
+    const pub = publicRef.current;
+    if (pub && portal === 'all') {
+      if (pub.portalMode === 'admin' || pub.portalMode === 'customer') setPortalMode(pub.portalMode);
+      if (typeof pub.showHome === 'boolean') setShowHome(pub.showHome);
+      if (typeof pub.showHealth === 'boolean') setShowHealth(pub.showHealth);
+      if (pub.customerStartTab === 'register' || pub.customerStartTab === 'login') setCustomerStartTab(pub.customerStartTab);
+    }
+  }, []);
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('mfsif_public_v1', JSON.stringify({ portalMode, showHome, showHealth, customerStartTab }));
+    } catch (_e) {
+      // ignore
+    }
+  }, [portalMode, showHome, showHealth, customerStartTab]);
   const [feedbackMessage, setFeedbackMessage] = useState<{
     text: string;
     type: 'success' | 'info' | 'error';
@@ -98,6 +125,14 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [profileUserToEdit, setProfileUserToEdit] = useState<User | null>(null);
 
+  // Remember who is logged in and which screen they are on, so a refresh keeps them logged in
+  useEffect(() => {
+    if (currentUser) saveSession(currentUser.id);
+  }, [currentUser?.id]);
+  useEffect(() => {
+    if (currentUser) saveTab(currentUser.id, activeTab);
+  }, [activeTab, currentUser?.id]);
+
   // Auto-dismiss notification toasts
   useEffect(() => {
     if (feedbackMessage) {
@@ -105,6 +140,27 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
       return () => clearTimeout(timer);
     }
   }, [feedbackMessage]);
+
+  const defaultTabFor = (role: User['role']): ViewTab =>
+    role === 'customer' ? 'customer-portal' : role === 'regional_incharge' || role === 'area_incharge' ? 'assigned-leads' : 'all-leads';
+
+  // After a page refresh: log the person back in (no password needed again) and return to the same screen
+  const restoreSession = (list: User[]) => {
+    if (currentUserIdRef.current) return;
+    const sess = readSession();
+    if (!sess) return;
+    const me = list.find((u) => u.id === sess.userId);
+    const portalOk = !me ? false : portal === 'admin' ? me.role !== 'customer' : portal === 'customer' ? me.role === 'customer' : true;
+    if (me && me.status === 'active' && portalOk) {
+      currentUserIdRef.current = me.id;
+      setCurrentUser(me);
+      setPortalMode(me.role === 'customer' ? 'customer' : 'admin');
+      setShowHome(false);
+      setActiveTab((readTab(me.id) as ViewTab | null) || defaultTabFor(me.role));
+    } else if (!me && list.length > 0) {
+      clearSession(); // the account no longer exists
+    }
+  };
 
   // Load online database users and leads
   const loadData = async () => {
@@ -116,6 +172,7 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
         apiService.getSchemes().catch(() => []),
       ]);
       setUsers(fetchedUsers);
+      restoreSession(fetchedUsers);
       setLeads(fetchedLeads);
       if (fetchedSchemes && fetchedSchemes.length > 0) setSchemes(fetchedSchemes);
       // Health check-up reports are optional: the rest of the app still works if they cannot be loaded
@@ -160,6 +217,7 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
       // A write happened while we were fetching: this snapshot may be stale, skip it.
       if (getWriteVersion() !== versionAtStart) return;
       setUsers(fetchedUsers);
+      restoreSession(fetchedUsers);
       setLeads(fetchedLeads);
       if (fetchedRegions) setStoredRegions(fetchedRegions);
       if (fetchedSchemes) setSchemes(fetchedSchemes);
@@ -168,6 +226,7 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
       if (meId) {
         const me = fetchedUsers.find((u) => u.id === meId);
         if (!me || me.status !== 'active') {
+          clearSession();
           setCurrentUser(null);
           showFeedback(
             !me
@@ -233,6 +292,8 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
   };
 
   const handleLogout = () => {
+    clearSession();
+    currentUserIdRef.current = null;
     setCurrentUser(null);
     setShowHome(portal !== 'admin');
     showFeedback('You have been securely logged out.', 'info');

@@ -68,3 +68,9 @@ npm run lint           # type-check
 - Publish `firestore.rules` in the Firebase console after every update (it now includes the `settings` documents).
 
 - If **Save changes** or **Publish questions** shows "the online database is blocking it", the Firestore rules are not published yet. The message has a **Copy the Firestore rules** button; paste them in Firebase console > Firestore Database > Rules and press Publish.
+
+## Staying logged in and live switches
+
+- Refreshing the page no longer logs anyone out in the admin or customer portals. The login is remembered in the browser for 7 days (only the user id is kept, never a password) and is cleared when the person presses Logout, or when the account is deleted or deactivated. A refresh also returns to the same screen, and a half-finished Health Check-up keeps its answers.
+- Feature Controls switches (for example Browse Published Schemes) reach every open customer screen within about 20 seconds, or at once when the person returns to the tab. Nobody needs to refresh.
+- In Health Check-up Questions every question and topic has visible **Edit** and **Delete** buttons. Edit changes the text, topic, answer type, options and points; Delete asks for confirmation. Press **Publish questions** to make the changes live.
