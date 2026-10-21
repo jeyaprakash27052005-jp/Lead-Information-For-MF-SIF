@@ -1,3 +1,6 @@
+import { FundExplainer } from './intro/FundExplainer';
+import { GrowthArt, RotatingTagline } from './intro/GrowthArt';
+import { AwarenessList } from './AwarenessList';
 import { useAppSettings } from '../context/AppSettings';
 import React, { useState, useEffect, useRef } from 'react';
 import { InvestmentScheme, AdBanner } from '../types';
@@ -158,6 +161,24 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
       {/* Main Home Screen Content */}
       <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-8 flex-1">
+        {/* Welcome: an animated introduction to mutual fund investing */}
+        <section className="anim-rise rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white overflow-hidden">
+          <div className="grid md:grid-cols-2 items-center gap-2 p-6 sm:p-8">
+            <div className="space-y-3">
+              <span className="inline-block text-[11px] font-bold uppercase tracking-wider text-emerald-300">Mutual funds and NPS</span>
+              <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-[1.05] text-shimmer">
+                Grow your money, one step at a time.
+              </h1>
+              <p className="text-lg sm:text-xl font-black text-emerald-300 h-8">
+                <RotatingTagline />
+              </p>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-md">
+                See how regular investing can build wealth. Log in to use the calculators, take the health check-up and join our awareness programmes.
+              </p>
+            </div>
+            <GrowthArt className="w-full h-auto max-h-64" />
+          </div>
+        </section>
         {/* MOVING ADS ON THE SCREEN (CAROUSEL SLIDER) */}
         {ads.length > 0 && (
         <section
@@ -314,6 +335,18 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               )}
             </div>
           </div>
+        )}
+
+        {/* How mutual funds work (animated) */}
+        <section className="space-y-3" aria-label="How mutual funds work">
+          <h2 className="text-lg font-black text-slate-900 tracking-tight">How mutual funds work</h2>
+          <FundExplainer />
+        </section>
+
+        {settings.features.awarenessPrograms && (
+          <section className="space-y-3" aria-label="Upcoming awareness programmes">
+            <AwarenessList limit={2} compact hideWhenEmpty />
+          </section>
         )}
       </main>
 

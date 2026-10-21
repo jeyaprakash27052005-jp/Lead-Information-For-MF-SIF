@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
+import { InvestIntro } from './components/intro/InvestIntro';
+import { FundExplainer } from './components/intro/FundExplainer';
 import { saveSession, readSession, clearSession, saveTab, readTab } from './utils/session';
-import { User, Lead, LeadStatus, ViewTab, InvestmentScheme, CustomerPermissions, HealthReport } from './types';
+import { User, Lead, LeadStatus, ViewTab, InvestmentScheme, CustomerPermissionSettings, HealthReport } from './types';
 import { apiService, testConnection, getWriteVersion } from './services/api';
 import { Header } from './components/Header';
 import { Navigation } from './components/Navigation';
@@ -21,6 +23,7 @@ import { SchemeManagement } from './components/SchemeManagement';
 import { CustomerPortal } from './components/CustomerPortal';
 import { HomeScreen } from './components/HomeScreen';
 import { AdsManagement } from './components/AdsManagement';
+import { AwarenessProgramsAdmin } from './components/AwarenessProgramsAdmin';
 import { AddLeadPage } from './components/AddLeadPage';
 import { FeatureControls } from './components/FeatureControls';
 import { HealthQuestionsAdmin } from './components/HealthQuestionsAdmin';
@@ -35,9 +38,45 @@ import { getAllRegions, NATIONAL_HQ_REGION } from './utils/regions';
 export type AppPortal = 'all' | 'admin' | 'customer';
 
 export default function App(props: { portal?: AppPortal } = {}) {
+  // ?demo=intro and ?demo=explainer play the animations on their own (used to record them as videos)
+  const demo = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('demo') : null;
+
+  // Start-up animation: shown once per browser tab to people who are not already logged in
+  const [intro, setIntro] = useState<boolean>(() => {
+    if (demo) return false;
+    try {
+      return !readSession() && !sessionStorage.getItem('mfsif_intro_seen_v1');
+    } catch (_e) {
+      return false;
+    }
+  });
+
+  if (demo === 'intro') return <InvestIntro demo onDone={() => undefined} />;
+  if (demo === 'explainer') {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <FundExplainer dark />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <AppSettingsProvider>
       <AppInner {...props} />
+      {intro && (
+        <InvestIntro
+          onDone={() => {
+            try {
+              sessionStorage.setItem('mfsif_intro_seen_v1', '1');
+            } catch (_e) {
+              // ignore
+            }
+            setIntro(false);
+          }}
+        />
+      )}
     </AppSettingsProvider>
   );
 }
@@ -417,7 +456,7 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
     showFeedback(`Account for ${updated.name} marked as ${newStatus}.`);
   };
 
-  const handleUpdatePermissions = async (userId: string, permissions: CustomerPermissions) => {
+  const handleUpdatePermissions = async (userId: string, permissions: CustomerPermissionSettings) => {
     const updated = await apiService.updateUserPermissions(userId, permissions);
     setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
     showFeedback(`Feature permissions saved for ${updated.name}.`);
@@ -742,6 +781,8 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
                 ? 'schemes'
                 : activeTab === 'health-checkup'
                 ? 'health'
+                : activeTab === 'awareness-programs'
+                ? 'awareness'
                 : 'dashboard'
             }
             onViewChange={(view) =>
@@ -755,6 +796,8 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
                   ? 'scheme-management'
                   : view === 'health'
                   ? 'health-checkup'
+                  : view === 'awareness'
+                  ? 'awareness-programs'
                   : 'customer-portal'
               )
             }
@@ -915,6 +958,10 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
             )}
 
             {/* VIEW 10: Ads Management (Head uploads home screen ad images) */}
+            {activeTab === 'awareness-admin' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge') && (
+              <AwarenessProgramsAdmin currentUser={currentUser} onNotify={showFeedback} />
+            )}
+
             {activeTab === 'ads-management' && currentUser.role === 'head' && (
               <AdsManagement onNotify={showFeedback} />
             )}

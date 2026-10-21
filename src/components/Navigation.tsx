@@ -13,6 +13,7 @@ import {
   Layers,
   Globe,
   Image as ImageIcon,
+  Megaphone,
   HeartPulse,
   ToggleRight,
   ListChecks
@@ -146,6 +147,12 @@ export const Navigation: React.FC<NavigationProps> = ({
         label: 'Health Check-up Questions',
         icon: <ListChecks className="w-4 h-4" />,
         description: 'Add, edit and remove the questions asked in the Finance Health Check-up',
+      });
+      items.push({
+        id: 'awareness-admin',
+        label: 'Awareness Programs',
+        icon: <Megaphone className="w-4 h-4" />,
+        description: 'Add awareness programme details that customers see',
       });
       items.push({
         id: 'feature-controls',

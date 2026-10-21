@@ -69,6 +69,17 @@ service cloud.firestore {
       allow delete: if isValidId(adId);
     }
 
+    match /awarenessPrograms/{programId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(programId)
+        && request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 200
+        && request.resource.data.description is string && request.resource.data.description.size() <= 3000
+        && request.resource.data.startsAt is string
+        && request.resource.data.mode in ['online', 'offline']
+        && request.resource.data.isActive is bool;
+      allow delete: if isValidId(programId);
+    }
+
     match /healthReports/{reportId} {
       allow get, list: if true;
       allow create, update: if isValidId(reportId)

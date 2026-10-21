@@ -1,1 +1,162 @@
 @import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   Motion for the whole site. Everything here is switched off for people
+   who ask their device for reduced motion (see the end of this file).
+------------------------------------------------------------------- */
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Every button: lifts on hover, presses on click */
+button:not(:disabled),
+[role='button']:not([aria-disabled='true']) {
+  transition:
+    transform 0.18s var(--ease-out),
+    box-shadow 0.2s var(--ease-out),
+    filter 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+button:not(:disabled):hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05) saturate(1.05);
+  box-shadow: 0 10px 22px -10px rgba(79, 70, 229, 0.45);
+}
+button:not(:disabled):active {
+  transform: translateY(0) scale(0.96);
+  box-shadow: none;
+  transition-duration: 0.06s;
+}
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+/* On/off switches and tiny icon buttons keep still so they do not jitter */
+button[role='switch']:not(:disabled):hover,
+button[role='radio']:not(:disabled):hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* ---- entrances ---- */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pop {
+  0% { opacity: 0; transform: scale(0.85); }
+  70% { transform: scale(1.04); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.anim-rise { opacity: 0; animation: rise 0.6s var(--ease-out) forwards; animation-delay: var(--d, 0ms); }
+.anim-fade { animation: fade-in 0.45s ease both; animation-delay: var(--d, 0ms); }
+.anim-pop { animation: pop 0.5s var(--ease-out) both; animation-delay: var(--d, 0ms); }
+/* put on a screen container and give it key={screenName}: it plays again on every tab change */
+.page-enter { animation: rise 0.45s var(--ease-out) both; }
+
+.lift-card { transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out); }
+.lift-card:hover { transform: translateY(-4px); box-shadow: 0 18px 30px -18px rgba(30, 27, 75, 0.35); }
+
+/* ---- growth (bars, lines, money) ---- */
+@keyframes grow-x { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes grow-y { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+.grow-x { transform-origin: left center; animation: grow-x 0.9s var(--ease-out) both; animation-delay: var(--d, 0ms); }
+.grow-y { transform-box: fill-box; transform-origin: center bottom; animation: grow-y 0.8s var(--ease-out) both; animation-delay: var(--d, 0ms); }
+
+@keyframes draw { from { stroke-dashoffset: var(--len, 600); } to { stroke-dashoffset: 0; } }
+.draw-line { stroke-dasharray: var(--len, 600); animation: draw 2.2s var(--ease-out) both; animation-delay: var(--d, 0ms); }
+
+@keyframes coin-drop {
+  0% { transform: translateY(-70px) rotateY(0deg); opacity: 0; }
+  15% { opacity: 1; }
+  80% { transform: translateY(0) rotateY(540deg); opacity: 1; }
+  100% { transform: translateY(6px) rotateY(720deg); opacity: 0; }
+}
+.coin-drop { transform-box: fill-box; transform-origin: center; animation: coin-drop 2.6s ease-in infinite; animation-delay: var(--d, 0ms); }
+
+@keyframes float-y { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+.float-y { animation: float-y 3.4s ease-in-out infinite; animation-delay: var(--d, 0ms); }
+
+@keyframes pulse-ring { 0% { transform: scale(0.9); opacity: 0.7; } 100% { transform: scale(1.6); opacity: 0; } }
+.pulse-ring { transform-box: fill-box; transform-origin: center; animation: pulse-ring 2.4s ease-out infinite; animation-delay: var(--d, 0ms); }
+
+@keyframes shimmer { from { background-position: -200% 0; } to { background-position: 200% 0; } }
+.text-shimmer {
+  background: linear-gradient(90deg, #c7d2fe 0%, #ffffff 40%, #a7f3d0 60%, #c7d2fe 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 4s linear infinite;
+}
+
+/* ---- the two investors in the intro ---- */
+@keyframes swing-a { 0%, 100% { transform: rotate(-26deg); } 50% { transform: rotate(26deg); } }
+@keyframes swing-b { 0%, 100% { transform: rotate(26deg); } 50% { transform: rotate(-26deg); } }
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes jump { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-34px); } 60% { transform: translateY(-34px); } }
+.limb { transform-box: fill-box; transform-origin: 50% 8%; }
+.walking .leg-a, .walking .arm-b { animation: swing-a 0.7s ease-in-out infinite; }
+.walking .leg-b, .walking .arm-a { animation: swing-b 0.7s ease-in-out infinite; }
+.walking .body { animation: bob 0.35s ease-in-out infinite; }
+.celebrate .body { animation: jump 0.9s ease-in-out infinite; }
+.celebrate .arm-a, .celebrate .arm-b { animation: swing-a 0.45s ease-in-out infinite; }
+
+@keyframes confetti-fall {
+  0% { transform: translate(0, -20px) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translate(var(--dx, 0px), 340px) rotate(540deg); opacity: 0; }
+}
+.confetti { position: absolute; top: 0; animation: confetti-fall 2.2s ease-in forwards; animation-delay: var(--d, 0ms); }
+
+@keyframes wipe-up { from { transform: translateY(0); } to { transform: translateY(-100%); } }
+.wipe-up { animation: wipe-up 0.7s var(--ease-out) forwards; }
+@keyframes word-in { from { opacity: 0; transform: translateY(110%); } to { opacity: 1; transform: none; } }
+.word-in { display: inline-block; animation: word-in 0.7s var(--ease-out) both; animation-delay: var(--d, 0ms); }
+
+/* ---- reduced motion: no movement for people who ask for it ---- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .anim-rise { opacity: 1; }
+}
+
+/* ---- main call-to-action buttons: a soft glow and a light sweep ---- */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.45); }
+  50% { box-shadow: 0 0 0 9px rgba(99, 102, 241, 0); }
+}
+@keyframes sheen {
+  0% { transform: translateX(-130%) skewX(-18deg); }
+  60%, 100% { transform: translateX(260%) skewX(-18deg); }
+}
+.btn-glow { position: relative; overflow: hidden; animation: glow-pulse 2.6s ease-out infinite; }
+.btn-glow::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 38%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  animation: sheen 3.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ---- explainer progress bar ---- */
+@keyframes seg-fill { from { width: 0%; } to { width: 100%; } }
+@keyframes scene-in { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: none; } }
+.scene-in { animation: scene-in 0.6s var(--ease-out) both; }
+@keyframes tag-swap { 0% { opacity: 0; transform: translateY(10px); } 12%, 88% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-10px); } }
+.tag-swap { animation: tag-swap 2.6s ease-in-out both; }

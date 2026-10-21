@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { GrowthArt, RotatingTagline } from './intro/GrowthArt';
 import { Layers, ArrowLeft, Lock, User as UserIcon, ArrowRight, AlertCircle, Globe, Shield, Sparkles, LogIn } from 'lucide-react';
 
 interface LoginPageProps {
@@ -86,8 +87,26 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToCustome
         </div>
       </nav>
 
+      <div className="flex-1 grid lg:grid-cols-2">
+      {/* Animated introduction to mutual funds */}
+      <aside className="hidden lg:flex flex-col justify-center gap-5 p-10 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-300">Mutual funds and NPS</span>
+        <h2 className="text-4xl font-black tracking-tight leading-[1.05] text-shimmer">Mutual funds, made simple.</h2>
+        <p className="text-xl font-black text-emerald-300 h-8">
+          <RotatingTagline />
+        </p>
+        <GrowthArt className="w-full h-auto max-h-72" />
+        <div className="flex flex-wrap gap-2 text-xs font-bold">
+          {['SIP', 'Lumpsum', 'NPS', 'Health check-up'].map((c, i) => (
+            <span key={c} className="float-y px-3 py-1 rounded-full bg-white/10 border border-white/20" style={{ ['--d' as string]: `${i * 300}ms` }}>
+              {c}
+            </span>
+          ))}
+        </div>
+      </aside>
+
       {/* Main Login Form Container */}
-      <div className="flex-1 flex flex-col justify-center py-8 sm:px-6 lg:px-8">
+      <div className="flex flex-col justify-center py-8 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
           <div className="text-center mb-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold mb-2">
@@ -194,6 +213,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToCustome
             )}
           </div>
         </div>
+      </div>
       </div>
 
       {/* Footer */}

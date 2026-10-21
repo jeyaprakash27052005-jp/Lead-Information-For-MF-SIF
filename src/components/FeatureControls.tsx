@@ -130,7 +130,7 @@ export const FeatureControls: React.FC<FeatureControlsProps> = ({ currentUser, o
   const groups: { title: string; keys: (keyof AppFeatureFlags)[] }[] = [
     { title: 'Portals', keys: ['customerPortal', 'healthPortal'] },
     { title: 'Customer features', keys: ['customerRegistration', 'mfCalculator', 'npsCalculator', 'schemesCatalog', 'healthCheckup'] },
-    { title: 'Home Screen', keys: ['homeAds'] },
+    { title: 'Home Screen and information', keys: ['homeAds', 'awarenessPrograms'] },
   ];
 
   return (

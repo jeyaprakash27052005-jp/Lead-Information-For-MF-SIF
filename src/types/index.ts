@@ -12,8 +12,11 @@ export interface User {
   createdBy: string;
   associatedLeadId?: string;
   /** Features an admin (Head / Regional Incharge) has switched on or off for this customer */
-  permissions?: Partial<CustomerPermissions>;
+  permissions?: CustomerPermissionSettings;
 }
+
+/** What an admin saved for one customer. `explicit` marks values chosen in the Permissions window (false = blocked for this customer). */
+export type CustomerPermissionSettings = Partial<CustomerPermissions> & { explicit?: boolean };
 
 export interface CustomerPermissions {
   mfCalculator: boolean;
@@ -102,6 +105,8 @@ export type ViewTab =
   | 'nps-calculator'
   | 'health-reports'
   | 'feature-controls'
+  | 'awareness-admin'
+  | 'awareness-programs'
   | 'health-questions'
   | 'health-checkup';
 
@@ -167,6 +172,7 @@ export interface AppFeatureFlags {
   schemesCatalog: boolean; // Browse Published Schemes
   healthCheckup: boolean; // Finance Health Check-up inside the customer portal
   homeAds: boolean; // moving ads on the Home Screen
+  awarenessPrograms: boolean; // the Awareness Programs list shown to customers and on the Home Screen
 }
 
 export interface AppSettings {
@@ -175,4 +181,23 @@ export interface AppSettings {
   npsReturnRate: number; // % per year used by the NPS calculator
   updatedAt?: string;
   updatedBy?: string;
+}
+
+/** An investor awareness programme (seminar / webinar) that the admin team announces */
+export interface AwarenessProgram {
+  id: string;
+  title: string;
+  description: string;
+  startsAt: string; // date and time, e.g. 2026-11-20T17:30
+  endsAt?: string;
+  mode: 'online' | 'offline';
+  venue?: string; // place for an offline programme
+  joinLink?: string; // https link for an online programme
+  language?: string;
+  speaker?: string;
+  contact?: string; // phone / WhatsApp number for registering
+  isActive: boolean;
+  createdAt: string;
+  createdBy?: string;
+  updatedAt?: string;
 }

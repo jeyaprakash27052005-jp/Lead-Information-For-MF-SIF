@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { TrendingUp, Shield, IndianRupee, Eye, Download, X } from 'lucide-react';
 import { formatInr } from '../utils/currency';
 import { NumField } from './NumField';
+import { useCountUp } from '../hooks/useCountUp';
 import { useAppSettings } from '../context/AppSettings';
 import { FeatureOff } from './FeatureOff';
 import {
@@ -127,6 +128,10 @@ export const ProjectionCalculator: React.FC<ProjectionCalculatorProps> = ({ kind
 
   const usesLump = mode === 'lumpsum' || mode === 'both';
   const usesSip = mode === 'sip' || mode === 'both';
+  // the money figures count up to their new value instead of jumping
+  const shownMaturity = useCountUp(result?.maturity ?? 0);
+  const shownInvested = useCountUp(result?.invested ?? 0);
+  const shownGain = useCountUp(result?.gain ?? 0);
   const gainPct = result && result.invested > 0 ? Math.min(100, Math.round((result.gain / result.maturity) * 100)) : 0;
 
   const downloadPdf = () =>
@@ -282,7 +287,7 @@ export const ProjectionCalculator: React.FC<ProjectionCalculatorProps> = ({ kind
                   <span className={`text-xs font-semibold ${theme.heroLabel} uppercase tracking-wider block`}>
                     Estimated future value
                   </span>
-                  <div className="text-3xl font-black mt-1 tracking-tight">{formatInr(Math.round(result.maturity))}</div>
+                  <div className="text-3xl font-black mt-1 tracking-tight">{formatInr(Math.round(shownMaturity))}</div>
                   <p className={`text-[11px] ${theme.heroLabel} mt-1 font-medium`}>
                     At {rate}% expected return over {describePeriod(input.durationValue, unit)}
                   </p>
@@ -291,11 +296,11 @@ export const ProjectionCalculator: React.FC<ProjectionCalculatorProps> = ({ kind
                 <div className="grid grid-cols-2 gap-3">
                   <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
                     <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Total invested</span>
-                    <div className="text-base font-bold text-slate-900 mt-1">{formatInr(Math.round(result.invested))}</div>
+                    <div className="text-base font-bold text-slate-900 mt-1">{formatInr(Math.round(shownInvested))}</div>
                   </div>
                   <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200">
                     <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">Estimated gain</span>
-                    <div className="text-base font-bold text-emerald-800 mt-1">{formatInr(Math.round(result.gain))}</div>
+                    <div className="text-base font-bold text-emerald-800 mt-1">{formatInr(Math.round(shownGain))}</div>
                   </div>
                 </div>
 

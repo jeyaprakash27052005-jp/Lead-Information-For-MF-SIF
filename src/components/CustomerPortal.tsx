@@ -4,9 +4,11 @@ import { MutualFundCalculator } from './MutualFundCalculator';
 import { NPSCalculator } from './NPSCalculator';
 import { HealthCheckup } from './HealthCheckup';
 import { resolvePermissions } from '../utils/permissions';
+import { AwarenessList } from './AwarenessList';
+import { GrowthArt, RotatingTagline } from './intro/GrowthArt';
 import { useAppSettings } from '../context/AppSettings';
 
-export type CustomerView = 'dashboard' | 'mf-calc' | 'nps-calc' | 'schemes' | 'health';
+export type CustomerView = 'dashboard' | 'mf-calc' | 'nps-calc' | 'schemes' | 'health' | 'awareness';
 import {
   UserPlus,
   LogIn,
@@ -26,7 +28,8 @@ import {
   HeartPulse,
   Layers,
   ArrowRight,
-  LogOut
+  LogOut,
+  Megaphone,
 } from 'lucide-react';
 import { formatInr } from '../utils/currency';
 import { DEFAULT_REGIONS } from '../utils/regions';
@@ -238,6 +241,7 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
       'nps-calc': perms.npsCalculator,
       schemes: perms.schemesCatalog,
       health: perms.healthCheckup,
+      awareness: settings.features.awarenessPrograms,
     };
     const effectiveView: CustomerView = viewAllowed[customerActiveView] ? customerActiveView : 'dashboard';
     return (
@@ -359,6 +363,19 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
             >
               <HeartPulse className="w-4 h-4" />
               <span>Finance Health Check-up</span>
+            </button>
+          )}
+
+          {settings.features.awarenessPrograms && (
+            <button
+              type="button"
+              onClick={() => setCustomerActiveView('awareness')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
+                effectiveView === 'awareness' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <Megaphone className="w-4 h-4" />
+              <span>Awareness Programs</span>
             </button>
           )}
         </div>
@@ -516,6 +533,14 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
           <NPSCalculator schemes={schemes} customerName={currentUser?.name} />
         )}
 
+        {/* View 6: Awareness programmes added by the admin team */}
+        {effectiveView === 'awareness' && settings.features.awarenessPrograms && (
+          <div className="space-y-3">
+            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Awareness Programs</h3>
+            <AwarenessList />
+          </div>
+        )}
+
         {/* View 5: Finance Health Check-up (only when an admin has switched it on) */}
         {effectiveView === 'health' && perms.healthCheckup && (
           <HealthCheckup
@@ -597,6 +622,18 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
               <span>Admin Login</span>
             </button>
           )}
+        </div>
+      </div>
+
+      {/* Animated introduction to mutual funds */}
+      <div className="anim-rise rounded-2xl bg-gradient-to-r from-indigo-950 to-slate-900 text-white p-4 flex items-center gap-4 overflow-hidden">
+        <GrowthArt className="w-32 sm:w-44 h-auto shrink-0" />
+        <div className="min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-300">Mutual funds and NPS</p>
+          <p className="text-base sm:text-lg font-black leading-tight">Log in to grow your money</p>
+          <p className="text-sm font-black text-emerald-300 h-6">
+            <RotatingTagline />
+          </p>
         </div>
       </div>
 

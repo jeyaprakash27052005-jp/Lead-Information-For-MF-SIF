@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CustomerPermissions, User, UserRole } from '../types';
+import { CustomerPermissionSettings, User, UserRole } from '../types';
 import { ConfirmModal } from './ConfirmModal';
 import {
   UserPlus,
@@ -36,7 +36,7 @@ interface UserManagementProps {
   onToggleStatus: (userId: string, newStatus: 'active' | 'inactive') => Promise<void>;
   onDeleteUser: (userId: string) => Promise<void>;
   onEditUserProfile: (user: User) => void;
-  onUpdatePermissions?: (userId: string, permissions: CustomerPermissions) => Promise<void>;
+  onUpdatePermissions?: (userId: string, permissions: CustomerPermissionSettings) => Promise<void>;
   onCreateRegion?: (name: string) => Promise<void>;
   onDeleteRegion?: (name: string) => Promise<void>;
   regions?: string[];

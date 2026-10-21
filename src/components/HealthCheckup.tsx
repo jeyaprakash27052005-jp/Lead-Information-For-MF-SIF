@@ -18,6 +18,7 @@ import { computeInvestmentPlan } from '../utils/healthInvestPlan';
 import { formatInr } from '../utils/currency';
 import { NumField } from './NumField';
 import { useAppSettings } from '../context/AppSettings';
+import { useCountUp } from '../hooks/useCountUp';
 import { FeatureOff } from './FeatureOff';
 
 interface HealthCheckupProps {
@@ -134,6 +135,7 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
   );
 
   const score = useMemo(() => (isComplete(answers, cfg) ? computeHealthScore(answers, cfg) : null), [answers, config]);
+  const shownScore = useCountUp(score?.overall ?? 0, 1100);
 
   const next = async () => {
     setShowErrors(true);
@@ -560,7 +562,7 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
           <div className={`p-6 rounded-2xl border ${BAND_STYLE[score.band].bg} ${BAND_STYLE[score.band].border}`}>
             <div className="flex flex-col sm:flex-row sm:items-center gap-5">
               <div className="w-28 h-28 shrink-0 rounded-full bg-white border-4 border-white shadow-md flex flex-col items-center justify-center">
-                <span className={`text-4xl font-black ${BAND_STYLE[score.band].text}`}>{score.overall}</span>
+                <span className={`text-4xl font-black ${BAND_STYLE[score.band].text}`}>{Math.round(shownScore)}</span>
                 <span className="text-[10px] font-bold text-slate-400">out of 100</span>
               </div>
               <div>
@@ -574,7 +576,7 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
             <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Your score by area</h4>
-            {score.categories.map((c) => (
+            {score.categories.map((c, idx) => (
               <div key={c.id}>
                 <div className="flex justify-between text-xs font-semibold text-slate-700 mb-1">
                   <span>{c.label}</span>
@@ -583,7 +585,10 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
                   </span>
                 </div>
                 <div className="h-2.5 rounded-full bg-slate-200 overflow-hidden">
-                  <div className={`h-full ${BAND_STYLE[c.band].bar}`} style={{ width: `${c.score}%` }} />
+                  <div
+                    className={`h-full grow-x ${BAND_STYLE[c.band].bar}`}
+                    style={{ width: `${c.score}%`, ['--d' as string]: `${200 + idx * 120}ms` }}
+                  />
                 </div>
                 <p className="text-[11px] text-slate-500 mt-1">{c.tip}</p>
               </div>

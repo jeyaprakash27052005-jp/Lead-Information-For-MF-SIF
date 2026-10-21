@@ -9,6 +9,7 @@ export const DEFAULT_FEATURES: AppFeatureFlags = {
   schemesCatalog: false, // customers no longer browse the scheme list unless an admin turns it on
   healthCheckup: true,
   homeAds: true,
+  awarenessPrograms: true,
 };
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {
@@ -24,8 +25,9 @@ export const FEATURE_LABELS: { key: keyof AppFeatureFlags; label: string; help: 
   { key: 'mfCalculator', label: 'Mutual Fund Calculator', help: 'Future value calculator for one-time, SIP or both.' },
   { key: 'npsCalculator', label: 'NPS Calculator', help: 'Future value calculator for NPS contributions.' },
   { key: 'schemesCatalog', label: 'Browse Published Schemes', help: 'Customers can see the list of published schemes.' },
-  { key: 'healthCheckup', label: 'Finance Health Check-up (inside Customer Portal)', help: 'Shows the check-up tab to customers who are allowed to use it.' },
+  { key: 'healthCheckup', label: 'Finance Health Check-up (inside Customer Portal)', help: 'Shows the check-up tab to every customer. One customer can be blocked in User Management > Permissions.' },
   { key: 'homeAds', label: 'Home Screen Ads', help: 'The moving ad banners on the Home Screen.' },
+  { key: 'awarenessPrograms', label: 'Awareness Programs', help: 'Shows the awareness programmes you add in the admin portal to customers and on the Home Screen.' },
 ];
 
 const num = (v: unknown, fallback: number) =>

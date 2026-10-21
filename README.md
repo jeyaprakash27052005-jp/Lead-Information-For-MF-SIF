@@ -74,3 +74,11 @@ npm run lint           # type-check
 - Refreshing the page no longer logs anyone out in the admin or customer portals. The login is remembered in the browser for 7 days (only the user id is kept, never a password) and is cleared when the person presses Logout, or when the account is deleted or deactivated. A refresh also returns to the same screen, and a half-finished Health Check-up keeps its answers.
 - Feature Controls switches (for example Browse Published Schemes) reach every open customer screen within about 20 seconds, or at once when the person returns to the tab. Nobody needs to refresh.
 - In Health Check-up Questions every question and topic has visible **Edit** and **Delete** buttons. Edit changes the text, topic, answer type, options and points; Delete asks for confirmation. Press **Publish questions** to make the changes live.
+
+## Awareness programmes, intro animation and video
+
+- **Awareness Programs** (admin portal, Head and Regional Incharge): add, edit, hide and delete investor awareness programmes (title, details, date and time, online link or in-person venue, speaker). Visible programmes appear on the Home Screen and in the customer portal. The **Awareness Programs** switch in Feature Controls turns them off for customers.
+- **Finance Health Check-up (inside Customer Portal)** switch: when it is on, every customer sees the tab. A customer is blocked only if the admin blocks them with the Permissions button.
+- **Intro animation**: the first screen of every site plays a short mutual-fund intro (loading counter, two investors, "SIP BETTER, GROW FASTER."). It plays once per browser tab and has a Skip button. The Home Screen has an animated "How mutual funds work" explainer and a growing-investment chart. All buttons and cards have hover and press animations (switched off for people who ask their device for reduced motion).
+- `media/mutual-fund-intro.mp4` is a 38-second portrait video of the intro and the explainer, for sharing. Open the site with `?demo=intro` or `?demo=explainer` to play the animations full screen.
+- Publish `firestore.rules` after this update (it adds the `awarenessPrograms` collection).

@@ -13,7 +13,7 @@ import {
   getDocs
 } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
-import { User, Lead, LeadStatus, InvestmentScheme, HealthReport, AppSettings } from '../types';
+import { User, Lead, LeadStatus, InvestmentScheme, HealthReport, AppSettings, AwarenessProgram } from '../types';
 import { mergeSettings } from '../utils/appSettings';
 import { HealthConfig, cleanHealthConfig } from '../utils/healthCheck';
 import { DEFAULT_REGIONS, NATIONAL_HQ_REGION } from '../utils/regions';
@@ -442,7 +442,7 @@ export const firebaseDbService = {
     }
   },
 
-  async updateUserPermissions(userId: string, permissions: Partial<import('../types').CustomerPermissions>): Promise<User> {
+  async updateUserPermissions(userId: string, permissions: import('../types').CustomerPermissionSettings): Promise<User> {
     await ensureFirestoreDatabaseSeeded();
     const path = `users/${userId}`;
     try {
@@ -1012,6 +1012,53 @@ export const firebaseDbService = {
     const path = `schemes/${id}`;
     try {
       await deleteDoc(doc(db, 'schemes', id));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, path);
+    }
+  },
+
+  // ---- Awareness programmes (added in the admin portal, shown to customers) ----
+  async getAwarenessPrograms(): Promise<AwarenessProgram[]> {
+    const path = 'awarenessPrograms';
+    try {
+      const snap = await getDocs(collection(db, path));
+      const list: AwarenessProgram[] = [];
+      snap.forEach((d) => list.push({ ...d.data(), id: d.id } as AwarenessProgram));
+      return list.sort((a, b) => String(a.startsAt).localeCompare(String(b.startsAt)));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.LIST, path);
+    }
+  },
+
+  async createAwarenessProgram(data: Omit<AwarenessProgram, 'id' | 'createdAt'>, by: string): Promise<AwarenessProgram> {
+    const path = 'awarenessPrograms';
+    try {
+      const id = `aw_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+      const program = JSON.parse(JSON.stringify({ ...data, id, createdAt: new Date().toISOString(), createdBy: by })) as AwarenessProgram;
+      await setDoc(doc(db, path, id), program);
+      return program;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, path);
+    }
+  },
+
+  async updateAwarenessProgram(id: string, data: Partial<AwarenessProgram>): Promise<void> {
+    const path = `awarenessPrograms/${id}`;
+    try {
+      const ref = doc(db, 'awarenessPrograms', id);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) throw new Error('This programme no longer exists.');
+      const merged = JSON.parse(JSON.stringify({ ...snap.data(), ...data, id, updatedAt: new Date().toISOString() }));
+      await setDoc(ref, merged);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, path);
+    }
+  },
+
+  async deleteAwarenessProgram(id: string): Promise<void> {
+    const path = `awarenessPrograms/${id}`;
+    try {
+      await deleteDoc(doc(db, 'awarenessPrograms', id));
     } catch (error) {
       handleFirestoreError(error, OperationType.DELETE, path);
     }

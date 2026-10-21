@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { ShieldCheck, X } from 'lucide-react';
-import { CustomerPermissions, User } from '../types';
+import { CustomerPermissions, CustomerPermissionSettings, User } from '../types';
 import { PERMISSION_LABELS, resolvePermissions } from '../utils/permissions';
 
 interface CustomerPermissionsModalProps {
   customer: User;
-  onSave: (userId: string, permissions: CustomerPermissions) => Promise<void>;
+  onSave: (userId: string, permissions: CustomerPermissionSettings) => Promise<void>;
   onClose: () => void;
 }
 
@@ -18,7 +18,7 @@ export const CustomerPermissionsModal: React.FC<CustomerPermissionsModalProps> =
     setSaving(true);
     setError(null);
     try {
-      await onSave(customer.id, perms);
+      await onSave(customer.id, { ...perms, explicit: true });
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save the permissions.');
@@ -49,7 +49,7 @@ export const CustomerPermissionsModal: React.FC<CustomerPermissionsModalProps> =
         </div>
         <div className="p-6 space-y-3">
           <p className="text-xs text-slate-500">
-            Choose the features this customer can use after signing in. Changes apply the next time the customer signs in.
+            Every feature is on for this customer while its switch is on in Feature Controls. Untick a feature to block it for this customer only.
           </p>
           {PERMISSION_LABELS.map((p) => (
             <label
