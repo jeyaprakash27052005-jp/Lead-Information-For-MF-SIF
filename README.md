@@ -107,4 +107,4 @@ Customers see programmes for their own region plus the "All regions" ones; the p
 
 ## E-mailing the health check-up PDF (API key)
 
-The PDF is sent through Brevo with `BREVO_API_KEY` and `REPORT_FROM_EMAIL` (see `.env.example` for the 3 steps). Put them in a local `.env` file for `npm run dev`, or in Vercel -> Settings -> Environment Variables, then redeploy. The key is read only on the server; it is never stored in Firestore or sent to the browser. Use **Feature Controls -> Check e-mail setup** to confirm it works.
+The PDF is sent through Brevo with `BREVO_API_KEY` (the only value you must add; the sender defaults to `jeyaprakash27052005@gmail.com`, which must be verified in Brevo, and can be changed with `REPORT_FROM_EMAIL`) (see `.env.example` for the 3 steps). Put them in a local `.env` file for `npm run dev`, or in Vercel -> Settings -> Environment Variables, then redeploy. The key is read only on the server; it is never stored in Firestore or sent to the browser. Use **Feature Controls -> Check e-mail setup** to confirm it works.

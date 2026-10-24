@@ -7,6 +7,16 @@
 //   REPORT_FROM_NAME    - (optional) sender name shown to the customer
 // ---------------------------------------------------------------------------
 
+/** Sender used when REPORT_FROM_EMAIL / REPORT_FROM_NAME are not set (the address must be verified in Brevo) */
+export const DEFAULT_FROM_EMAIL = 'jeyaprakash27052005@gmail.com';
+export const DEFAULT_FROM_NAME = 'Finance Health Check-up';
+
+const withDefaults = (env: Record<string, string | undefined>): Record<string, string | undefined> => ({
+  ...env,
+  REPORT_FROM_EMAIL: env.REPORT_FROM_EMAIL?.trim() || DEFAULT_FROM_EMAIL,
+  REPORT_FROM_NAME: env.REPORT_FROM_NAME?.trim() || DEFAULT_FROM_NAME,
+});
+
 export interface SendReportResult {
   status: number;
   json: Record<string, unknown>;
@@ -86,6 +96,7 @@ export async function sendReportHandler(
   env: Record<string, string | undefined>,
   fetchImpl: typeof fetch = fetch
 ): Promise<SendReportResult> {
+  env = withDefaults(env);
   const b = (body && typeof body === 'object' ? body : {}) as Record<string, unknown>;
   if (b.action === 'check') return checkSetup(env, fetchImpl);
   const isTest = b.action === 'test';
