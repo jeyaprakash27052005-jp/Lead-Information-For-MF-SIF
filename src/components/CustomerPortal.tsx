@@ -128,6 +128,23 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  // welcome message after every fresh login
+  const [welcomePending, setWelcomePending] = useState(false);
+  const [welcomeOpen, setWelcomeOpen] = useState(false);
+  useEffect(() => {
+    if (welcomePending && currentUser) {
+      setWelcomePending(false);
+      setWelcomeOpen(true);
+    }
+  }, [welcomePending, currentUser]);
+  useEffect(() => {
+    if (!welcomeOpen) return;
+    const t = setTimeout(() => setWelcomeOpen(false), 10000);
+    return () => clearTimeout(t);
+  }, [welcomeOpen]);
+  useEffect(() => {
+    if (!currentUser) setWelcomeOpen(false);
+  }, [currentUser]);
 
   const isStudent = occupation.trim().toLowerCase().includes('student');
 
@@ -206,6 +223,7 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
     setError(null);
     try {
       await onCustomerLogin(loginUsername.trim(), loginPassword.trim() || loginUsername.trim());
+      setWelcomePending(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed. Check your User ID / Password.');
     } finally {
@@ -248,29 +266,20 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
     const effectiveView: CustomerView = viewAllowed[customerActiveView] ? customerActiveView : 'dashboard';
     return (
       <div className="space-y-6">
-        {/* Navigation & Switcher Bar */}
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center font-bold shadow-md">
-              <TrendingUp className="w-5 h-5" />
-            </div>
+        {/* Welcome message: shown each time the customer logs in (not on a page refresh) */}
+        {welcomeOpen && (
+          <div role="status" className="anim-rise flex items-start justify-between gap-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 text-white px-5 py-4 shadow-md">
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-base font-black text-slate-900 tracking-tight">
-                  Welcome, {currentUser.name}
-                </h1>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-200">
-                  Customer Account
-                </span>
-              </div>
-              <p className="text-xs text-slate-500">
-                User ID: <span className="font-mono font-bold text-slate-700">{currentUser.username}</span> • Region: {currentUser.region}
-              </p>
+              <p className="text-base font-black">Welcome, {currentUser.name}!</p>
+              <p className="text-xs text-emerald-50 mt-0.5">Good to see you again. Open the menu to use the calculators, the Finance Health Check-up and more.</p>
             </div>
+            <button type="button" onClick={() => setWelcomeOpen(false)} aria-label="Close welcome message" className="shrink-0 w-7 h-7 rounded-lg hover:bg-white/20 flex items-center justify-center cursor-pointer text-lg leading-none">
+              &times;
+            </button>
           </div>
-
-          <div className="flex items-center gap-2 flex-wrap">
-            {currentUser.role !== 'customer' && onSwitchToAdmin && (
+        )}
+        {currentUser.role !== 'customer' && onSwitchToAdmin && (
+          <div className="flex justify-end">
             <button
               type="button"
               onClick={onSwitchToAdmin}
@@ -280,18 +289,8 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
               <Shield className="w-3.5 h-3.5 text-indigo-600" />
               <span>Admin Portal</span>
             </button>
-            )}
-
-            <button
-              type="button"
-              onClick={onCustomerLogout}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors flex items-center gap-1.5 cursor-pointer"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Sign Out</span>
-            </button>
           </div>
-        </div>
+        )}
 
         {/* Three-line menu for the customer's sections */}
         <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs">
