@@ -205,3 +205,8 @@ button[role='radio']:not(:disabled):hover {
 .ad-text-fade { animation: ad-text-fade 1s ease-out both; }
 .ad-text-slide { animation: ad-text-slide 0.8s var(--ease-out, ease-out) both; }
 .ad-text-pop { animation: ad-text-pop 0.7s var(--ease-out, ease-out) both; }
+
+/* ---- three-line menu panel ---- */
+@keyframes slide-in-left { from { transform: translateX(-100%); } to { transform: none; } }
+.anim-slide-in-left { animation: slide-in-left 0.25s var(--ease-out, ease-out) both; }
+.anim-fade { animation: fade-in 0.2s ease-out both; }

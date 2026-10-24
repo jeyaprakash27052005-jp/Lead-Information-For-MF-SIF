@@ -263,6 +263,15 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
         auto = 'failed';
       }
       setDlResult({ leadSaved, leadError, email: 'message', auto, autoDetail });
+      if (auto !== 'whatsapp' && auto !== 'sms') {
+        // No sending account is set up: open WhatsApp for the customer straight away (phone: share sheet with the PDF attached).
+        // The customer only has to tap Send. If the browser blocks it, the buttons below still work.
+        sharePdf(blob, reportFileName, reportText())
+          .then((shared) => {
+            if (!shared) window.open(whatsappUrl(mobile.trim(), reportText()), '_blank', 'noopener');
+          })
+          .catch(() => undefined);
+      }
       return;
     }
     let emailStatus: 'sent' | 'not_configured' | 'failed' = 'failed';
@@ -774,7 +783,7 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
                 {dlResult.email === 'message' && dlResult.auto !== 'whatsapp' && dlResult.auto !== 'sms' && pdfBlob && (
                   <div className="space-y-2">
                     <p className="font-semibold text-slate-700">
-                      {dlResult.auto === 'failed' ? 'We could not send it automatically just now.' : 'Automatic sending is not switched on yet.'} Send the report to your phone yourself:
+                      WhatsApp should have opened with your report ready: just tap Send. If it did not open, use these buttons:
                     </p>
                     <button
                       type="button"

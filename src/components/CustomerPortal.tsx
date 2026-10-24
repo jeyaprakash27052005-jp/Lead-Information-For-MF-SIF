@@ -5,6 +5,8 @@ import { NPSCalculator } from './NPSCalculator';
 import { HealthCheckup } from './HealthCheckup';
 import { resolvePermissions } from '../utils/permissions';
 import { AwarenessList } from './AwarenessList';
+import { AdsCarousel } from './AdsCarousel';
+import { HamburgerMenu } from './HamburgerMenu';
 import { GrowthArt, RotatingTagline } from './intro/GrowthArt';
 import { useAppSettings } from '../context/AppSettings';
 
@@ -291,98 +293,36 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
           </div>
         </div>
 
-        {/* Inner Tabs for Customer */}
-        <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
-          <button
-            type="button"
-            onClick={() => setCustomerActiveView('dashboard')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-              effectiveView === 'dashboard'
-                ? 'bg-slate-900 text-white shadow-sm'
-                : 'text-slate-600 hover:bg-slate-100'
-            }`}
-          >
-            <UserIcon className="w-4 h-4" />
-            <span>My Application & Status</span>
-          </button>
-
-          {perms.mfCalculator && (
-          <button
-            type="button"
-            onClick={() => setCustomerActiveView('mf-calc')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-              effectiveView === 'mf-calc'
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'text-slate-600 hover:bg-slate-100'
-            }`}
-          >
-            <TrendingUp className="w-4 h-4" />
-            <span>Mutual Fund Calculator</span>
-          </button>
-          )}
-
-          {perms.npsCalculator && (
-          <button
-            type="button"
-            onClick={() => setCustomerActiveView('nps-calc')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-              effectiveView === 'nps-calc'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-600 hover:bg-slate-100'
-            }`}
-          >
-            <Shield className="w-4 h-4" />
-            <span>NPS Pension Calculator</span>
-          </button>
-          )}
-
-          {perms.schemesCatalog && (
-          <button
-            type="button"
-            onClick={() => setCustomerActiveView('schemes')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-              effectiveView === 'schemes'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-600 hover:bg-slate-100'
-            }`}
-          >
-            <Layers className="w-4 h-4" />
-            <span>Browse Published Schemes ({schemes.length})</span>
-          </button>
-          )}
-
-          {perms.healthCheckup && (
-            <button
-              type="button"
-              onClick={() => setCustomerActiveView('health')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-                effectiveView === 'health'
-                  ? 'bg-rose-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <HeartPulse className="w-4 h-4" />
-              <span>Finance Health Check-up</span>
-            </button>
-          )}
-
-          {settings.features.awarenessPrograms && (
-            <button
-              type="button"
-              onClick={() => setCustomerActiveView('awareness')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-                effectiveView === 'awareness' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <Megaphone className="w-4 h-4" />
-              <span>Awareness Programs</span>
-            </button>
-          )}
+        {/* Three-line menu for the customer's sections */}
+        <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs">
+          <HamburgerMenu<CustomerView>
+            title="Menu"
+            activeId={effectiveView}
+            onSelect={setCustomerActiveView}
+            items={[
+              { id: 'dashboard', label: 'Home', icon: <UserIcon className="w-4 h-4" />, description: 'Offers, announcements and your application status' },
+              ...(perms.mfCalculator ? [{ id: 'mf-calc' as CustomerView, label: 'Mutual Fund Calculator', icon: <TrendingUp className="w-4 h-4" />, description: 'Lumpsum and SIP projections' }] : []),
+              ...(perms.npsCalculator ? [{ id: 'nps-calc' as CustomerView, label: 'NPS Pension Calculator', icon: <Shield className="w-4 h-4" />, description: 'Pension projections' }] : []),
+              ...(perms.schemesCatalog ? [{ id: 'schemes' as CustomerView, label: 'Browse Published Schemes', icon: <Layers className="w-4 h-4" />, badge: schemes.length, description: 'Schemes published by the team' }] : []),
+              ...(perms.healthCheckup ? [{ id: 'health' as CustomerView, label: 'Finance Health Check-up', icon: <HeartPulse className="w-4 h-4" />, description: 'Score, PDF report and investment plan' }] : []),
+              ...(settings.features.awarenessPrograms ? [{ id: 'awareness' as CustomerView, label: 'Awareness Programs', icon: <Megaphone className="w-4 h-4" />, description: 'Seminars and webinars' }] : []),
+            ]}
+          />
         </div>
 
         {/* View 1: Customer Application Status Dashboard */}
         {effectiveView === 'dashboard' && (
           <div className="space-y-6">
+            {/* Home: the ads and offers the admin team added (a welcome card when there are none) */}
+            <AdsCarousel
+              fallback={
+                <section className="rounded-2xl bg-gradient-to-br from-indigo-600 to-emerald-600 text-white p-6 shadow-lg">
+                  <p className="text-xs font-bold uppercase tracking-wider text-indigo-100">Welcome</p>
+                  <h2 className="text-xl font-black mt-1">Hello {currentUser.name}, grow your savings with SIP</h2>
+                  <p className="text-sm text-indigo-50 mt-1">Open the menu to try the calculators, take the Finance Health Check-up or see upcoming awareness programmes.</p>
+                </section>
+              }
+            />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Application Status Card */}
               <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col justify-between">

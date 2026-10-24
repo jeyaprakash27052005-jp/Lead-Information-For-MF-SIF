@@ -1,4 +1,5 @@
 import React from 'react';
+import { HamburgerMenu } from './HamburgerMenu';
 import { User, ViewTab } from '../types';
 import {
   Users,
@@ -219,40 +220,8 @@ export const Navigation: React.FC<NavigationProps> = ({
 
   return (
     <nav className="bg-white border-b border-slate-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex space-x-1 sm:space-x-2 overflow-x-auto py-2.5 scrollbar-thin">
-          {items.map((item) => {
-            const isActive = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => onTabChange(item.id)}
-                className={`flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-md transition-all whitespace-nowrap cursor-pointer ${
-                  isActive
-                    ? 'bg-slate-900 text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                }`}
-                title={item.description}
-              >
-                <span className={isActive ? 'text-indigo-400' : 'text-slate-400'}>
-                  {item.icon}
-                </span>
-                <span>{item.label}</span>
-                {item.badge !== undefined && (
-                  <span
-                    className={`ml-1 px-1.5 py-0.2 rounded-full text-[11px] font-bold ${
-                      isActive
-                        ? 'bg-slate-700 text-indigo-300'
-                        : 'bg-slate-200 text-slate-700'
-                    }`}
-                  >
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
+        <HamburgerMenu items={items} activeId={activeTab} onSelect={onTabChange} title="Menu" />
       </div>
     </nav>
   );

@@ -131,3 +131,9 @@ Add them in the Customer and Health Check-up projects (and Admin for the check b
 ## Address / place
 
 The health check-up asks for the customer's **Address / place** (typed text) instead of choosing a region. It is shown in the PDF, in Health Check-up Reports and in the lead's notes.
+
+## Three-line menu and customer Home
+
+- Every portal now uses a **three-line (hamburger) menu**: the button at the top-left opens a side panel with all options (admin sections, or the customer's Home, calculators, Finance Health Check-up and Awareness Programs). It closes when an option is chosen, on Escape, or when the dark area is pressed.
+- After login, the customer's **Home** opens with the moving, animated ads the admin team added (Home Screen Ads), followed by their application status. When no ad exists, or the Home Screen Ads switch is off, a welcome card is shown instead of an empty page.
+- With no WhatsApp / SMS account set up, pressing **Download report** downloads the PDF and opens WhatsApp straight away with the full report ready (phone: share sheet with the PDF attached); the customer taps Send. A browser cannot press Send for the customer; that needs the optional automatic-sending accounts described above.
