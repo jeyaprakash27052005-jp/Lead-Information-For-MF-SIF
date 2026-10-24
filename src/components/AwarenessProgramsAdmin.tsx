@@ -5,6 +5,7 @@ import { apiService } from '../services/api';
 import { formatDateTime } from '../utils/dateTime';
 import { ConfirmModal } from './ConfirmModal';
 import { SearchBox, SelectFilter, ClearFilters } from './FilterControls';
+import { isHqRegion, getAllRegions } from '../utils/regions';
 import { SaveErrorNotice, SaveProblem, describeSaveError } from './SaveErrorNotice';
 
 interface Props {
@@ -26,9 +27,18 @@ const empty = () => ({
   isActive: true,
 });
 
-/** Awareness programme details are added here, in the admin portal only (Head and Regional Incharge) */
+/** Awareness programme details are added here, in the admin portal only (Head, Regional Incharge and Area Incharge) */
 export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify }) => {
-  const allowed = currentUser.role === 'head' || currentUser.role === 'regional_incharge';
+  const isHead = currentUser.role === 'head';
+  const allowed = isHead || currentUser.role === 'regional_incharge' || currentUser.role === 'area_incharge';
+  const ownRegion = isHqRegion(currentUser.region) ? '' : currentUser.region;
+  const [regions, setRegions] = useState<string[]>([]);
+  const [region, setRegion] = useState(isHead ? '' : ownRegion);
+  /** Head: everything. Regional Incharge: programmes of their division. Area Incharge: only programmes they added. */
+  const canModify = (p: AwarenessProgram) =>
+    isHead ||
+    p.createdById === currentUser.id ||
+    (currentUser.role === 'regional_incharge' && !!ownRegion && p.region === ownRegion);
   const [list, setList] = useState<AwarenessProgram[]>([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(empty());
@@ -53,6 +63,9 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
   useEffect(() => {
     if (allowed) load();
   }, [allowed]);
+  useEffect(() => {
+    if (allowed && isHead) apiService.getRegions().then((r: string[]) => setRegions(getAllRegions([], [], r))).catch(() => setRegions(getAllRegions()));
+  }, [allowed, isHead]);
 
   const set = (patch: Partial<ReturnType<typeof empty>>) => setForm((f) => ({ ...f, ...patch }));
 
@@ -60,6 +73,7 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
     if (form.title.trim().length < 4) return 'Write the programme title (at least 4 characters).';
     if (!form.startsAt) return 'Choose the date and time the programme starts.';
     if (form.endsAt && form.endsAt < form.startsAt) return 'The end time must be after the start time.';
+    if (!isHead && !ownRegion) return 'Your account has no division set, so a programme cannot be added. Ask the Head Incharge to set it.';
     if (form.mode === 'offline' && form.venue.trim().length < 3) return 'Enter the venue for an in-person programme.';
     if (form.mode === 'online' && form.joinLink.trim() && !/^https:\/\/\S+$/i.test(form.joinLink.trim()))
       return 'The join link must start with https://';
@@ -85,6 +99,7 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
       speaker: form.speaker.trim() || undefined,
       contact: form.contact.trim() || undefined,
       isActive: form.isActive,
+      region: isHead ? region : ownRegion,
     };
     try {
       if (editingId) {
@@ -97,13 +112,15 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
           language: data.language ?? '',
           speaker: data.speaker ?? '',
           contact: data.contact ?? '',
+          region: data.region,
         });
         onNotify?.('Awareness programme updated.');
       } else {
-        await apiService.createAwarenessProgram(data, currentUser.name);
+        await apiService.createAwarenessProgram({ ...data, createdByRole: currentUser.role, createdById: currentUser.id }, currentUser.name);
         onNotify?.('Awareness programme added. Customers can see it now.');
       }
       setForm(empty());
+      setRegion(isHead ? '' : ownRegion);
       setEditingId(null);
       await load();
     } catch (e) {
@@ -130,6 +147,7 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
       contact: p.contact || '',
       isActive: p.isActive,
     });
+    setRegion(isHead ? p.region || '' : ownRegion);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -176,7 +194,7 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
   if (!allowed) {
     return (
       <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-xs text-slate-500">
-        Only the Head Incharge and Regional Incharge can manage awareness programmes.
+        Only the Head, Regional and Area Incharges can manage awareness programmes.
       </div>
     );
   }
@@ -242,6 +260,23 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
           <input aria-label="Language" value={form.language} onChange={(e) => set({ language: e.target.value })} placeholder="Language (optional)" className={input} />
           <input aria-label="Contact phone" value={form.contact} onChange={(e) => set({ contact: e.target.value })} placeholder="Contact phone (optional)" className={input} />
         </div>
+        <div className="grid sm:grid-cols-2 gap-3 items-end">
+          <label className="block font-bold text-slate-700 uppercase tracking-wider">
+            Who can see it
+            {isHead ? (
+              <select aria-label="Programme region" value={region} onChange={(e) => setRegion(e.target.value)} className={`mt-1 ${input} bg-white`}>
+                <option value="">All regions</option>
+                {regions.map((r) => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+            ) : (
+              <p className="mt-1 px-3 py-2 text-sm font-semibold rounded-lg bg-slate-50 border border-slate-200 normal-case">
+                {ownRegion ? `Customers of ${ownRegion}` : 'No division set on your account'}
+              </p>
+            )}
+          </label>
+        </div>
         <label className="flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
           <input type="checkbox" checked={form.isActive} onChange={(e) => set({ isActive: e.target.checked })} />
           Show this programme to customers
@@ -293,9 +328,12 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
                 <span className={`px-2 py-0.5 rounded-full font-bold border ${p.isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
                   {p.isActive ? 'Shown to customers' : 'Hidden'}
                 </span>
+                <span className="px-2 py-0.5 rounded-full font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">{p.region || 'All regions'}</span>
+                {p.createdBy && <span className="px-2 py-0.5 rounded-full font-bold bg-slate-50 text-slate-600 border border-slate-200">Added by {p.createdBy}</span>}
                 {isPast(p) && <span className="px-2 py-0.5 rounded-full font-bold bg-amber-50 text-amber-800 border border-amber-200">Completed</span>}
               </p>
             </div>
+            {canModify(p) ? (
             <div className="flex items-center gap-1.5 shrink-0">
               <button type="button" onClick={() => toggleActive(p)} title={p.isActive ? 'Hide from customers' : 'Show to customers'} className="btn-glow px-2.5 py-1.5 rounded-lg font-bold text-slate-700 bg-slate-50 border border-slate-200 flex items-center gap-1 cursor-pointer">
                 {p.isActive ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />} {p.isActive ? 'Hide' : 'Show'}
@@ -307,6 +345,9 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
                 <Trash2 className="w-3.5 h-3.5" /> Delete
               </button>
             </div>
+            ) : (
+              <p className="text-[11px] font-semibold text-slate-400 shrink-0">View only</p>
+            )}
           </div>
         ))}
       </div>

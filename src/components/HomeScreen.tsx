@@ -7,6 +7,8 @@ import { InvestmentScheme, AdBanner } from '../types';
 import { MutualFundCalculator } from './MutualFundCalculator';
 import { NPSCalculator } from './NPSCalculator';
 import { adsStorageService } from '../services/adsStorage';
+import { AnimatedAd } from './AnimatedAd';
+import { adTextClass } from '../utils/adAnimations';
 import {
   Layers,
   Shield,
@@ -199,16 +201,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     }`}
                   >
                     {/* Background Ad Image (JPG, JPEG, PNG, GIF) */}
-                    <img
-                      src={ad.imageUrl}
-                      alt={ad.title}
-                      className="absolute inset-0 w-full h-full object-cover object-center"
-                    />
+                    <AnimatedAd ad={ad} playKey={isActive ? 'on' : 'off'} className="absolute inset-0" />
                     {/* Gradient Overlay for high readability */}
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent" />
 
                     {/* Content on the Ad */}
-                    <div className="relative z-20 max-w-2xl space-y-3">
+                    <div key={isActive ? 'on' : 'off'} className={`relative z-20 max-w-2xl space-y-3 ${adTextClass(ad)}`}>
                       {ad.badge && (
                         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-600/90 text-white text-xs font-black tracking-wide uppercase shadow-md">
                           <Sparkles className="w-3.5 h-3.5 text-indigo-200" />

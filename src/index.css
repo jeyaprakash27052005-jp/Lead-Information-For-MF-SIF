@@ -160,3 +160,48 @@ button[role='radio']:not(:disabled):hover {
 .scene-in { animation: scene-in 0.6s var(--ease-out) both; }
 @keyframes tag-swap { 0% { opacity: 0; transform: translateY(10px); } 12%, 88% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-10px); } }
 .tag-swap { animation: tag-swap 2.6s ease-in-out both; }
+
+
+/* ---- Home Screen ad creatives: animations chosen by the admin (see utils/adAnimations.ts) ---- */
+.ad-anim { --ad-dur: 6s; will-change: transform, opacity; transform-origin: center; }
+.ad-speed-slow { --ad-dur: 10s; }
+.ad-speed-normal { --ad-dur: 6s; }
+.ad-speed-fast { --ad-dur: 3s; }
+@keyframes ad-zoom-in { from { transform: scale(1); } to { transform: scale(1.18); } }
+@keyframes ad-zoom-out { from { transform: scale(1.2); } to { transform: scale(1); } }
+@keyframes ad-pan-left { from { transform: scale(1.15) translateX(4%); } to { transform: scale(1.15) translateX(-4%); } }
+@keyframes ad-pan-right { from { transform: scale(1.15) translateX(-4%); } to { transform: scale(1.15) translateX(4%); } }
+@keyframes ad-pan-up { from { transform: scale(1.15) translateY(4%); } to { transform: scale(1.15) translateY(-4%); } }
+@keyframes ad-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ad-slide-left { from { transform: translateX(14%); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes ad-slide-right { from { transform: translateX(-14%); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes ad-slide-up { from { transform: translateY(14%); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes ad-bounce { 0%, 100% { transform: scale(1.06) translateY(0); } 50% { transform: scale(1.06) translateY(-3%); } }
+@keyframes ad-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+@keyframes ad-float { 0%, 100% { transform: scale(1.08) translate(0, 0); } 33% { transform: scale(1.08) translate(1.5%, -1.5%); } 66% { transform: scale(1.08) translate(-1.5%, 1%); } }
+@keyframes ad-shake { 0%, 100% { transform: scale(1.06) rotate(0); } 25% { transform: scale(1.06) rotate(-1.2deg); } 75% { transform: scale(1.06) rotate(1.2deg); } }
+@keyframes ad-flip { from { transform: perspective(900px) rotateY(-70deg); opacity: 0; } to { transform: perspective(900px) rotateY(0); opacity: 1; } }
+@keyframes ad-shimmer { 0%, 100% { filter: brightness(1) saturate(1); } 50% { filter: brightness(1.18) saturate(1.25); } }
+.ad-anim-zoom-in { animation: ad-zoom-in var(--ad-dur) ease-out both; }
+.ad-anim-zoom-out { animation: ad-zoom-out var(--ad-dur) ease-out both; }
+.ad-anim-pan-left { animation: ad-pan-left var(--ad-dur) ease-in-out infinite alternate; }
+.ad-anim-pan-right { animation: ad-pan-right var(--ad-dur) ease-in-out infinite alternate; }
+.ad-anim-pan-up { animation: ad-pan-up var(--ad-dur) ease-in-out infinite alternate; }
+.ad-anim-fade-in { animation: ad-fade-in calc(var(--ad-dur) / 4) ease-out both; }
+.ad-anim-slide-left { animation: ad-slide-left calc(var(--ad-dur) / 5) var(--ease-out, ease-out) both; }
+.ad-anim-slide-right { animation: ad-slide-right calc(var(--ad-dur) / 5) var(--ease-out, ease-out) both; }
+.ad-anim-slide-up { animation: ad-slide-up calc(var(--ad-dur) / 5) var(--ease-out, ease-out) both; }
+.ad-anim-bounce { animation: ad-bounce calc(var(--ad-dur) / 4) ease-in-out infinite; }
+.ad-anim-pulse { animation: ad-pulse calc(var(--ad-dur) / 3) ease-in-out infinite; }
+.ad-anim-float { animation: ad-float var(--ad-dur) ease-in-out infinite; }
+.ad-anim-shake { animation: ad-shake calc(var(--ad-dur) / 6) ease-in-out infinite; }
+.ad-anim-flip { animation: ad-flip calc(var(--ad-dur) / 5) var(--ease-out, ease-out) both; }
+.ad-anim-shimmer { animation: ad-shimmer calc(var(--ad-dur) / 2) ease-in-out infinite; }
+@keyframes ad-text-rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+@keyframes ad-text-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ad-text-slide { from { opacity: 0; transform: translateX(-36px); } to { opacity: 1; transform: none; } }
+@keyframes ad-text-pop { 0% { opacity: 0; transform: scale(0.85); } 70% { transform: scale(1.04); } 100% { opacity: 1; transform: none; } }
+.ad-text-rise { animation: ad-text-rise 0.8s var(--ease-out, ease-out) both; }
+.ad-text-fade { animation: ad-text-fade 1s ease-out both; }
+.ad-text-slide { animation: ad-text-slide 0.8s var(--ease-out, ease-out) both; }
+.ad-text-pop { animation: ad-text-pop 0.7s var(--ease-out, ease-out) both; }

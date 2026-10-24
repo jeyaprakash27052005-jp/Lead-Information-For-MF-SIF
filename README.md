@@ -82,3 +82,29 @@ npm run lint           # type-check
 - **Intro animation**: the first screen of every site plays a short mutual-fund intro (loading counter, two investors, "SIP BETTER, GROW FASTER."). It plays once per browser tab and has a Skip button. The Home Screen has an animated "How mutual funds work" explainer and a growing-investment chart. All buttons and cards have hover and press animations (switched off for people who ask their device for reduced motion).
 - `media/mutual-fund-intro.mp4` is a 38-second portrait video of the intro and the explainer, for sharing. Open the site with `?demo=intro` or `?demo=explainer` to play the animations full screen.
 - Publish `firestore.rules` after this update (it adds the `awarenessPrograms` collection).
+
+## Animated ad creatives (Home Screen Ads, Head Incharge)
+
+Admin portal -> **Home Screen Ads**. Upload a JPG / PNG / GIF, write the headline, tagline and badge, then choose:
+
+- **Picture animation** - slow zoom in / out, pan left / right / up, fade in, slide in, flip in, bounce, pulse, float, wiggle, shimmer, or none.
+- **Speed** - slow, normal or fast.
+- **Headline / tagline effect** - rise up, fade in, slide from left, pop, or none.
+
+The creative preview in the form shows exactly how it will move (**Replay preview** plays it again). Each ad in the list has **Edit** (change the picture, text or animation), **Active / Disabled** and **Delete**. Ads made before this update keep working with no animation. Animation is switched off for visitors whose device asks for reduced motion.
+
+## Awareness programmes by Head, Regional and Area Incharge
+
+**Awareness Programs** is in the menu of all three admin roles. Each programme belongs to a region:
+
+| Role | Who sees what it adds | What it can edit / delete |
+|---|---|---|
+| Head Incharge | Chooses **All regions** or one region | Every programme |
+| Regional Incharge | Customers of their own division | Programmes of their division and their own |
+| Area Incharge | Customers of their own division | Only programmes they added |
+
+Customers see programmes for their own region plus the "All regions" ones; the public Home Screen shows only "All regions" programmes.
+
+## E-mailing the health check-up PDF (API key)
+
+The PDF is sent through Brevo with `BREVO_API_KEY` and `REPORT_FROM_EMAIL` (see `.env.example` for the 3 steps). Put them in a local `.env` file for `npm run dev`, or in Vercel -> Settings -> Environment Variables, then redeploy. The key is read only on the server; it is never stored in Firestore or sent to the browser. Use **Feature Controls -> Check e-mail setup** to confirm it works.

@@ -78,6 +78,13 @@ export interface Lead {
   updatedAt: string;
 }
 
+/** Movement applied to the ad picture (see utils/adAnimations.ts) */
+export type AdAnimation =
+  | 'none' | 'zoom-in' | 'zoom-out' | 'pan-left' | 'pan-right' | 'pan-up'
+  | 'fade-in' | 'slide-left' | 'slide-right' | 'slide-up' | 'bounce' | 'pulse' | 'float' | 'shake' | 'flip' | 'shimmer';
+export type AdTextEffect = 'none' | 'rise' | 'fade' | 'slide' | 'pop';
+export type AdAnimationSpeed = 'slow' | 'normal' | 'fast';
+
 export interface AdBanner {
   id: string;
   title: string;
@@ -87,6 +94,11 @@ export interface AdBanner {
   badge?: string; // e.g. "Special Offer", "High Return", "Tax Saver", "NPS Pension", "New Fund"
   isActive: boolean;
   order: number;
+  /** How the picture moves on the Home Screen (default: none) */
+  animation?: AdAnimation;
+  /** How the headline and tagline appear (default: rise) */
+  textEffect?: AdTextEffect;
+  animationSpeed?: AdAnimationSpeed;
   createdAt: string;
 }
 
@@ -196,6 +208,10 @@ export interface AwarenessProgram {
   language?: string;
   speaker?: string;
   contact?: string; // phone / WhatsApp number for registering
+  /** Division the programme is for. Empty = every region. */
+  region?: string;
+  createdByRole?: UserRole;
+  createdById?: string;
   isActive: boolean;
   createdAt: string;
   createdBy?: string;

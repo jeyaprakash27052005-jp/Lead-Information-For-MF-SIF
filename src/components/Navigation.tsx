@@ -149,16 +149,20 @@ export const Navigation: React.FC<NavigationProps> = ({
         description: 'Add, edit and remove the questions asked in the Finance Health Check-up',
       });
       items.push({
-        id: 'awareness-admin',
-        label: 'Awareness Programs',
-        icon: <Megaphone className="w-4 h-4" />,
-        description: 'Add awareness programme details that customers see',
-      });
-      items.push({
         id: 'feature-controls',
         label: 'Feature Controls',
         icon: <ToggleRight className="w-4 h-4" />,
         description: 'Switch portals and features on or off, set the calculator return rates, check e-mail setup',
+      });
+    }
+
+    // Feature: Awareness programmes (Head, Regional Incharge and Area Incharge)
+    if (isHead || isRegional || isArea) {
+      items.push({
+        id: 'awareness-admin',
+        label: 'Awareness Programs',
+        icon: <Megaphone className="w-4 h-4" />,
+        description: isArea ? 'Add awareness programmes for your division' : 'Add awareness programme details that customers see',
       });
     }
 

@@ -8,7 +8,7 @@ import { useAppSettings } from '../context/AppSettings';
 const endOf = (p: AwarenessProgram) => new Date(p.endsAt || p.startsAt).getTime() + 3 * 60 * 60 * 1000;
 
 /** The awareness programmes the admin team added, for customers and the Home Screen (read only) */
-export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWhenEmpty?: boolean }> = ({ limit, compact, hideWhenEmpty }) => {
+export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWhenEmpty?: boolean; region?: string }> = ({ limit, compact, hideWhenEmpty, region }) => {
   const { settings } = useAppSettings();
   const [programs, setPrograms] = useState<AwarenessProgram[] | null>(null);
 
@@ -31,7 +31,8 @@ export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWh
   if (programs === null) return <p className="text-xs font-semibold text-slate-400 py-6 text-center">Loading...</p>;
 
   const now = Date.now();
-  const active = programs.filter((p) => p.isActive);
+  // a programme with a region is only for customers of that region; without a region it is for everyone
+  const active = programs.filter((p) => p.isActive && (!p.region || p.region === region));
   const upcoming = active.filter((p) => endOf(p) >= now);
   const past = active.filter((p) => endOf(p) < now).reverse().slice(0, 3);
   const shown = limit ? upcoming.slice(0, limit) : upcoming;

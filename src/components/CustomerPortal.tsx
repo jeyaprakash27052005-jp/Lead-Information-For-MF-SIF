@@ -537,7 +537,7 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
         {effectiveView === 'awareness' && settings.features.awarenessPrograms && (
           <div className="space-y-3">
             <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Awareness Programs</h3>
-            <AwarenessList />
+            <AwarenessList region={currentUser?.region} />
           </div>
         )}
 

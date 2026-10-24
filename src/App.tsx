@@ -958,7 +958,7 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
             )}
 
             {/* VIEW 10: Ads Management (Head uploads home screen ad images) */}
-            {activeTab === 'awareness-admin' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge') && (
+            {activeTab === 'awareness-admin' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge' || currentUser.role === 'area_incharge') && (
               <AwarenessProgramsAdmin currentUser={currentUser} onNotify={showFeedback} />
             )}
 

@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AdBanner } from '../types';
+import { AdBanner, AdAnimation, AdAnimationSpeed, AdTextEffect } from '../types';
+import { AnimatedAd } from './AnimatedAd';
+import { AD_ANIMATIONS, AD_SPEEDS, AD_TEXT_EFFECTS, DEFAULT_AD_ANIMATION, DEFAULT_AD_SPEED, DEFAULT_AD_TEXT_EFFECT, adTextClass, animationLabel } from '../utils/adAnimations';
 import { adsStorageService, prepareAdImage } from '../services/adsStorage';
 import { SearchBox, SelectFilter, ClearFilters, FilterBar } from './FilterControls';
 import {
@@ -46,6 +48,10 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFileName, setImageFileName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [animation, setAnimation] = useState<AdAnimation>('zoom-in');
+  const [textEffect, setTextEffect] = useState<AdTextEffect>(DEFAULT_AD_TEXT_EFFECT);
+  const [animSpeed, setAnimSpeed] = useState<AdAnimationSpeed>(DEFAULT_AD_SPEED);
+  const [replay, setReplay] = useState(0);
 
   // Live Carousel Preview State
   const [previewSlide, setPreviewSlide] = useState(0);
@@ -130,6 +136,9 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
     setImagePreview(null);
     setImageFileName(null);
     setEditingId(null);
+    setAnimation('zoom-in');
+    setTextEffect(DEFAULT_AD_TEXT_EFFECT);
+    setAnimSpeed(DEFAULT_AD_SPEED);
     setError(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -152,6 +161,10 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
     setImageUrl(ad.imageUrl);
     setImagePreview(ad.imageUrl);
     setImageFileName(null);
+    setAnimation(ad.animation || DEFAULT_AD_ANIMATION);
+    setTextEffect(ad.textEffect || DEFAULT_AD_TEXT_EFFECT);
+    setAnimSpeed(ad.animationSpeed || DEFAULT_AD_SPEED);
+    setReplay((n) => n + 1);
     setError(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -181,6 +194,9 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
           badge: badge.trim(),
           imageUrl: finalImageUrl,
           linkUrl: targetLink,
+          animation,
+          textEffect,
+          animationSpeed: animSpeed,
         });
         setAds((prev) => prev.map((a) => (a.id === updated.id ? updated : a)));
         if (onNotify) onNotify('Advertisement updated successfully!', 'success');
@@ -193,6 +209,9 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
           linkUrl: targetLink || undefined,
           isActive: true,
           order: ads.length + 1,
+          animation,
+          textEffect,
+          animationSpeed: animSpeed,
         });
         setAds((prev) => [...prev, newAd]);
         if (onNotify) onNotify('Advertisement banner added successfully!', 'success');
@@ -295,13 +314,9 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
                   idx === previewSlide ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
                 }`}
               >
-                <img
-                  src={ad.imageUrl}
-                  alt={ad.title}
-                  className="absolute inset-0 w-full h-full object-cover object-center"
-                />
+                <AnimatedAd ad={ad} playKey={idx === previewSlide ? `on${replay}` : 'off'} className="absolute inset-0" />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
-                <div className="relative z-20 space-y-1 max-w-lg">
+                <div key={idx === previewSlide ? 'on' : 'off'} className={`relative z-20 space-y-1 max-w-lg ${adTextClass(ad)}`}>
                   {ad.badge && (
                     <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-indigo-600 text-white">
                       {ad.badge}
@@ -447,6 +462,72 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
             </div>
           </div>
 
+          {/* Animation options */}
+          <div className="rounded-xl border border-indigo-100 bg-indigo-50/30 p-4 space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">Animation for this creative</label>
+              <button
+                type="button"
+                onClick={() => setReplay((n) => n + 1)}
+                className="px-2.5 py-1 rounded-md bg-white hover:bg-slate-100 border border-slate-200 text-[11px] font-bold text-slate-700 flex items-center gap-1 cursor-pointer"
+              >
+                <Play className="w-3 h-3" /> Replay preview
+              </button>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2" role="radiogroup" aria-label="Picture animation">
+              {AD_ANIMATIONS.map((a) => (
+                <button
+                  key={a.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={animation === a.value}
+                  title={a.help}
+                  onClick={() => {
+                    setAnimation(a.value);
+                    setReplay((n) => n + 1);
+                  }}
+                  className={`px-2.5 py-2 rounded-lg border text-[11px] font-bold text-left cursor-pointer transition-colors ${
+                    animation === a.value ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-700 border-slate-200 hover:border-indigo-300'
+                  }`}
+                >
+                  {a.label}
+                </button>
+              ))}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Speed</label>
+                <select value={animSpeed} onChange={(e) => { setAnimSpeed(e.target.value as AdAnimationSpeed); setReplay((n) => n + 1); }} className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white">
+                  {AD_SPEEDS.map((x) => (
+                    <option key={x.value} value={x.value}>{x.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Headline / tagline effect</label>
+                <select value={textEffect} onChange={(e) => { setTextEffect(e.target.value as AdTextEffect); setReplay((n) => n + 1); }} className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white">
+                  {AD_TEXT_EFFECTS.map((x) => (
+                    <option key={x.value} value={x.value}>{x.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            {imagePreview ? (
+              <div className="relative h-44 rounded-xl overflow-hidden border border-slate-300 bg-slate-950">
+                <AnimatedAd ad={{ imageUrl: imagePreview, title: title || 'Preview', animation, animationSpeed: animSpeed }} playKey={replay} className="absolute inset-0" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent" />
+                <div key={replay} className={`absolute bottom-3 left-4 right-4 z-10 ${adTextClass({ textEffect })}`}>
+                  {badge && <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-indigo-600 text-white">{badge}</span>}
+                  <p className="text-base font-black text-white mt-1">{title || 'Your headline'}</p>
+                  {subtitle && <p className="text-xs text-slate-200 line-clamp-1">{subtitle}</p>}
+                </div>
+              </div>
+            ) : (
+              <p className="text-[11px] text-slate-500">Upload an image above to see the animation here before you publish.</p>
+            )}
+            <p className="text-[10px] text-slate-500">Animations are switched off automatically for visitors whose device asks for reduced motion.</p>
+          </div>
+
           {/* Action Destination */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -550,11 +631,7 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
               >
                 <div className="flex items-center gap-3">
                   {/* Image Thumbnail */}
-                  <img
-                    src={ad.imageUrl}
-                    alt={ad.title}
-                    className="w-20 h-14 object-cover rounded-lg border border-slate-200 shadow-2xs shrink-0"
-                  />
+                  <AnimatedAd ad={ad} className="w-20 h-14 rounded-lg border border-slate-200 shadow-2xs shrink-0" />
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-bold text-slate-900">{ad.title}</span>
@@ -577,7 +654,7 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
                       <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">{ad.subtitle}</p>
                     )}
                     <p className="text-[10px] text-slate-400 font-mono mt-0.5">
-                      Target: {ad.linkUrl || 'None'} • Order: #{index + 1}
+                      Target: {ad.linkUrl || 'None'} • Order: #{index + 1} • Animation: {animationLabel(ad.animation)}
                     </p>
                   </div>
                 </div>
