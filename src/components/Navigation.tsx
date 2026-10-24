@@ -166,13 +166,13 @@ export const Navigation: React.FC<NavigationProps> = ({
       });
     }
 
-    // Feature: Home Screen Ads (Head uploads JPG / JPEG / PNG / GIF banners)
-    if (isHead) {
+    // Feature: Home Screen Ads and animated creatives (Head, Regional Incharge and Area Incharge)
+    if (isHead || isRegional || isArea) {
       items.push({
         id: 'ads-management',
         label: 'Home Screen Ads',
         icon: <ImageIcon className="w-4 h-4" />,
-        description: 'Upload and manage the moving ad images shown on the Home Screen',
+        description: 'Create animated ad creatives and manage the moving ads shown on the Home Screen',
       });
     }
 

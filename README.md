@@ -83,9 +83,9 @@ npm run lint           # type-check
 - `media/mutual-fund-intro.mp4` is a 38-second portrait video of the intro and the explainer, for sharing. Open the site with `?demo=intro` or `?demo=explainer` to play the animations full screen.
 - Publish `firestore.rules` after this update (it adds the `awarenessPrograms` collection).
 
-## Animated ad creatives (Home Screen Ads, Head Incharge)
+## Animated ad creatives (Home Screen Ads: Head, Regional and Area Incharge)
 
-Admin portal -> **Home Screen Ads**. Upload a JPG / PNG / GIF, write the headline, tagline and badge, then choose:
+Admin portal -> **Home Screen Ads** (available to the Head, Regional and Area Incharge; each ad shows who added it). Upload a JPG / PNG / GIF, write the headline, tagline and badge, then choose:
 
 - **Picture animation** - slow zoom in / out, pan left / right / up, fade in, slide in, flip in, bounce, pulse, float, wiggle, shimmer, or none.
 - **Speed** - slow, normal or fast.

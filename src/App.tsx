@@ -962,8 +962,8 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
               <AwarenessProgramsAdmin currentUser={currentUser} onNotify={showFeedback} />
             )}
 
-            {activeTab === 'ads-management' && currentUser.role === 'head' && (
-              <AdsManagement onNotify={showFeedback} />
+            {activeTab === 'ads-management' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge' || currentUser.role === 'area_incharge') && (
+              <AdsManagement currentUser={currentUser} onNotify={showFeedback} />
             )}
 
             {/* VIEW 9: Schemes Management (Add, Edit, Delete catalog for MF & NPS) */}

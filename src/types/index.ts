@@ -99,6 +99,9 @@ export interface AdBanner {
   /** How the headline and tagline appear (default: rise) */
   textEffect?: AdTextEffect;
   animationSpeed?: AdAnimationSpeed;
+  /** Who made the creative */
+  createdByName?: string;
+  createdByRole?: UserRole;
   createdAt: string;
 }
 

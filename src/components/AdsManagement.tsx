@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AdBanner, AdAnimation, AdAnimationSpeed, AdTextEffect } from '../types';
+import { User, AdBanner, AdAnimation, AdAnimationSpeed, AdTextEffect } from '../types';
 import { AnimatedAd } from './AnimatedAd';
 import { AD_ANIMATIONS, AD_SPEEDS, AD_TEXT_EFFECTS, DEFAULT_AD_ANIMATION, DEFAULT_AD_SPEED, DEFAULT_AD_TEXT_EFFECT, adTextClass, animationLabel } from '../utils/adAnimations';
 import { adsStorageService, prepareAdImage } from '../services/adsStorage';
@@ -27,10 +27,11 @@ import {
 } from 'lucide-react';
 
 interface AdsManagementProps {
+  currentUser: User;
   onNotify?: (msg: string, type?: 'success' | 'error' | 'info') => void;
 }
 
-export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
+export const AdsManagement: React.FC<AdsManagementProps> = ({ currentUser, onNotify }) => {
   const [ads, setAds] = useState<AdBanner[]>([]);
   const [loading, setLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
@@ -212,6 +213,8 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
           animation,
           textEffect,
           animationSpeed: animSpeed,
+          createdByName: currentUser.name,
+          createdByRole: currentUser.role,
         });
         setAds((prev) => [...prev, newAd]);
         if (onNotify) onNotify('Advertisement banner added successfully!', 'success');
@@ -654,7 +657,7 @@ export const AdsManagement: React.FC<AdsManagementProps> = ({ onNotify }) => {
                       <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">{ad.subtitle}</p>
                     )}
                     <p className="text-[10px] text-slate-400 font-mono mt-0.5">
-                      Target: {ad.linkUrl || 'None'} • Order: #{index + 1} • Animation: {animationLabel(ad.animation)}
+                      Target: {ad.linkUrl || 'None'} • Order: #{index + 1} • Animation: {animationLabel(ad.animation)}{ad.createdByName ? ` • Added by ${ad.createdByName}` : ''}
                     </p>
                   </div>
                 </div>
