@@ -300,7 +300,7 @@ export const HealthReportsAdmin: React.FC<HealthReportsAdminProps> = ({ reports,
                       </td>
                       <td className="px-4 py-3 text-slate-700">
                         <div>{SOURCE_LABEL[r.source]}</div>
-                        <div className="text-[11px] text-slate-500">{r.region}</div>
+                        <div className="text-[11px] text-slate-500">{r.address || r.region}</div>
                       </td>
                       <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{formatDateTime(r.createdAt)}</td>
                       <td className="px-4 py-3">

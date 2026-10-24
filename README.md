@@ -116,4 +116,18 @@ Admin -> **Feature Controls -> How the health check-up report reaches the custom
 - **Message (WhatsApp / SMS)** - the default. The customer's Gmail / e-mail ID and mobile number are still collected and saved (visible in Health Check-up Reports). After the PDF downloads, **Send on WhatsApp** opens the phone's share sheet with the PDF attached and the full report typed in (score, topic scores, strengths, priorities, monthly investment plan); on a computer it opens WhatsApp to the customer's number with the same text and the customer attaches the downloaded PDF. **Send as SMS** sends the first 600 characters.
 - **E-mail the PDF** - the earlier behaviour; needs `BREVO_API_KEY` (see above).
 
-Press **Save changes** after choosing. A browser cannot attach a file to a WhatsApp / SMS message on its own, so the customer taps send; fully automatic sending needs a paid WhatsApp Business / SMS API.
+Press **Save changes** after choosing. ### Automatic sending (no buttons for the customer)
+
+When the keys below are set on the Vercel project, the report is sent to the customer's mobile by itself the moment they press **Download report**. WhatsApp is tried first (PDF + full report text); if it is not set up or fails, an SMS with the score and first step is sent. If neither is set up, the customer sees the Send on WhatsApp / Send as SMS buttons instead.
+
+| Variable | Purpose |
+|---|---|
+| `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID` | Meta WhatsApp Cloud API access token and sending number ID |
+| `WHATSAPP_TEMPLATE`, `WHATSAPP_TEMPLATE_LANG` | Approved template with a Document header and 2 body variables ({{1}} name, {{2}} score). Without it WhatsApp only delivers to people who messaged your number in the last 24 hours |
+| `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM` | SMS through Twilio (or `TWILIO_MESSAGING_SERVICE_SID`) |
+
+Add them in the Customer and Health Check-up projects (and Admin for the check button), redeploy, then use **Feature Controls -> Check automatic WhatsApp / SMS setup**. WhatsApp Business and SMS providers charge per message / need account approval.
+
+## Address / place
+
+The health check-up asks for the customer's **Address / place** (typed text) instead of choosing a region. It is shown in the PDF, in Health Check-up Reports and in the lead's notes.

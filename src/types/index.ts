@@ -133,6 +133,8 @@ export interface HealthReport {
   occupation: string;
   annualIncome: number;
   region: string;
+  /** Address or place typed by the customer */
+  address?: string;
   answers: Record<string, number | string | string[]>;
   overallScore: number;
   band: string;

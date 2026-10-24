@@ -88,6 +88,24 @@ export const FeatureControls: React.FC<FeatureControlsProps> = ({ currentUser, o
     }
   };
 
+  const [msgCheck, setMsgCheck] = useState<{ ok: boolean; text: string } | null>(null);
+  const checkMessageSetup = async () => {
+    setMsgCheck(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/send-report-message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'check' }),
+      });
+      const j = await res.json();
+      if (!res.ok) throw new Error('missing');
+      const parts = [j.whatsapp && `WhatsApp ready${j.template ? ' (template set)' : ' (no template: only works for people who messaged your number in the last 24 hours)'}`, j.sms && 'SMS ready'].filter(Boolean);
+      setMsgCheck(parts.length ? { ok: true, text: parts.join(' and ') + '.' } : { ok: false, text: 'Not set up yet: add the WhatsApp or SMS keys on this site and redeploy.' });
+    } catch (_e) {
+      setMsgCheck({ ok: false, text: 'The message function was not found on this site. Deploy the project that contains the /api folder.' });
+    }
+  };
+
   const runCheck = async () => {
     setChecking(true);
     setCheckResult(null);
@@ -254,6 +272,20 @@ export const FeatureControls: React.FC<FeatureControlsProps> = ({ currentUser, o
             <span><span className="font-bold text-slate-900">{label}</span><br /><span className="text-slate-500">{help}</span></span>
           </label>
         ))}
+        <div className="flex flex-wrap items-center gap-2 pt-1">
+          <button
+            type="button"
+            onClick={checkMessageSetup}
+            className="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold cursor-pointer"
+          >
+            Check automatic WhatsApp / SMS setup
+          </button>
+          {msgCheck && <span className={`text-xs font-semibold ${msgCheck.ok ? 'text-emerald-700' : 'text-rose-600'}`}>{msgCheck.text}</span>}
+        </div>
+        <p className="text-[11px] text-slate-500">
+          In Message mode the report is sent to the customer's phone automatically, as soon as they press Download report. WhatsApp needs WHATSAPP_TOKEN and
+          WHATSAPP_PHONE_ID; SMS needs TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN and TWILIO_FROM (see the README). Until one is set up, the customer sees Send buttons instead.
+        </p>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 space-y-3">

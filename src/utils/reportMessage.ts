@@ -30,6 +30,12 @@ export const buildReportMessage = (p: {
   return lines.filter(Boolean).join('\n');
 };
 
+/** Short text for an automatic SMS (SMS cannot carry the PDF) */
+export const buildSmsText = (p: { name: string; score: number; band: string; result?: HealthScoreResult | null }): string => {
+  const top = p.result?.priorities?.[0];
+  return `Hello ${p.name}, your Finance Health Check-up score is ${p.score}/100 (${p.band}).${top ? ` First step: ${top}.` : ''} Our team may contact you. Not financial advice.`;
+};
+
 export const whatsappUrl = (mobile: string, text: string) => `https://wa.me/91${mobile}?text=${encodeURIComponent(text)}`;
 // SMS has a short limit, so it carries the score and the main points only
 export const smsUrl = (mobile: string, text: string) => `sms:+91${mobile}?body=${encodeURIComponent(text.slice(0, 600))}`;

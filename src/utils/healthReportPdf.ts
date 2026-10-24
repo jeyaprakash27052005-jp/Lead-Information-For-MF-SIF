@@ -12,6 +12,7 @@ export interface HealthReportPdfInput {
   occupation: string;
   annualIncome: number;
   region?: string;
+  address?: string;
   createdAt?: string;
   score: HealthScoreResult;
   plan?: InvestmentPlan;
@@ -41,7 +42,7 @@ export function generateHealthReportPDF(data: HealthReportPdfInput, action: 'dow
     body: [
       ['Name', data.name, 'Age', String(data.age)],
       ['Gender', data.gender, 'Occupation', data.occupation],
-      ['Annual income', rs(data.annualIncome), 'Region', data.region || '-'],
+      ['Annual income', rs(data.annualIncome), 'Address / place', data.address || '-'],
     ],
     theme: 'grid',
     styles: { fontSize: 9, cellPadding: 2.2 },

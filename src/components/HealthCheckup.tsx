@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { HeartPulse, ArrowLeft, ArrowRight, Download, RotateCcw, CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { apiService } from '../services/api';
-import { DEFAULT_REGIONS, NATIONAL_HQ_REGION } from '../utils/regions';
+import { NATIONAL_HQ_REGION } from '../utils/regions';
 import {
   HealthConfig,
   HealthAnswers,
@@ -16,7 +16,7 @@ import {
 import { generateHealthReportPDF, blobToBase64 } from '../utils/healthReportPdf';
 import { computeInvestmentPlan } from '../utils/healthInvestPlan';
 import { formatInr } from '../utils/currency';
-import { buildReportMessage, whatsappUrl, smsUrl, sharePdf } from '../utils/reportMessage';
+import { buildReportMessage, buildSmsText, whatsappUrl, smsUrl, sharePdf } from '../utils/reportMessage';
 import { NumField } from './NumField';
 import { useAppSettings } from '../context/AppSettings';
 import { useCountUp } from '../hooks/useCountUp';
@@ -58,8 +58,9 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
   const [gender, setGender] = useState<Gender | ''>(draft.gender ?? '');
   const [occupation, setOccupation] = useState<string>(draft.occupation ?? '');
   const [incomeStr, setIncomeStr] = useState<string>(draft.incomeStr ?? '');
-  const [region, setRegion] = useState<string>(draft.region ?? (defaultRegion || NATIONAL_HQ_REGION));
-  const [regions, setRegions] = useState<string[]>(DEFAULT_REGIONS);
+  // The customer types an address / place. The region (used by the team to route the lead) stays the customer's own region, or head office.
+  const [address, setAddress] = useState<string>(draft.address ?? '');
+  const region = defaultRegion || NATIONAL_HQ_REGION;
   const [answers, setAnswers] = useState<HealthAnswers>(draft.answers && typeof draft.answers === 'object' ? draft.answers : {});
   const [showErrors, setShowErrors] = useState(false);
 
@@ -72,15 +73,15 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
   const [mobile, setMobile] = useState(defaultMobile && MOBILE_RE.test(defaultMobile) ? defaultMobile : '');
   const [downloading, setDownloading] = useState(false);
   const [dlError, setDlError] = useState<string | null>(null);
-  const [dlResult, setDlResult] = useState<{ leadSaved: boolean; leadError?: string; email: 'sent' | 'not_configured' | 'failed' | 'message'; reason?: string } | null>(null);
+  const [dlResult, setDlResult] = useState<{ leadSaved: boolean; leadError?: string; email: 'sent' | 'not_configured' | 'failed' | 'message'; reason?: string; auto?: 'whatsapp' | 'sms' | 'not_configured' | 'failed'; autoDetail?: string } | null>(null);
 
   useEffect(() => {
     try {
-      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ step, name, ageStr, gender, occupation, incomeStr, region, answers }));
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ step, name, ageStr, gender, occupation, incomeStr, address, answers }));
     } catch (_e) {
       // storage blocked - the check-up still works, it just cannot survive a refresh
     }
-  }, [step, name, ageStr, gender, occupation, incomeStr, region, answers]);
+  }, [step, name, ageStr, gender, occupation, incomeStr, address, answers]);
 
   // The report page needs a saved report; after a refresh go back to the last question page instead
   const clampedRef = useRef(false);
@@ -98,13 +99,6 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
       .catch(() => setConfig(null));
   }, []);
 
-  useEffect(() => {
-    apiService
-      .getRegions()
-      .then((r: string[]) => r.length && setRegions(r))
-      .catch(() => undefined);
-  }, []);
-
   const cfg: HealthConfig = config || { categories: [], questions: [] };
   const cats = cfg.categories;
   const totalPages = cats.length;
@@ -118,6 +112,7 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
   if (!gender) profileErrors.gender = 'Select your gender';
   if (occupation.trim().length < 2) profileErrors.occupation = 'Enter your occupation';
   if (incomeStr.trim() === '' || !(income >= 0)) profileErrors.income = 'Enter your yearly income (0 if none)';
+  if (address.trim().length < 3) profileErrors.address = 'Enter your address or place';
   const profileOk = Object.keys(profileErrors).length === 0;
 
   const pageQuestions = (page: number) => cfg.questions.filter((q) => q.category === cats[page - 1].id);
@@ -164,6 +159,7 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
     occupation: occupation.trim(),
     annualIncome: income,
     region,
+    address: address.trim(),
     answers,
     overallScore: score!.overall,
     band: score!.band,
@@ -218,6 +214,7 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
     occupation: occupation.trim(),
     annualIncome: income,
     region,
+    address: address.trim(),
     score: score!,
     plan: plan || undefined,
   });
@@ -241,8 +238,31 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
     }
 
     if (messageMode) {
-      // message mode: nothing is e-mailed; the e-mail ID and mobile were saved above
-      setDlResult({ leadSaved, leadError, email: 'message' });
+      // message mode: nothing is e-mailed; the e-mail ID and mobile were saved above. The report goes to the phone by itself.
+      let auto: 'whatsapp' | 'sms' | 'not_configured' | 'failed' = 'failed';
+      let autoDetail: string | undefined;
+      try {
+        const res = await fetch(`${API_BASE}/api/send-report-message`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: name.trim(),
+            mobile: mobile.trim(),
+            score: score!.overall,
+            band: score!.band,
+            text: reportText(),
+            smsText: buildSmsText({ name: name.trim(), score: score!.overall, band: score!.band, result: score }),
+            pdfBase64: await blobToBase64(blob),
+          }),
+        });
+        const j = await res.json().catch(() => ({} as Record<string, unknown>));
+        if (res.ok && j.sent) auto = j.channel === 'sms' ? 'sms' : 'whatsapp';
+        else if (res.status === 404 || j.reason === 'MESSAGE_NOT_CONFIGURED') auto = 'not_configured';
+        else autoDetail = typeof j.detail === 'string' ? j.detail : undefined;
+      } catch (_e) {
+        auto = 'failed';
+      }
+      setDlResult({ leadSaved, leadError, email: 'message', auto, autoDetail });
       return;
     }
     let emailStatus: 'sent' | 'not_configured' | 'failed' = 'failed';
@@ -402,17 +422,9 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
             hint="Total income for one year, before tax"
           />
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Your region</label>
-            <select value={region} onChange={(e) => setRegion(e.target.value)} className={inputCls()}>
-              <option value={NATIONAL_HQ_REGION}>Not sure</option>
-              {regions
-                .filter((r) => r !== NATIONAL_HQ_REGION)
-                .map((r) => (
-                  <option key={r} value={r}>
-                    {r}
-                  </option>
-                ))}
-            </select>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Address / place</label>
+            <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Your area, town or city" maxLength={200} className={inputCls(profileErrors.address)} />
+            {showErrors && profileErrors.address && <p className="text-[11px] font-semibold text-rose-600 mt-1">{profileErrors.address}</p>}
           </div>
         </div>
       )}
@@ -707,7 +719,7 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
 
             {!dlResult ? (
               <div className="p-6 space-y-4">
-                <p className="text-xs text-slate-500">Enter your Gmail ID and mobile number. {messageMode ? 'We will save them and you can send the report PDF on WhatsApp or SMS.' : 'We will e-mail the report PDF to you.'}</p>
+                <p className="text-xs text-slate-500">Enter your Gmail ID and mobile number. {messageMode ? 'We will save them and send the full report to your WhatsApp or SMS.' : 'We will e-mail the report PDF to you.'}</p>
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Gmail ID</label>
                   <input
@@ -749,9 +761,21 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
                 <p className="flex items-start gap-2 font-bold text-emerald-700">
                   <CheckCircle2 className="w-4 h-4 shrink-0" /> Your PDF report has been downloaded.
                 </p>
-                {dlResult.email === 'message' && pdfBlob && (
+                {dlResult.email === 'message' && dlResult.auto === 'whatsapp' && (
+                  <p className="flex items-start gap-2 font-semibold text-emerald-700">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" /> We sent your report to your WhatsApp ({mobile.trim()}).
+                  </p>
+                )}
+                {dlResult.email === 'message' && dlResult.auto === 'sms' && (
+                  <p className="flex items-start gap-2 font-semibold text-emerald-700">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" /> We sent your result by SMS to {mobile.trim()}. Your full PDF is downloaded on this device.
+                  </p>
+                )}
+                {dlResult.email === 'message' && dlResult.auto !== 'whatsapp' && dlResult.auto !== 'sms' && pdfBlob && (
                   <div className="space-y-2">
-                    <p className="font-semibold text-slate-700">Send the report to your phone:</p>
+                    <p className="font-semibold text-slate-700">
+                      {dlResult.auto === 'failed' ? 'We could not send it automatically just now.' : 'Automatic sending is not switched on yet.'} Send the report to your phone yourself:
+                    </p>
                     <button
                       type="button"
                       onClick={async () => {
@@ -768,6 +792,7 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
                     >
                       Send as SMS
                     </a>
+                    {dlResult.autoDetail && <p className="text-[11px] text-slate-400">Reason: {dlResult.autoDetail}</p>}
                     <p className="text-[11px] text-slate-400">On a phone, WhatsApp opens with the PDF attached. On a computer the message opens without the file: attach the downloaded PDF yourself.</p>
                   </div>
                 )}

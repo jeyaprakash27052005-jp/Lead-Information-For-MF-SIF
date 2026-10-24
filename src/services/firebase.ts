@@ -735,7 +735,7 @@ export const firebaseDbService = {
           occupation: report.occupation,
           mobile,
           email,
-          narration: `Finance health score ${report.overallScore}/100 (${report.band}). Money style: ${report.moneyStyle}. Weakest areas: ${weak}.`,
+          narration: `${report.address ? `Address / place: ${report.address}. ` : ''}Finance health score ${report.overallScore}/100 (${report.band}). Money style: ${report.moneyStyle}. Weakest areas: ${weak}.`,
           status: 'Pending',
           statusRemarks: 'Downloaded the Finance Health Check-up report',
           addedByUserId: 'finance_health_checkup',
