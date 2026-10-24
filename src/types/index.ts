@@ -187,8 +187,12 @@ export interface AppFeatureFlags {
   awarenessPrograms: boolean; // the Awareness Programs list shown to customers and on the Home Screen
 }
 
+/** How the health check-up report reaches the customer: e-mailed PDF, or a WhatsApp / SMS message (the e-mail ID is still collected) */
+export type ReportDelivery = 'email' | 'message';
+
 export interface AppSettings {
   features: AppFeatureFlags;
+  reportDelivery?: ReportDelivery;
   mfReturnRate: number; // % per year used by the Mutual Fund calculator
   npsReturnRate: number; // % per year used by the NPS calculator
   updatedAt?: string;

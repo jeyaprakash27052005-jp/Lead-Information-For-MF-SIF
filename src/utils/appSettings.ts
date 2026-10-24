@@ -16,6 +16,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   features: DEFAULT_FEATURES,
   mfReturnRate: 12,
   npsReturnRate: 10,
+  reportDelivery: 'message',
 };
 
 export const FEATURE_LABELS: { key: keyof AppFeatureFlags; label: string; help: string }[] = [
@@ -43,6 +44,7 @@ export const mergeSettings = (raw: unknown): AppSettings => {
   });
   return {
     features,
+    reportDelivery: r.reportDelivery === 'email' || r.reportDelivery === 'message' ? r.reportDelivery : 'message',
     mfReturnRate: num(r.mfReturnRate, DEFAULT_APP_SETTINGS.mfReturnRate),
     npsReturnRate: num(r.npsReturnRate, DEFAULT_APP_SETTINGS.npsReturnRate),
     updatedAt: typeof r.updatedAt === 'string' ? r.updatedAt : undefined,

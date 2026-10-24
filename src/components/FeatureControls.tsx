@@ -60,6 +60,7 @@ export const FeatureControls: React.FC<FeatureControlsProps> = ({ currentUser, o
 
   const dirty =
     JSON.stringify(draft.features) !== JSON.stringify(settings.features) ||
+    (draft.reportDelivery || 'message') !== (settings.reportDelivery || 'message') ||
     Number(mfStr) !== settings.mfReturnRate ||
     Number(npsStr) !== settings.npsReturnRate;
 
@@ -239,6 +240,20 @@ export const FeatureControls: React.FC<FeatureControlsProps> = ({ currentUser, o
             />
           </label>
         </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 space-y-3">
+        <p className="text-sm font-bold text-slate-900">How the health check-up report reaches the customer</p>
+        <p className="text-[11px] text-slate-500">The customer's e-mail ID and mobile number are collected and saved in both cases. Press Save changes to apply.</p>
+        {([
+          ['message', 'Message (WhatsApp / SMS)', 'The report PDF downloads and the customer can send it on WhatsApp or SMS from their phone. Nothing is e-mailed, so no e-mail API key is needed.'],
+          ['email', 'E-mail the PDF', 'The PDF is e-mailed to the customer. Needs the Brevo API key (see below).'],
+        ] as const).map(([v, label, help]) => (
+          <label key={v} className="flex items-start gap-2 text-xs cursor-pointer">
+            <input type="radio" name="report-delivery" className="mt-0.5" checked={(draft.reportDelivery || 'message') === v} onChange={() => setDraft((d) => ({ ...d, reportDelivery: v }))} />
+            <span><span className="font-bold text-slate-900">{label}</span><br /><span className="text-slate-500">{help}</span></span>
+          </label>
+        ))}
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 space-y-3">

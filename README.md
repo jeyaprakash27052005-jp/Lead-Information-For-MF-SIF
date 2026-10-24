@@ -108,3 +108,12 @@ Customers see programmes for their own region plus the "All regions" ones; the p
 ## E-mailing the health check-up PDF (API key)
 
 The PDF is sent through Brevo with `BREVO_API_KEY` (the only value you must add; the sender defaults to `jeyaprakash27052005@gmail.com`, which must be verified in Brevo, and can be changed with `REPORT_FROM_EMAIL`) (see `.env.example` for the 3 steps). Put them in a local `.env` file for `npm run dev`, or in Vercel -> Settings -> Environment Variables, then redeploy. The key is read only on the server; it is never stored in Firestore or sent to the browser. Use **Feature Controls -> Check e-mail setup** to confirm it works.
+
+## Sending the health check-up report as a message (no e-mail API needed)
+
+Admin -> **Feature Controls -> How the health check-up report reaches the customer**:
+
+- **Message (WhatsApp / SMS)** - the default. The customer's Gmail / e-mail ID and mobile number are still collected and saved (visible in Health Check-up Reports). After the PDF downloads, **Send on WhatsApp** opens the phone's share sheet with the PDF attached and the full report typed in (score, topic scores, strengths, priorities, monthly investment plan); on a computer it opens WhatsApp to the customer's number with the same text and the customer attaches the downloaded PDF. **Send as SMS** sends the first 600 characters.
+- **E-mail the PDF** - the earlier behaviour; needs `BREVO_API_KEY` (see above).
+
+Press **Save changes** after choosing. A browser cannot attach a file to a WhatsApp / SMS message on its own, so the customer taps send; fully automatic sending needs a paid WhatsApp Business / SMS API.

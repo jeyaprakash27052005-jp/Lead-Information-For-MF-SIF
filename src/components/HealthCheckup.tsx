@@ -16,6 +16,7 @@ import {
 import { generateHealthReportPDF, blobToBase64 } from '../utils/healthReportPdf';
 import { computeInvestmentPlan } from '../utils/healthInvestPlan';
 import { formatInr } from '../utils/currency';
+import { buildReportMessage, whatsappUrl, smsUrl, sharePdf } from '../utils/reportMessage';
 import { NumField } from './NumField';
 import { useAppSettings } from '../context/AppSettings';
 import { useCountUp } from '../hooks/useCountUp';
@@ -71,7 +72,7 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
   const [mobile, setMobile] = useState(defaultMobile && MOBILE_RE.test(defaultMobile) ? defaultMobile : '');
   const [downloading, setDownloading] = useState(false);
   const [dlError, setDlError] = useState<string | null>(null);
-  const [dlResult, setDlResult] = useState<{ leadSaved: boolean; leadError?: string; email: 'sent' | 'not_configured' | 'failed'; reason?: string } | null>(null);
+  const [dlResult, setDlResult] = useState<{ leadSaved: boolean; leadError?: string; email: 'sent' | 'not_configured' | 'failed' | 'message'; reason?: string } | null>(null);
 
   useEffect(() => {
     try {
@@ -221,6 +222,10 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
     plan: plan || undefined,
   });
 
+  const messageMode = (settings.reportDelivery || 'message') === 'message';
+  const reportFileName = `finance-health-report-${name.trim().replace(/\s+/g, '-').toLowerCase()}.pdf`;
+  const reportText = () => buildReportMessage({ name: name.trim(), score: score?.overall ?? 0, band: score?.band ?? '', monthlyInvest: plan?.monthlyInvest, result: score, plan });
+
   /** Saves the report + contact details for the admin team and e-mails the PDF. Safe to run again (Try again). */
   const deliver = async (blob: Blob) => {
     let leadSaved = false;
@@ -235,6 +240,11 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
       leadError = e instanceof Error ? e.message : 'Could not save your details.';
     }
 
+    if (messageMode) {
+      // message mode: nothing is e-mailed; the e-mail ID and mobile were saved above
+      setDlResult({ leadSaved, leadError, email: 'message' });
+      return;
+    }
     let emailStatus: 'sent' | 'not_configured' | 'failed' = 'failed';
     let reason: string | undefined;
     try {
@@ -283,7 +293,7 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `finance-health-report-${name.trim().replace(/\s+/g, '-').toLowerCase()}.pdf`;
+      a.download = reportFileName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -697,7 +707,7 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
 
             {!dlResult ? (
               <div className="p-6 space-y-4">
-                <p className="text-xs text-slate-500">Enter your Gmail ID and mobile number. We will e-mail the report PDF to you.</p>
+                <p className="text-xs text-slate-500">Enter your Gmail ID and mobile number. {messageMode ? 'We will save them and you can send the report PDF on WhatsApp or SMS.' : 'We will e-mail the report PDF to you.'}</p>
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Gmail ID</label>
                   <input
@@ -731,7 +741,7 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
                   disabled={downloading}
                   className="w-full py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white text-xs font-bold cursor-pointer"
                 >
-                  {downloading ? 'Preparing your report...' : 'Download & send report'}
+                  {downloading ? 'Preparing your report...' : messageMode ? 'Download report' : 'Download & send report'}
                 </button>
               </div>
             ) : (
@@ -739,6 +749,28 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
                 <p className="flex items-start gap-2 font-bold text-emerald-700">
                   <CheckCircle2 className="w-4 h-4 shrink-0" /> Your PDF report has been downloaded.
                 </p>
+                {dlResult.email === 'message' && pdfBlob && (
+                  <div className="space-y-2">
+                    <p className="font-semibold text-slate-700">Send the report to your phone:</p>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const shared = await sharePdf(pdfBlob, reportFileName, reportText());
+                        if (!shared) window.open(whatsappUrl(mobile.trim(), reportText()), '_blank', 'noopener');
+                      }}
+                      className="w-full py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-xs font-bold cursor-pointer"
+                    >
+                      Send on WhatsApp
+                    </button>
+                    <a
+                      href={smsUrl(mobile.trim(), reportText())}
+                      className="block w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold text-center"
+                    >
+                      Send as SMS
+                    </a>
+                    <p className="text-[11px] text-slate-400">On a phone, WhatsApp opens with the PDF attached. On a computer the message opens without the file: attach the downloaded PDF yourself.</p>
+                  </div>
+                )}
                 {dlResult.email === 'sent' && (
                   <p className="flex items-start gap-2 font-semibold text-emerald-700">
                     <CheckCircle2 className="w-4 h-4 shrink-0" /> We e-mailed the report to {email.trim()}.
@@ -752,7 +784,7 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
                 {dlResult.email === 'failed' && (
                   <p className="text-amber-700 font-semibold">We could not e-mail the report right now. Please keep the downloaded PDF.</p>
                 )}
-                {dlResult.email !== 'sent' && dlResult.reason && (
+                {dlResult.email !== 'sent' && dlResult.email !== 'message' && dlResult.reason && (
                   <p className="text-[11px] text-slate-400">Reason: {dlResult.reason}</p>
                 )}
                 {dlResult.leadSaved ? (
@@ -760,7 +792,7 @@ export const HealthCheckup: React.FC<HealthCheckupProps> = ({ source, defaultNam
                 ) : (
                   <p className="text-amber-700 font-semibold">{dlResult.leadError || 'We could not save your contact details.'}</p>
                 )}
-                {(dlResult.email !== 'sent' || !dlResult.leadSaved) && (
+                {((dlResult.email !== 'sent' && dlResult.email !== 'message') || !dlResult.leadSaved) && (
                   <button
                     type="button"
                     onClick={handleRetry}

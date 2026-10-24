@@ -283,7 +283,7 @@ export const HealthReportsAdmin: React.FC<HealthReportsAdminProps> = ({ reports,
                                   ? 'E-mail sent'
                                   : r.emailStatus
                                   ? `E-mail not sent${r.emailError ? ` (${r.emailError})` : ''}`
-                                  : 'E-mail not tried'}
+                                  : 'E-mail ID collected (report sent by message)'}
                               </div>
                             )}
                           </div>
@@ -336,7 +336,7 @@ export const HealthReportsAdmin: React.FC<HealthReportsAdminProps> = ({ reports,
                             <a
                               title="Message on WhatsApp"
                               href={`https://wa.me/91${r.mobile}?text=${encodeURIComponent(
-                                `Hello ${r.name}, this is regarding your Finance Health Check-up report (score ${r.overallScore}/100).`
+                                `Hello ${r.name}, your Finance Health Check-up result is ${r.overallScore}/100 (${r.band}). Our team will help you with the next steps. This is for general awareness and is not financial advice.`
                               )}`}
                               target="_blank"
                               rel="noopener noreferrer"
