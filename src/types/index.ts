@@ -123,7 +123,8 @@ export type ViewTab =
   | 'awareness-admin'
   | 'awareness-programs'
   | 'health-questions'
-  | 'health-checkup';
+  | 'health-checkup'
+  | 'finance-calculations';
 
 export interface HealthReport {
   id: string;

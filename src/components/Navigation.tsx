@@ -17,7 +17,8 @@ import {
   Megaphone,
   HeartPulse,
   ToggleRight,
-  ListChecks
+  ListChecks,
+  Calculator
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -174,6 +175,16 @@ export const Navigation: React.FC<NavigationProps> = ({
         label: 'Home Screen Ads',
         icon: <ImageIcon className="w-4 h-4" />,
         description: 'Create animated ad creatives and manage the moving ads shown on the Home Screen',
+      });
+    }
+
+    // Feature: Investment calculations: future value, growth, dividend, professional formulas (all three admins)
+    if (isHead || isRegional || isArea) {
+      items.push({
+        id: 'finance-calculations',
+        label: 'Investment Calculations',
+        icon: <Calculator className="w-4 h-4" />,
+        description: 'Future value, growth value, dividend and professional (MBA) finance formulas',
       });
     }
 
