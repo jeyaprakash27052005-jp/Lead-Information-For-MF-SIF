@@ -178,13 +178,13 @@ export const Navigation: React.FC<NavigationProps> = ({
       });
     }
 
-    // Feature: Investment calculations: future value, growth, dividend, professional formulas (all three admins)
+    // Feature: Investment calculations: lumpsum and SIP future value, growth, dividend (Head, Regional and Area Incharge only)
     if (isHead || isRegional || isArea) {
       items.push({
         id: 'finance-calculations',
         label: 'Investment Calculations',
         icon: <Calculator className="w-4 h-4" />,
-        description: 'Future value, growth value, dividend and professional (MBA) finance formulas',
+        description: 'Lumpsum and SIP future value, growth value and dividend calculations',
       });
     }
 

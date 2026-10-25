@@ -1,4 +1,4 @@
-// Finance formulas used by the admin "Investment Calculations" page. Pure functions, no screen code.
+// Formulas used by the admin "Investment Calculations" page (lumpsum and SIP future value / growth, dividends). Pure functions, no screen code.
 // Rates are given in percent (12 = 12 %). Money is in rupees.
 
 const pct = (r: number) => r / 100;
@@ -48,6 +48,35 @@ export function futureValue(p: { lumpsum: number; sip: number; ratePct: number; 
     realValue: value / Math.pow(1 + pct(p.inflationPct), p.years),
     rows,
   };
+}
+
+/** Lumpsum growth year by year (value of the amount at the end of each year) */
+export function lumpsumRows(p: { lumpsum: number; ratePct: number; years: number; inflationPct: number }) {
+  const rows: YearRow[] = [];
+  const whole = Math.floor(p.years + 1e-9);
+  for (let y = 1; y <= whole; y++) rows.push({ year: y, invested: p.lumpsum, value: fvLumpsum(p.lumpsum, p.ratePct, y) });
+  if (p.years - whole > 1e-9) rows.push({ year: p.years, invested: p.lumpsum, value: fvLumpsum(p.lumpsum, p.ratePct, p.years) });
+  const fv = fvLumpsum(p.lumpsum, p.ratePct, p.years);
+  return { rows, futureValue: fv, gain: fv - p.lumpsum, realValue: fv / Math.pow(1 + pct(p.inflationPct), p.years) };
+}
+
+/**
+ * Yearly return (percent) that a monthly SIP earned, given what it is worth now:
+ * finds r so that a SIP of `sip` a month for `years` grows to `value` (same method as the SIP future value).
+ */
+export function sipReturn(sip: number, years: number, value: number): number {
+  const months = Math.round(years * 12);
+  if (!(sip > 0) || months < 1 || !(value > 0)) return NaN;
+  const fv = (r: number) => futureValue({ lumpsum: 0, sip, ratePct: r, years, stepUpPct: 0, inflationPct: 0 }).futureValue;
+  let lo = -50;
+  let hi = 200;
+  if (value < fv(lo) || value > fv(hi)) return NaN;
+  for (let k = 0; k < 100; k++) {
+    const mid = (lo + hi) / 2;
+    if (fv(mid) < value) lo = mid;
+    else hi = mid;
+  }
+  return (lo + hi) / 2;
 }
 
 /** Compound annual growth rate: CAGR = (End / Begin)^(1/t) - 1, in percent */
@@ -110,104 +139,6 @@ export function totalReturnWithDividends(p: { beginNav: number; endNav: number; 
   const annual = (Math.pow((p.endNav + p.dividendsPerUnit) / p.beginNav, 1 / p.years) - 1) * 100;
   return { total: finite(total), annual: finite(annual), priceOnly: absoluteReturn(p.beginNav, p.endNav) };
 }
-
-// ---------------------------------------------------------------- professional (MBA) formulas
-/** Net present value: NPV = sum CF_t / (1 + r)^t, with CF_0 at time 0 */
-export const npv = (ratePct: number, cashflows: number[]) => cashflows.reduce((s, cf, t) => s + cf / Math.pow(1 + pct(ratePct), t), 0);
-
-/** Internal rate of return in percent (bisection, robust for ordinary projects). NaN if there is no sign change. */
-export function irr(cashflows: number[]): number {
-  const f = (r: number) => npv(r * 100, cashflows);
-  let lo = -0.99;
-  let hi = 10;
-  let flo = f(lo);
-  const fhi = f(hi);
-  if (!(flo * fhi < 0)) return NaN;
-  for (let k = 0; k < 200; k++) {
-    const mid = (lo + hi) / 2;
-    const fm = f(mid);
-    if (Math.abs(fm) < 1e-9) return mid * 100;
-    if (flo * fm < 0) hi = mid;
-    else {
-      lo = mid;
-      flo = fm;
-    }
-  }
-  return ((lo + hi) / 2) * 100;
-}
-
-/** XIRR for cashflows on dates (percent a year, 365-day basis) */
-export function xirr(flows: { date: Date; amount: number }[]): number {
-  if (flows.length < 2) return NaN;
-  const t0 = flows[0].date.getTime();
-  const f = (r: number) => flows.reduce((s, c) => s + c.amount / Math.pow(1 + r, (c.date.getTime() - t0) / 86400000 / 365), 0);
-  let lo = -0.99;
-  let hi = 10;
-  let flo = f(lo);
-  if (!(flo * f(hi) < 0)) return NaN;
-  for (let k = 0; k < 200; k++) {
-    const mid = (lo + hi) / 2;
-    const fm = f(mid);
-    if (Math.abs(fm) < 1e-9) return mid * 100;
-    if (flo * fm < 0) hi = mid;
-    else {
-      lo = mid;
-      flo = fm;
-    }
-  }
-  return ((lo + hi) / 2) * 100;
-}
-
-/** Profitability index = PV of future cash flows / initial outlay */
-export const profitabilityIndex = (ratePct: number, cashflows: number[]) => {
-  const pv = npv(ratePct, [0, ...cashflows.slice(1)]);
-  return cashflows[0] !== 0 ? pv / Math.abs(cashflows[0]) : NaN;
-};
-
-/** Simple and discounted payback period in years (null if never paid back) */
-export function payback(ratePct: number | null, cashflows: number[]): number | null {
-  let cum = 0;
-  for (let t = 0; t < cashflows.length; t++) {
-    const cf = ratePct === null ? cashflows[t] : cashflows[t] / Math.pow(1 + pct(ratePct), t);
-    const next = cum + cf;
-    if (t > 0 && cum < 0 && next >= 0) return t - 1 + -cum / cf;
-    cum = next;
-  }
-  return null;
-}
-
-/** Present value of an ordinary annuity: PV = C (1 - (1 + r)^-n) / r */
-export const pvAnnuity = (c: number, ratePct: number, n: number) => (ratePct === 0 ? c * n : (c * (1 - Math.pow(1 + pct(ratePct), -n))) / pct(ratePct));
-/** Future value of an ordinary annuity: FV = C ((1 + r)^n - 1) / r */
-export const fvAnnuity = (c: number, ratePct: number, n: number) => (ratePct === 0 ? c * n : (c * (Math.pow(1 + pct(ratePct), n) - 1)) / pct(ratePct));
-/** Payment (EMI) on a loan: PMT = P r / (1 - (1 + r)^-n), r per period */
-export const pmt = (principal: number, periodRatePct: number, n: number) =>
-  periodRatePct === 0 ? principal / n : (principal * pct(periodRatePct)) / (1 - Math.pow(1 + pct(periodRatePct), -n));
-/** Present value of a perpetuity (and growing perpetuity): PV = C / (r - g) */
-export const pvPerpetuity = (c: number, ratePct: number, growthPct = 0) => c / (pct(ratePct) - pct(growthPct));
-
-/** Capital Asset Pricing Model: expected return = Rf + beta (Rm - Rf), in percent */
-export const capm = (rfPct: number, beta: number, rmPct: number) => rfPct + beta * (rmPct - rfPct);
-
-/** Mean and sample standard deviation of periodic returns (percent) */
-export function meanStd(returns: number[]) {
-  const n = returns.length;
-  const mean = returns.reduce((s, x) => s + x, 0) / n;
-  const variance = n > 1 ? returns.reduce((s, x) => s + (x - mean) ** 2, 0) / (n - 1) : NaN;
-  return { mean, variance, std: Math.sqrt(variance) };
-}
-
-/** Risk-adjusted return measures (all inputs in percent a year) */
-export const sharpe = (rp: number, rf: number, sd: number) => (rp - rf) / sd;
-export const treynor = (rp: number, rf: number, beta: number) => (rp - rf) / beta;
-export const jensenAlpha = (rp: number, rf: number, beta: number, rm: number) => rp - capm(rf, beta, rm);
-export const sortino = (rp: number, rf: number, downsideDev: number) => (rp - rf) / downsideDev;
-
-/** Weighted average cost of capital: WACC = E/V Re + D/V Rd (1 - Tc), in percent */
-export const wacc = (equity: number, debt: number, rePct: number, rdPct: number, taxPct: number) => {
-  const v = equity + debt;
-  return (equity / v) * rePct + (debt / v) * rdPct * (1 - pct(taxPct));
-};
 
 /** Expense-ratio drag: value after `years` with the fund's cost taken off the return */
 export const costDrag = (p: { lumpsum: number; grossPct: number; expensePct: number; years: number }) => {

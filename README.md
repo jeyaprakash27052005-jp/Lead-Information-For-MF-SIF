@@ -138,13 +138,14 @@ The health check-up asks for the customer's **Address / place** (typed text) ins
 - After login, the customer's **Home** opens with the moving, animated ads the admin team added (Home Screen Ads), followed by their application status. When no ad exists, or the Home Screen Ads switch is off, a welcome card is shown instead of an empty page.
 - With no WhatsApp / SMS account set up, pressing **Download report** downloads the PDF and opens WhatsApp straight away with the full report ready (phone: share sheet with the PDF attached); the customer taps Send. A browser cannot press Send for the customer; that needs the optional automatic-sending accounts described above.
 
-## Investment Calculations (Head, Regional and Area Incharge)
+## Investment Calculations (Head, Regional and Area Incharge only)
 
-Menu -> **Investment Calculations**. Every result shows the formula used.
+Menu -> **Investment Calculations**. It is not shown to customers. Lumpsum and SIP are separate tabs, and every result shows the formula used.
 
-- **Future value** - lumpsum + monthly SIP with optional yearly step-up, inflation-adjusted ("today's money") value, year-by-year table, and the monthly SIP needed for a goal. The monthly rate is `(1 + r)^(1/12) - 1`, so the yearly return you enter is the effective yearly return (the customer calculators use the scheme's own method; small differences are expected).
-- **Growth value** - growth (gain), absolute return, CAGR, real return (Fisher), doubling time (Rule of 72 and exact), and the cost of the fund's expense ratio.
-- **Dividend** - IDCW payout, tax at the rate you enter, dividend yield, NAV after dividend, units and value if reinvested, annual yield, and total return including dividends.
-- **Professional (MBA) formulas** - NPV, IRR, simple and discounted payback, profitability index, XIRR on dates, annuity / perpetuity PV and FV, loan EMI, CAPM, Sharpe, Treynor, Jensen's alpha, mean / variance / standard deviation, and WACC.
+- **Lumpsum: future value** - one-time amount, return, years, inflation: future value, gain, worth in today's money, year-by-year table.
+- **SIP: future value** - monthly SIP with optional yearly step-up: future value, total invested, gain, today's-money value, year-by-year table, and the monthly SIP needed for a goal. The monthly rate is `(1 + r)^(1/12) - 1`, so the yearly return you enter is the effective yearly return (the customer calculators use the scheme's own method; small differences are expected).
+- **Lumpsum: growth** - growth value, absolute return, CAGR, growth multiple, real return after inflation, doubling time (Rule of 72 and exact) and what the fund's expense ratio costs.
+- **SIP: growth** - total invested, growth value, absolute return and the yearly return the SIP earned (from what it is worth now), plus real return after inflation.
+- **Dividend** - IDCW payout, tax at the rate you enter, dividend yield, NAV after dividend, units and value if reinvested, annual yield and total return including dividends.
 
 These are estimates for explaining numbers, not guaranteed returns or advice.
