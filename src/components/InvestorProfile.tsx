@@ -10,7 +10,7 @@ import {
   FUND_RISK_LABEL,
   minYearsFor,
 } from '../utils/investorProfile';
-import { DEFAULT_SCHEME_CODE, FundLatest, FundStats, fetchFundHistory, fetchFundLatest, fundStats } from '../services/mfApi';
+import { DEFAULT_SCHEME_CODE, FundLatest, FundSearchHit, FundStats, fetchFundHistory, fetchFundLatest, fundStats, navAgeDays, searchFunds } from '../services/mfApi';
 import { formatInr } from '../utils/currency';
 
 const pct = (x: number | null, d = 1) => (x === null || !Number.isFinite(x) ? 'n/a' : `${x >= 0 ? '' : ''}${x.toFixed(d)} %`);
@@ -39,6 +39,12 @@ export const InvestorProfile: React.FC<{ mode: 'customer' | 'admin'; defaultName
   const [fundError, setFundError] = useState<string | null>(null);
   const [fundLoading, setFundLoading] = useState(true);
   const [stats, setStats] = useState<FundStats | null>(null);
+  const [checkedAt, setCheckedAt] = useState<Date | null>(null);
+  const [refreshTick, setRefreshTick] = useState(0);
+  const [searchText, setSearchText] = useState('');
+  const [hits, setHits] = useState<FundSearchHit[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   const [answers, setAnswers] = useState<Answers>({});
   const [step, setStep] = useState(0); // 0..10 questions, 11 = result
@@ -48,19 +54,56 @@ export const InvestorProfile: React.FC<{ mode: 'customer' | 'admin'; defaultName
     let alive = true;
     setFundLoading(true);
     setFundError(null);
-    setStats(null);
     fetchFundLatest(code)
       .then((f) => {
         if (!alive) return;
         setFund(f);
-        fetchFundHistory(code).then((pts) => alive && pts && setStats(fundStats(pts)));
+        setCheckedAt(new Date());
+        fetchFundHistory(code).then((pts) => alive && setStats(pts ? fundStats(pts) : null));
       })
       .catch((e: Error) => alive && (setFund(null), setFundError(e.message)))
       .finally(() => alive && setFundLoading(false));
     return () => {
       alive = false;
     };
-  }, [code]);
+  }, [code, refreshTick]);
+
+  // Keep the NAV current: check again every 30 minutes while the page is open, and when the person comes back to the tab.
+  // (Fund NAVs are published once on each business day, so the date changes daily.)
+  useEffect(() => {
+    const again = () => setRefreshTick((n) => n + 1);
+    const timer = setInterval(again, 30 * 60 * 1000);
+    const onVisible = () => {
+      if (document.visibilityState === 'visible' && (!checkedAt || Date.now() - checkedAt.getTime() > 5 * 60 * 1000)) again();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [checkedAt]);
+
+  // Search the scheme list by name (waits until typing pauses)
+  useEffect(() => {
+    const text = searchText.trim();
+    setSearchError(null);
+    if (text.length < 3) {
+      setHits([]);
+      return;
+    }
+    let alive = true;
+    const t = setTimeout(() => {
+      setSearching(true);
+      searchFunds(text)
+        .then((h) => alive && setHits(h))
+        .catch((e: Error) => alive && (setHits([]), setSearchError(e.message)))
+        .finally(() => alive && setSearching(false));
+    }, 400);
+    return () => {
+      alive = false;
+      clearTimeout(t);
+    };
+  }, [searchText]);
 
   const total = PROFILE_QUESTIONS.length;
   const done = step >= total;
@@ -105,16 +148,62 @@ export const InvestorProfile: React.FC<{ mode: 'customer' | 'admin'; defaultName
             <div className="text-right shrink-0">
               <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Latest NAV</p>
               <p className="text-lg font-black text-slate-900">{formatInr(fund.nav)}</p>
-              <p className="text-[10px] text-slate-400">as on {fund.date}</p>
+              <p className="text-[10px] text-slate-400">NAV date {fund.date}</p>
             </div>
           )}
         </div>
+        {fund && (() => {
+          const age = navAgeDays(fund.date);
+          return (
+            <p className={`text-[11px] font-semibold ${age !== null && age > 5 ? 'text-amber-700' : 'text-slate-500'}`}>
+              {age !== null && age > 5 ? `This NAV is ${age} days old: the fund house has not published a newer one. ` : 'NAV is published once on each business day and updates here by itself. '}
+              {checkedAt ? `Checked ${checkedAt.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}. ` : ''}
+              <button type="button" onClick={() => setRefreshTick((n) => n + 1)} className="underline font-bold text-indigo-700 cursor-pointer">
+                Refresh now
+              </button>
+            </p>
+          );
+        })()}
         {fund && level && (
           <p className="text-xs text-slate-600">
             Risk group of this type of fund: <b>{FUND_RISK_LABEL[level]}</b>. It usually needs{' '}
             {minYearsFor(level) > 0 ? `about ${minYearsFor(level)} years or more` : 'little time'} to work well.
           </p>
         )}
+        <div className="pt-1">
+          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider" htmlFor="fund-search">
+            Search another fund by name
+          </label>
+          <input
+            id="fund-search"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            placeholder="e.g. SBI small cap direct growth"
+            className="mt-1 w-full px-3 py-2 text-sm font-semibold border border-slate-300 rounded-lg"
+          />
+          {searching && <p className="text-[11px] text-slate-400 mt-1">Searching...</p>}
+          {searchError && <p className="text-[11px] font-semibold text-rose-600 mt-1">{searchError}</p>}
+          {hits.length > 0 && (
+            <ul className="mt-1 max-h-56 overflow-y-auto rounded-lg border border-slate-200 divide-y divide-slate-100 bg-white">
+              {hits.map((h) => (
+                <li key={h.code}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCode(h.code);
+                      setCodeInput(h.code);
+                      setHits([]);
+                      setSearchText('');
+                    }}
+                    className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-800 hover:bg-indigo-50 cursor-pointer"
+                  >
+                    {h.name} <span className="text-slate-400">({h.code})</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
         <form
           className="flex flex-wrap items-center gap-2 pt-1"
           onSubmit={(e) => {
