@@ -25,8 +25,7 @@ export async function fetchFundLatest(code: string, fetchImpl: typeof fetch = fe
   if (!/^\d{4,8}$/.test(code)) throw new Error('A scheme code is only digits, for example 125497.');
   let res: Response;
   try {
-    // always ask the service for today's NAV: never reuse an older answer kept by the browser
-    res = await fetchImpl(`${BASE}/${code}/latest`, { cache: 'no-store' });
+    res = await fetchImpl(`${BASE}/${code}/latest`);
   } catch (_e) {
     throw new Error('The fund data service could not be reached. Check your connection and try again.');
   }
@@ -46,33 +45,6 @@ export async function fetchFundLatest(code: string, fetchImpl: typeof fetch = fe
   };
 }
 
-export interface FundSearchHit {
-  code: string;
-  name: string;
-}
-
-/** Search the scheme list (about 38,000 schemes) by name. Direct plan + Growth options are listed first. */
-export async function searchFunds(query: string, fetchImpl: typeof fetch = fetch): Promise<FundSearchHit[]> {
-  const q = query.trim();
-  if (q.length < 3) return [];
-  const res = await fetchImpl(`${BASE}/search?q=${encodeURIComponent(q)}`);
-  if (!res.ok) throw new Error('The fund search is not available right now.');
-  const j = (await res.json()) as { schemeCode?: unknown; schemeName?: unknown }[];
-  if (!Array.isArray(j)) return [];
-  const rank = (n: string) => (/direct/i.test(n) ? 0 : 2) + (/growth/i.test(n) ? 0 : 1);
-  return j
-    .map((x) => ({ code: str(x.schemeCode), name: str(x.schemeName) }))
-    .filter((x) => /^\d+$/.test(x.code) && x.name)
-    .sort((a, b) => rank(a.name) - rank(b.name))
-    .slice(0, 12);
-}
-
-/** Days between a published NAV date (dd-mm-yyyy) and now */
-export function navAgeDays(date: string, now = Date.now()): number | null {
-  const t = parseDmy(date);
-  return Number.isFinite(t) ? Math.floor((now - t) / 86400000) : null;
-}
-
 export interface NavPoint {
   t: number; // ms
   nav: number;
@@ -86,7 +58,7 @@ const parseDmy = (s: string): number => {
 /** Full NAV history, oldest first. Returns null when it cannot be loaded (the page then simply skips the return figures). */
 export async function fetchFundHistory(code: string, fetchImpl: typeof fetch = fetch): Promise<NavPoint[] | null> {
   try {
-    const res = await fetchImpl(`${BASE}/${code}`, { cache: 'no-store' });
+    const res = await fetchImpl(`${BASE}/${code}`);
     if (!res.ok) return null;
     const j = (await res.json()) as { data?: RawNav[] };
     if (!Array.isArray(j.data)) return null;
