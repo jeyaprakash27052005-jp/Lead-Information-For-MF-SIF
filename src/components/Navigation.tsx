@@ -18,8 +18,7 @@ import {
   HeartPulse,
   ToggleRight,
   ListChecks,
-  Calculator,
-  UserCheck
+  Calculator
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -176,16 +175,6 @@ export const Navigation: React.FC<NavigationProps> = ({
         label: 'Home Screen Ads',
         icon: <ImageIcon className="w-4 h-4" />,
         description: 'Create animated ad creatives and manage the moving ads shown on the Home Screen',
-      });
-    }
-
-    // Feature: Investor profile (11 questions + fund fit from live data), for staff to use with a customer
-    if (isHead || isRegional || isArea) {
-      items.push({
-        id: 'investor-profile',
-        label: 'Investor Profile',
-        icon: <UserCheck className="w-4 h-4" />,
-        description: 'Evaluate a customer with 11 questions and see how well a mutual fund fits',
       });
     }
 

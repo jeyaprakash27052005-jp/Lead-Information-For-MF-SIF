@@ -6,12 +6,11 @@ import { HealthCheckup } from './HealthCheckup';
 import { resolvePermissions } from '../utils/permissions';
 import { AwarenessList } from './AwarenessList';
 import { AdsCarousel } from './AdsCarousel';
-import { InvestorProfile } from './InvestorProfile';
 import { HamburgerMenu } from './HamburgerMenu';
 import { GrowthArt, RotatingTagline } from './intro/GrowthArt';
 import { useAppSettings } from '../context/AppSettings';
 
-export type CustomerView = 'dashboard' | 'mf-calc' | 'nps-calc' | 'schemes' | 'health' | 'awareness' | 'profile';
+export type CustomerView = 'dashboard' | 'mf-calc' | 'nps-calc' | 'schemes' | 'health' | 'awareness';
 import {
   UserPlus,
   LogIn,
@@ -33,7 +32,6 @@ import {
   ArrowRight,
   LogOut,
   Megaphone,
-  UserCheck,
 } from 'lucide-react';
 import { formatInr } from '../utils/currency';
 import { DEFAULT_REGIONS } from '../utils/regions';
@@ -264,7 +262,6 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
       schemes: perms.schemesCatalog,
       health: perms.healthCheckup,
       awareness: settings.features.awarenessPrograms,
-      profile: settings.features.investorProfile,
     };
     const effectiveView: CustomerView = viewAllowed[customerActiveView] ? customerActiveView : 'dashboard';
     return (
@@ -307,7 +304,6 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
               ...(perms.npsCalculator ? [{ id: 'nps-calc' as CustomerView, label: 'NPS Pension Calculator', icon: <Shield className="w-4 h-4" />, description: 'Pension projections' }] : []),
               ...(perms.schemesCatalog ? [{ id: 'schemes' as CustomerView, label: 'Browse Published Schemes', icon: <Layers className="w-4 h-4" />, badge: schemes.length, description: 'Schemes published by the team' }] : []),
               ...(perms.healthCheckup ? [{ id: 'health' as CustomerView, label: 'Finance Health Check-up', icon: <HeartPulse className="w-4 h-4" />, description: 'Score, PDF report and investment plan' }] : []),
-              ...(settings.features.investorProfile ? [{ id: 'profile' as CustomerView, label: 'Investor Profile', icon: <UserCheck className="w-4 h-4" />, description: '11 questions: your risk profile and fund fit' }] : []),
               ...(settings.features.awarenessPrograms ? [{ id: 'awareness' as CustomerView, label: 'Awareness Programs', icon: <Megaphone className="w-4 h-4" />, description: 'Seminars and webinars' }] : []),
             ]}
           />
@@ -477,8 +473,6 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
         )}
 
         {/* View 6: Awareness programmes added by the admin team */}
-        {effectiveView === 'profile' && settings.features.investorProfile && <InvestorProfile mode="customer" defaultName={currentUser.name} />}
-
         {effectiveView === 'awareness' && settings.features.awarenessPrograms && (
           <div className="space-y-3">
             <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Awareness Programs</h3>

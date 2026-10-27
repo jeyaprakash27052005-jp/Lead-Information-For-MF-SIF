@@ -24,7 +24,6 @@ import { CustomerPortal } from './components/CustomerPortal';
 import { HomeScreen } from './components/HomeScreen';
 import { AdsManagement } from './components/AdsManagement';
 import { FinanceCalculations } from './components/FinanceCalculations';
-import { InvestorProfile } from './components/InvestorProfile';
 import { AwarenessProgramsAdmin } from './components/AwarenessProgramsAdmin';
 import { AddLeadPage } from './components/AddLeadPage';
 import { FeatureControls } from './components/FeatureControls';
@@ -785,8 +784,6 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
                 ? 'health'
                 : activeTab === 'awareness-programs'
                 ? 'awareness'
-                : activeTab === 'investor-profile-customer'
-                ? 'profile'
                 : 'dashboard'
             }
             onViewChange={(view) =>
@@ -802,8 +799,6 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
                   ? 'health-checkup'
                   : view === 'awareness'
                   ? 'awareness-programs'
-                  : view === 'profile'
-                  ? 'investor-profile-customer'
                   : 'customer-portal'
               )
             }
@@ -967,8 +962,6 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
             {activeTab === 'awareness-admin' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge' || currentUser.role === 'area_incharge') && (
               <AwarenessProgramsAdmin currentUser={currentUser} onNotify={showFeedback} />
             )}
-
-            {activeTab === 'investor-profile' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge' || currentUser.role === 'area_incharge') && <InvestorProfile mode="admin" />}
 
             {activeTab === 'finance-calculations' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge' || currentUser.role === 'area_incharge') && <FinanceCalculations />}
 

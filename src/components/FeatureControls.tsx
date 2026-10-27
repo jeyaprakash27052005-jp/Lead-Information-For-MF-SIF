@@ -22,7 +22,7 @@ const REASON_TEXT: Record<string, string> = {
   API_NOT_FOUND: 'The e-mail function was not found on this site. Deploy the project that contains the /api folder.',
 };
 
-const NEEDS_CUSTOMER_PORTAL: (keyof AppFeatureFlags)[] = ['customerRegistration', 'mfCalculator', 'npsCalculator', 'schemesCatalog', 'healthCheckup', 'investorProfile'];
+const NEEDS_CUSTOMER_PORTAL: (keyof AppFeatureFlags)[] = ['customerRegistration', 'mfCalculator', 'npsCalculator', 'schemesCatalog', 'healthCheckup'];
 
 /** Only Head Incharge and Regional Incharge can switch features on or off and set the calculator rates */
 export const FeatureControls: React.FC<FeatureControlsProps> = ({ currentUser, onNotify }) => {
@@ -148,7 +148,7 @@ export const FeatureControls: React.FC<FeatureControlsProps> = ({ currentUser, o
 
   const groups: { title: string; keys: (keyof AppFeatureFlags)[] }[] = [
     { title: 'Portals', keys: ['customerPortal', 'healthPortal'] },
-    { title: 'Customer features', keys: ['customerRegistration', 'mfCalculator', 'npsCalculator', 'schemesCatalog', 'healthCheckup', 'investorProfile'] },
+    { title: 'Customer features', keys: ['customerRegistration', 'mfCalculator', 'npsCalculator', 'schemesCatalog', 'healthCheckup'] },
     { title: 'Home Screen and information', keys: ['homeAds', 'awarenessPrograms'] },
   ];
 
