@@ -124,7 +124,9 @@ export type ViewTab =
   | 'awareness-programs'
   | 'health-questions'
   | 'health-checkup'
-  | 'finance-calculations';
+  | 'finance-calculations'
+  | 'investor-profile'
+  | 'investor-profile-customer';
 
 export interface HealthReport {
   id: string;
@@ -191,6 +193,7 @@ export interface AppFeatureFlags {
   healthCheckup: boolean; // Finance Health Check-up inside the customer portal
   homeAds: boolean; // moving ads on the Home Screen
   awarenessPrograms: boolean; // the Awareness Programs list shown to customers and on the Home Screen
+  investorProfile: boolean; // the Investor Profile check (11 questions + fund fit) in the customer portal
 }
 
 /** How the health check-up report reaches the customer: e-mailed PDF, or a WhatsApp / SMS message (the e-mail ID is still collected) */

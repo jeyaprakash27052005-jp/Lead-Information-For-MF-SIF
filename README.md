@@ -149,3 +149,14 @@ Menu -> **Investment Calculations**. It is not shown to customers. Lumpsum and S
 - **Dividend** - IDCW payout, tax at the rate you enter, dividend yield, NAV after dividend, units and value if reinvested, annual yield and total return including dividends.
 
 These are estimates for explaining numbers, not guaranteed returns or advice.
+
+## Investor Profile (customers, and Head / Regional / Area Incharge)
+
+**Customer portal -> menu -> Investor Profile**, and **Admin portal -> menu -> Investor Profile** (staff can type the customer's name and evaluate them in person).
+
+- **11 questions**: age, people who depend on you, income stability, monthly savings, emergency fund, loans, experience, time horizon, goal, reaction to a 20 % fall, and comfort with loss. Each answer scores 1 to 5; the total (11 to 55) gives one of five profiles: Conservative, Moderately Conservative, Balanced, Moderately Aggressive, Aggressive. The profile is lowered for safety when the money is needed within 5 years, there is no emergency fund, EMIs are over half of income, or the person would sell everything in a fall.
+- **Suggested mix** of equity / debt / gold for the profile.
+- **Fund fit** from live data: the site calls `https://api.mfapi.in/mf/<scheme code>/latest` (default `125497`, SBI Small Cap Fund Direct Growth) for the fund name, category and latest NAV, and the full history `https://api.mfapi.in/mf/<scheme code>` (optional) for 1 / 3 / 5 year returns, the worst fall and the yearly ups and downs. The fund's risk group comes from its category; the page says whether it is suitable, suitable only in a small amount, or not suitable, how much of the portfolio it may take, and how to invest (SIP vs staged lumpsum). Anyone can load another fund by its scheme code.
+- Switch it on or off for customers in **Feature Controls -> Investor Profile**.
+
+General guidance only, not personal investment advice.
