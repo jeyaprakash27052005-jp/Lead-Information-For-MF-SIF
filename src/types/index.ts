@@ -124,7 +124,9 @@ export type ViewTab =
   | 'awareness-programs'
   | 'health-questions'
   | 'health-checkup'
-  | 'finance-calculations';
+  | 'finance-calculations'
+  | 'fund-ads-admin'
+  | 'fund-ads-customer';
 
 export interface HealthReport {
   id: string;
@@ -191,6 +193,7 @@ export interface AppFeatureFlags {
   healthCheckup: boolean; // Finance Health Check-up inside the customer portal
   homeAds: boolean; // moving ads on the Home Screen
   awarenessPrograms: boolean; // the Awareness Programs list shown to customers and on the Home Screen
+  fundAds: boolean; // the Mutual Fund Offers (fund advertisements added by the admin team)
 }
 
 /** How the health check-up report reaches the customer: e-mailed PDF, or a WhatsApp / SMS message (the e-mail ID is still collected) */
@@ -203,6 +206,30 @@ export interface AppSettings {
   npsReturnRate: number; // % per year used by the NPS calculator
   updatedAt?: string;
   updatedBy?: string;
+}
+
+/** A mutual fund advertisement. Only the admin team (Head, Regional and Area Incharge) can add, edit or delete these. */
+export interface FundAd {
+  id: string;
+  fundName: string;
+  fundHouse: string;
+  category: string; // e.g. Equity - Small Cap
+  headline: string;
+  description?: string;
+  highlights?: string[]; // up to 5 short points
+  riskLevel?: 'Low' | 'Low to Moderate' | 'Moderate' | 'Moderately High' | 'High' | 'Very High'; // as printed on the fund's riskometer
+  minSip?: number; // rupees a month
+  linkUrl?: string; // https page of the fund house
+  badge?: string;
+  imageUrl: string; // data URL or https link
+  animation?: AdAnimation;
+  textEffect?: AdTextEffect;
+  animationSpeed?: AdAnimationSpeed;
+  isActive: boolean;
+  order: number;
+  createdAt: string;
+  createdBy?: string;
+  updatedAt?: string;
 }
 
 /** An investor awareness programme (seminar / webinar) that the admin team announces */

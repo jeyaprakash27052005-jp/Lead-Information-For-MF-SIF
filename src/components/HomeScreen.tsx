@@ -1,6 +1,7 @@
 import { FundExplainer } from './intro/FundExplainer';
 import { GrowthArt, RotatingTagline } from './intro/GrowthArt';
 import { AwarenessList } from './AwarenessList';
+import { FundAdsList } from './FundAdsList';
 import { useAppSettings } from '../context/AppSettings';
 import React, { useState, useEffect, useRef } from 'react';
 import { InvestmentScheme, AdBanner } from '../types';
@@ -340,6 +341,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           <h2 className="text-lg font-black text-slate-900 tracking-tight">How mutual funds work</h2>
           <FundExplainer />
         </section>
+
+        {settings.features.fundAds && (
+          <section className="space-y-3" aria-label="Mutual fund offers">
+            <h2 className="text-lg font-black text-slate-900 tracking-tight">Mutual fund offers</h2>
+            <FundAdsList limit={3} compact hideWhenEmpty />
+          </section>
+        )}
 
         {settings.features.awarenessPrograms && (
           <section className="space-y-3" aria-label="Upcoming awareness programmes">

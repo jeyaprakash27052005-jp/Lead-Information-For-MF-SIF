@@ -18,7 +18,8 @@ import {
   HeartPulse,
   ToggleRight,
   ListChecks,
-  Calculator
+  Calculator,
+  Landmark
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -165,6 +166,16 @@ export const Navigation: React.FC<NavigationProps> = ({
         label: 'Awareness Programs',
         icon: <Megaphone className="w-4 h-4" />,
         description: isArea ? 'Add awareness programmes for your division' : 'Add awareness programme details that customers see',
+      });
+    }
+
+    // Feature: Mutual fund advertisements (added by the admin team only)
+    if (isHead || isRegional || isArea) {
+      items.push({
+        id: 'fund-ads-admin',
+        label: 'Mutual Fund Ads',
+        icon: <Landmark className="w-4 h-4" />,
+        description: 'Add, edit and delete the mutual fund advertisements customers see',
       });
     }
 

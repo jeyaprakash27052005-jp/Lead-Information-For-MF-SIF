@@ -10,6 +10,7 @@ export const DEFAULT_FEATURES: AppFeatureFlags = {
   healthCheckup: true,
   homeAds: true,
   awarenessPrograms: true,
+  fundAds: true,
 };
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {
@@ -29,6 +30,7 @@ export const FEATURE_LABELS: { key: keyof AppFeatureFlags; label: string; help: 
   { key: 'healthCheckup', label: 'Finance Health Check-up (inside Customer Portal)', help: 'Shows the check-up tab to every customer. One customer can be blocked in User Management > Permissions.' },
   { key: 'homeAds', label: 'Home Screen Ads', help: 'The moving ad banners on the Home Screen.' },
   { key: 'awarenessPrograms', label: 'Awareness Programs', help: 'Shows the awareness programmes you add in the admin portal to customers and on the Home Screen.' },
+  { key: 'fundAds', label: 'Mutual Fund Offers', help: 'Shows the mutual fund advertisements added by the admin team to customers and on the Home Screen.' },
 ];
 
 const num = (v: unknown, fallback: number) =>

@@ -149,3 +149,15 @@ Menu -> **Investment Calculations**. It is not shown to customers. Lumpsum and S
 - **Dividend** - IDCW payout, tax at the rate you enter, dividend yield, NAV after dividend, units and value if reinvested, annual yield and total return including dividends.
 
 These are estimates for explaining numbers, not guaranteed returns or advice.
+
+## Mutual Fund Ads (added by the admin team only)
+
+Admin portal -> menu -> **Mutual Fund Ads** (Head, Regional and Area Incharge). Customers can only view them; there is no way to add one from the customer site.
+
+- Each advertisement has the scheme name, fund house, category, riskometer level, headline, details, up to 5 highlights, minimum SIP, a fund-house page link (https), a badge, an uploaded image (JPG / PNG / GIF) and the same picture animation, speed and headline effect options as Home Screen Ads, with a live preview.
+- Add, edit, delete, hide / show and re-order. Each shows who added it.
+- Customers see them under **Mutual Fund Offers** in their menu (with a category filter) and in a "Mutual fund offers" section on the Home Screen. The **Mutual Fund Offers** switch in Feature Controls turns them off.
+- Advertising rules built in: the standard warning ("Mutual fund investments are subject to market risks...") is added to every advertisement automatically, and words that promise returns (guarantee, assured return, risk-free, double your money...) are not accepted.
+- Publish `firestore.rules` after this update (it adds the `fundAds` collection).
+
+The earlier **Investor Profile** (11 questions with the fund data link) has been removed.

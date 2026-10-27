@@ -24,6 +24,7 @@ import { CustomerPortal } from './components/CustomerPortal';
 import { HomeScreen } from './components/HomeScreen';
 import { AdsManagement } from './components/AdsManagement';
 import { FinanceCalculations } from './components/FinanceCalculations';
+import { FundAdsManagement } from './components/FundAdsManagement';
 import { AwarenessProgramsAdmin } from './components/AwarenessProgramsAdmin';
 import { AddLeadPage } from './components/AddLeadPage';
 import { FeatureControls } from './components/FeatureControls';
@@ -784,6 +785,8 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
                 ? 'health'
                 : activeTab === 'awareness-programs'
                 ? 'awareness'
+                : activeTab === 'fund-ads-customer'
+                ? 'fund-ads'
                 : 'dashboard'
             }
             onViewChange={(view) =>
@@ -799,6 +802,8 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
                   ? 'health-checkup'
                   : view === 'awareness'
                   ? 'awareness-programs'
+                  : view === 'fund-ads'
+                  ? 'fund-ads-customer'
                   : 'customer-portal'
               )
             }
@@ -962,6 +967,8 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
             {activeTab === 'awareness-admin' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge' || currentUser.role === 'area_incharge') && (
               <AwarenessProgramsAdmin currentUser={currentUser} onNotify={showFeedback} />
             )}
+
+            {activeTab === 'fund-ads-admin' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge' || currentUser.role === 'area_incharge') && <FundAdsManagement currentUser={currentUser} onNotify={showFeedback} />}
 
             {activeTab === 'finance-calculations' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge' || currentUser.role === 'area_incharge') && <FinanceCalculations />}
 

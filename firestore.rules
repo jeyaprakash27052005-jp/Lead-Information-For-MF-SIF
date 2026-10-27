@@ -69,6 +69,16 @@ service cloud.firestore {
       allow delete: if isValidId(adId);
     }
 
+    match /fundAds/{adId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(adId)
+        && request.resource.data.fundName is string && request.resource.data.fundName.size() > 0 && request.resource.data.fundName.size() <= 160
+        && request.resource.data.headline is string && request.resource.data.headline.size() <= 200
+        && request.resource.data.imageUrl is string
+        && request.resource.data.isActive is bool;
+      allow delete: if isValidId(adId);
+    }
+
     match /awarenessPrograms/{programId} {
       allow get, list: if true;
       allow create, update: if isValidId(programId)
