@@ -1,24 +1,26 @@
 # Lead Information For MF SIF
 
-One repository, three separate websites that share the same code and the same online database (Firebase):
+One repository, four separate websites that share the same code and the same online database (Firebase):
 
 | Website | Folder | Who uses it |
 |---|---|---|
 | **Admin Portal** | `apps/admin` | Head, Regional and Area Incharge: leads, users, schemes, ads, reports, customer permissions, Finance Health Check-up reports |
 | **Customer Portal** | `apps/customer` | Customers: Home Screen with ads, create account / login, scheme calculators and the other features the admin has switched on |
 | **Finance Health Check-up Portal** | `apps/health-check` | Anyone (no login): health questionnaire, report, PDF download and e-mail |
+| **Advertising Website** | `apps/ads` | Anyone (no login): moving ads, mutual fund offers, awareness sessions and a contact page |
 
 Shared code lives in `src/` (components, services, utils). Each website has its own `vercel.json`.
 
 ## Deploy on Vercel (three projects from this one repo)
 
-Create three Vercel projects from this repository and set **Root Directory** for each one:
+Create four Vercel projects from this repository and set **Root Directory** for each one:
 
 | Vercel project | Root Directory |
 |---|---|
 | Admin | `apps/admin` |
 | Customer | `apps/customer` |
 | Finance Health Check-up | `apps/health-check` |
+| Advertising | `apps/ads` |
 
 Leave "Include source files outside of the Root Directory in the Build Step" switched **on** (the default). The `vercel.json` in each folder installs and builds from the repository root.
 
@@ -161,3 +163,9 @@ Admin portal -> menu -> **Mutual Fund Ads** (Head, Regional and Area Incharge). 
 - Publish `firestore.rules` after this update (it adds the `fundAds` collection).
 
 The earlier **Investor Profile** (11 questions with the fund data link) has been removed.
+
+## Advertising website (`apps/ads`)
+
+A separate public website for advertising the product, with a top navigation bar: **Home, Mutual Funds, All Sessions, Contact Us** (centered links, active link in red; a menu button on phones). It shows what the admins add: Home Screen Ads (animated), Mutual Fund Ads and Awareness Programs, and respects their switches in Feature Controls. Contact Us opens the visitor's own e-mail (or WhatsApp) with the message filled in.
+
+Optional settings (Vercel -> Environment Variables, all public): `VITE_CONTACT_EMAIL` (default jeyaprakash27052005@gmail.com), `VITE_CONTACT_PHONE`, `VITE_CONTACT_WHATSAPP` (digits with country code). Run with `npm run dev:ads`, build with `npm run build:ads`.
