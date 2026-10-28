@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { BellRing, CalendarClock, RefreshCw } from 'lucide-react';
 import { Lead, SipPlan } from '../types';
 import { sipStorage } from '../services/sipStorage';
-import { SIP_REMIND_DAYS, dayString, dueFor, frequencyLabel, optionLabel, whenText } from '../utils/sipSchedule';
+import { SIP_REMIND_DAYS, dayString, dueFor, frequencyLabel, optionLabel, reminderDate, whenText } from '../utils/sipSchedule';
 import { formatInr } from '../utils/currency';
 import { dateText } from './SipPlans';
 
@@ -50,6 +50,7 @@ export const SipReminders: React.FC<{ leads: Lead[]; onViewLead: (lead: Lead) =>
           <p className="text-slate-600">
             {d.plan.schemeName} · {formatInr(d.plan.amount)} <b>{frequencyLabel(d.plan.frequency)}</b> · {optionLabel(d.plan.option)}
           </p>
+          <p className="text-slate-500">Reminder date: {dateText(dayString(reminderDate(d.date)))}</p>
         </div>
         <span className={`px-2.5 py-1 rounded-full font-bold border ${d.remind ? 'bg-amber-50 text-amber-800 border-amber-300' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>
           {whenText(d.inDays)} · {dateText(dayString(d.date))}

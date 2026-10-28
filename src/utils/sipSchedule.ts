@@ -66,3 +66,7 @@ export const dueFor = (plan: SipPlan, from: Date = new Date()): SipDue | null =>
 };
 
 export const whenText = (inDays: number): string => (inDays <= 0 ? 'Today' : inDays === 1 ? 'Tomorrow' : `In ${inDays} days`);
+
+/** The day the reminder starts for an investment date (3 days before) */
+export const reminderDate = (investDate: Date): Date => new Date(investDate.getFullYear(), investDate.getMonth(), investDate.getDate() - SIP_REMIND_DAYS);
+export const repeatText = (f: SipFrequency): string => (f === 'daily' ? 'every day' : f === 'weekly' ? 'every week, 3 days before the same weekday' : 'every month, 3 days before the same date');

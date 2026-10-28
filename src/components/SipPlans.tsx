@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BellRing, CalendarClock, Pencil, Plus, Save, Trash2, X } from 'lucide-react';
 import { Lead, SipFrequency, SipOption, SipPlan, User } from '../types';
 import { sipStorage } from '../services/sipStorage';
-import { SIP_FREQUENCIES, SIP_OPTIONS, dayString, dueFor, frequencyLabel, optionLabel, whenText } from '../utils/sipSchedule';
+import { SIP_REMIND_DAYS, SIP_FREQUENCIES, SIP_OPTIONS, dayString, dueFor, frequencyLabel, optionLabel, reminderDate, repeatText, whenText } from '../utils/sipSchedule';
 import { formatInr } from '../utils/currency';
 import { formatDateTime } from '../utils/dateTime';
 
@@ -197,6 +197,12 @@ export const SipPlans: React.FC<{ lead: Lead; currentUser: User }> = ({ lead, cu
                 </p>
               ) : (
                 <p className="text-slate-500">{p.isActive ? 'This SIP has ended.' : 'Paused.'}</p>
+              )}
+              {due && p.isActive && (
+                <p className="flex items-center gap-1.5 text-emerald-800 font-semibold">
+                  <CalendarClock className="w-3.5 h-3.5" />
+                  Reminder date: {dateText(dayString(reminderDate(due.date)))} ({SIP_REMIND_DAYS} days before {dateText(dayString(due.date))}) · {frequencyLabel(p.frequency)} order, reminder repeats {repeatText(p.frequency)}
+                </p>
               )}
               <p className="text-[10px] text-slate-400">Entered by {p.addedBy} on {formatDateTime(p.createdAt)}</p>
             </li>
