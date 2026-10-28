@@ -190,3 +190,7 @@ Optional settings (Vercel -> Environment Variables, all public): `VITE_CUSTOMER_
 - **SIP investment** (admin portal): when a lead is **Ready to Invest**, open the lead's profile and press **Add SIP**. Enter the scheme name, starting date, end of SIP and amount by hand, choose **Growth / Dividend Payout / Reinvestment of Dividend**, and the order mode (**daily / weekly / monthly**). SIPs can be edited, paused and deleted.
 - **SIP Reminders** (admin menu): every SIP due within **3 days** is listed first (also shown as an alert inside the investor's profile), followed by all other running SIPs with their next date. Stored in the `sipPlans` collection.
 - Republish `firestore.rules` (new: `sipPlans`, `settings/siteContact`).
+
+### Reminding the investor and filters
+
+On **SIP Reminders** (and inside the investor's SIP card) the incharge presses **Mark reminded** after calling or messaging the investor. It records who reminded and when, for that investment date only; when the next daily / weekly / monthly date comes, the SIP shows "not reminded yet" again. Filters: investor / scheme / mobile search, order mode (daily, weekly, monthly), reminded or not, investment date (3, 7, 31 days) and region.

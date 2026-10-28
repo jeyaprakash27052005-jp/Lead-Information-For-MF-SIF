@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BellRing, CalendarClock, Pencil, Plus, Save, Trash2, X } from 'lucide-react';
 import { Lead, SipFrequency, SipOption, SipPlan, User } from '../types';
 import { sipStorage } from '../services/sipStorage';
-import { SIP_REMIND_DAYS, SIP_FREQUENCIES, SIP_OPTIONS, dayString, dueFor, frequencyLabel, optionLabel, reminderDate, repeatText, whenText } from '../utils/sipSchedule';
+import { SIP_REMIND_DAYS, SIP_FREQUENCIES, SIP_OPTIONS, dayString, dueFor, frequencyLabel, optionLabel, isReminded, reminderDate, repeatText, whenText } from '../utils/sipSchedule';
 import { formatInr } from '../utils/currency';
 import { formatDateTime } from '../utils/dateTime';
 
@@ -64,6 +64,9 @@ export const SipPlans: React.FC<{ lead: Lead; currentUser: User }> = ({ lead, cu
         option: form.option,
         frequency: form.frequency,
         isActive: old?.isActive ?? true,
+        remindedFor: old?.remindedFor,
+        remindedAt: old?.remindedAt,
+        remindedBy: old?.remindedBy,
         addedBy: old?.addedBy || currentUser.name,
         createdAt: old?.createdAt || new Date().toISOString(),
       });
@@ -89,6 +92,15 @@ export const SipPlans: React.FC<{ lead: Lead; currentUser: User }> = ({ lead, cu
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not delete the SIP.');
+    }
+  };
+  const remind = async (p: SipPlan, date: Date) => {
+    const done = !isReminded(p, date);
+    try {
+      await sipStorage.savePlan(done ? { ...p, remindedFor: dayString(date), remindedAt: new Date().toISOString(), remindedBy: currentUser.name } : { ...p, remindedFor: '', remindedAt: '', remindedBy: '' });
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not save the reminder.');
     }
   };
   const toggle = async (p: SipPlan) => {
@@ -197,6 +209,15 @@ export const SipPlans: React.FC<{ lead: Lead; currentUser: User }> = ({ lead, cu
                 </p>
               ) : (
                 <p className="text-slate-500">{p.isActive ? 'This SIP has ended.' : 'Paused.'}</p>
+              )}
+              {due && p.isActive && (
+                <p className={`font-semibold ${isReminded(p, due.date) ? 'text-emerald-700' : 'text-slate-500'}`}>
+                  {isReminded(p, due.date) ? `Investor reminded by ${p.remindedBy || 'incharge'}${p.remindedAt ? ` on ${dateText(dayString(new Date(p.remindedAt)))}` : ''}` : 'Investor not reminded yet for this date'}
+                  {' '}
+                  <button type="button" onClick={() => remind(p, due.date)} className="ml-1 px-2 py-0.5 rounded-md border border-slate-300 text-slate-800 font-bold cursor-pointer">
+                    {isReminded(p, due.date) ? 'Undo' : 'Mark reminded'}
+                  </button>
+                </p>
               )}
               {due && p.isActive && (
                 <p className="flex items-center gap-1.5 text-emerald-800 font-semibold">

@@ -307,6 +307,10 @@ export interface SipPlan {
   option: SipOption;
   frequency: SipFrequency;
   isActive: boolean;
+  /** The investment date (YYYY-MM-DD) the incharge has already reminded the investor about; it resets by itself when the next date comes */
+  remindedFor?: string;
+  remindedAt?: string;
+  remindedBy?: string;
   addedBy: string;
   createdAt: string;
   updatedAt?: string;

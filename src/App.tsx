@@ -972,7 +972,7 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
 
             {activeTab === 'fund-ads-admin' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge' || currentUser.role === 'area_incharge') && <FundAdsManagement currentUser={currentUser} onNotify={showFeedback} />}
 
-            {activeTab === 'sip-reminders' && <SipReminders leads={assignedLeads} onViewLead={(lead) => setDetailsModalLead(lead)} />}
+            {activeTab === 'sip-reminders' && <SipReminders leads={assignedLeads} currentUser={currentUser} onViewLead={(lead) => setDetailsModalLead(lead)} />}
             {activeTab === 'site-content' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge') && <SiteContentManagement currentUser={currentUser} onNotify={showFeedback} />}
             {activeTab === 'finance-calculations' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge' || currentUser.role === 'area_incharge') && <FinanceCalculations />}
 
