@@ -401,7 +401,7 @@ export const SiteContentManagement: React.FC<Props> = ({ currentUser, onNotify }
         <label className="flex items-center gap-2 font-bold text-slate-700">
           <input type="checkbox" checked={form.isActive} onChange={(e) => set({ isActive: e.target.checked })} /> Show on the website
         </label>
-        <p className="text-[11px] text-slate-500">Words that promise or guarantee returns are not accepted. The standard mutual fund risk warning is shown on every page.</p>
+        <p className="text-[11px] text-slate-500">Words that promise or guarantee returns are not accepted.</p>
         <div className="flex gap-2">
           <button type="button" disabled={saving} onClick={save} className="btn-glow px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold flex items-center gap-1.5 cursor-pointer disabled:opacity-60">
             <Save className="w-3.5 h-3.5" /> {editingId ? 'Save changes' : 'Add page'}

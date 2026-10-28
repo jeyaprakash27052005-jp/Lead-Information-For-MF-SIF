@@ -8,12 +8,8 @@ import { FinanceCalculations } from './components/FinanceCalculations';
 import { siteStorage } from './services/siteStorage';
 import { DEFAULT_ITEMS, DEFAULT_MENUS } from './utils/siteDefaults';
 import { SiteContact, SiteItem, SiteMenu } from './types';
-import { MF_DISCLAIMER } from './utils/fundAdRules';
 
 const env = import.meta.env as Record<string, string | undefined>;
-const CONTACT_EMAIL = env.VITE_CONTACT_EMAIL || 'jeyaprakash27052005@gmail.com';
-const CONTACT_PHONE = (env.VITE_CONTACT_PHONE || '').trim();
-const CONTACT_WHATSAPP = (env.VITE_CONTACT_WHATSAPP || '').replace(/\D/g, '');
 const LOGIN_URL = /^https:\/\//i.test(env.VITE_CUSTOMER_URL || '') ? (env.VITE_CUSTOMER_URL as string) : '';
 
 type Route = { name: 'home' | 'funds' | 'sessions' | 'contact' | 'calc' } | { name: 'page'; id: string };
@@ -288,36 +284,23 @@ function Site() {
           ))}
       </main>
 
-      <footer className="py-5 px-4 text-center text-[11px] text-slate-500 space-y-1">
-        <p>{MF_DISCLAIMER}</p>
-      </footer>
     </div>
   );
 }
 
 function Contact() {
-  const [info, setInfo] = useState<SiteContact>({ contactName: '', mobile: CONTACT_PHONE, email: CONTACT_EMAIL, officeAddress: '', hours: '' });
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [msg, setMsg] = useState('');
+  const [info, setInfo] = useState<SiteContact | null | undefined>(undefined);
 
   useEffect(() => {
     let alive = true;
     siteStorage
       .getContact()
-      .then((c) => alive && c && setInfo((o) => ({ ...o, ...c, email: c.email || o.email })))
-      .catch(() => undefined);
+      .then((c) => alive && setInfo(c))
+      .catch(() => alive && setInfo(null));
     return () => {
       alive = false;
     };
   }, []);
-
-  const email = info.email || CONTACT_EMAIL;
-  const digits = info.mobile.replace(/\D/g, '');
-  const wa = CONTACT_WHATSAPP || (digits.length === 10 ? `91${digits}` : digits.length >= 11 ? digits : '');
-  const text = `Hello, I am ${name || '(name)'}${phone ? ` (mobile ${phone})` : ''}. ${msg}`.trim();
-  const ready = name.trim().length > 1 && msg.trim().length > 1;
-  const input = 'w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
 
   const block = (icon: React.ReactNode, title: string, lines: React.ReactNode[]) => (
     <div className="flex items-start gap-4">
@@ -331,51 +314,28 @@ function Contact() {
     </div>
   );
 
+  const has = info && (info.contactName || info.mobile || info.email || info.officeAddress || info.hours);
+
   return (
-    <section className="max-w-4xl mx-auto space-y-6">
+    <section className="max-w-xl mx-auto space-y-6">
       <h1 className="text-2xl font-black text-slate-900">Contact Us</h1>
-      <div className="grid md:grid-cols-2 gap-8">
+      {info === undefined && <p className="text-xs text-slate-400">Loading...</p>}
+      {info !== undefined && !has && <p className="text-sm text-slate-500">Contact details will be available soon.</p>}
+      {info && has && (
         <div className="space-y-7 bg-white rounded-2xl border border-slate-200 p-6">
-          {block(<Mail className="w-6 h-6" />, 'Chat to us', [
-            'Our friendly team is here to help.',
-            info.contactName && <b key="n">{info.contactName}</b>,
-            <a key="e" href={`mailto:${email}`} className="text-blue-700 font-semibold">{email}</a>,
-          ].filter(Boolean) as React.ReactNode[])}
-          {info.officeAddress && block(<MapPin className="w-6 h-6" />, 'Office', ['Come and meet us at our office.', <span key="a" className="whitespace-pre-line">{info.officeAddress}</span>])}
+          {(info.email || info.contactName) &&
+            block(<Mail className="w-6 h-6" />, 'Chat to us', [
+              info.contactName && <b key="n">{info.contactName}</b>,
+              info.email && <a key="e" href={`mailto:${info.email}`} className="text-blue-700 font-semibold">{info.email}</a>,
+            ].filter(Boolean) as React.ReactNode[])}
+          {info.officeAddress && block(<MapPin className="w-6 h-6" />, 'Office', [<span key="a" className="whitespace-pre-line">{info.officeAddress}</span>])}
           {(info.mobile || info.hours) &&
             block(<Phone className="w-6 h-6" />, 'Phone', [
               info.hours,
-              info.contactName && info.mobile ? info.contactName : '',
               info.mobile && <a key="p" href={`tel:${info.mobile.replace(/\s+/g, '')}`} className="text-blue-700 font-semibold">{info.mobile}</a>,
             ].filter(Boolean) as React.ReactNode[])}
         </div>
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 space-y-3">
-          <p className="text-sm text-slate-600">Or send us a question. It opens in your own e-mail or WhatsApp so you can check it before sending.</p>
-          <input className={input} placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} />
-          <input className={input} placeholder="Mobile number (optional)" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} />
-          <textarea className={input} rows={4} placeholder="Your question" value={msg} onChange={(e) => setMsg(e.target.value)} maxLength={600} />
-          <div className="flex flex-wrap gap-2">
-            <a
-              aria-disabled={!ready}
-              href={ready ? `mailto:${email}?subject=${encodeURIComponent('Mutual fund enquiry')}&body=${encodeURIComponent(text)}` : undefined}
-              className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold text-white ${ready ? 'bg-blue-700 hover:bg-blue-800' : 'bg-slate-300 pointer-events-none'}`}
-            >
-              <Send className="w-4 h-4" /> Send by e-mail
-            </a>
-            {wa && (
-              <a
-                aria-disabled={!ready}
-                href={ready ? `https://wa.me/${wa}?text=${encodeURIComponent(text)}` : undefined}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold text-white ${ready ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-300 pointer-events-none'}`}
-              >
-                <MessageCircle className="w-4 h-4" /> WhatsApp
-              </a>
-            )}
-          </div>
-        </div>
-      </div>
+      )}
     </section>
   );
 }

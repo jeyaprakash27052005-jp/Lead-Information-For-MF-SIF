@@ -191,7 +191,7 @@ export const FundExplainer: React.FC<{ sceneMs?: number; dark?: boolean }> = ({ 
         </button>
       </div>
       <p className={`px-5 pb-3 text-[10px] ${dark ? 'text-slate-500' : 'text-slate-400'}`}>
-        Illustration only. Mutual fund investments are subject to market risks. Read all scheme related documents carefully.
+        Illustration only.
       </p>
     </div>
   );

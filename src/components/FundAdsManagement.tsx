@@ -4,7 +4,7 @@ import { AdAnimation, AdAnimationSpeed, AdTextEffect, FundAd, User } from '../ty
 import { fundAdsStorage } from '../services/fundAdsStorage';
 import { prepareAdImage } from '../services/adsStorage';
 import { AD_ANIMATIONS, AD_SPEEDS, AD_TEXT_EFFECTS } from '../utils/adAnimations';
-import { FUND_CATEGORIES, MF_DISCLAIMER, RISK_LEVELS, findBannedClaim } from '../utils/fundAdRules';
+import { FUND_CATEGORIES, RISK_LEVELS, findBannedClaim } from '../utils/fundAdRules';
 import { FundAdCard } from './FundAdCard';
 import { ConfirmModal } from './ConfirmModal';
 
@@ -228,7 +228,7 @@ export const FundAdsManagement: React.FC<Props> = ({ currentUser, onNotify }) =>
           </div>
           <h2 className="text-lg font-black text-slate-900">Advertise mutual fund schemes to customers</h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Only the admin team can add these. They appear for customers under <b>Mutual Fund Offers</b> and on the Home Screen. Every advertisement shows the standard risk warning automatically.
+            Only the admin team can add these. They appear for customers under <b>Mutual Fund Offers</b> and on the Home Screen.
           </p>
         </div>
         <button type="button" onClick={load} className="btn-glow px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs font-bold text-slate-700 flex items-center gap-1.5 cursor-pointer">
@@ -346,7 +346,7 @@ export const FundAdsManagement: React.FC<Props> = ({ currentUser, onNotify }) =>
           <input type="checkbox" checked={form.isActive} onChange={(e) => set({ isActive: e.target.checked })} /> Show this advertisement to customers
         </label>
         <p className="text-[11px] text-slate-500">
-          Advertising rules: do not promise or guarantee returns. This warning is added to every advertisement automatically: <i>{MF_DISCLAIMER}</i>
+          Advertising rules: do not promise or guarantee returns.
         </p>
         <div className="flex justify-end gap-2">
           {editingId && (

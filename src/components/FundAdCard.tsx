@@ -3,10 +3,9 @@ import { ExternalLink, ShieldAlert } from 'lucide-react';
 import { FundAd } from '../types';
 import { AnimatedAd } from './AnimatedAd';
 import { adTextClass } from '../utils/adAnimations';
-import { MF_DISCLAIMER } from '../utils/fundAdRules';
 import { formatInr } from '../utils/currency';
 
-/** One mutual fund advertisement, with the standard risk warning that must always be shown */
+/** One mutual fund advertisement */
 export const FundAdCard: React.FC<{ ad: FundAd; playKey?: string | number; compact?: boolean }> = ({ ad, playKey, compact }) => (
   <article className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col lift-card">
     <div className="relative h-44 bg-slate-900">
@@ -46,9 +45,6 @@ export const FundAdCard: React.FC<{ ad: FundAd; playKey?: string | number; compa
           Know more <ExternalLink className="w-3.5 h-3.5" />
         </a>
       )}
-      <p className="mt-auto pt-2 flex items-start gap-1.5 text-[10px] leading-snug text-slate-500 border-t border-slate-100">
-        <ShieldAlert className="w-3 h-3 shrink-0 mt-0.5" /> {MF_DISCLAIMER}
-      </p>
     </div>
   </article>
 );

@@ -159,7 +159,7 @@ Admin portal -> menu -> **Mutual Fund Ads** (Head, Regional and Area Incharge). 
 - Each advertisement has the scheme name, fund house, category, riskometer level, headline, details, up to 5 highlights, minimum SIP, a fund-house page link (https), a badge, an uploaded image (JPG / PNG / GIF) and the same picture animation, speed and headline effect options as Home Screen Ads, with a live preview.
 - Add, edit, delete, hide / show and re-order. Each shows who added it.
 - Customers see them under **Mutual Fund Offers** in their menu (with a category filter) and in a "Mutual fund offers" section on the Home Screen. The **Mutual Fund Offers** switch in Feature Controls turns them off.
-- Advertising rules built in: the standard warning ("Mutual fund investments are subject to market risks...") is added to every advertisement automatically, and words that promise returns (guarantee, assured return, risk-free, double your money...) are not accepted.
+- Advertising rules built in: words that promise returns (guarantee, assured return, risk-free, double your money...) are not accepted.
 - Publish `firestore.rules` after this update (it adds the `fundAds` collection).
 
 The earlier **Investor Profile** (11 questions with the fund data link) has been removed.
@@ -170,7 +170,7 @@ A separate public website for advertising mutual fund products, with a top menu 
 
 What it shows:
 - Menus, sub menus and pages written by the admin team (below).
-- Home Screen Ads (animated), Mutual Fund Ads, Awareness Sessions, the investment calculators (SIP, lumpsum, dividend) and a Contact page that opens the visitor's own e-mail or WhatsApp. These respect the switches in Feature Controls.
+- Home Screen Ads (animated), Mutual Fund Ads, Awareness Sessions, the investment calculators (SIP, lumpsum, dividend) and a Contact Us page that shows only the details the admin typed in. These respect the switches in Feature Controls.
 
 ### Managing the website (Head Incharge and Regional Incharge only)
 
@@ -178,11 +178,11 @@ Admin portal -> **Website Menus**:
 - **Top menus**: add, rename, reorder, hide, delete, or make one a highlighted button.
 - **Sub menu pages**: each has a column heading, title, short line, tag (New / Coming Soon) and opens a page of text with an optional picture, an outside https link, a part of the site (Mutual Fund Offers, Sessions, Contact), or the calculators. Add, edit, hide, reorder and delete.
 - Until the first save the website shows a built-in starter menu; press **Load starter menu** to copy it into the database and edit it.
-- Words that promise or guarantee returns are rejected, and the standard risk warning shows in the footer. Mutual fund promotions themselves are added under **Mutual Fund Ads**.
+- Words that promise or guarantee returns are rejected. Mutual fund promotions themselves are added under **Mutual Fund Ads**.
 
 Republish `firestore.rules` after pulling this change (new collections `siteMenus` and `siteItems`).
 
-Optional settings (Vercel -> Environment Variables, all public): `VITE_CONTACT_EMAIL` (default jeyaprakash27052005@gmail.com), `VITE_CONTACT_PHONE`, `VITE_CONTACT_WHATSAPP` (digits with country code), `VITE_CUSTOMER_URL` (https address of the Customer Portal, shows the Login button). Run with `npm run dev:ads`, build with `npm run build:ads`. Vercel Root Directory: `apps/ads`.
+Optional settings (Vercel -> Environment Variables, all public): `VITE_CUSTOMER_URL` (https address of the Customer Portal, shows the Login button). Run with `npm run dev:ads`, build with `npm run build:ads`. Vercel Root Directory: `apps/ads`.
 
 ## Contact details and SIP reminders
 
