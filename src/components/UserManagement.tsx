@@ -565,7 +565,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
 
       {/* Add User Modal Dialog */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-start justify-center modal-safe p-4">
           <div
             className="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200"
             role="dialog"
@@ -789,7 +789,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
 
       {/* Create / Delete Region Modal (Head only) */}
       {isHead && regionModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-start justify-center modal-safe p-4">
           <div
             className="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden"
             role="dialog"

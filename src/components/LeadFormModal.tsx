@@ -170,7 +170,7 @@ const LeadFormModalInner: React.FC<LeadFormModalProps> = ({
       className={
         isPage
           ? 'w-full'
-          : 'fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4'
+          : 'fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-start justify-center modal-safe p-4'
       }
     >
       <div

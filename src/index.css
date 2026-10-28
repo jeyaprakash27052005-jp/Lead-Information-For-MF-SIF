@@ -210,3 +210,9 @@ button[role='radio']:not(:disabled):hover {
 @keyframes slide-in-left { from { transform: translateX(-100%); } to { transform: none; } }
 .anim-slide-in-left { animation: slide-in-left 0.25s var(--ease-out, ease-out) both; }
 .anim-fade { animation: fade-in 0.2s ease-out both; }
+
+/* Tall dialogs: centre when they fit, and start at the top (never clip the top) when they are taller than the screen */
+.modal-safe > * {
+  margin-top: auto;
+  margin-bottom: auto;
+}
