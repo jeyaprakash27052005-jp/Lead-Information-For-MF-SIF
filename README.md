@@ -166,6 +166,20 @@ The earlier **Investor Profile** (11 questions with the fund data link) has been
 
 ## Advertising website (`apps/ads`)
 
-A separate public website for advertising the product, with a top navigation bar: **Home, Mutual Funds, All Sessions, Contact Us** (centered links, active link in red; a menu button on phones). It shows what the admins add: Home Screen Ads (animated), Mutual Fund Ads and Awareness Programs, and respects their switches in Feature Controls. Contact Us opens the visitor's own e-mail (or WhatsApp) with the message filled in.
+A separate public website for advertising mutual fund products, with a top menu bar and drop-down panels in the style of a fund-house site (labels are our own and can be renamed). The starter menu has **Investor Guide, Plan & Calculate, Fund Products, Help & Services** and a **Top Offers** button, plus **Quick Enquiry** and an optional **Login** button. Open to everyone, no login. On phones the menu becomes a three-line menu.
 
-Optional settings (Vercel -> Environment Variables, all public): `VITE_CONTACT_EMAIL` (default jeyaprakash27052005@gmail.com), `VITE_CONTACT_PHONE`, `VITE_CONTACT_WHATSAPP` (digits with country code). Run with `npm run dev:ads`, build with `npm run build:ads`.
+What it shows:
+- Menus, sub menus and pages written by the admin team (below).
+- Home Screen Ads (animated), Mutual Fund Ads, Awareness Sessions, the investment calculators (SIP, lumpsum, dividend) and a Contact page that opens the visitor's own e-mail or WhatsApp. These respect the switches in Feature Controls.
+
+### Managing the website (Head Incharge and Regional Incharge only)
+
+Admin portal -> **Website Menus**:
+- **Top menus**: add, rename, reorder, hide, delete, or make one a highlighted button.
+- **Sub menu pages**: each has a column heading, title, short line, tag (New / Coming Soon) and opens a page of text with an optional picture, an outside https link, a part of the site (Mutual Fund Offers, Sessions, Contact), or the calculators. Add, edit, hide, reorder and delete.
+- Until the first save the website shows a built-in starter menu; press **Load starter menu** to copy it into the database and edit it.
+- Words that promise or guarantee returns are rejected, and the standard risk warning shows in the footer. Mutual fund promotions themselves are added under **Mutual Fund Ads**.
+
+Republish `firestore.rules` after pulling this change (new collections `siteMenus` and `siteItems`).
+
+Optional settings (Vercel -> Environment Variables, all public): `VITE_CONTACT_EMAIL` (default jeyaprakash27052005@gmail.com), `VITE_CONTACT_PHONE`, `VITE_CONTACT_WHATSAPP` (digits with country code), `VITE_CUSTOMER_URL` (https address of the Customer Portal, shows the Login button). Run with `npm run dev:ads`, build with `npm run build:ads`. Vercel Root Directory: `apps/ads`.

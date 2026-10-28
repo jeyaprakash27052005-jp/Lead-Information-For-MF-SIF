@@ -126,6 +126,7 @@ export type ViewTab =
   | 'health-checkup'
   | 'finance-calculations'
   | 'fund-ads-admin'
+  | 'site-content'
   | 'fund-ads-customer';
 
 export interface HealthReport {
@@ -249,6 +250,41 @@ export interface AwarenessProgram {
   region?: string;
   createdByRole?: UserRole;
   createdById?: string;
+  isActive: boolean;
+  createdAt: string;
+  createdBy?: string;
+  updatedAt?: string;
+}
+
+/** A top menu of the advertising website (for example "Investor Guide") */
+export interface SiteMenu {
+  id: string;
+  label: string;
+  order: number;
+  isActive: boolean;
+  /** Shown as a coloured button instead of a plain menu */
+  highlight?: boolean;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export type SiteItemKind = 'page' | 'link' | 'route' | 'calculator';
+export type SiteRoute = 'funds' | 'sessions' | 'contact';
+
+/** A sub menu entry under a top menu: opens a page of text, an outside link, a part of the site, or the calculators */
+export interface SiteItem {
+  id: string;
+  menuId: string;
+  section: string; // heading of the column inside the menu panel
+  title: string;
+  description?: string;
+  badge?: 'New' | 'Coming Soon' | '';
+  kind: SiteItemKind;
+  body?: string; // page text (kind = page)
+  imageUrl?: string;
+  linkUrl?: string; // https link (kind = link)
+  route?: SiteRoute; // (kind = route)
+  order: number;
   isActive: boolean;
   createdAt: string;
   createdBy?: string;

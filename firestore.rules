@@ -79,6 +79,24 @@ service cloud.firestore {
       allow delete: if isValidId(adId);
     }
 
+    match /siteMenus/{menuId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(menuId)
+        && request.resource.data.label is string && request.resource.data.label.size() > 0 && request.resource.data.label.size() <= 60
+        && request.resource.data.isActive is bool;
+      allow delete: if isValidId(menuId);
+    }
+
+    match /siteItems/{itemId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(itemId)
+        && request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 120
+        && request.resource.data.menuId is string
+        && request.resource.data.kind in ['page', 'link', 'route', 'calculator']
+        && request.resource.data.isActive is bool;
+      allow delete: if isValidId(itemId);
+    }
+
     match /awarenessPrograms/{programId} {
       allow get, list: if true;
       allow create, update: if isValidId(programId)

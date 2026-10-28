@@ -19,7 +19,8 @@ import {
   ToggleRight,
   ListChecks,
   Calculator,
-  Landmark
+  Landmark,
+  LayoutList,
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -176,6 +177,16 @@ export const Navigation: React.FC<NavigationProps> = ({
         label: 'Mutual Fund Ads',
         icon: <Landmark className="w-4 h-4" />,
         description: 'Add, edit and delete the mutual fund advertisements customers see',
+      });
+    }
+
+    // Feature: Advertising website menus and pages (Head and Regional Incharge only)
+    if (isHead || isRegional) {
+      items.push({
+        id: 'site-content',
+        label: 'Website Menus',
+        icon: <LayoutList className="w-4 h-4" />,
+        description: 'Add, edit and delete the menus, investment guide and promotion pages of the advertising website',
       });
     }
 
