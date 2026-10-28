@@ -127,6 +127,7 @@ export type ViewTab =
   | 'finance-calculations'
   | 'fund-ads-admin'
   | 'site-content'
+  | 'sip-reminders'
   | 'fund-ads-customer';
 
 export interface HealthReport {
@@ -289,4 +290,35 @@ export interface SiteItem {
   createdAt: string;
   createdBy?: string;
   updatedAt?: string;
+}
+
+export type SipOption = 'growth' | 'dividend_payout' | 'dividend_reinvest';
+export type SipFrequency = 'daily' | 'weekly' | 'monthly';
+
+/** A SIP investment the admin team entered by hand for a lead who is Ready to Invest */
+export interface SipPlan {
+  id: string;
+  leadId: string;
+  leadName: string;
+  schemeName: string;
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD
+  amount: number;
+  option: SipOption;
+  frequency: SipFrequency;
+  isActive: boolean;
+  addedBy: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+/** Contact details shown on the advertising website's Contact Us page (stored in settings/siteContact) */
+export interface SiteContact {
+  contactName: string;
+  mobile: string;
+  email: string;
+  officeAddress: string;
+  hours: string;
+  updatedAt?: string;
+  updatedBy?: string;
 }

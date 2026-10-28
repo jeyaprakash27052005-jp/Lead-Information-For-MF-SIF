@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { LayoutList, Plus, Pencil, Trash2, Eye, EyeOff, ArrowUp, ArrowDown, Upload, Save, X, RefreshCw, AlertCircle, Download } from 'lucide-react';
-import { SiteItem, SiteItemKind, SiteMenu, SiteRoute, User } from '../types';
+import { SiteContact, SiteItem, SiteItemKind, SiteMenu, SiteRoute, User } from '../types';
 import { siteStorage } from '../services/siteStorage';
 import { prepareAdImage } from '../services/adsStorage';
 import { DEFAULT_ITEMS, DEFAULT_MENUS, SITE_ROUTE_LABELS } from '../utils/siteDefaults';
@@ -45,6 +45,7 @@ export const SiteContentManagement: React.FC<Props> = ({ currentUser, onNotify }
   const [saving, setSaving] = useState(false);
   const [delItem, setDelItem] = useState<SiteItem | null>(null);
   const [delMenu, setDelMenu] = useState<SiteMenu | null>(null);
+  const [contact, setContact] = useState<SiteContact>({ contactName: '', mobile: '', email: '', officeAddress: '', hours: '' });
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   const load = async () => {
@@ -53,6 +54,8 @@ export const SiteContentManagement: React.FC<Props> = ({ currentUser, onNotify }
       const [m, i] = await Promise.all([siteStorage.getMenus(), siteStorage.getItems()]);
       setMenus(m);
       setItems(i);
+      const c = await siteStorage.getContact().catch(() => null);
+      if (c) setContact(c);
       setError(null);
     } catch (_e) {
       setError('Could not read the menus from the online database.');
@@ -80,6 +83,24 @@ export const SiteContentManagement: React.FC<Props> = ({ currentUser, onNotify }
     setForm(emptyItem(filter || menus[0]?.id || ''));
     setEditingId(null);
     if (fileRef.current) fileRef.current.value = '';
+  };
+
+  const saveContact = () => {
+    const mobile = contact.mobile.replace(/[^0-9+]/g, '');
+    if (mobile && !/^(\+91)?[6-9][0-9]{9}$/.test(mobile)) return setError('Type a valid 10 digit mobile number (with or without +91).');
+    if (contact.email.trim() && !/^\S+@\S+\.\S+$/.test(contact.email.trim())) return setError('Type a valid e-mail address.');
+    run(
+      () =>
+        siteStorage.saveContact({
+          contactName: contact.contactName.trim(),
+          mobile,
+          email: contact.email.trim(),
+          officeAddress: contact.officeAddress.trim(),
+          hours: contact.hours.trim(),
+          updatedBy: currentUser.name,
+        }),
+      'Contact details saved. The Contact Us page shows them now.'
+    );
   };
 
   const addMenu = () => {
@@ -236,6 +257,36 @@ export const SiteContentManagement: React.FC<Props> = ({ currentUser, onNotify }
           </button>
         </div>
       )}
+
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 space-y-3 text-xs">
+        <p className="font-bold text-slate-900 text-sm">Contact Us details</p>
+        <p className="text-slate-500">Shown on the Contact Us page of the website (name, mobile number, e-mail, office and hours).</p>
+        <div className="grid sm:grid-cols-2 gap-3">
+          <label className={lbl}>
+            Contact person name
+            <input value={contact.contactName} maxLength={100} onChange={(e) => setContact({ ...contact, contactName: e.target.value })} className={`mt-1 ${input}`} />
+          </label>
+          <label className={lbl}>
+            Mobile number
+            <input value={contact.mobile} maxLength={14} inputMode="tel" onChange={(e) => setContact({ ...contact, mobile: e.target.value })} placeholder="9876543210" className={`mt-1 ${input}`} />
+          </label>
+          <label className={lbl}>
+            E-mail
+            <input value={contact.email} maxLength={120} onChange={(e) => setContact({ ...contact, email: e.target.value })} className={`mt-1 ${input}`} />
+          </label>
+          <label className={lbl}>
+            Phone hours
+            <input value={contact.hours} maxLength={120} onChange={(e) => setContact({ ...contact, hours: e.target.value })} placeholder="Mon-Sat, 9 am to 6 pm" className={`mt-1 ${input}`} />
+          </label>
+        </div>
+        <label className={lbl}>
+          Office address
+          <textarea value={contact.officeAddress} rows={3} maxLength={400} onChange={(e) => setContact({ ...contact, officeAddress: e.target.value })} className={`mt-1 ${input}`} />
+        </label>
+        <button type="button" onClick={saveContact} className="btn-glow px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold flex items-center gap-1.5 cursor-pointer">
+          <Save className="w-3.5 h-3.5" /> Save contact details
+        </button>
+      </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 space-y-3 text-xs">
         <p className="font-bold text-slate-900 text-sm">Top menus</p>

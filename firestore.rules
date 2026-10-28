@@ -79,6 +79,19 @@ service cloud.firestore {
       allow delete: if isValidId(adId);
     }
 
+    match /sipPlans/{planId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(planId)
+        && request.resource.data.leadId is string && request.resource.data.leadId.size() > 0
+        && request.resource.data.schemeName is string && request.resource.data.schemeName.size() > 0 && request.resource.data.schemeName.size() <= 200
+        && request.resource.data.startDate is string && request.resource.data.endDate is string
+        && request.resource.data.amount is number && request.resource.data.amount > 0
+        && request.resource.data.option in ['growth', 'dividend_payout', 'dividend_reinvest']
+        && request.resource.data.frequency in ['daily', 'weekly', 'monthly']
+        && request.resource.data.isActive is bool;
+      allow delete: if isValidId(planId);
+    }
+
     match /siteMenus/{menuId} {
       allow get, list: if true;
       allow create, update: if isValidId(menuId)
@@ -129,6 +142,12 @@ service cloud.firestore {
           && request.resource.data.features is map
           && request.resource.data.mfReturnRate is number && request.resource.data.mfReturnRate > 0 && request.resource.data.mfReturnRate <= 100
           && request.resource.data.npsReturnRate is number && request.resource.data.npsReturnRate > 0 && request.resource.data.npsReturnRate <= 100)
+        || (docId == 'siteContact'
+          && request.resource.data.contactName is string && request.resource.data.contactName.size() <= 100
+          && request.resource.data.mobile is string && request.resource.data.mobile.size() <= 20
+          && request.resource.data.email is string && request.resource.data.email.size() <= 120
+          && request.resource.data.officeAddress is string && request.resource.data.officeAddress.size() <= 400
+          && request.resource.data.hours is string && request.resource.data.hours.size() <= 120)
         || (docId == 'healthCheck'
           && request.resource.data.categories is list && request.resource.data.categories.size() <= 30
           && request.resource.data.questions is list && request.resource.data.questions.size() <= 200);

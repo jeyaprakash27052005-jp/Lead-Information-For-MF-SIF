@@ -21,6 +21,7 @@ import {
   Calculator,
   Landmark,
   LayoutList,
+  CalendarClock,
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -177,6 +178,16 @@ export const Navigation: React.FC<NavigationProps> = ({
         label: 'Mutual Fund Ads',
         icon: <Landmark className="w-4 h-4" />,
         description: 'Add, edit and delete the mutual fund advertisements customers see',
+      });
+    }
+
+    // Feature: SIP reminders for investors who are Ready to Invest (all three admin roles)
+    if (isHead || isRegional || isArea) {
+      items.push({
+        id: 'sip-reminders',
+        label: 'SIP Reminders',
+        icon: <CalendarClock className="w-4 h-4" />,
+        description: 'See which SIP investments are due in the next 3 days',
       });
     }
 

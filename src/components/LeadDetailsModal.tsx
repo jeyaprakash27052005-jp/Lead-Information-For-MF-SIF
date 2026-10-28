@@ -1,6 +1,7 @@
 import React from 'react';
 import { formatDateTime } from '../utils/dateTime';
-import { Lead } from '../types';
+import { Lead, User as AppUser } from '../types';
+import { SipPlans } from './SipPlans';
 import {
   X,
   User,
@@ -19,6 +20,7 @@ import { formatIndianMobile } from '../utils/validation';
 
 interface LeadDetailsModalProps {
   lead: Lead | null;
+  currentUser?: AppUser | null;
   onClose: () => void;
   onOpenStatusModal: (lead: Lead) => void;
   onOpenEditModal: (lead: Lead) => void;
@@ -26,6 +28,7 @@ interface LeadDetailsModalProps {
 
 export const LeadDetailsModal: React.FC<LeadDetailsModalProps> = ({
   lead,
+  currentUser,
   onClose,
   onOpenStatusModal,
   onOpenEditModal,
@@ -197,6 +200,8 @@ export const LeadDetailsModal: React.FC<LeadDetailsModalProps> = ({
               ))}
             </div>
           </div>
+
+          {currentUser && <SipPlans lead={lead} currentUser={currentUser} />}
 
           {/* Narration for any other savings (optional) */}
           <div className="p-4 rounded-lg bg-amber-50/40 border border-amber-200">

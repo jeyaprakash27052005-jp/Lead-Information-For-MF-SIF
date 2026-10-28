@@ -1,6 +1,6 @@
-import { SiteItem, SiteMenu } from '../types';
+import { SiteContact, SiteItem, SiteMenu } from '../types';
 import { db } from './firebase';
-import { collection, getDocs, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, getDoc, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 
 const clean = <T,>(o: T): T => JSON.parse(JSON.stringify(o));
 const fail = (what: string) => new Error(`Could not ${what}. Check your connection and that the Firestore rules allow the "siteMenus" and "siteItems" collections.`);
@@ -18,6 +18,17 @@ export const siteStorage = {
     const l: SiteItem[] = [];
     snap.forEach((d) => l.push({ ...d.data(), id: d.id } as SiteItem));
     return l.sort((a, b) => a.order - b.order);
+  },
+  async getContact(): Promise<SiteContact | null> {
+    const d = await getDoc(doc(db, 'settings', 'siteContact'));
+    return d.exists() ? (d.data() as SiteContact) : null;
+  },
+  async saveContact(c: SiteContact): Promise<void> {
+    try {
+      await setDoc(doc(db, 'settings', 'siteContact'), clean({ ...c, updatedAt: new Date().toISOString() }));
+    } catch (_e) {
+      throw fail('save the contact details (the "settings/siteContact" document must be allowed by the Firestore rules)');
+    }
   },
   async saveMenu(menu: SiteMenu): Promise<void> {
     try {

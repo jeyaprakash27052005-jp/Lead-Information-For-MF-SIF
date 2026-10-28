@@ -183,3 +183,10 @@ Admin portal -> **Website Menus**:
 Republish `firestore.rules` after pulling this change (new collections `siteMenus` and `siteItems`).
 
 Optional settings (Vercel -> Environment Variables, all public): `VITE_CONTACT_EMAIL` (default jeyaprakash27052005@gmail.com), `VITE_CONTACT_PHONE`, `VITE_CONTACT_WHATSAPP` (digits with country code), `VITE_CUSTOMER_URL` (https address of the Customer Portal, shows the Login button). Run with `npm run dev:ads`, build with `npm run build:ads`. Vercel Root Directory: `apps/ads`.
+
+## Contact details and SIP reminders
+
+- **Contact Us page** (advertising website) shows *Chat to us* (name, e-mail), *Office* (address) and *Phone* (hours, name, mobile number) with green icons. Head and Regional Incharge edit them in the admin portal under **Website Menus -> Contact Us details**; they are stored online in `settings/siteContact`.
+- **SIP investment** (admin portal): when a lead is **Ready to Invest**, open the lead's profile and press **Add SIP**. Enter the scheme name, starting date, end of SIP and amount by hand, choose **Growth / Dividend Payout / Reinvestment of Dividend**, and the order mode (**daily / weekly / monthly**). SIPs can be edited, paused and deleted.
+- **SIP Reminders** (admin menu): every SIP due within **3 days** is listed first (also shown as an alert inside the investor's profile), followed by all other running SIPs with their next date. Stored in the `sipPlans` collection.
+- Republish `firestore.rules` (new: `sipPlans`, `settings/siteContact`).

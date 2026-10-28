@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { Mail, Menu, MessageCircle, Phone, X, Send, Landmark, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { MapPin, Mail, Menu, MessageCircle, Phone, X, Send, Landmark, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { AppSettingsProvider, useAppSettings } from './context/AppSettings';
 import { AdsCarousel } from './components/AdsCarousel';
 import { FundAdsList } from './components/FundAdsList';
@@ -7,7 +7,7 @@ import { AwarenessList } from './components/AwarenessList';
 import { FinanceCalculations } from './components/FinanceCalculations';
 import { siteStorage } from './services/siteStorage';
 import { DEFAULT_ITEMS, DEFAULT_MENUS } from './utils/siteDefaults';
-import { SiteItem, SiteMenu } from './types';
+import { SiteContact, SiteItem, SiteMenu } from './types';
 import { MF_DISCLAIMER } from './utils/fundAdRules';
 
 const env = import.meta.env as Record<string, string | undefined>;
@@ -296,47 +296,85 @@ function Site() {
 }
 
 function Contact() {
+  const [info, setInfo] = useState<SiteContact>({ contactName: '', mobile: CONTACT_PHONE, email: CONTACT_EMAIL, officeAddress: '', hours: '' });
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [msg, setMsg] = useState('');
+
+  useEffect(() => {
+    let alive = true;
+    siteStorage
+      .getContact()
+      .then((c) => alive && c && setInfo((o) => ({ ...o, ...c, email: c.email || o.email })))
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const email = info.email || CONTACT_EMAIL;
+  const digits = info.mobile.replace(/\D/g, '');
+  const wa = CONTACT_WHATSAPP || (digits.length === 10 ? `91${digits}` : digits.length >= 11 ? digits : '');
   const text = `Hello, I am ${name || '(name)'}${phone ? ` (mobile ${phone})` : ''}. ${msg}`.trim();
   const ready = name.trim().length > 1 && msg.trim().length > 1;
   const input = 'w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
 
+  const block = (icon: React.ReactNode, title: string, lines: React.ReactNode[]) => (
+    <div className="flex items-start gap-4">
+      <span className="w-14 h-14 shrink-0 rounded-full bg-green-500 text-slate-900 flex items-center justify-center">{icon}</span>
+      <div className="space-y-1 min-w-0">
+        <p className="text-sm font-black uppercase tracking-wide text-slate-900">{title}</p>
+        {lines.map((l, i) => (
+          <p key={i} className="text-sm text-slate-700 break-words">{l}</p>
+        ))}
+      </div>
+    </div>
+  );
+
   return (
-    <section className="max-w-xl mx-auto space-y-5">
+    <section className="max-w-4xl mx-auto space-y-6">
       <h1 className="text-2xl font-black text-slate-900">Contact Us</h1>
-      <p className="text-sm text-slate-600">Tell us what you would like to know. Your message opens in your own e-mail or WhatsApp, so you can check it before sending.</p>
-      <div className="bg-white rounded-2xl border border-slate-200 p-5 space-y-3">
-        <input className={input} placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} />
-        <input className={input} placeholder="Mobile number (optional)" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} />
-        <textarea className={input} rows={4} placeholder="Your question" value={msg} onChange={(e) => setMsg(e.target.value)} maxLength={600} />
-        <div className="flex flex-wrap gap-2">
-          <a
-            aria-disabled={!ready}
-            href={ready ? `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Mutual fund enquiry')}&body=${encodeURIComponent(text)}` : undefined}
-            className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold text-white ${ready ? 'bg-blue-700 hover:bg-blue-800' : 'bg-slate-300 pointer-events-none'}`}
-          >
-            <Send className="w-4 h-4" /> Send by e-mail
-          </a>
-          {CONTACT_WHATSAPP && (
+      <div className="grid md:grid-cols-2 gap-8">
+        <div className="space-y-7 bg-white rounded-2xl border border-slate-200 p-6">
+          {block(<Mail className="w-6 h-6" />, 'Chat to us', [
+            'Our friendly team is here to help.',
+            info.contactName && <b key="n">{info.contactName}</b>,
+            <a key="e" href={`mailto:${email}`} className="text-blue-700 font-semibold">{email}</a>,
+          ].filter(Boolean) as React.ReactNode[])}
+          {info.officeAddress && block(<MapPin className="w-6 h-6" />, 'Office', ['Come and meet us at our office.', <span key="a" className="whitespace-pre-line">{info.officeAddress}</span>])}
+          {(info.mobile || info.hours) &&
+            block(<Phone className="w-6 h-6" />, 'Phone', [
+              info.hours,
+              info.contactName && info.mobile ? info.contactName : '',
+              info.mobile && <a key="p" href={`tel:${info.mobile.replace(/\s+/g, '')}`} className="text-blue-700 font-semibold">{info.mobile}</a>,
+            ].filter(Boolean) as React.ReactNode[])}
+        </div>
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 space-y-3">
+          <p className="text-sm text-slate-600">Or send us a question. It opens in your own e-mail or WhatsApp so you can check it before sending.</p>
+          <input className={input} placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} />
+          <input className={input} placeholder="Mobile number (optional)" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} />
+          <textarea className={input} rows={4} placeholder="Your question" value={msg} onChange={(e) => setMsg(e.target.value)} maxLength={600} />
+          <div className="flex flex-wrap gap-2">
             <a
               aria-disabled={!ready}
-              href={ready ? `https://wa.me/${CONTACT_WHATSAPP}?text=${encodeURIComponent(text)}` : undefined}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold text-white ${ready ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-300 pointer-events-none'}`}
+              href={ready ? `mailto:${email}?subject=${encodeURIComponent('Mutual fund enquiry')}&body=${encodeURIComponent(text)}` : undefined}
+              className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold text-white ${ready ? 'bg-blue-700 hover:bg-blue-800' : 'bg-slate-300 pointer-events-none'}`}
             >
-              <MessageCircle className="w-4 h-4" /> WhatsApp
+              <Send className="w-4 h-4" /> Send by e-mail
             </a>
-          )}
+            {wa && (
+              <a
+                aria-disabled={!ready}
+                href={ready ? `https://wa.me/${wa}?text=${encodeURIComponent(text)}` : undefined}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold text-white ${ready ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-300 pointer-events-none'}`}
+              >
+                <MessageCircle className="w-4 h-4" /> WhatsApp
+              </a>
+            )}
+          </div>
         </div>
-      </div>
-      <div className="text-sm text-slate-700 space-y-1.5">
-        <p className="flex items-center gap-2"><Mail className="w-4 h-4 text-blue-700" /> {CONTACT_EMAIL}</p>
-        {CONTACT_PHONE && (
-          <p className="flex items-center gap-2"><Phone className="w-4 h-4 text-blue-700" /> <a href={`tel:${CONTACT_PHONE.replace(/\s+/g, '')}`}>{CONTACT_PHONE}</a></p>
-        )}
       </div>
     </section>
   );

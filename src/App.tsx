@@ -25,6 +25,7 @@ import { HomeScreen } from './components/HomeScreen';
 import { AdsManagement } from './components/AdsManagement';
 import { FinanceCalculations } from './components/FinanceCalculations';
 import { FundAdsManagement } from './components/FundAdsManagement';
+import { SipReminders } from './components/SipReminders';
 import { SiteContentManagement } from './components/SiteContentManagement';
 import { AwarenessProgramsAdmin } from './components/AwarenessProgramsAdmin';
 import { AddLeadPage } from './components/AddLeadPage';
@@ -971,6 +972,7 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
 
             {activeTab === 'fund-ads-admin' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge' || currentUser.role === 'area_incharge') && <FundAdsManagement currentUser={currentUser} onNotify={showFeedback} />}
 
+            {activeTab === 'sip-reminders' && <SipReminders leads={assignedLeads} onViewLead={(lead) => setDetailsModalLead(lead)} />}
             {activeTab === 'site-content' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge') && <SiteContentManagement currentUser={currentUser} onNotify={showFeedback} />}
             {activeTab === 'finance-calculations' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge' || currentUser.role === 'area_incharge') && <FinanceCalculations />}
 
@@ -1031,6 +1033,7 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
       {/* MODAL 3: Lead Details Dossier Modal */}
       <LeadDetailsModal
         lead={detailsModalLead}
+        currentUser={currentUser}
         onClose={() => setDetailsModalLead(null)}
         onOpenStatusModal={(lead) => setStatusModalLead(lead)}
         onOpenEditModal={(lead) => {
