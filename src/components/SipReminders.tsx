@@ -34,6 +34,10 @@ export const SipReminders: React.FC<{ leads: Lead[]; onViewLead: (lead: Lead) =>
       .sort((a, b) => a.due!.date.getTime() - b.due!.date.getTime());
   }, [plans, leads]);
 
+  // investors who are Ready to Invest but have no SIP entered yet
+  const withSip = new Set((plans ?? []).map((p) => p.leadId));
+  const waiting = leads.filter((l) => l.status === 'Ready to Invest' && !withSip.has(l.id));
+
   const soon = rows.filter((r) => r.due!.remind);
   const later = rows.filter((r) => !r.due!.remind);
 
@@ -71,12 +75,27 @@ export const SipReminders: React.FC<{ leads: Lead[]; onViewLead: (lead: Lead) =>
           <RefreshCw className="w-3.5 h-3.5" /> Refresh
         </button>
       </div>
-      {error && <p role="alert" className="text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">Could not read the SIPs from the online database.</p>}
+      {error && <p role="alert" className="text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">Could not read the SIPs from the online database. Publish the latest <b>firestore.rules</b> in Firebase (it adds the "sipPlans" collection), then press Refresh. Investors who are Ready to Invest are still listed below.</p>}
       <div className="bg-white rounded-2xl border border-amber-200 shadow-xs p-5">
         <p className="flex items-center gap-1.5 font-bold text-amber-900 text-sm mb-1"><BellRing className="w-4 h-4" /> Due in the next {SIP_REMIND_DAYS} days ({soon.length})</p>
         {plans === null && <p className="text-xs text-slate-400 py-4">Loading...</p>}
         {plans !== null && soon.length === 0 && <p className="text-xs text-slate-500 py-3">No investment is due in the next {SIP_REMIND_DAYS} days.</p>}
         <ul className="divide-y divide-slate-100">{soon.map(row)}</ul>
+      </div>
+      <div className="bg-white rounded-2xl border border-emerald-200 shadow-xs p-5">
+        <p className="font-bold text-emerald-900 text-sm mb-1">Ready to Invest, SIP not entered yet ({waiting.length})</p>
+        {waiting.length === 0 && <p className="text-xs text-slate-500 py-3">Every Ready to Invest investor has a SIP.</p>}
+        <ul className="divide-y divide-slate-100">
+          {waiting.map((l) => (
+            <li key={l.id} className="py-3 flex flex-wrap items-center gap-3 text-xs">
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-slate-900 text-sm">{l.name}</p>
+                <p className="text-slate-600">{l.mobile ? `Mobile ${l.mobile}` : 'No mobile number'}</p>
+              </div>
+              <button type="button" onClick={() => onViewLead(l)} className="px-3 py-1.5 rounded-md bg-emerald-600 text-white font-bold cursor-pointer">Open profile and add SIP</button>
+            </li>
+          ))}
+        </ul>
       </div>
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
         <p className="font-bold text-slate-900 text-sm mb-1">All other running SIPs ({later.length})</p>
