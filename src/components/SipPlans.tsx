@@ -19,6 +19,7 @@ export const SipPlans: React.FC<{ lead: Lead; currentUser: User }> = ({ lead, cu
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [remindOn, setRemindOn] = useState(dayString(new Date()));
   const ready = lead.status === 'Ready to Invest';
 
   const load = () =>
@@ -97,7 +98,7 @@ export const SipPlans: React.FC<{ lead: Lead; currentUser: User }> = ({ lead, cu
   const remind = async (p: SipPlan, date: Date) => {
     const done = !isReminded(p, date);
     try {
-      await sipStorage.savePlan(done ? { ...p, remindedFor: dayString(date), remindedAt: new Date().toISOString(), remindedBy: currentUser.name } : { ...p, remindedFor: '', remindedAt: '', remindedBy: '' });
+      await sipStorage.savePlan(done ? { ...p, remindedFor: dayString(date), remindedAt: new Date(`${remindOn || dayString(new Date())}T12:00:00`).toISOString(), remindedBy: currentUser.name } : { ...p, remindedFor: '', remindedAt: '', remindedBy: '' });
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not save the reminder.');
@@ -211,19 +212,26 @@ export const SipPlans: React.FC<{ lead: Lead; currentUser: User }> = ({ lead, cu
                 <p className="text-slate-500">{p.isActive ? 'This SIP has ended.' : 'Paused.'}</p>
               )}
               {due && p.isActive && (
-                <p className={`font-semibold ${isReminded(p, due.date) ? 'text-emerald-700' : 'text-slate-500'}`}>
-                  {isReminded(p, due.date) ? `Investor reminded by ${p.remindedBy || 'incharge'}${p.remindedAt ? ` on ${dateText(dayString(new Date(p.remindedAt)))}` : ''}` : 'Investor not reminded yet for this date'}
-                  {' '}
-                  <button type="button" onClick={() => remind(p, due.date)} className="ml-1 px-2 py-0.5 rounded-md border border-slate-300 text-slate-800 font-bold cursor-pointer">
-                    {isReminded(p, due.date) ? 'Undo' : 'Mark reminded'}
-                  </button>
-                </p>
-              )}
-              {due && p.isActive && (
-                <p className="flex items-center gap-1.5 text-emerald-800 font-semibold">
-                  <CalendarClock className="w-3.5 h-3.5" />
-                  Reminder date: {dateText(dayString(reminderDate(due.date)))} ({SIP_REMIND_DAYS} days before {dateText(dayString(due.date))}) · {frequencyLabel(p.frequency)} order, reminder repeats {repeatText(p.frequency)}
-                </p>
+                <div className="mt-1 rounded-md border border-emerald-200 bg-emerald-50/60 p-2.5 space-y-2">
+                  <p className="font-bold text-emerald-900 flex items-center gap-1.5">
+                    <CalendarClock className="w-3.5 h-3.5" /> Reminder · {dateText(dayString(reminderDate(due.date)))}
+                    <span className="font-semibold text-emerald-700">({SIP_REMIND_DAYS} days before {dateText(dayString(due.date))}, {frequencyLabel(p.frequency).toLowerCase()} order)</span>
+                  </p>
+                  {isReminded(p, due.date) ? (
+                    <p className="flex flex-wrap items-center gap-2 text-emerald-800 font-semibold">
+                      Investor reminded by {p.remindedBy || 'incharge'}{p.remindedAt ? ` on ${dateText(dayString(new Date(p.remindedAt)))}` : ''}
+                      <button type="button" onClick={() => remind(p, due.date)} className="px-2 py-0.5 rounded-md border border-slate-300 bg-white text-slate-800 font-bold cursor-pointer">Undo</button>
+                    </p>
+                  ) : (
+                    <div className="flex flex-wrap items-end gap-2">
+                      <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                        Reminded on
+                        <input type="date" value={remindOn} max={dayString(new Date())} onChange={(e) => setRemindOn(e.target.value)} className="mt-1 block px-2 py-1.5 text-xs font-semibold border border-slate-300 rounded-md bg-white" />
+                      </label>
+                      <button type="button" onClick={() => remind(p, due.date)} className="px-3 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-bold cursor-pointer">Save reminder</button>
+                    </div>
+                  )}
+                </div>
               )}
               <p className="text-[10px] text-slate-400">Entered by {p.addedBy} on {formatDateTime(p.createdAt)}</p>
             </li>
