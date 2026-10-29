@@ -130,6 +130,7 @@ export type ViewTab =
   | 'fund-ads-admin'
   | 'site-content'
   | 'sip-reminders'
+  | 'event-leads'
   | 'fund-ads-customer';
 
 export interface HealthReport {
@@ -332,4 +333,42 @@ export interface SiteContact {
   hours: string;
   updatedAt?: string;
   updatedBy?: string;
+}
+
+/** An event (seminar, camp, exhibition...) created by the Head or Regional Incharge; every admin can then add leads met at it */
+export interface EventInfo {
+  id: string;
+  name: string;
+  date: string; // YYYY-MM-DD
+  endDate?: string;
+  venue: string;
+  description?: string;
+  /** Division the event is for (the creator's region); empty = whole organisation */
+  region?: string;
+  isActive: boolean; // false = closed: no more leads can be added
+  createdBy: string;
+  createdByRole: UserRole;
+  createdById: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export type EventLeadCategory = 'individual' | 'company';
+
+/** A person met at an event, added by any admin */
+export interface EventLead {
+  id: string;
+  eventId: string;
+  eventName: string;
+  category: EventLeadCategory;
+  companyName?: string; // only when category = company
+  personName: string;
+  mobile: string; // 10 digits
+  narration?: string;
+  region: string; // region of the admin who added it
+  addedByUserId: string;
+  addedByName: string;
+  addedByRole: UserRole;
+  createdAt: string;
+  updatedAt?: string;
 }

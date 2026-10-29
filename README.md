@@ -207,3 +207,11 @@ Head and Regional Incharge always have **SIP Reminders** (menu, and Add SIP insi
 ### Change limit for Area Incharge
 
 An Area Incharge can **Undo / change** the reminder of one investment date only **2 times** (the button shows how many are left). After that it shows "Change limit over" and only the Regional or Head Incharge can change it. Head and Regional Incharge are never limited, and in the investor's SIP card they can set a different limit for that investor ("Area Incharge changes allowed for a reminder"). The count starts again at 0 for the next investment date.
+
+## Event Leads (admin portal)
+
+Menu -> **Event Leads**.
+- **Head and Regional Incharge** create events (event name, date, optional end date, venue, details). A Regional Incharge's event belongs to their region; the Head's event is for all regions. They can edit, close (no more leads) / reopen and delete their events (the Head any event).
+- **Every admin** (Head, Regional, Area Incharge) then adds the people they meet: **Name category** - *Individual* (person name only) or *Company name* (company name and contact person name) - plus mobile number (10 digits) and narration.
+- Visibility: the Head sees every event lead, a Regional Incharge the leads of their region, an Area Incharge the leads they added. Head and Regional Incharge can download an event's leads as CSV.
+- Stored in the `events` and `eventLeads` collections: republish `firestore.rules`.

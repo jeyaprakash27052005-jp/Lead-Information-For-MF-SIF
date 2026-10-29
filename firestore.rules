@@ -92,6 +92,28 @@ service cloud.firestore {
       allow delete: if isValidId(planId);
     }
 
+    match /events/{eventId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(eventId)
+        && request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 160
+        && request.resource.data.date is string && request.resource.data.date.size() == 10
+        && request.resource.data.venue is string && request.resource.data.venue.size() <= 300
+        && request.resource.data.isActive is bool;
+      allow delete: if isValidId(eventId);
+    }
+
+    match /eventLeads/{leadId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(leadId)
+        && request.resource.data.eventId is string && request.resource.data.eventId.size() > 0
+        && request.resource.data.category in ['individual', 'company']
+        && request.resource.data.personName is string && request.resource.data.personName.size() > 0 && request.resource.data.personName.size() <= 128
+        && request.resource.data.mobile is string && request.resource.data.mobile.matches('^[6-9][0-9]{9}$')
+        && (!('companyName' in request.resource.data) || (request.resource.data.companyName is string && request.resource.data.companyName.size() <= 160))
+        && (!('narration' in request.resource.data) || (request.resource.data.narration is string && request.resource.data.narration.size() <= 2000));
+      allow delete: if isValidId(leadId);
+    }
+
     match /siteMenus/{menuId} {
       allow get, list: if true;
       allow create, update: if isValidId(menuId)

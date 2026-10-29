@@ -21,6 +21,7 @@ import {
   Landmark,
   LayoutList,
   CalendarClock,
+  CalendarDays,
 } from 'lucide-react';
 
 import { canUseSip } from '../utils/sipAccess';
@@ -181,6 +182,14 @@ export const Navigation: React.FC<NavigationProps> = ({
         description: 'See which SIP investments are due in the next 3 days',
       });
     }
+
+    // Feature: Event leads (events by Head / Regional Incharge; leads added by every admin)
+    items.push({
+      id: 'event-leads',
+      label: 'Event Leads',
+      icon: <CalendarDays className="w-4 h-4" />,
+      description: isHead || isRegional ? 'Create events and collect the leads met at them' : 'Add the leads you meet at an event',
+    });
 
     // Feature: Advertising website menus and pages (Head and Regional Incharge only)
     if (isHead || isRegional) {
