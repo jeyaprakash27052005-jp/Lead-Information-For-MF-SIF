@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BellRing, CalendarClock, Pencil, Plus, Save, Trash2, X } from 'lucide-react';
 import { Lead, SipFrequency, SipOption, SipPlan, User } from '../types';
 import { sipStorage } from '../services/sipStorage';
-import { SIP_REMIND_DAYS, SIP_FREQUENCIES, SIP_OPTIONS, dayString, dueFor, frequencyLabel, optionLabel, isReminded, reminderDate, repeatText, whenText } from '../utils/sipSchedule';
+import { DEFAULT_CHANGE_LIMIT, SIP_REMIND_DAYS, SIP_FREQUENCIES, SIP_OPTIONS, dayString, dueFor, frequencyLabel, optionLabel, isReminded, changeInfo, undoReminder, reminderDate, repeatText, whenText } from '../utils/sipSchedule';
 import { formatInr } from '../utils/currency';
 import { formatDateTime } from '../utils/dateTime';
 
@@ -68,6 +68,9 @@ export const SipPlans: React.FC<{ lead: Lead; currentUser: User }> = ({ lead, cu
         remindedFor: old?.remindedFor,
         remindedAt: old?.remindedAt,
         remindedBy: old?.remindedBy,
+        changeLimit: old?.changeLimit,
+        changeFor: old?.changeFor,
+        changeCount: old?.changeCount,
         addedBy: old?.addedBy || currentUser.name,
         createdAt: old?.createdAt || new Date().toISOString(),
       });
@@ -97,11 +100,22 @@ export const SipPlans: React.FC<{ lead: Lead; currentUser: User }> = ({ lead, cu
   };
   const remind = async (p: SipPlan, date: Date) => {
     const done = !isReminded(p, date);
+    if (!done && changeInfo(p, date, currentUser.role).locked) return setError('Your change limit for this reminder is over. Ask the Regional Incharge or Head Incharge to change it or to give more changes.');
     try {
-      await sipStorage.savePlan(done ? { ...p, remindedFor: dayString(date), remindedAt: new Date(`${remindOn || dayString(new Date())}T12:00:00`).toISOString(), remindedBy: currentUser.name } : { ...p, remindedFor: '', remindedAt: '', remindedBy: '' });
+      await sipStorage.savePlan(done ? { ...p, remindedFor: dayString(date), remindedAt: new Date(`${remindOn || dayString(new Date())}T12:00:00`).toISOString(), remindedBy: currentUser.name } : undoReminder(p, date, currentUser.role));
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not save the reminder.');
+    }
+  };
+  const setLimit = async (p: SipPlan, v: string) => {
+    const n = Math.max(0, Math.min(20, Math.floor(Number(v))));
+    if (!Number.isFinite(n) || n === (p.changeLimit ?? DEFAULT_CHANGE_LIMIT)) return;
+    try {
+      await sipStorage.savePlan({ ...p, changeLimit: n });
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not save the limit.');
     }
   };
   const toggle = async (p: SipPlan) => {
@@ -220,7 +234,16 @@ export const SipPlans: React.FC<{ lead: Lead; currentUser: User }> = ({ lead, cu
                   {due.reminded && (
                     <p className="flex flex-wrap items-center gap-2 text-emerald-800 font-semibold">
                       Reminded for the {dateText(dayString(due.reminded))} investment by {p.remindedBy || 'incharge'}{p.remindedAt ? ` on ${dateText(dayString(new Date(p.remindedAt)))}` : ''}
-                      <button type="button" onClick={() => remind(p, due.reminded!)} className="px-2 py-0.5 rounded-md border border-slate-300 bg-white text-slate-800 font-bold cursor-pointer">Undo</button>
+                      {(() => {
+                        const ci = changeInfo(p, due.reminded!, currentUser.role);
+                        return ci.locked ? (
+                          <span className="text-rose-700 font-bold">Change limit over ({ci.used} of {ci.limit}). Ask the Regional or Head Incharge.</span>
+                        ) : (
+                          <button type="button" onClick={() => remind(p, due.reminded!)} className="px-2 py-0.5 rounded-md border border-slate-300 bg-white text-slate-800 font-bold cursor-pointer">
+                            Undo{ci.limited ? ` (${ci.limit - ci.used} change${ci.limit - ci.used === 1 ? '' : 's'} left)` : ''}
+                          </button>
+                        );
+                      })()}
                     </p>
                   )}
                   {!due.last && (
@@ -243,6 +266,21 @@ export const SipPlans: React.FC<{ lead: Lead; currentUser: User }> = ({ lead, cu
                     </>
                   )}
                 </div>
+              )}
+              {currentUser.role !== 'area_incharge' && due && p.isActive && (
+                <p className="flex flex-wrap items-center gap-2 text-[11px] text-slate-600">
+                  Area Incharge changes allowed for a reminder:
+                  <input
+                    type="number"
+                    min={0}
+                    max={20}
+                    defaultValue={p.changeLimit ?? DEFAULT_CHANGE_LIMIT}
+                    aria-label="Change limit"
+                    onBlur={(e) => setLimit(p, e.target.value)}
+                    className="w-14 px-1.5 py-1 border border-slate-300 rounded-md font-bold text-slate-800"
+                  />
+                  <span className="text-slate-400">(used {changeInfo(p, due.reminded || due.date, 'area_incharge').used}; saves when you leave the box)</span>
+                </p>
               )}
               <p className="text-[10px] text-slate-400">Entered by {p.addedBy} on {formatDateTime(p.createdAt)}</p>
             </li>

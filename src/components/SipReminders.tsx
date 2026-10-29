@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { BellRing, CalendarClock, CheckCircle2, RefreshCw, Search, Undo2 } from 'lucide-react';
 import { Lead, SipFrequency, SipPlan, User } from '../types';
 import { sipStorage } from '../services/sipStorage';
-import { SIP_FREQUENCIES, SIP_REMIND_DAYS, dayString, dueFor, frequencyLabel, isReminded, optionLabel, reminderDate, whenText } from '../utils/sipSchedule';
+import { SIP_FREQUENCIES, SIP_REMIND_DAYS, dayString, dueFor, frequencyLabel, changeInfo, isReminded, optionLabel, undoReminder, reminderDate, whenText } from '../utils/sipSchedule';
 import { formatInr } from '../utils/currency';
 import { dateText } from './SipPlans';
 
@@ -15,6 +15,7 @@ export const SipReminders: React.FC<{ leads: Lead[]; currentUser: User; onViewLe
   const [status, setStatus] = useState<'' | 'to_remind' | 'reminded'>('');
   const [region, setRegion] = useState('');
   const [when, setWhen] = useState<'' | 'soon' | 'week' | 'month'>('');
+  const [limitMsg, setLimitMsg] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const load = () =>
     sipStorage
@@ -49,11 +50,13 @@ export const SipReminders: React.FC<{ leads: Lead[]; currentUser: User; onViewLe
   }, [plans, leads, q, mode, status, region, when]);
 
   const mark = async (plan: SipPlan, date: Date, done: boolean) => {
+    if (!done && changeInfo(plan, date, currentUser.role).locked) return setLimitMsg(true);
+    setLimitMsg(false);
     setBusy(plan.id);
     try {
       const next: SipPlan = done
         ? { ...plan, remindedFor: dayString(date), remindedAt: new Date().toISOString(), remindedBy: currentUser.name }
-        : { ...plan, remindedFor: '', remindedAt: '', remindedBy: '' };
+        : undoReminder(plan, date, currentUser.role);
       await sipStorage.savePlan(next);
       setPlans((old) => (old ?? []).map((p) => (p.id === plan.id ? next : p)));
     } catch (_e) {
@@ -91,11 +94,17 @@ export const SipReminders: React.FC<{ leads: Lead[]; currentUser: User; onViewLe
         <span className={`px-2.5 py-1 rounded-full font-bold border ${d.remind ? 'bg-amber-50 text-amber-800 border-amber-300' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>
           {whenText(d.inDays)} · {dateText(dayString(d.date))}
         </span>
-        {d.reminded && (
-          <button type="button" disabled={busy === d.plan.id} onClick={() => mark(d.plan, d.reminded!, false)} className="px-3 py-1.5 rounded-md border border-slate-300 font-bold flex items-center gap-1 cursor-pointer">
-            <Undo2 className="w-3.5 h-3.5" /> Undo
-          </button>
-        )}
+        {d.reminded &&
+          (() => {
+            const ci = changeInfo(d.plan, d.reminded!, currentUser.role);
+            return ci.locked ? (
+              <span className="px-2 py-1 rounded-md bg-rose-50 border border-rose-200 text-rose-700 font-bold">Change limit over ({ci.used} of {ci.limit})</span>
+            ) : (
+              <button type="button" disabled={busy === d.plan.id} onClick={() => mark(d.plan, d.reminded!, false)} className="px-3 py-1.5 rounded-md border border-slate-300 font-bold flex items-center gap-1 cursor-pointer">
+                <Undo2 className="w-3.5 h-3.5" /> Undo{ci.limited ? ` (${ci.limit - ci.used} left)` : ''}
+              </button>
+            );
+          })()}
         {d.remind && !d.last && (
           <button type="button" disabled={busy === d.plan.id} onClick={() => mark(d.plan, d.date, true)} className="px-3 py-1.5 rounded-md bg-emerald-600 text-white font-bold flex items-center gap-1 cursor-pointer">
             <CheckCircle2 className="w-3.5 h-3.5" /> Mark reminded
@@ -122,6 +131,7 @@ export const SipReminders: React.FC<{ leads: Lead[]; currentUser: User; onViewLe
           <RefreshCw className="w-3.5 h-3.5" /> Refresh
         </button>
       </div>
+      {limitMsg && <p role="alert" className="text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">Your change limit for this reminder is over. Ask the Regional Incharge or Head Incharge to change it or to give more changes.</p>}
       {error && <p role="alert" className="text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">Could not read the SIPs from the online database. Publish the latest <b>firestore.rules</b> in Firebase (it adds the "sipPlans" collection), then press Refresh. Investors who are Ready to Invest are still listed below.</p>}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-4 grid sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
         <label className="relative sm:col-span-2 lg:col-span-1">

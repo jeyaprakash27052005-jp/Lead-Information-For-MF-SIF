@@ -203,3 +203,7 @@ Head and Regional Incharge always have **SIP Reminders** (menu, and Add SIP insi
 
 - **Add Lead** now exists only as the button at the top right of the **All Leads Directory** (admin). The floating round button, the menu entry and the button on Assigned Leads were removed.
 - After the incharge presses **Save reminder / Mark reminded**, the SIP shows the **next reminder date** by itself, worked out from the SIP's starting date and order mode (daily / weekly / monthly) up to the end date. After the last investment it says no more reminders.
+
+### Change limit for Area Incharge
+
+An Area Incharge can **Undo / change** the reminder of one investment date only **2 times** (the button shows how many are left). After that it shows "Change limit over" and only the Regional or Head Incharge can change it. Head and Regional Incharge are never limited, and in the investor's SIP card they can set a different limit for that investor ("Area Incharge changes allowed for a reminder"). The count starts again at 0 for the next investment date.

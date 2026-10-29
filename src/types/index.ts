@@ -313,6 +313,11 @@ export interface SipPlan {
   remindedFor?: string;
   remindedAt?: string;
   remindedBy?: string;
+  /** How many times an Area Incharge may undo the reminder of one investment date (default 2); Head / Regional Incharge can raise it for this investor */
+  changeLimit?: number;
+  /** The investment date (YYYY-MM-DD) the counter below belongs to; a new date starts again from 0 */
+  changeFor?: string;
+  changeCount?: number;
   addedBy: string;
   createdAt: string;
   updatedAt?: string;

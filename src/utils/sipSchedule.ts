@@ -91,3 +91,20 @@ export const isReminded = (plan: SipPlan, investDate: Date): boolean => plan.rem
 /** The investment date after `date` (null when the SIP ends with `date`): used to show the next reminder once the investor is reminded */
 export const followingInstallment = (plan: Pick<SipPlan, 'startDate' | 'endDate' | 'frequency'>, date: Date): Date | null =>
   nextInstallment(plan, new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1));
+
+export const DEFAULT_CHANGE_LIMIT = 2;
+
+/** Area Incharge may change (undo) the reminder of one investment date only a limited number of times; Head and Regional Incharge are never limited */
+export const changeInfo = (plan: SipPlan, investDate: Date, role: string) => {
+  const limit = plan.changeLimit ?? DEFAULT_CHANGE_LIMIT;
+  const used = plan.changeFor === dayString(investDate) ? plan.changeCount ?? 0 : 0;
+  const limited = role === 'area_incharge';
+  return { limit, used, limited, locked: limited && used >= limit };
+};
+
+/** The plan after the reminder of `investDate` is undone (counts as one change for an Area Incharge) */
+export const undoReminder = (plan: SipPlan, investDate: Date, role: string): SipPlan => {
+  const { used, limited } = changeInfo(plan, investDate, role);
+  const base = { ...plan, remindedFor: '', remindedAt: '', remindedBy: '' };
+  return limited ? { ...base, changeFor: dayString(investDate), changeCount: used + 1 } : base;
+};
