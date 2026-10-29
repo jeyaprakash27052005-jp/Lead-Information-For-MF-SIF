@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { BellRing, CalendarClock, CheckCircle2, RefreshCw, Search, Undo2 } from 'lucide-react';
 import { Lead, SipFrequency, SipPlan, User } from '../types';
 import { sipStorage } from '../services/sipStorage';
-import { SIP_FREQUENCIES, SIP_REMIND_DAYS, dayString, dueFor, followingInstallment, frequencyLabel, isReminded, optionLabel, reminderDate, whenText } from '../utils/sipSchedule';
+import { SIP_FREQUENCIES, SIP_REMIND_DAYS, dayString, dueFor, frequencyLabel, isReminded, optionLabel, reminderDate, whenText } from '../utils/sipSchedule';
 import { formatInr } from '../utils/currency';
 import { dateText } from './SipPlans';
 
@@ -43,7 +43,7 @@ export const SipReminders: React.FC<{ leads: Lead[]; currentUser: User; onViewLe
       .filter((r) => !mode || r.due!.plan.frequency === mode)
       .filter((r) => !region || r.lead.assignedRegion === region)
       .filter((r) => !needle || r.lead.name.toLowerCase().includes(needle) || r.due!.plan.schemeName.toLowerCase().includes(needle) || (r.lead.mobile || '').includes(needle))
-      .filter((r) => !status || (status === 'reminded') === isReminded(r.due!.plan, r.due!.date))
+      .filter((r) => !status || (status === 'reminded' ? !!r.due!.reminded : r.due!.remind && !r.due!.last))
       .filter((r) => !when || (when === 'soon' ? r.due!.inDays <= SIP_REMIND_DAYS : when === 'week' ? r.due!.inDays <= 7 : r.due!.inDays <= 31))
       .sort((a, b) => a.due!.date.getTime() - b.due!.date.getTime());
   }, [plans, leads, q, mode, status, region, when]);
@@ -67,8 +67,8 @@ export const SipReminders: React.FC<{ leads: Lead[]; currentUser: User; onViewLe
   const withSip = new Set((plans ?? []).map((p) => p.leadId));
   const waiting = leads.filter((l) => l.status === 'Ready to Invest' && !withSip.has(l.id));
 
-  const soon = rows.filter((r) => r.due!.remind);
-  const later = rows.filter((r) => !r.due!.remind);
+  const soon = rows.filter((r) => r.due!.remind && !r.due!.last);
+  const later = rows.filter((r) => !(r.due!.remind && !r.due!.last));
 
   const row = (r: (typeof rows)[number]) => {
     const d = r.due!;
@@ -79,25 +79,24 @@ export const SipReminders: React.FC<{ leads: Lead[]; currentUser: User; onViewLe
           <p className="text-slate-600">
             {d.plan.schemeName} · {formatInr(d.plan.amount)} <b>{frequencyLabel(d.plan.frequency)}</b> · {optionLabel(d.plan.option)}
           </p>
-          <p className="text-slate-500">Reminder date: {dateText(dayString(reminderDate(d.date)))}</p>
-          {isReminded(d.plan, d.date) && (
-            <p className="text-emerald-700 font-semibold flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Investor reminded by {d.plan.remindedBy || 'incharge'}{d.plan.remindedAt ? ` on ${dateText(dayString(new Date(d.plan.remindedAt)))}` : ''}
-              {' · '}
-              {(() => {
-                const f = followingInstallment(d.plan, d.date);
-                return f ? `Next reminder ${dateText(dayString(reminderDate(f)))}` : 'Last investment of this SIP';
-              })()}
-            </p>
+          {d.last ? (
+            <p className="text-slate-500">Last investment. No more reminders.</p>
+          ) : (
+            <p className="text-slate-500">Next reminder: {dateText(dayString(reminderDate(d.date)))} ({SIP_REMIND_DAYS} days before the investment)</p>
+          )}
+          {d.reminded && (
+            <p className="text-emerald-700 font-semibold flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Reminded for the {dateText(dayString(d.reminded))} investment by {d.plan.remindedBy || 'incharge'}{d.plan.remindedAt ? ` on ${dateText(dayString(new Date(d.plan.remindedAt)))}` : ''}</p>
           )}
         </div>
         <span className={`px-2.5 py-1 rounded-full font-bold border ${d.remind ? 'bg-amber-50 text-amber-800 border-amber-300' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>
           {whenText(d.inDays)} · {dateText(dayString(d.date))}
         </span>
-        {isReminded(d.plan, d.date) ? (
-          <button type="button" disabled={busy === d.plan.id} onClick={() => mark(d.plan, d.date, false)} className="px-3 py-1.5 rounded-md border border-slate-300 font-bold flex items-center gap-1 cursor-pointer">
+        {d.reminded && (
+          <button type="button" disabled={busy === d.plan.id} onClick={() => mark(d.plan, d.reminded!, false)} className="px-3 py-1.5 rounded-md border border-slate-300 font-bold flex items-center gap-1 cursor-pointer">
             <Undo2 className="w-3.5 h-3.5" /> Undo
           </button>
-        ) : (
+        )}
+        {d.remind && !d.last && (
           <button type="button" disabled={busy === d.plan.id} onClick={() => mark(d.plan, d.date, true)} className="px-3 py-1.5 rounded-md bg-emerald-600 text-white font-bold flex items-center gap-1 cursor-pointer">
             <CheckCircle2 className="w-3.5 h-3.5" /> Mark reminded
           </button>

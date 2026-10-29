@@ -51,18 +51,32 @@ export const nextInstallment = (plan: Pick<SipPlan, 'startDate' | 'endDate' | 'f
 
 export interface SipDue {
   plan: SipPlan;
+  /** The investment the next reminder is for: the first one that the investor has not been reminded about yet */
   date: Date;
   inDays: number;
-  /** true from 3 days before the investment date until the day itself */
+  /** true from 3 days before `date` (the reminder day) until the day itself */
   remind: boolean;
+  /** The earlier, still upcoming investment the investor was already reminded about (null when none) */
+  reminded: Date | null;
+  /** true when every remaining investment has been reminded (nothing more to do for this SIP) */
+  last: boolean;
 }
 
+/** After "Mark reminded" the schedule moves on by itself: weekly +7 days, monthly +1 month, daily +1 day, up to the end date */
 export const dueFor = (plan: SipPlan, from: Date = new Date()): SipDue | null => {
   if (!plan.isActive) return null;
-  const date = nextInstallment(plan, from);
-  if (!date) return null;
+  let date = nextInstallment(plan, from);
+  let reminded: Date | null = null;
+  while (date && isReminded(plan, date)) {
+    reminded = date;
+    date = followingInstallment(plan, date);
+  }
+  if (!date) {
+    if (!reminded) return null;
+    return { plan, date: reminded, inDays: daysBetween(from, reminded), remind: false, reminded, last: true };
+  }
   const inDays = daysBetween(from, date);
-  return { plan, date, inDays, remind: inDays <= SIP_REMIND_DAYS };
+  return { plan, date, inDays, remind: inDays <= SIP_REMIND_DAYS, reminded, last: false };
 };
 
 export const whenText = (inDays: number): string => (inDays <= 0 ? 'Today' : inDays === 1 ? 'Tomorrow' : `In ${inDays} days`);
