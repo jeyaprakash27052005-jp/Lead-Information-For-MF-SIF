@@ -36,7 +36,6 @@ import { FeatureOff } from './components/FeatureOff';
 import { AppSettingsProvider, useAppSettings } from './context/AppSettings';
 import { HealthReportsAdmin } from './components/HealthReportsAdmin';
 import { HealthCheckup } from './components/HealthCheckup';
-import { PlusCircle } from 'lucide-react';
 import { getAllRegions, NATIONAL_HQ_REGION } from './utils/regions';
 
 /** 'all' = the complete site; 'admin' / 'customer' = a stand-alone portal built from the same code */
@@ -893,10 +892,6 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
                   setIsAddLeadModalOpen(true);
                 }}
                 onDeleteLead={handleDeleteLead}
-                onAddNewLead={() => {
-                  setEditingLead(null);
-                  setActiveTab('add-lead');
-                }}
                 title={
                   currentUser.role === 'regional_incharge'
                     ? `Assigned Leads: ${currentUser.region}`
@@ -1006,21 +1001,6 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
           </>
         )}
       </main>
-
-      {/* Floating Action Button for Quick Lead Addition for authorized roles */}
-      {(currentUser.role === 'head' || currentUser.role === 'regional_incharge' || currentUser.role === 'area_incharge') && activeTab !== 'customer-portal' && activeTab !== 'add-lead' && (
-        <button
-          onClick={() => {
-            setEditingLead(null);
-            setActiveTab('add-lead');
-          }}
-          className="fixed bottom-6 right-6 z-40 bg-slate-900 hover:bg-slate-800 text-white p-3.5 rounded-full shadow-2xl flex items-center gap-2 text-xs font-bold transition-all cursor-pointer border border-slate-700"
-          title="Add New Lead Information"
-        >
-          <PlusCircle className="w-5 h-5 text-indigo-400" />
-          <span className="hidden sm:inline">Add Lead</span>
-        </button>
-      )}
 
       {/* MODAL 1: Lead Information Form Modal (Add / Edit) */}
       <LeadFormModal

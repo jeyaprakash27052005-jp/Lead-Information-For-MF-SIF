@@ -4,7 +4,6 @@ import { User, ViewTab } from '../types';
 import {
   Users,
   UserPlus,
-  PlusCircle,
   Activity,
   BarChart3,
   FileSpreadsheet,
@@ -108,16 +107,6 @@ export const Navigation: React.FC<NavigationProps> = ({
         badge: assignedCount,
         highlight: true,
         description: isRegional ? 'Leads assigned to your division' : 'Your portfolio leads',
-      });
-    }
-
-    // Feature: Add Leads (Head, Regional Incharge & Area Incharge)
-    if (isHead || isRegional || isArea) {
-      items.push({
-        id: 'add-lead',
-        label: 'Add New Lead',
-        icon: <PlusCircle className="w-4 h-4" />,
-        description: 'Record new lead with financial profile and savings narration',
       });
     }
 

@@ -73,3 +73,7 @@ export const repeatText = (f: SipFrequency): string => (f === 'daily' ? 'every d
 
 /** true when the incharge has marked the investor as reminded for this investment date */
 export const isReminded = (plan: SipPlan, investDate: Date): boolean => plan.remindedFor === dayString(investDate);
+
+/** The investment date after `date` (null when the SIP ends with `date`): used to show the next reminder once the investor is reminded */
+export const followingInstallment = (plan: Pick<SipPlan, 'startDate' | 'endDate' | 'frequency'>, date: Date): Date | null =>
+  nextInstallment(plan, new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1));

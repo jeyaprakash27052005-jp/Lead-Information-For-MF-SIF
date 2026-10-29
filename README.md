@@ -198,3 +198,8 @@ On **SIP Reminders** (and inside the investor's SIP card) the incharge presses *
 ### Who can use SIP Reminders
 
 Head and Regional Incharge always have **SIP Reminders** (menu, and Add SIP inside an investor's profile). An **Area Incharge** gets it only when a Head or Regional Incharge switches it on: Admin portal -> **User Management** -> the Area Incharge's row -> **SIP Reminders: Off/On** (a Regional Incharge can do this for Area Incharges of their own region). It switches on or off for that person within about a minute, without logging in again.
+
+### Add Lead and next reminder
+
+- **Add Lead** now exists only as the button at the top right of the **All Leads Directory** (admin). The floating round button, the menu entry and the button on Assigned Leads were removed.
+- After the incharge presses **Save reminder / Mark reminded**, the SIP shows the **next reminder date** by itself, worked out from the SIP's starting date and order mode (daily / weekly / monthly) up to the end date. After the last investment it says no more reminders.

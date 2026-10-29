@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { BellRing, CalendarClock, CheckCircle2, RefreshCw, Search, Undo2 } from 'lucide-react';
 import { Lead, SipFrequency, SipPlan, User } from '../types';
 import { sipStorage } from '../services/sipStorage';
-import { SIP_FREQUENCIES, SIP_REMIND_DAYS, dayString, dueFor, frequencyLabel, isReminded, optionLabel, reminderDate, whenText } from '../utils/sipSchedule';
+import { SIP_FREQUENCIES, SIP_REMIND_DAYS, dayString, dueFor, followingInstallment, frequencyLabel, isReminded, optionLabel, reminderDate, whenText } from '../utils/sipSchedule';
 import { formatInr } from '../utils/currency';
 import { dateText } from './SipPlans';
 
@@ -81,7 +81,13 @@ export const SipReminders: React.FC<{ leads: Lead[]; currentUser: User; onViewLe
           </p>
           <p className="text-slate-500">Reminder date: {dateText(dayString(reminderDate(d.date)))}</p>
           {isReminded(d.plan, d.date) && (
-            <p className="text-emerald-700 font-semibold flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Investor reminded by {d.plan.remindedBy || 'incharge'}{d.plan.remindedAt ? ` on ${dateText(dayString(new Date(d.plan.remindedAt)))}` : ''}</p>
+            <p className="text-emerald-700 font-semibold flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Investor reminded by {d.plan.remindedBy || 'incharge'}{d.plan.remindedAt ? ` on ${dateText(dayString(new Date(d.plan.remindedAt)))}` : ''}
+              {' · '}
+              {(() => {
+                const f = followingInstallment(d.plan, d.date);
+                return f ? `Next reminder ${dateText(dayString(reminderDate(f)))}` : 'Last investment of this SIP';
+              })()}
+            </p>
           )}
         </div>
         <span className={`px-2.5 py-1 rounded-full font-bold border ${d.remind ? 'bg-amber-50 text-amber-800 border-amber-300' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>

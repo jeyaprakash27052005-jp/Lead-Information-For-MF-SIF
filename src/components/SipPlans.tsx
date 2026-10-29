@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BellRing, CalendarClock, Pencil, Plus, Save, Trash2, X } from 'lucide-react';
 import { Lead, SipFrequency, SipOption, SipPlan, User } from '../types';
 import { sipStorage } from '../services/sipStorage';
-import { SIP_REMIND_DAYS, SIP_FREQUENCIES, SIP_OPTIONS, dayString, dueFor, frequencyLabel, optionLabel, isReminded, reminderDate, repeatText, whenText } from '../utils/sipSchedule';
+import { SIP_REMIND_DAYS, SIP_FREQUENCIES, SIP_OPTIONS, dayString, dueFor, frequencyLabel, optionLabel, followingInstallment, isReminded, reminderDate, repeatText, whenText } from '../utils/sipSchedule';
 import { formatInr } from '../utils/currency';
 import { formatDateTime } from '../utils/dateTime';
 
@@ -218,10 +218,18 @@ export const SipPlans: React.FC<{ lead: Lead; currentUser: User }> = ({ lead, cu
                     <span className="font-semibold text-emerald-700">({SIP_REMIND_DAYS} days before {dateText(dayString(due.date))}, {frequencyLabel(p.frequency).toLowerCase()} order)</span>
                   </p>
                   {isReminded(p, due.date) ? (
-                    <p className="flex flex-wrap items-center gap-2 text-emerald-800 font-semibold">
-                      Investor reminded by {p.remindedBy || 'incharge'}{p.remindedAt ? ` on ${dateText(dayString(new Date(p.remindedAt)))}` : ''}
-                      <button type="button" onClick={() => remind(p, due.date)} className="px-2 py-0.5 rounded-md border border-slate-300 bg-white text-slate-800 font-bold cursor-pointer">Undo</button>
-                    </p>
+                    <>
+                      <p className="flex flex-wrap items-center gap-2 text-emerald-800 font-semibold">
+                        Investor reminded by {p.remindedBy || 'incharge'}{p.remindedAt ? ` on ${dateText(dayString(new Date(p.remindedAt)))}` : ''}
+                        <button type="button" onClick={() => remind(p, due.date)} className="px-2 py-0.5 rounded-md border border-slate-300 bg-white text-slate-800 font-bold cursor-pointer">Undo</button>
+                      </p>
+                      <p className="text-slate-700 font-semibold">
+                        {(() => {
+                          const f = followingInstallment(p, due.date);
+                          return f ? `Next reminder: ${dateText(dayString(reminderDate(f)))} for the investment on ${dateText(dayString(f))}` : 'This is the last investment of the SIP. No more reminders after this.';
+                        })()}
+                      </p>
+                    </>
                   ) : (
                     <div className="flex flex-wrap items-end gap-2">
                       <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
