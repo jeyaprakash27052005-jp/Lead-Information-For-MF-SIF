@@ -2,6 +2,7 @@ import React from 'react';
 import { formatDateTime } from '../utils/dateTime';
 import { Lead, User as AppUser } from '../types';
 import { SipPlans } from './SipPlans';
+import { canUseSip } from '../utils/sipAccess';
 import {
   X,
   User,
@@ -201,7 +202,7 @@ export const LeadDetailsModal: React.FC<LeadDetailsModalProps> = ({
             </div>
           </div>
 
-          {currentUser && <SipPlans lead={lead} currentUser={currentUser} />}
+          {canUseSip(currentUser) && currentUser && <SipPlans lead={lead} currentUser={currentUser} />}
 
           {/* Narration for any other savings (optional) */}
           <div className="p-4 rounded-lg bg-amber-50/40 border border-amber-200">

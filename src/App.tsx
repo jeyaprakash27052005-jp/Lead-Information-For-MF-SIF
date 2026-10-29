@@ -26,6 +26,7 @@ import { AdsManagement } from './components/AdsManagement';
 import { FinanceCalculations } from './components/FinanceCalculations';
 import { FundAdsManagement } from './components/FundAdsManagement';
 import { SipReminders } from './components/SipReminders';
+import { canUseSip } from './utils/sipAccess';
 import { SiteContentManagement } from './components/SiteContentManagement';
 import { AwarenessProgramsAdmin } from './components/AwarenessProgramsAdmin';
 import { AddLeadPage } from './components/AddLeadPage';
@@ -268,6 +269,11 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
       const meId = currentUserIdRef.current;
       if (meId) {
         const me = fetchedUsers.find((u) => u.id === meId);
+        if (me && me.status === 'active') {
+          // keep the logged-in person's own settings (for example SIP Reminders access) up to date
+          setCurrentUser((cur) => (cur && cur.sipRemindersEnabled !== me.sipRemindersEnabled ? { ...cur, sipRemindersEnabled: me.sipRemindersEnabled } : cur));
+          if (me.role === 'area_incharge' && !me.sipRemindersEnabled) setActiveTab((t) => (t === 'sip-reminders' ? defaultTabFor(me.role) : t));
+        }
         if (!me || me.status !== 'active') {
           clearSession();
           setCurrentUser(null);
@@ -464,6 +470,12 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
     const updated = await apiService.updateUserPermissions(userId, permissions);
     setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
     showFeedback(`Feature permissions saved for ${updated.name}.`);
+  };
+
+  const handleToggleSipAccess = async (userId: string, enabled: boolean) => {
+    const updated = await apiService.updateUserSipAccess(userId, enabled);
+    setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
+    showFeedback(`SIP Reminders ${enabled ? 'switched on' : 'switched off'} for ${updated.name}.`);
   };
 
   const handleDeleteUser = async (userId: string) => {
@@ -930,6 +942,7 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
                 onToggleStatus={handleToggleUserStatus}
                 onDeleteUser={handleDeleteUser}
                 onUpdatePermissions={handleUpdatePermissions}
+                onToggleSipAccess={handleToggleSipAccess}
                 onEditUserProfile={(user) => {
                   setProfileUserToEdit(user);
                   setIsProfileModalOpen(true);
@@ -972,7 +985,7 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
 
             {activeTab === 'fund-ads-admin' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge' || currentUser.role === 'area_incharge') && <FundAdsManagement currentUser={currentUser} onNotify={showFeedback} />}
 
-            {activeTab === 'sip-reminders' && <SipReminders leads={assignedLeads} currentUser={currentUser} onViewLead={(lead) => setDetailsModalLead(lead)} />}
+            {activeTab === 'sip-reminders' && canUseSip(currentUser) && <SipReminders leads={assignedLeads} currentUser={currentUser} onViewLead={(lead) => setDetailsModalLead(lead)} />}
             {activeTab === 'site-content' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge') && <SiteContentManagement currentUser={currentUser} onNotify={showFeedback} />}
             {activeTab === 'finance-calculations' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge' || currentUser.role === 'area_incharge') && <FinanceCalculations />}
 

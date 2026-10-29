@@ -13,6 +13,8 @@ export interface User {
   associatedLeadId?: string;
   /** Features an admin (Head / Regional Incharge) has switched on or off for this customer */
   permissions?: CustomerPermissionSettings;
+  /** Area Incharge only: a Head or Regional Incharge has switched the SIP Reminders feature on for this person */
+  sipRemindersEnabled?: boolean;
 }
 
 /** What an admin saved for one customer. `explicit` marks values chosen in the Permissions window (false = blocked for this customer). */

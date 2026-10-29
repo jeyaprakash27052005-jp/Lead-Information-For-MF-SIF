@@ -37,6 +37,7 @@ interface UserManagementProps {
   onDeleteUser: (userId: string) => Promise<void>;
   onEditUserProfile: (user: User) => void;
   onUpdatePermissions?: (userId: string, permissions: CustomerPermissionSettings) => Promise<void>;
+  onToggleSipAccess?: (userId: string, enabled: boolean) => Promise<void>;
   onCreateRegion?: (name: string) => Promise<void>;
   onDeleteRegion?: (name: string) => Promise<void>;
   regions?: string[];
@@ -50,6 +51,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
   onDeleteUser,
   onEditUserProfile,
   onUpdatePermissions,
+  onToggleSipAccess,
   onCreateRegion,
   onDeleteRegion,
   regions = DEFAULT_REGIONS,
@@ -511,6 +513,21 @@ export const UserManagement: React.FC<UserManagementProps> = ({
                               title={`Choose which features ${u.name} can use`}
                             >
                               Permissions
+                            </button>
+                          )}
+
+                        {/* SIP Reminders access for an Area Incharge - chosen by Head / Regional Incharge */}
+                        {u.role === 'area_incharge' &&
+                          onToggleSipAccess &&
+                          (isHead || (isRegional && u.region === currentUser.region)) && (
+                            <button
+                              onClick={() => onToggleSipAccess(u.id, !u.sipRemindersEnabled).catch(() => window.alert('Could not change SIP Reminders access. Please check your connection and try again.'))}
+                              className={`px-2.5 py-1 rounded text-xs font-semibold border transition-colors cursor-pointer ${
+                                u.sipRemindersEnabled ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-slate-600 bg-slate-50 border-slate-200'
+                              }`}
+                              title={`Choose whether ${u.name} can use SIP Reminders`}
+                            >
+                              SIP Reminders: {u.sipRemindersEnabled ? 'On' : 'Off'}
                             </button>
                           )}
 

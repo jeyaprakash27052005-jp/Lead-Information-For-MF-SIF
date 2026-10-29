@@ -461,6 +461,24 @@ export const firebaseDbService = {
     }
   },
 
+  async updateUserSipAccess(userId: string, enabled: boolean): Promise<User> {
+    await ensureFirestoreDatabaseSeeded();
+    const path = `users/${userId}`;
+    try {
+      const userRef = doc(db, 'users', userId);
+      const snap = await getDoc(userRef);
+      if (!snap.exists()) {
+        throw new Error('User not found in online database');
+      }
+      await updateDoc(userRef, { sipRemindersEnabled: enabled });
+      const data = (await getDoc(userRef)).data() as StoredUser;
+      const { password: _p, ...safeUser } = data;
+      return safeUser as User;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, path);
+    }
+  },
+
   async updateUserProfile(
     userId: string,
     profileData: {

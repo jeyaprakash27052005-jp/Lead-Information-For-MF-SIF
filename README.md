@@ -194,3 +194,7 @@ Optional settings (Vercel -> Environment Variables, all public): `VITE_CUSTOMER_
 ### Reminding the investor and filters
 
 On **SIP Reminders** (and inside the investor's SIP card) the incharge presses **Mark reminded** after calling or messaging the investor. It records who reminded and when, for that investment date only; when the next daily / weekly / monthly date comes, the SIP shows "not reminded yet" again. Filters: investor / scheme / mobile search, order mode (daily, weekly, monthly), reminded or not, investment date (3, 7, 31 days) and region.
+
+### Who can use SIP Reminders
+
+Head and Regional Incharge always have **SIP Reminders** (menu, and Add SIP inside an investor's profile). An **Area Incharge** gets it only when a Head or Regional Incharge switches it on: Admin portal -> **User Management** -> the Area Incharge's row -> **SIP Reminders: Off/On** (a Regional Incharge can do this for Area Incharges of their own region). It switches on or off for that person within about a minute, without logging in again.

@@ -24,6 +24,8 @@ import {
   CalendarClock,
 } from 'lucide-react';
 
+import { canUseSip } from '../utils/sipAccess';
+
 interface NavigationProps {
   currentUser: User;
   activeTab: ViewTab;
@@ -181,8 +183,8 @@ export const Navigation: React.FC<NavigationProps> = ({
       });
     }
 
-    // Feature: SIP reminders for investors who are Ready to Invest (all three admin roles)
-    if (isHead || isRegional || isArea) {
+    // Feature: SIP reminders: Head and Regional Incharge; Area Incharge only when one of them switched it on
+    if (canUseSip(currentUser)) {
       items.push({
         id: 'sip-reminders',
         label: 'SIP Reminders',
