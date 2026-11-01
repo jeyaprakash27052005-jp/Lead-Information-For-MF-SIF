@@ -166,7 +166,7 @@ The earlier **Investor Profile** (11 questions with the fund data link) has been
 
 ## Advertising website (`apps/ads`)
 
-A separate public website for advertising mutual fund products, with a top menu bar and drop-down panels in the style of a fund-house site (labels are our own and can be renamed). The starter menu has **Investor Guide, Plan & Calculate, Fund Products, Help & Services** and a **Top Offers** button, plus **Quick Enquiry** and an optional **Login** button. Open to everyone, no login. On phones the menu becomes a three-line menu.
+A separate public website for advertising mutual fund products, with a top menu bar and drop-down panels in the style of a fund-house site (labels are our own and can be renamed). The starter menu has **Investor Guide, Plan & Calculate, Fund Products, Help & Services** and a **Top Offers** button, plus **Quick Response** and **Login** buttons. Open to everyone, no login. On phones the menu becomes a three-line menu.
 
 What it shows:
 - Menus, sub menus and pages written by the admin team (below).
@@ -215,3 +215,12 @@ Menu -> **Event Leads**.
 - **Every admin** (Head, Regional, Area Incharge) then adds the people they meet: **Name category** - *Individual* (person name only) or *Company name* (company name and contact person name) - plus mobile number (10 digits) and narration.
 - Visibility: the Head sees every event lead, a Regional Incharge the leads of their region, an Area Incharge the leads they added. Head and Regional Incharge can download an event's leads as CSV.
 - Stored in the `events` and `eventLeads` collections: republish `firestore.rules`.
+
+## Login, Quick Response and customer queries (advertising website)
+
+- **Login / Create account** (top right of the advertising website): login with e-mail ID (or mobile number) and password. **Create account** asks full name, mobile number, e-mail ID, password and confirm password (at least 8 characters). Passwords are never stored as text: they are salted PBKDF2 hashes made in the browser, and one e-mail ID can register only once.
+- **Verification without any outside service:** the site cannot send an SMS or e-mail by itself, so verification is done by the team. After sign-up the customer sees "Verify your account". In the admin portal, **Customer Queries -> Verify accounts**, an Area / Regional / Head Incharge presses **Generate code**, tells the customer the 8 character code on a call or message to their mobile number, and the customer types it on the site (valid 48 hours, 5 attempts; only a scrambled copy is stored). **Mark verified** is available when the person has already been confirmed.
+- **Quick Response** (needs a verified login): the customer sends a question. It appears in the admin portal under **Customer Queries -> Questions** for every Area, Regional and Head Incharge (open ones are counted). A reply shows on the customer's Quick Response page with the replier's name and role; the customer can add a follow-up. Head and Regional Incharge can delete questions and accounts.
+- Republish `firestore.rules` (new collections `siteCustomers` and `siteQueries`).
+- Real e-mail / SMS one-time codes need a sending service (for example the Brevo e-mail already used for the health report). That can be added later if you want it.
+- Note: the Firestore rules in this project let anyone read the database, so customer names, mobile numbers, e-mail IDs and questions are readable by anyone who calls the database directly. Moving to Firebase Authentication with stricter rules is the proper fix when you are ready.

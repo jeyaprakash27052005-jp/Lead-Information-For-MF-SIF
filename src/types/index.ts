@@ -131,6 +131,7 @@ export type ViewTab =
   | 'site-content'
   | 'sip-reminders'
   | 'event-leads'
+  | 'customer-queries'
   | 'fund-ads-customer';
 
 export interface HealthReport {
@@ -371,4 +372,40 @@ export interface EventLead {
   addedByRole: UserRole;
   createdAt: string;
   updatedAt?: string;
+}
+
+/** A visitor who created an account on the advertising website (stored in siteCustomers; secrets are salted hashes) */
+export interface SiteCustomer {
+  id: string;
+  fullName: string;
+  mobile: string;
+  email: string;
+  verified: boolean;
+  createdAt: string;
+  verifiedAt?: string;
+  /** a verification code was given by the team and is still waiting to be used */
+  codePending?: boolean;
+  codeExpires?: string;
+}
+
+export interface QueryMessage {
+  from: 'customer' | 'staff';
+  byName: string;
+  byRole?: UserRole;
+  text: string;
+  at: string;
+}
+
+/** A question sent by a customer from "Quick Response"; staff answer it from the admin portal */
+export interface SiteQuery {
+  id: string;
+  customerId: string;
+  customerName: string;
+  mobile: string;
+  email: string;
+  topic: string;
+  messages: QueryMessage[];
+  status: 'open' | 'answered';
+  createdAt: string;
+  updatedAt: string;
 }

@@ -114,6 +114,31 @@ service cloud.firestore {
       allow delete: if isValidId(leadId);
     }
 
+    match /siteCustomers/{customerId} {
+      allow get, list: if true;
+      allow create: if isValidId(customerId)
+        && !exists(/databases/$(database)/documents/siteCustomers/$(customerId))
+        && request.resource.data.fullName is string && request.resource.data.fullName.size() >= 2 && request.resource.data.fullName.size() <= 100
+        && request.resource.data.mobile is string && request.resource.data.mobile.matches('^[6-9][0-9]{9}$')
+        && request.resource.data.email is string && request.resource.data.email.size() <= 120
+        && request.resource.data.passwordHash is string && request.resource.data.passwordSalt is string
+        && request.resource.data.verified == false;
+      allow update: if isValidId(customerId)
+        && request.resource.data.passwordHash == resource.data.passwordHash
+        && request.resource.data.email == resource.data.email;
+      allow delete: if isValidId(customerId);
+    }
+
+    match /siteQueries/{queryId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(queryId)
+        && request.resource.data.customerId is string && request.resource.data.customerId.size() > 0
+        && request.resource.data.topic is string && request.resource.data.topic.size() <= 200
+        && request.resource.data.messages is list && request.resource.data.messages.size() >= 1 && request.resource.data.messages.size() <= 200
+        && request.resource.data.status in ['open', 'answered'];
+      allow delete: if isValidId(queryId);
+    }
+
     match /siteMenus/{menuId} {
       allow get, list: if true;
       allow create, update: if isValidId(menuId)

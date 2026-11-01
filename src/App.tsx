@@ -27,6 +27,7 @@ import { FinanceCalculations } from './components/FinanceCalculations';
 import { FundAdsManagement } from './components/FundAdsManagement';
 import { SipReminders } from './components/SipReminders';
 import { EventLeads } from './components/EventLeads';
+import { CustomerQueries } from './components/CustomerQueries';
 import { canUseSip } from './utils/sipAccess';
 import { SiteContentManagement } from './components/SiteContentManagement';
 import { AwarenessProgramsAdmin } from './components/AwarenessProgramsAdmin';
@@ -981,6 +982,7 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
 
             {activeTab === 'fund-ads-admin' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge' || currentUser.role === 'area_incharge') && <FundAdsManagement currentUser={currentUser} onNotify={showFeedback} />}
 
+            {activeTab === 'customer-queries' && <CustomerQueries currentUser={currentUser} onNotify={showFeedback} />}
             {activeTab === 'event-leads' && <EventLeads currentUser={currentUser} onNotify={showFeedback} />}
             {activeTab === 'sip-reminders' && canUseSip(currentUser) && <SipReminders leads={assignedLeads} currentUser={currentUser} onViewLead={(lead) => setDetailsModalLead(lead)} />}
             {activeTab === 'site-content' && (currentUser.role === 'head' || currentUser.role === 'regional_incharge') && <SiteContentManagement currentUser={currentUser} onNotify={showFeedback} />}

@@ -7,16 +7,25 @@ import { AwarenessList } from './components/AwarenessList';
 import { FinanceCalculations } from './components/FinanceCalculations';
 import { siteStorage } from './services/siteStorage';
 import { DEFAULT_ITEMS, DEFAULT_MENUS } from './utils/siteDefaults';
-import { SiteContact, SiteItem, SiteMenu } from './types';
+import { SiteContact, SiteCustomer, SiteItem, SiteMenu } from './types';
+import { AdsAccount, VerifyPanel } from './components/AdsAccount';
+import { QuickResponse } from './components/QuickResponse';
+import { siteCustomerStorage } from './services/siteCustomerStorage';
 
-const env = import.meta.env as Record<string, string | undefined>;
-const LOGIN_URL = /^https:\/\//i.test(env.VITE_CUSTOMER_URL || '') ? (env.VITE_CUSTOMER_URL as string) : '';
+const SESSION_KEY = 'ads_customer_id';
+const readSession = (): string | null => {
+  try {
+    return localStorage.getItem(SESSION_KEY);
+  } catch (_e) {
+    return null;
+  }
+};
 
-type Route = { name: 'home' | 'funds' | 'sessions' | 'contact' | 'calc' } | { name: 'page'; id: string };
+type Route = { name: 'home' | 'funds' | 'sessions' | 'contact' | 'calc' | 'login' | 'quick' } | { name: 'page'; id: string };
 
 const readRoute = (): Route => {
   const h = window.location.hash.replace(/^#\/?/, '');
-  if (h === 'funds' || h === 'sessions' || h === 'contact' || h === 'calc') return { name: h };
+  if (h === 'funds' || h === 'sessions' || h === 'contact' || h === 'calc' || h === 'login' || h === 'quick') return { name: h };
   if (h.startsWith('p/')) return { name: 'page', id: decodeURIComponent(h.slice(2)) };
   return { name: 'home' };
 };
@@ -34,6 +43,48 @@ function Site() {
   const [menus, setMenus] = useState<SiteMenu[]>(DEFAULT_MENUS);
   const [items, setItems] = useState<SiteItem[]>(DEFAULT_ITEMS);
   const headerRef = useRef<HTMLElement | null>(null);
+  const [customer, setCustomer] = useState<SiteCustomer | null>(null);
+  const [sessionChecked, setSessionChecked] = useState(false);
+  const afterLogin = useRef<string>('/home');
+
+  useEffect(() => {
+    const id = readSession();
+    if (!id) return setSessionChecked(true);
+    siteCustomerStorage
+      .get(id)
+      .then((c) => setCustomer(c))
+      .catch(() => undefined)
+      .finally(() => setSessionChecked(true));
+  }, []);
+
+  const signedIn = (c: SiteCustomer) => {
+    setCustomer(c);
+    try {
+      localStorage.setItem(SESSION_KEY, c.id);
+    } catch (_e) {
+      // the login simply is not remembered
+    }
+    if (c.verified) {
+      window.location.hash = afterLogin.current;
+      afterLogin.current = '/home';
+    }
+  };
+  const logout = () => {
+    setCustomer(null);
+    try {
+      localStorage.removeItem(SESSION_KEY);
+    } catch (_e) {
+      // ignore
+    }
+    window.location.hash = '/home';
+    setMobile(false);
+  };
+  const goLogin = (next: string) => {
+    afterLogin.current = next;
+    window.location.hash = '/login';
+    setMobile(false);
+    setOpenMenu(null);
+  };
 
   useEffect(() => {
     let alive = true;
@@ -133,7 +184,7 @@ function Site() {
             </span>
             <span className="font-black text-slate-900 tracking-tight text-sm sm:text-base">Mutual Fund Hub</span>
           </button>
-          <nav className="hidden lg:flex flex-1 items-center gap-1 ml-4" aria-label="Main">
+          <nav className="hidden xl:flex flex-1 items-center gap-1 ml-4" aria-label="Main">
             {visibleMenus.map((m) => (
               <button
                 key={m.id}
@@ -142,7 +193,7 @@ function Site() {
                 className={
                   m.highlight
                     ? 'ml-2 px-3.5 py-1.5 rounded-md text-sm font-bold bg-blue-100 text-blue-800 border border-blue-300 hover:bg-blue-200'
-                    : `px-3 py-2 text-sm font-semibold inline-flex items-center gap-1 ${openMenu === m.id ? 'text-blue-700' : 'text-slate-800 hover:text-blue-700'}`
+                    : `px-3 py-2 text-sm font-semibold inline-flex items-center gap-1 whitespace-nowrap ${openMenu === m.id ? 'text-blue-700' : 'text-slate-800 hover:text-blue-700'}`
                 }
               >
                 {m.label}
@@ -150,23 +201,26 @@ function Site() {
               </button>
             ))}
           </nav>
-          <div className="hidden lg:flex items-center gap-2 ml-auto">
-            <button onClick={() => go('/contact')} className="px-4 py-2 rounded-md border border-slate-800 text-sm font-bold text-slate-900 hover:bg-slate-50">
-              Quick Enquiry
+          <div className="hidden xl:flex items-center gap-2 ml-auto">
+            <button onClick={() => (customer?.verified ? go('/quick') : goLogin('/quick'))} className="px-4 py-2 rounded-md border border-slate-800 text-sm font-bold text-slate-900 hover:bg-slate-50">
+              Quick Response
             </button>
-            {LOGIN_URL && (
-              <a href={LOGIN_URL} className="px-5 py-2 rounded-md bg-blue-700 hover:bg-blue-800 text-sm font-bold text-white">
-                Login
-              </a>
+            {customer ? (
+              <>
+                <span className="text-sm font-semibold text-slate-700 max-w-[10rem] truncate" title={customer.fullName}>Hi, {customer.fullName.split(' ')[0]}</span>
+                <button onClick={logout} className="px-4 py-2 rounded-md bg-blue-700 hover:bg-blue-800 text-sm font-bold text-white">Logout</button>
+              </>
+            ) : (
+              <button onClick={() => goLogin('/home')} className="px-5 py-2 rounded-md bg-blue-700 hover:bg-blue-800 text-sm font-bold text-white">Login</button>
             )}
           </div>
-          <button className="lg:hidden ml-auto p-2 rounded-lg border border-slate-200" aria-label={mobile ? 'Close menu' : 'Open menu'} aria-expanded={mobile} onClick={() => setMobile((o) => !o)}>
+          <button className="xl:hidden ml-auto p-2 rounded-lg border border-slate-200" aria-label={mobile ? 'Close menu' : 'Open menu'} aria-expanded={mobile} onClick={() => setMobile((o) => !o)}>
             {mobile ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
 
         {panel && (
-          <div className="hidden lg:block absolute inset-x-0 top-full bg-white border-b border-slate-200 shadow-lg" role="region" aria-label={panel.label}>
+          <div className="hidden xl:block absolute inset-x-0 top-full bg-white border-b border-slate-200 shadow-lg" role="region" aria-label={panel.label}>
             <div className="max-w-7xl mx-auto px-8 py-7 grid gap-x-10 gap-y-6" style={{ gridTemplateColumns: `repeat(${Math.min(Math.max(sectionsOf(panel.id).length, 1), 4)}, minmax(0, 1fr))` }}>
               {sectionsOf(panel.id).map((sec) => (
                 <div key={sec.title} className="space-y-3">
@@ -187,7 +241,7 @@ function Site() {
         )}
 
         {mobile && (
-          <nav className="lg:hidden border-t border-slate-200 bg-white px-4 py-2 max-h-[75vh] overflow-y-auto" aria-label="Mobile">
+          <nav className="xl:hidden border-t border-slate-200 bg-white px-4 py-2 max-h-[75vh] overflow-y-auto" aria-label="Mobile">
             {visibleMenus.map((m) => (
               <div key={m.id} className="border-b border-slate-100 last:border-0">
                 <button onClick={() => clickMenu(m)} className="w-full flex items-center justify-between py-3 text-sm font-bold text-slate-800">
@@ -212,8 +266,12 @@ function Site() {
               </div>
             ))}
             <div className="py-3 flex gap-2">
-              <button onClick={() => go('/contact')} className="flex-1 px-4 py-2 rounded-md border border-slate-800 text-sm font-bold">Quick Enquiry</button>
-              {LOGIN_URL && <a href={LOGIN_URL} className="flex-1 text-center px-4 py-2 rounded-md bg-blue-700 text-sm font-bold text-white">Login</a>}
+              <button onClick={() => (customer?.verified ? go('/quick') : goLogin('/quick'))} className="flex-1 px-4 py-2 rounded-md border border-slate-800 text-sm font-bold">Quick Response</button>
+              {customer ? (
+                <button onClick={logout} className="flex-1 px-4 py-2 rounded-md bg-blue-700 text-sm font-bold text-white">Logout</button>
+              ) : (
+                <button onClick={() => goLogin('/home')} className="flex-1 px-4 py-2 rounded-md bg-blue-700 text-sm font-bold text-white">Login</button>
+              )}
             </div>
           </nav>
         )}
@@ -263,6 +321,27 @@ function Site() {
           </section>
         )}
         {route.name === 'contact' && <Contact />}
+        {route.name === 'login' && (
+          <section className="space-y-4">
+            {!sessionChecked ? <p className="text-xs text-slate-400 text-center">Loading...</p> : customer && !customer.verified ? <VerifyPanel customer={customer} onVerified={signedIn} /> : customer ? (
+              <div className="max-w-md mx-auto bg-white rounded-2xl border border-slate-200 p-6 text-center space-y-3">
+                <p className="text-sm text-slate-700">You are logged in as <b>{customer.fullName}</b>.</p>
+                <button onClick={() => go('/quick')} className="px-5 py-2.5 rounded-xl bg-blue-700 text-white text-sm font-bold cursor-pointer">Open Quick Response</button>
+              </div>
+            ) : (
+              <AdsAccount onLogin={signedIn} message={afterLogin.current === '/quick' ? 'Please login or create an account to use Quick Response.' : undefined} />
+            )}
+          </section>
+        )}
+        {route.name === 'quick' && (
+          !sessionChecked ? <p className="text-xs text-slate-400 text-center">Loading...</p> : !customer ? (
+            <AdsAccount onLogin={(c) => { afterLogin.current = '/quick'; signedIn(c); }} message="Please login or create an account to use Quick Response." />
+          ) : !customer.verified ? (
+            <VerifyPanel customer={customer} onVerified={(c) => { setCustomer(c); }} />
+          ) : (
+            <QuickResponse customer={customer} />
+          )
+        )}
         {route.name === 'page' &&
           (pageItem ? (
             <article className="max-w-2xl mx-auto space-y-4">

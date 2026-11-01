@@ -22,6 +22,7 @@ import {
   LayoutList,
   CalendarClock,
   CalendarDays,
+  MessageSquare,
 } from 'lucide-react';
 
 import { canUseSip } from '../utils/sipAccess';
@@ -182,6 +183,14 @@ export const Navigation: React.FC<NavigationProps> = ({
         description: 'See which SIP investments are due in the next 3 days',
       });
     }
+
+    // Feature: Questions customers send from the advertising website (all three admin roles)
+    items.push({
+      id: 'customer-queries',
+      label: 'Customer Queries',
+      icon: <MessageSquare className="w-4 h-4" />,
+      description: 'Answer the questions customers send from the advertising website and verify new accounts',
+    });
 
     // Feature: Event leads (events by Head / Regional Incharge; leads added by every admin)
     items.push({
