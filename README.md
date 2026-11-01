@@ -224,3 +224,8 @@ Menu -> **Event Leads**.
 - Republish `firestore.rules` (new collections `siteCustomers` and `siteQueries`).
 - Real e-mail / SMS one-time codes need a sending service (for example the Brevo e-mail already used for the health report). That can be added later if you want it.
 - Note: the Firestore rules in this project let anyone read the database, so customer names, mobile numbers, e-mail IDs and questions are readable by anyone who calls the database directly. Moving to Firebase Authentication with stricter rules is the proper fix when you are ready.
+
+### Advertising website: self-shown verification code and leads
+
+- After **Create account**, the website itself makes a verification code and shows it with a 30 second countdown. When the time is over it shows **Code expired** and the customer taps **Regenerate** for a new one. The customer types the code to verify. No e-mail / SMS service is used, so this is only a human check, not proof of phone or e-mail ownership.
+- Every new website account is also saved in **All Leads Directory** as a separate lead (source `ads_website`, added by "Advertising Website", status Pending, region National HQ). Age, income and occupation are placeholders for the team to fill in.

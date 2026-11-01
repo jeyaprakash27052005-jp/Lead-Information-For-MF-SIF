@@ -174,7 +174,7 @@ export const CustomerQueries: React.FC<Props> = ({ currentUser, onNotify }) => {
       {tab === 'accounts' && (
         <div className="space-y-3">
           <p className="text-xs text-slate-600 bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3">
-            No e-mail or SMS service is used. Call or message the customer on their mobile number, press <b>Generate code</b> and tell them the code. They type it on the website to verify. A code works for 48 hours; only a scrambled copy is stored. Use <b>Mark verified</b> if you have already confirmed the person.
+            Customers now verify themselves with a code shown on the website (valid 30 seconds, can be regenerated); this only checks a person is typing, it does not prove their phone or e-mail. Use <b>Mark verified</b> after you have confirmed the person, or <b>Generate code</b> to give an old-style 48-hour code by call.
           </p>
           {shownC.length === 0 && <p className="bg-white rounded-2xl border border-dashed border-slate-300 p-8 text-center text-xs text-slate-500">No accounts here.</p>}
           {shownC.map((c) => (

@@ -71,7 +71,7 @@ export interface Lead {
   assignedRegion: string;
   assignedTeamMember?: string;
   /** Where the lead came from (normal entries have no source) */
-  leadSource?: 'finance_health_checkup';
+  leadSource?: 'finance_health_checkup' | 'ads_website';
   email?: string;
   healthReportId?: string;
   healthScore?: number;

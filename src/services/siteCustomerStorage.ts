@@ -3,6 +3,8 @@ import { db } from './firebase';
 import { collection, getDocs, getDoc, doc, setDoc, updateDoc, deleteDoc, query, where, arrayUnion } from 'firebase/firestore';
 import { customerIdFor, hashSecret, isEmail, newVerificationCode, normalizeCode, randomSalt } from '../utils/siteAuth';
 import { normalizeIndianMobile } from '../utils/validation';
+import { NATIONAL_HQ_REGION } from '../utils/regions';
+import { Lead } from '../types';
 
 const MAX_ATTEMPTS = 5;
 const CODE_HOURS = 48;
@@ -40,6 +42,32 @@ export const siteCustomerStorage = {
       const salt = randomSalt();
       const c: Stored = { id, fullName, mobile, email, verified: false, createdAt: new Date().toISOString(), passwordSalt: salt, passwordHash: await hashSecret(input.password, salt) };
       await setDoc(doc(db, 'siteCustomers', id), clean(c));
+      // Also keep the new customer in the All Leads Directory, as a separate entry (never blocks sign-up)
+      try {
+        const now = new Date().toISOString();
+        const lead: Lead = {
+          id: `lead_ads_${id}`,
+          name: fullName,
+          age: 0,
+          gender: 'Other',
+          annualIncome: 0,
+          occupation: 'Not provided',
+          mobile,
+          email,
+          narration: 'Created an account on the advertising website.',
+          status: 'Pending',
+          addedByUserId: 'ads_website',
+          addedByName: 'Advertising Website',
+          addedByDesignation: 'Website customer',
+          assignedRegion: NATIONAL_HQ_REGION,
+          leadSource: 'ads_website',
+          createdAt: now,
+          updatedAt: now,
+        } as Lead;
+        await setDoc(doc(db, 'leads', lead.id), clean(lead));
+      } catch (_e) {
+        /* the account is already created; the lead can be added by the team */
+      }
       return publicView(c);
     } catch (e) {
       if (e instanceof Error && e.message.startsWith('This e-mail')) throw e;
@@ -93,6 +121,18 @@ export const siteCustomerStorage = {
     }
     await updateDoc(ref, { verified: true, verifiedAt: new Date().toISOString(), verifyHash: '', verifySalt: '', verifyExpires: '', verifyAttempts: 0 });
     return publicView({ ...s, verified: true, verifiedAt: new Date().toISOString(), verifyHash: '' });
+  },
+
+  /** The customer typed the code shown on the page (it is generated in the browser, valid for 30 seconds) */
+  async markSelfVerified(id: string): Promise<SiteCustomer> {
+    try {
+      const ref = doc(db, 'siteCustomers', id);
+      await updateDoc(ref, { verified: true, verifiedAt: new Date().toISOString(), verifyHash: '', verifySalt: '', verifyExpires: '' });
+      const snap = await getDoc(ref);
+      return publicView(snap.data() as Stored);
+    } catch (_e) {
+      throw dbErr('verify the account');
+    }
   },
 
   // ----- staff (admin portal) -----

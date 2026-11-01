@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AlertCircle, CheckCircle2, KeyRound, LogIn, RefreshCw, ShieldCheck, UserPlus } from 'lucide-react';
 import { SiteCustomer } from '../types';
 import { siteCustomerStorage } from '../services/siteCustomerStorage';
+import { newVerificationCode, normalizeCode } from '../utils/siteAuth';
 
 const input = 'w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
 const lbl = 'block text-xs font-bold text-slate-700 uppercase tracking-wider';
@@ -12,33 +13,41 @@ const Err: React.FC<{ msg: string | null }> = ({ msg }) =>
     </p>
   ) : null;
 
-/** Enter the code the team gave on a call / message. No e-mail or SMS service is used. */
+const CODE_SECONDS = 30;
+
+/** The code is made in the browser, shown for 30 seconds, then must be regenerated. No e-mail / SMS service is used. */
 export const VerifyPanel: React.FC<{ customer: SiteCustomer; onVerified: (c: SiteCustomer) => void }> = ({ customer, onVerified }) => {
+  const [shown, setShown] = useState(() => newVerificationCode());
+  const [left, setLeft] = useState(CODE_SECONDS);
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [note, setNote] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (left <= 0) return;
+    const t = window.setTimeout(() => setLeft((n) => n - 1), 1000);
+    return () => window.clearTimeout(t);
+  }, [left]);
+
+  const regenerate = () => {
+    setShown(newVerificationCode());
+    setLeft(CODE_SECONDS);
+    setCode('');
+    setError(null);
+  };
+  const expired = left <= 0;
 
   const submit = async () => {
     setError(null);
+    if (expired) return setError('The code has expired. Tap Regenerate.');
+    if (normalizeCode(code) !== normalizeCode(shown)) return setError('The code does not match. Type the code shown above.');
     setBusy(true);
     try {
-      onVerified(await siteCustomerStorage.verifyWithCode(customer.id, code));
+      onVerified(await siteCustomerStorage.markSelfVerified(customer.id));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not verify.');
     } finally {
       setBusy(false);
-    }
-  };
-  const recheck = async () => {
-    setError(null);
-    setNote(null);
-    try {
-      const c = await siteCustomerStorage.get(customer.id);
-      if (c?.verified) onVerified(c);
-      else setNote(c?.codePending ? 'A code is ready for you. Enter it above.' : 'Not verified yet. Our team will contact you on your mobile number soon.');
-    } catch (_e) {
-      setError('Could not check. Please try again.');
     }
   };
 
@@ -48,20 +57,25 @@ export const VerifyPanel: React.FC<{ customer: SiteCustomer; onVerified: (c: Sit
         <ShieldCheck className="w-4 h-4" /> Verify your account
       </div>
       <p className="text-sm text-slate-700">
-        Hello <b>{customer.fullName}</b>. To keep the site safe, our team will contact you on <b>{customer.mobile}</b> and tell you a verification code. Enter it below.
+        Hello <b>{customer.fullName}</b>. Type the code shown below to verify your account.
       </p>
+      <div className={`rounded-xl border px-4 py-3 text-center ${expired ? 'bg-rose-50 border-rose-200' : 'bg-blue-50 border-blue-200'}`}>
+        <p data-testid="verify-code" className={`font-mono text-2xl font-extrabold tracking-widest ${expired ? 'text-slate-400 line-through' : 'text-blue-800'}`}>{shown}</p>
+        <p data-testid="verify-status" className={`mt-1 text-xs font-bold ${expired ? 'text-rose-700' : 'text-emerald-700'}`}>
+          {expired ? 'Code expired' : `Valid for ${left} second${left === 1 ? '' : 's'}`}
+        </p>
+      </div>
       <Err msg={error} />
-      {note && <p className="text-xs font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">{note}</p>}
       <label className={lbl}>
-        Verification code
-        <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="XXXX-XXXX" maxLength={9} autoComplete="one-time-code" className={`mt-1 ${input} tracking-widest font-mono`} />
+        Enter the code
+        <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="XXXX-XXXX" maxLength={9} autoComplete="off" className={`mt-1 ${input} tracking-widest font-mono`} />
       </label>
       <div className="flex gap-2">
-        <button type="button" disabled={busy || code.replace(/[^A-Za-z0-9]/g, '').length < 8} onClick={submit} className="px-4 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold flex items-center gap-1.5 disabled:opacity-50 cursor-pointer">
+        <button type="button" disabled={busy || expired || code.replace(/[^A-Za-z0-9]/g, '').length < 8} onClick={submit} className="px-4 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold flex items-center gap-1.5 disabled:opacity-50 cursor-pointer">
           <KeyRound className="w-4 h-4" /> Verify
         </button>
-        <button type="button" onClick={recheck} className="px-4 py-2.5 rounded-xl border border-slate-300 text-sm font-bold flex items-center gap-1.5 cursor-pointer">
-          <RefreshCw className="w-4 h-4" /> Check again
+        <button type="button" onClick={regenerate} className={`px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-1.5 cursor-pointer ${expired ? 'bg-amber-500 text-white' : 'border border-slate-300'}`}>
+          <RefreshCw className="w-4 h-4" /> Regenerate
         </button>
       </div>
     </div>
@@ -136,7 +150,7 @@ export const AdsAccount: React.FC<{ onLogin: (c: SiteCustomer) => void; message?
             Confirm password
             <input type="password" value={f.confirm} onChange={(e) => setF({ ...f, confirm: e.target.value })} autoComplete="new-password" className={`mt-1 ${input}`} />
           </label>
-          <p className="text-[11px] text-slate-500 flex items-start gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" /> After you create the account, our team gives you a verification code on your mobile number.</p>
+          <p className="text-[11px] text-slate-500 flex items-start gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" /> After you create the account, a verification code is shown on the page. It is valid for 30 seconds and can be regenerated.</p>
           <button type="submit" disabled={busy} className="w-full px-4 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold flex items-center justify-center gap-1.5 disabled:opacity-60 cursor-pointer">
             <UserPlus className="w-4 h-4" /> {busy ? 'Please wait...' : 'Create account'}
           </button>
