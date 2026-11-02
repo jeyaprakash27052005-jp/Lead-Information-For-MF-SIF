@@ -72,13 +72,6 @@ export const SessionRegister: React.FC<{ programId: string; onBack: () => void }
               <AlertCircle className="w-4 h-4 shrink-0" /> {error}
             </p>
           )}
-          <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 rounded-xl text-sm font-bold">
-            {(['customer', 'member'] as const).map((t) => (
-              <button key={t} type="button" onClick={() => setF({ ...f, attendeeType: t })} className={`py-2 rounded-lg cursor-pointer ${f.attendeeType === t ? 'bg-white shadow-xs text-blue-700' : 'text-slate-600'}`}>
-                {t === 'customer' ? 'Customer' : 'Member'}
-              </button>
-            ))}
-          </div>
           <label className={lbl}>Full name<input value={f.name} maxLength={100} onChange={(e) => setF({ ...f, name: e.target.value })} autoComplete="name" className={`mt-1 ${input}`} /></label>
           <label className={lbl}>Mobile number<input value={f.mobile} inputMode="tel" maxLength={16} onChange={(e) => setF({ ...f, mobile: e.target.value })} autoComplete="tel" className={`mt-1 ${input}`} /></label>
           <label className={lbl}>E-mail ID (optional)<input type="email" value={f.email} maxLength={120} onChange={(e) => setF({ ...f, email: e.target.value })} autoComplete="email" className={`mt-1 ${input}`} /></label>

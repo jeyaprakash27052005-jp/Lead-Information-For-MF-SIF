@@ -232,7 +232,7 @@ Menu -> **Event Leads**.
 
 ### Awareness Sessions: separate registration form and link
 
-- Every session on the advertising website shows a **Register** button that opens its own form at `#/register/<session id>`. The form asks Customer or Member, name, mobile, optional e-mail and city, people coming along, and a message. The same mobile number can register once per session.
+- Every session on the advertising website shows a **Register** button that opens its own form at `#/register/<session id>`. The form asks name, mobile, optional e-mail and city, people coming along, and a message. The same mobile number can register once per session.
 - In **Awareness Programs** (admin) type the advertising website address once, then use **Copy link** on a session to share its registration link, and **Registrations** to see or delete the people who registered.
 - Each registration is also saved in **All Leads Directory** as a separate lead (source `awareness_session`).
 - Republish `firestore.rules` (new `sessionRegistrations` collection).
