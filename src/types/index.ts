@@ -432,6 +432,13 @@ export interface SessionRegistration {
   /** Paid session: amount to pay and the payment screenshot (compressed image) */
   amount?: number;
   paymentProof?: string;
+  /** The logged in website customer who registered */
+  customerId?: string;
+  /** ID card details typed by the customer once the session is complete */
+  cardName?: string;
+  cardOccupation?: string;
+  cardCity?: string;
+  cardPhoto?: string;
   note?: string;
   createdAt: string;
 }

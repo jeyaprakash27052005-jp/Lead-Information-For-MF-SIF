@@ -5,6 +5,7 @@ import { AdsCarousel } from './components/AdsCarousel';
 import { FundAdsList } from './components/FundAdsList';
 import { AwarenessList } from './components/AwarenessList';
 import { SessionRegister } from './components/SessionRegister';
+import { MyProfile } from './components/MyProfile';
 import { FinanceCalculations } from './components/FinanceCalculations';
 import { siteStorage } from './services/siteStorage';
 import { DEFAULT_ITEMS, DEFAULT_MENUS } from './utils/siteDefaults';
@@ -22,11 +23,12 @@ const readSession = (): string | null => {
   }
 };
 
-type Route = { name: 'home' | 'funds' | 'sessions' | 'contact' | 'calc' | 'login' | 'quick' } | { name: 'page'; id: string } | { name: 'register'; id: string };
+type Route = { name: 'home' | 'funds' | 'sessions' | 'contact' | 'calc' | 'login' | 'quick' } | { name: 'page'; id: string } | { name: 'register'; id: string } | { name: 'profile' };
 
 const readRoute = (): Route => {
   const h = window.location.hash.replace(/^#\/?/, '');
   if (h === 'funds' || h === 'sessions' || h === 'contact' || h === 'calc' || h === 'login' || h === 'quick') return { name: h };
+  if (h === 'profile') return { name: 'profile' };
   if (h.startsWith('register/')) return { name: 'register', id: decodeURIComponent(h.slice(9)) };
   if (h.startsWith('p/')) return { name: 'page', id: decodeURIComponent(h.slice(2)) };
   return { name: 'home' };
@@ -48,6 +50,10 @@ function Site() {
   const [customer, setCustomer] = useState<SiteCustomer | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
   const afterLogin = useRef<string>('/home');
+  // everything except Home, Contact, Login and Quick Response (which has its own check) needs a verified login first
+  const gated = ['funds', 'sessions', 'calc', 'register', 'page', 'profile'].includes(route.name);
+  const ok = !gated || !!customer?.verified;
+  const here = () => window.location.hash.replace(/^#/, '') || '/home';
 
   useEffect(() => {
     const id = readSession();
@@ -210,6 +216,7 @@ function Site() {
             {customer ? (
               <>
                 <span className="text-sm font-semibold text-slate-700 max-w-[10rem] truncate" title={customer.fullName}>Hi, {customer.fullName.split(' ')[0]}</span>
+                <button onClick={() => go('/profile')} className="px-4 py-2 rounded-md border border-slate-800 text-sm font-bold text-slate-900 hover:bg-slate-50">My Profile</button>
                 <button onClick={logout} className="px-4 py-2 rounded-md bg-blue-700 hover:bg-blue-800 text-sm font-bold text-white">Logout</button>
               </>
             ) : (
@@ -270,7 +277,10 @@ function Site() {
             <div className="py-3 flex gap-2">
               <button onClick={() => (customer?.verified ? go('/quick') : goLogin('/quick'))} className="flex-1 px-4 py-2 rounded-md border border-slate-800 text-sm font-bold">Quick Response</button>
               {customer ? (
-                <button onClick={logout} className="flex-1 px-4 py-2 rounded-md bg-blue-700 text-sm font-bold text-white">Logout</button>
+                <>
+                  <button onClick={() => go('/profile')} className="flex-1 px-4 py-2 rounded-md border border-slate-800 text-sm font-bold">My Profile</button>
+                  <button onClick={logout} className="flex-1 px-4 py-2 rounded-md bg-blue-700 text-sm font-bold text-white">Logout</button>
+                </>
               ) : (
                 <button onClick={() => goLogin('/home')} className="flex-1 px-4 py-2 rounded-md bg-blue-700 text-sm font-bold text-white">Login</button>
               )}
@@ -304,20 +314,28 @@ function Site() {
             )}
           </>
         )}
-        {route.name === 'funds' && (
+        {ok && route.name === 'funds' && (
           <section className="space-y-4">
             <h1 className="text-2xl font-black text-slate-900">Mutual Fund Offers</h1>
             <FundAdsList />
           </section>
         )}
-        {route.name === 'sessions' && (
+        {ok && route.name === 'sessions' && (
           <section className="space-y-4">
             <h1 className="text-2xl font-black text-slate-900">Awareness Sessions</h1>
             <AwarenessList registerBase="#/register/" />
           </section>
         )}
-        {route.name === 'register' && <SessionRegister programId={route.id} onBack={() => go('/sessions')} />}
-        {route.name === 'calc' && (
+        {ok && route.name === 'register' && customer && <SessionRegister programId={route.id} customer={customer} onBack={() => go('/sessions')} />}
+        {ok && route.name === 'profile' && customer && <MyProfile customer={customer} />}
+        {!ok && (
+          !sessionChecked ? <p className="text-xs text-slate-400 text-center">Loading...</p> : !customer ? (
+            <AdsAccount onLogin={(c) => { afterLogin.current = here(); signedIn(c); }} message="Please login or create an account to open this page." />
+          ) : (
+            <VerifyPanel customer={customer} onVerified={(c) => { afterLogin.current = here(); signedIn(c); }} />
+          )
+        )}
+        {ok && route.name === 'calc' && (
           <section className="space-y-4">
             <h1 className="text-2xl font-black text-slate-900">Investment Calculators</h1>
             <FinanceCalculations />
@@ -345,7 +363,7 @@ function Site() {
             <QuickResponse customer={customer} />
           )
         )}
-        {route.name === 'page' &&
+        {ok && route.name === 'page' &&
           (pageItem ? (
             <article className="max-w-2xl mx-auto space-y-4">
               <p className="text-xs font-bold uppercase tracking-wide text-blue-700">{menus.find((m) => m.id === pageItem.menuId)?.label}</p>

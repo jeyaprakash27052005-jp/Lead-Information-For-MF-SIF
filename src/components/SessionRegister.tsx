@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AlertCircle, CalendarDays, CheckCircle2, ImagePlus, MapPin, UserPlus } from 'lucide-react';
-import { AwarenessProgram } from '../types';
+import { AwarenessProgram, SiteCustomer } from '../types';
 import { apiService } from '../services/api';
 import { sessionRegStorage } from '../services/sessionRegStorage';
 import { formatDateTime } from '../utils/dateTime';
@@ -37,9 +37,9 @@ const compress = (file: File): Promise<string> =>
   });
 
 /** Separate registration form of one awareness session (opened by its own link) */
-export const SessionRegister: React.FC<{ programId: string; onBack: () => void }> = ({ programId, onBack }) => {
+export const SessionRegister: React.FC<{ programId: string; customer: SiteCustomer; onBack: () => void }> = ({ programId, customer, onBack }) => {
   const [program, setProgram] = useState<AwarenessProgram | null | undefined>(undefined);
-  const [f, setF] = useState({ attendeeType: 'customer' as 'customer' | 'member', name: '', mobile: '', email: '', city: '', guests: 0, note: '' });
+  const [f, setF] = useState({ attendeeType: 'customer' as 'customer' | 'member', name: customer.fullName, mobile: customer.mobile, email: customer.email, city: '', guests: 0, note: '' });
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
@@ -89,7 +89,7 @@ export const SessionRegister: React.FC<{ programId: string; onBack: () => void }
     setError(null);
     setBusy(true);
     try {
-      await sessionRegStorage.register(program, { ...f, paymentProof: proof ?? undefined });
+      await sessionRegStorage.register(program, { ...f, paymentProof: proof ?? undefined, customerId: customer.id });
       setDone(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not register.');
@@ -115,6 +115,7 @@ export const SessionRegister: React.FC<{ programId: string; onBack: () => void }
         <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center space-y-3">
           <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
           <p className="text-sm font-bold text-emerald-900">Thank you {f.name}. You are registered.</p>
+          <p className="text-xs text-emerald-800">You can see this in <b>My Profile</b>. The ID card is ready there after the session is complete.</p>
           <button onClick={onBack} className="px-4 py-2 rounded-xl bg-blue-700 text-white text-sm font-bold cursor-pointer">Back to sessions</button>
         </div>
       ) : (

@@ -1,6 +1,6 @@
 import { Lead, SessionRegistration } from '../types';
 import { db } from './firebase';
-import { collection, getDocs, getDoc, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, getDoc, doc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { normalizeIndianMobile } from '../utils/validation';
 import { NATIONAL_HQ_REGION } from '../utils/regions';
 import { isEmail } from '../utils/siteAuth';
@@ -12,7 +12,7 @@ const fail = (what: string) => new Error(`Could not ${what}. Check your connecti
 export const sessionRegStorage = {
   async register(
     program: { id: string; title: string; isPaid?: boolean; fee?: number; freeFirst?: number; maxRegistrations?: number },
-    input: { attendeeType: 'customer' | 'member'; name: string; mobile: string; email: string; city: string; guests: number; note: string; paymentProof?: string },
+    input: { attendeeType: 'customer' | 'member'; name: string; mobile: string; email: string; city: string; guests: number; note: string; paymentProof?: string; customerId?: string },
   ): Promise<SessionRegistration> {
     const name = input.name.trim().replace(/\s+/g, ' ');
     const mobile = normalizeIndianMobile(input.mobile);
@@ -39,6 +39,7 @@ export const sessionRegStorage = {
       email: email || undefined,
       city: input.city.trim() || undefined,
       guests,
+      customerId: input.customerId,
       amount: program.isPaid ? amount : undefined,
       paymentProof: payNow ? input.paymentProof : undefined,
       note: input.note.trim().slice(0, 500) || undefined,
@@ -86,6 +87,14 @@ export const sessionRegStorage = {
       return l.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     } catch (_e) {
       throw fail('read the registrations');
+    }
+  },
+  /** The customer types the details that go on the ID card of a completed session */
+  async saveCard(id: string, card: { cardName: string; cardOccupation: string; cardCity: string; cardPhoto?: string }): Promise<void> {
+    try {
+      await updateDoc(doc(db, 'sessionRegistrations', id), JSON.parse(JSON.stringify(card)));
+    } catch (_e) {
+      throw fail('save the ID card details');
     }
   },
   async remove(id: string): Promise<void> {

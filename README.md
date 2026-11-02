@@ -244,3 +244,12 @@ Menu -> **Event Leads**.
 - Admins open **Registrations** on the session to see the amount and **View payment screenshot**. Payments are not checked automatically; the team must confirm the money in GPay.
 - Republish `firestore.rules`.
 - Any session (free or paid) can have a **Registration limit**. Seats left are shown on the form; when all seats are taken the form says registration is full. Counts are read when the form opens, so two people registering at the same second could rarely exceed the limit by one.
+
+### Login required, My Profile and ID card
+
+- On the advertising website only Home, Contact and Login are open to everyone. Every other page and sub menu (offers, sessions, calculators, pages) and every session registration first asks the visitor to login or create an account (with the 30 second code), then opens the page they clicked.
+- Registrations are linked to the logged in customer; the form is filled with their name, mobile and e-mail.
+- **My Profile** lists the customer's registered events with amount paid or free entry.
+- When a session is complete, its card in My Profile asks the customer to type the name, occupation / company, city and upload a photo, then generates an **ID card** (ID number, name, event, date, venue) that can be downloaded as a picture and updated again later.
+- In the admin portal **View payment screenshot** opens the screenshot alone on a dark screen.
+- Republish `firestore.rules`.

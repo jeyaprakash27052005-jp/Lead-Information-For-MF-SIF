@@ -138,6 +138,8 @@ service cloud.firestore {
         && request.resource.data.mobile is string && request.resource.data.mobile.matches('^[6-9][0-9]{9}$')
         && request.resource.data.guests is number && request.resource.data.guests >= 0 && request.resource.data.guests <= 10
         && (!('paymentProof' in request.resource.data) || (request.resource.data.paymentProof is string && request.resource.data.paymentProof.size() < 800000))
+        && (!('cardPhoto' in request.resource.data) || (request.resource.data.cardPhoto is string && request.resource.data.cardPhoto.size() < 150000))
+        && (!('customerId' in request.resource.data) || request.resource.data.customerId is string)
         && (!('amount' in request.resource.data) || (request.resource.data.amount is number && request.resource.data.amount >= 0));
       allow delete: if isValidId(regId);
     }

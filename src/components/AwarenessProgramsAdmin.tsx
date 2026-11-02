@@ -449,10 +449,7 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
                       {r.note ? <span className="block text-slate-500">{r.note}</span> : null}
                       {r.amount ? <span className="block font-bold text-emerald-700">Paid ₹{r.amount}</span> : null}
                       {r.paymentProof ? (
-                        <>
-                          <button type="button" onClick={() => setProof(proof === r.id ? null : r.id)} className="text-indigo-700 font-bold cursor-pointer">{proof === r.id ? 'Hide payment screenshot' : 'View payment screenshot'}</button>
-                          {proof === r.id && <img src={r.paymentProof} alt="Payment screenshot" className="mt-1 max-h-96 rounded-lg border border-slate-200" />}
-                        </>
+                        <button type="button" onClick={() => setProof(r.id)} className="text-indigo-700 font-bold cursor-pointer">View payment screenshot</button>
                       ) : null}
                     </p>
                     <button type="button" onClick={() => sessionRegStorage.remove(r.id).then(loadRegs).catch((e) => onNotify?.(e.message, 'error'))} className="text-rose-600 font-bold cursor-pointer shrink-0">Delete</button>
@@ -463,6 +460,13 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
           </div>
         ))}
       </div>
+
+      {proof && regs.find((r) => r.id === proof)?.paymentProof && (
+        <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-3" onClick={() => setProof(null)}>
+          <button type="button" aria-label="Close" className="absolute top-3 right-3 p-2 rounded-full bg-white text-slate-900 cursor-pointer"><X className="w-5 h-5" /></button>
+          <img src={regs.find((r) => r.id === proof)?.paymentProof} alt="Payment screenshot" className="max-w-full max-h-full object-contain" onClick={(e) => e.stopPropagation()} />
+        </div>
+      )}
 
       <ConfirmModal
         isOpen={!!toDelete}
