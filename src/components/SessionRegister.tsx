@@ -143,14 +143,17 @@ export const SessionRegister: React.FC<{ programId: string; onBack: () => void }
               <p className="text-sm text-slate-800">
                 Pay by GPay to <b data-testid="gpay-number" className="font-mono text-base">{program.gpayNumber}</b>{program.gpayName ? ` (${program.gpayName})` : ''}
               </p>
-              <label className={lbl}>
-                Upload the full payment screenshot (with transfer details)
-                <input type="file" accept="image/*" onChange={(e) => pick(e.target.files?.[0])} className="mt-1 block w-full text-xs normal-case" />
-              </label>
+              {!proof && (
+                <label className={lbl}>
+                  Upload the full payment screenshot (with transfer details)
+                  <input type="file" accept="image/*" onChange={(e) => pick(e.target.files?.[0])} className="mt-1 block w-full text-xs normal-case" />
+                </label>
+              )}
               {proof ? (
                 <div className="space-y-1">
                   <p className="text-xs font-bold text-emerald-800 flex items-center gap-1"><ImagePlus className="w-3.5 h-3.5" /> Uploaded: {proofName}</p>
                   <img src={proof} alt="Payment screenshot" className="max-h-48 rounded-lg border border-slate-200" />
+                  <button type="button" onClick={() => { setProof(null); setProofName(''); }} className="text-xs font-bold text-rose-700 cursor-pointer">Remove and upload another</button>
                 </div>
               ) : (
                 <p className="text-[11px] font-semibold text-slate-600">The Register button works after you upload the screenshot.</p>
