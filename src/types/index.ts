@@ -251,6 +251,13 @@ export interface AwarenessProgram {
   language?: string;
   speaker?: string;
   contact?: string; // phone / WhatsApp number for registering
+  /** Paid session: set by the admin team only */
+  isPaid?: boolean;
+  fee?: number;
+  offerText?: string; // registration offer shown with the fee
+  offerFee?: number; // fee after the offer
+  gpayNumber?: string;
+  gpayName?: string;
   /** Division the programme is for. Empty = every region. */
   region?: string;
   createdByRole?: UserRole;
@@ -421,6 +428,9 @@ export interface SessionRegistration {
   email?: string;
   city?: string;
   guests: number; // people coming with them
+  /** Paid session: amount to pay and the payment screenshot (compressed image) */
+  amount?: number;
+  paymentProof?: string;
   note?: string;
   createdAt: string;
 }

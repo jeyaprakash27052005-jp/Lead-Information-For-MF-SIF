@@ -60,6 +60,11 @@ export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWh
         {p.endsAt ? ` to ${formatDateTime(p.endsAt)}` : ''}
         {isPast && <span className="ml-1 text-slate-400 font-semibold">(completed)</span>}
       </p>
+      {p.isPaid && (
+        <p className="text-xs font-bold text-emerald-700">
+          Paid session: {p.offerFee !== undefined && p.offerFee >= 0 ? <>₹{p.offerFee} <s className="text-slate-400">₹{p.fee}</s>{p.offerText ? ` (${p.offerText})` : ''}</> : `₹${p.fee}`}
+        </p>
+      )}
       {!compact && p.description && <p className="text-xs text-slate-600 whitespace-pre-line">{p.description}</p>}
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-500 font-semibold">
         {p.mode === 'offline' && p.venue && (

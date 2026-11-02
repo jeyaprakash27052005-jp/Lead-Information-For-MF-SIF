@@ -136,7 +136,9 @@ service cloud.firestore {
         && request.resource.data.attendeeType in ['customer', 'member']
         && request.resource.data.name is string && request.resource.data.name.size() >= 2 && request.resource.data.name.size() <= 100
         && request.resource.data.mobile is string && request.resource.data.mobile.matches('^[6-9][0-9]{9}$')
-        && request.resource.data.guests is number && request.resource.data.guests >= 0 && request.resource.data.guests <= 10;
+        && request.resource.data.guests is number && request.resource.data.guests >= 0 && request.resource.data.guests <= 10
+        && (!('paymentProof' in request.resource.data) || (request.resource.data.paymentProof is string && request.resource.data.paymentProof.size() < 800000))
+        && (!('amount' in request.resource.data) || (request.resource.data.amount is number && request.resource.data.amount >= 0));
       allow delete: if isValidId(regId);
     }
 

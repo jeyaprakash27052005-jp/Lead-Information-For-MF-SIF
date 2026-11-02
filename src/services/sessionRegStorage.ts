@@ -11,8 +11,8 @@ const fail = (what: string) => new Error(`Could not ${what}. Check your connecti
 /** Registrations of the awareness sessions (one form and link per session) */
 export const sessionRegStorage = {
   async register(
-    program: { id: string; title: string },
-    input: { attendeeType: 'customer' | 'member'; name: string; mobile: string; email: string; city: string; guests: number; note: string },
+    program: { id: string; title: string; isPaid?: boolean; fee?: number; offerFee?: number },
+    input: { attendeeType: 'customer' | 'member'; name: string; mobile: string; email: string; city: string; guests: number; note: string; paymentProof?: string },
   ): Promise<SessionRegistration> {
     const name = input.name.trim().replace(/\s+/g, ' ');
     const mobile = normalizeIndianMobile(input.mobile);
@@ -21,6 +21,8 @@ export const sessionRegStorage = {
     if (!mobile) throw new Error('Type a valid 10 digit mobile number.');
     if (email && !isEmail(email)) throw new Error('Type a valid e-mail ID or leave it empty.');
     const guests = Math.max(0, Math.min(10, Math.floor(Number(input.guests) || 0)));
+    const amount = program.isPaid ? (program.offerFee !== undefined && program.offerFee >= 0 ? program.offerFee : program.fee ?? 0) : 0;
+    if (program.isPaid && !input.paymentProof) throw new Error('Upload the full payment screenshot first.');
     const id = `reg_${program.id}_${mobile}`;
     const now = new Date().toISOString();
     const reg: SessionRegistration = {
@@ -33,6 +35,8 @@ export const sessionRegStorage = {
       email: email || undefined,
       city: input.city.trim() || undefined,
       guests,
+      amount: program.isPaid ? amount : undefined,
+      paymentProof: program.isPaid ? input.paymentProof : undefined,
       note: input.note.trim().slice(0, 500) || undefined,
       createdAt: now,
     };

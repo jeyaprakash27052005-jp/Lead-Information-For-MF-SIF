@@ -236,3 +236,10 @@ Menu -> **Event Leads**.
 - In **Awareness Programs** (admin) type the advertising website address once, then use **Copy link** on a session to share its registration link, and **Registrations** to see or delete the people who registered.
 - Each registration is also saved in **All Leads Directory** as a separate lead (source `awareness_session`).
 - Republish `firestore.rules` (new `sessionRegistrations` collection).
+
+### Paid awareness sessions
+
+- In **Awareness Programs** (admin only) tick **Paid session** and enter the fee, the GPay number (and name), and optionally an offer text with an offer fee. Only the admin team can set these.
+- The session's registration form then shows the amount (with the offer), the GPay number, and a screenshot upload. **Register** stays disabled until the full payment screenshot is uploaded. The screenshot is shrunk in the browser and saved in the registration.
+- Admins open **Registrations** on the session to see the amount and **View payment screenshot**. Payments are not checked automatically; the team must confirm the money in GPay.
+- Republish `firestore.rules`.

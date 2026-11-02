@@ -25,6 +25,12 @@ const empty = () => ({
   language: '',
   speaker: '',
   contact: '',
+  isPaid: false,
+  fee: '',
+  offerText: '',
+  offerFee: '',
+  gpayNumber: '',
+  gpayName: '',
   isActive: true,
 });
 
@@ -45,6 +51,7 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
   const [form, setForm] = useState(empty());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [regs, setRegs] = useState<SessionRegistration[]>([]);
+  const [proof, setProof] = useState<string | null>(null);
   const [openRegs, setOpenRegs] = useState<string | null>(null);
   const [siteUrl, setSiteUrl] = useState(() => {
     try {
@@ -110,6 +117,11 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
     if (form.mode === 'online' && form.joinLink.trim() && !/^https:\/\/\S+$/i.test(form.joinLink.trim()))
       return 'The join link must start with https://';
     if (form.contact.trim() && !/^[+\d][\d\s-]{6,17}$/.test(form.contact.trim())) return 'Enter a valid contact phone number.';
+    if (form.isPaid) {
+      if (!(Number(form.fee) > 0)) return 'Enter the fee of the paid session.';
+      if (form.offerFee !== '' && !(Number(form.offerFee) >= 0 && Number(form.offerFee) < Number(form.fee))) return 'The offer fee must be less than the fee.';
+      if (!/^[6-9]\d{9}$/.test(form.gpayNumber.replace(/[\s-]/g, '').replace(/^\+?91/, ''))) return 'Enter a valid 10 digit GPay number.';
+    }
     return null;
   };
 
@@ -130,6 +142,12 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
       language: form.language.trim() || undefined,
       speaker: form.speaker.trim() || undefined,
       contact: form.contact.trim() || undefined,
+      isPaid: form.isPaid,
+      fee: form.isPaid ? Number(form.fee) : undefined,
+      offerText: form.isPaid && form.offerText.trim() ? form.offerText.trim() : undefined,
+      offerFee: form.isPaid && form.offerFee !== '' ? Number(form.offerFee) : undefined,
+      gpayNumber: form.isPaid ? form.gpayNumber.replace(/[\s-]/g, '').replace(/^\+?91/, '') : undefined,
+      gpayName: form.isPaid && form.gpayName.trim() ? form.gpayName.trim() : undefined,
       isActive: form.isActive,
       region: isHead ? region : ownRegion,
     };
@@ -144,6 +162,11 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
           language: data.language ?? '',
           speaker: data.speaker ?? '',
           contact: data.contact ?? '',
+          fee: data.fee ?? 0,
+          offerText: data.offerText ?? '',
+          offerFee: data.offerFee ?? -1,
+          gpayNumber: data.gpayNumber ?? '',
+          gpayName: data.gpayName ?? '',
           region: data.region,
         });
         onNotify?.('Awareness programme updated.');
@@ -177,6 +200,12 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
       language: p.language || '',
       speaker: p.speaker || '',
       contact: p.contact || '',
+      isPaid: !!p.isPaid,
+      fee: p.fee ? String(p.fee) : '',
+      offerText: p.offerText || '',
+      offerFee: p.offerFee !== undefined && p.offerFee >= 0 ? String(p.offerFee) : '',
+      gpayNumber: p.gpayNumber || '',
+      gpayName: p.gpayName || '',
       isActive: p.isActive,
     });
     setRegion(isHead ? p.region || '' : ownRegion);
@@ -292,6 +321,18 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
           <input aria-label="Language" value={form.language} onChange={(e) => set({ language: e.target.value })} placeholder="Language (optional)" className={input} />
           <input aria-label="Contact phone" value={form.contact} onChange={(e) => set({ contact: e.target.value })} placeholder="Contact phone (optional)" className={input} />
         </div>
+        <label className="flex items-center gap-2 font-bold text-slate-700">
+          <input type="checkbox" checked={form.isPaid} onChange={(e) => set({ isPaid: e.target.checked })} /> Paid session (members pay and upload the payment screenshot)
+        </label>
+        {form.isPaid && (
+          <div className="grid sm:grid-cols-2 gap-3 bg-emerald-50/50 border border-emerald-200 rounded-xl p-3">
+            <input aria-label="Fee" type="number" min={1} value={form.fee} onChange={(e) => set({ fee: e.target.value })} placeholder="Fee in rupees" className={input} />
+            <input aria-label="GPay number" value={form.gpayNumber} onChange={(e) => set({ gpayNumber: e.target.value })} placeholder="GPay number to pay" className={input} />
+            <input aria-label="GPay name" value={form.gpayName} onChange={(e) => set({ gpayName: e.target.value })} placeholder="Name on GPay (optional)" className={input} />
+            <input aria-label="Offer fee" type="number" min={0} value={form.offerFee} onChange={(e) => set({ offerFee: e.target.value })} placeholder="Offer fee in rupees (optional)" className={input} />
+            <input aria-label="Offer text" value={form.offerText} onChange={(e) => set({ offerText: e.target.value })} placeholder="Registration offer, for example Early bird offer (optional)" className={`${input} sm:col-span-2`} />
+          </div>
+        )}
         <div className="grid sm:grid-cols-2 gap-3 items-end">
           <label className="block font-bold text-slate-700 uppercase tracking-wider">
             Who can see it
@@ -365,6 +406,7 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
                 <span className={`px-2 py-0.5 rounded-full font-bold border ${p.isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
                   {p.isActive ? 'Shown to customers' : 'Hidden'}
                 </span>
+                {p.isPaid && <span className="px-2 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Paid ₹{p.offerFee !== undefined && p.offerFee >= 0 ? p.offerFee : p.fee}</span>}
                 <span className="px-2 py-0.5 rounded-full font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">{p.region || 'All regions'}</span>
                 {p.createdBy && <span className="px-2 py-0.5 rounded-full font-bold bg-slate-50 text-slate-600 border border-slate-200">Added by {p.createdBy}</span>}
                 {isPast(p) && <span className="px-2 py-0.5 rounded-full font-bold bg-amber-50 text-amber-800 border border-amber-200">Completed</span>}
@@ -402,6 +444,13 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
                       <b>{r.name}</b> ({r.attendeeType}) • <a href={`tel:${r.mobile}`} className="text-indigo-700 font-bold">{r.mobile}</a>
                       {r.email ? ` • ${r.email}` : ''}{r.city ? ` • ${r.city}` : ''}{r.guests ? ` • +${r.guests} guest${r.guests > 1 ? 's' : ''}` : ''}
                       {r.note ? <span className="block text-slate-500">{r.note}</span> : null}
+                      {r.amount ? <span className="block font-bold text-emerald-700">Paid ₹{r.amount}</span> : null}
+                      {r.paymentProof ? (
+                        <>
+                          <button type="button" onClick={() => setProof(proof === r.id ? null : r.id)} className="text-indigo-700 font-bold cursor-pointer">{proof === r.id ? 'Hide payment screenshot' : 'View payment screenshot'}</button>
+                          {proof === r.id && <img src={r.paymentProof} alt="Payment screenshot" className="mt-1 max-h-96 rounded-lg border border-slate-200" />}
+                        </>
+                      ) : null}
                     </p>
                     <button type="button" onClick={() => sessionRegStorage.remove(r.id).then(loadRegs).catch((e) => onNotify?.(e.message, 'error'))} className="text-rose-600 font-bold cursor-pointer shrink-0">Delete</button>
                   </div>
