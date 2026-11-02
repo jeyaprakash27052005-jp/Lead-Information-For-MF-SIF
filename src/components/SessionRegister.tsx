@@ -146,8 +146,8 @@ export const SessionRegister: React.FC<{ programId: string; onBack: () => void }
               {!proof && (
                 <div className="space-y-1.5">
                   <p className={lbl}>Upload the full payment screenshot (with transfer details)</p>
-                  <label className="w-full px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold flex items-center justify-center gap-2 cursor-pointer">
-                    <ImagePlus className="w-4 h-4" /> Upload payment screenshot
+                  <label className="w-full px-4 py-3 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold flex items-center justify-center gap-2 cursor-pointer">
+                    <ImagePlus className="w-4 h-4" /> Upload file
                     <input type="file" accept="image/*" onChange={(e) => pick(e.target.files?.[0])} className="sr-only" />
                   </label>
                 </div>
