@@ -8,7 +8,7 @@ import { useAppSettings } from '../context/AppSettings';
 const endOf = (p: AwarenessProgram) => new Date(p.endsAt || p.startsAt).getTime() + 3 * 60 * 60 * 1000;
 
 /** The awareness programmes the admin team added, for customers and the Home Screen (read only) */
-export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWhenEmpty?: boolean; region?: string }> = ({ limit, compact, hideWhenEmpty, region }) => {
+export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWhenEmpty?: boolean; region?: string; registerBase?: string }> = ({ limit, compact, hideWhenEmpty, region, registerBase }) => {
   const { settings } = useAppSettings();
   const [programs, setPrograms] = useState<AwarenessProgram[] | null>(null);
 
@@ -83,6 +83,11 @@ export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWh
           </a>
         )}
       </div>
+      {!isPast && registerBase && (
+        <a href={`${registerBase}${encodeURIComponent(p.id)}`} className="btn-glow inline-flex items-center gap-1.5 mr-2 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">
+          Register
+        </a>
+      )}
       {!isPast && p.mode === 'online' && p.joinLink && /^https:\/\//i.test(p.joinLink) && (
         <a
           href={p.joinLink}

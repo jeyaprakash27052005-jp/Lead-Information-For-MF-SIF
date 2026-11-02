@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Megaphone, Plus, Pencil, Trash2, Eye, EyeOff, RefreshCw, Save, X } from 'lucide-react';
-import { AwarenessProgram, User } from '../types';
+import { Link2, Users, Megaphone, Plus, Pencil, Trash2, Eye, EyeOff, RefreshCw, Save, X } from 'lucide-react';
+import { AwarenessProgram, SessionRegistration, User } from '../types';
+import { sessionRegStorage } from '../services/sessionRegStorage';
 import { apiService } from '../services/api';
 import { formatDateTime } from '../utils/dateTime';
 import { ConfirmModal } from './ConfirmModal';
@@ -43,6 +44,37 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(empty());
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [regs, setRegs] = useState<SessionRegistration[]>([]);
+  const [openRegs, setOpenRegs] = useState<string | null>(null);
+  const [siteUrl, setSiteUrl] = useState(() => {
+    try {
+      return localStorage.getItem('ads_site_url') || '';
+    } catch (_e) {
+      return '';
+    }
+  });
+  const loadRegs = () => sessionRegStorage.list().then(setRegs).catch(() => undefined);
+  useEffect(() => {
+    loadRegs();
+  }, []);
+  const saveSiteUrl = (v: string) => {
+    setSiteUrl(v);
+    try {
+      localStorage.setItem('ads_site_url', v.trim());
+    } catch (_e) {
+      /* ignore */
+    }
+  };
+  const linkFor = (p: AwarenessProgram) => `${siteUrl.trim().replace(/\/+$/, '').replace(/#.*$/, '')}/#/register/${encodeURIComponent(p.id)}`;
+  const copyLink = async (p: AwarenessProgram) => {
+    if (!/^https?:\/\//i.test(siteUrl.trim())) return onNotify?.('First type the address of the advertising website (starts with https://) above the list.', 'error');
+    try {
+      await navigator.clipboard.writeText(linkFor(p));
+      onNotify?.('Registration link copied. Share it with customers and members.', 'success');
+    } catch (_e) {
+      window.prompt('Copy this registration link', linkFor(p));
+    }
+  };
   const [error, setError] = useState<string | null>(null);
   const [problem, setProblem] = useState<SaveProblem | null>(null);
   const [saving, setSaving] = useState(false);
@@ -309,11 +341,16 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
         <ClearFilters show={q !== '' || view !== 'ALL'} onClick={() => { setQ(''); setView('ALL'); }} />
       </div>
 
+      <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+        Advertising website address (used to make each session's registration link)
+        <input value={siteUrl} onChange={(e) => saveSiteUrl(e.target.value)} placeholder="https://your-ads-site.vercel.app" className="mt-1 w-full px-3 py-2 rounded-xl border border-slate-300 text-xs normal-case font-normal" />
+      </label>
+
       <div className="space-y-3">
         {loading && <p className="text-xs text-slate-400 text-center py-4">Loading...</p>}
         {!loading && shown.length === 0 && <p className="text-xs text-slate-500 text-center py-6">No programmes found.</p>}
         {shown.map((p) => (
-          <div key={p.id} className="lift-card bg-white rounded-xl border border-slate-200 shadow-2xs p-4 flex flex-col sm:flex-row sm:items-start gap-3 text-xs">
+          <div key={p.id} className="lift-card bg-white rounded-xl border border-slate-200 shadow-2xs p-4 flex flex-col sm:flex-row sm:flex-wrap sm:items-start gap-3 text-xs">
             <div className="flex-1 min-w-0 space-y-1">
               <p className="text-sm font-black text-slate-900">{p.title}</p>
               <p className="font-bold text-indigo-700">
@@ -333,6 +370,14 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
                 {isPast(p) && <span className="px-2 py-0.5 rounded-full font-bold bg-amber-50 text-amber-800 border border-amber-200">Completed</span>}
               </p>
             </div>
+            <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
+              <button type="button" onClick={() => copyLink(p)} className="btn-glow px-2.5 py-1.5 rounded-lg font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 flex items-center gap-1 cursor-pointer">
+                <Link2 className="w-3.5 h-3.5" /> Copy link
+              </button>
+              <button type="button" onClick={() => setOpenRegs(openRegs === p.id ? null : p.id)} className="btn-glow px-2.5 py-1.5 rounded-lg font-bold text-slate-700 bg-slate-50 border border-slate-200 flex items-center gap-1 cursor-pointer">
+                <Users className="w-3.5 h-3.5" /> Registrations ({regs.filter((r) => r.programId === p.id).length})
+              </button>
+            </div>
             {canModify(p) ? (
             <div className="flex items-center gap-1.5 shrink-0">
               <button type="button" onClick={() => toggleActive(p)} title={p.isActive ? 'Hide from customers' : 'Show to customers'} className="btn-glow px-2.5 py-1.5 rounded-lg font-bold text-slate-700 bg-slate-50 border border-slate-200 flex items-center gap-1 cursor-pointer">
@@ -347,6 +392,21 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
             </div>
             ) : (
               <p className="text-[11px] font-semibold text-slate-400 shrink-0">View only</p>
+            )}
+            {openRegs === p.id && (
+              <div className="w-full basis-full border-t border-slate-100 pt-3 space-y-1.5">
+                {regs.filter((r) => r.programId === p.id).length === 0 && <p className="text-slate-500">No one has registered yet.</p>}
+                {regs.filter((r) => r.programId === p.id).map((r) => (
+                  <div key={r.id} className="flex items-start justify-between gap-2 bg-slate-50 rounded-lg px-3 py-2">
+                    <p className="min-w-0">
+                      <b>{r.name}</b> ({r.attendeeType}) • <a href={`tel:${r.mobile}`} className="text-indigo-700 font-bold">{r.mobile}</a>
+                      {r.email ? ` • ${r.email}` : ''}{r.city ? ` • ${r.city}` : ''}{r.guests ? ` • +${r.guests} guest${r.guests > 1 ? 's' : ''}` : ''}
+                      {r.note ? <span className="block text-slate-500">{r.note}</span> : null}
+                    </p>
+                    <button type="button" onClick={() => sessionRegStorage.remove(r.id).then(loadRegs).catch((e) => onNotify?.(e.message, 'error'))} className="text-rose-600 font-bold cursor-pointer shrink-0">Delete</button>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         ))}

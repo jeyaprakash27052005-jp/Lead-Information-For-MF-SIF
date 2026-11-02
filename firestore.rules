@@ -129,6 +129,17 @@ service cloud.firestore {
       allow delete: if isValidId(customerId);
     }
 
+    match /sessionRegistrations/{regId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(regId)
+        && request.resource.data.programId is string && request.resource.data.programId.size() > 0
+        && request.resource.data.attendeeType in ['customer', 'member']
+        && request.resource.data.name is string && request.resource.data.name.size() >= 2 && request.resource.data.name.size() <= 100
+        && request.resource.data.mobile is string && request.resource.data.mobile.matches('^[6-9][0-9]{9}$')
+        && request.resource.data.guests is number && request.resource.data.guests >= 0 && request.resource.data.guests <= 10;
+      allow delete: if isValidId(regId);
+    }
+
     match /siteQueries/{queryId} {
       allow get, list: if true;
       allow create, update: if isValidId(queryId)

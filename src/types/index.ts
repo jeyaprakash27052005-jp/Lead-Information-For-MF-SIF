@@ -71,7 +71,7 @@ export interface Lead {
   assignedRegion: string;
   assignedTeamMember?: string;
   /** Where the lead came from (normal entries have no source) */
-  leadSource?: 'finance_health_checkup' | 'ads_website';
+  leadSource?: 'finance_health_checkup' | 'ads_website' | 'awareness_session';
   email?: string;
   healthReportId?: string;
   healthScore?: number;
@@ -408,4 +408,19 @@ export interface SiteQuery {
   status: 'open' | 'answered';
   createdAt: string;
   updatedAt: string;
+}
+
+/** Someone who registered for one awareness session through its own registration link */
+export interface SessionRegistration {
+  id: string;
+  programId: string;
+  programTitle: string;
+  attendeeType: 'customer' | 'member';
+  name: string;
+  mobile: string;
+  email?: string;
+  city?: string;
+  guests: number; // people coming with them
+  note?: string;
+  createdAt: string;
 }

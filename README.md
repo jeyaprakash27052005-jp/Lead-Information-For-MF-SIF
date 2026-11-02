@@ -229,3 +229,10 @@ Menu -> **Event Leads**.
 
 - After **Create account**, the website itself makes a verification code and shows it with a 30 second countdown. When the time is over it shows **Code expired** and the customer taps **Regenerate** for a new one. The customer types the code to verify. No e-mail / SMS service is used, so this is only a human check, not proof of phone or e-mail ownership.
 - Every new website account is also saved in **All Leads Directory** as a separate lead (source `ads_website`, added by "Advertising Website", status Pending, region National HQ). Age, income and occupation are placeholders for the team to fill in.
+
+### Awareness Sessions: separate registration form and link
+
+- Every session on the advertising website shows a **Register** button that opens its own form at `#/register/<session id>`. The form asks Customer or Member, name, mobile, optional e-mail and city, people coming along, and a message. The same mobile number can register once per session.
+- In **Awareness Programs** (admin) type the advertising website address once, then use **Copy link** on a session to share its registration link, and **Registrations** to see or delete the people who registered.
+- Each registration is also saved in **All Leads Directory** as a separate lead (source `awareness_session`).
+- Republish `firestore.rules` (new `sessionRegistrations` collection).

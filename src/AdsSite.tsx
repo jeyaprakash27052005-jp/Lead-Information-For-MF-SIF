@@ -4,6 +4,7 @@ import { AppSettingsProvider, useAppSettings } from './context/AppSettings';
 import { AdsCarousel } from './components/AdsCarousel';
 import { FundAdsList } from './components/FundAdsList';
 import { AwarenessList } from './components/AwarenessList';
+import { SessionRegister } from './components/SessionRegister';
 import { FinanceCalculations } from './components/FinanceCalculations';
 import { siteStorage } from './services/siteStorage';
 import { DEFAULT_ITEMS, DEFAULT_MENUS } from './utils/siteDefaults';
@@ -21,11 +22,12 @@ const readSession = (): string | null => {
   }
 };
 
-type Route = { name: 'home' | 'funds' | 'sessions' | 'contact' | 'calc' | 'login' | 'quick' } | { name: 'page'; id: string };
+type Route = { name: 'home' | 'funds' | 'sessions' | 'contact' | 'calc' | 'login' | 'quick' } | { name: 'page'; id: string } | { name: 'register'; id: string };
 
 const readRoute = (): Route => {
   const h = window.location.hash.replace(/^#\/?/, '');
   if (h === 'funds' || h === 'sessions' || h === 'contact' || h === 'calc' || h === 'login' || h === 'quick') return { name: h };
+  if (h.startsWith('register/')) return { name: 'register', id: decodeURIComponent(h.slice(9)) };
   if (h.startsWith('p/')) return { name: 'page', id: decodeURIComponent(h.slice(2)) };
   return { name: 'home' };
 };
@@ -297,7 +299,7 @@ function Site() {
             {f.awarenessPrograms && (
               <section className="space-y-3">
                 <h2 className="text-lg font-black text-slate-900">Upcoming sessions</h2>
-                <AwarenessList limit={2} hideWhenEmpty />
+                <AwarenessList limit={2} hideWhenEmpty registerBase="#/register/" />
               </section>
             )}
           </>
@@ -311,9 +313,10 @@ function Site() {
         {route.name === 'sessions' && (
           <section className="space-y-4">
             <h1 className="text-2xl font-black text-slate-900">Awareness Sessions</h1>
-            <AwarenessList />
+            <AwarenessList registerBase="#/register/" />
           </section>
         )}
+        {route.name === 'register' && <SessionRegister programId={route.id} onBack={() => go('/sessions')} />}
         {route.name === 'calc' && (
           <section className="space-y-4">
             <h1 className="text-2xl font-black text-slate-900">Investment Calculators</h1>
