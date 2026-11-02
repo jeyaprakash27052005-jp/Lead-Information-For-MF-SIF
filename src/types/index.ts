@@ -251,11 +251,12 @@ export interface AwarenessProgram {
   language?: string;
   speaker?: string;
   contact?: string; // phone / WhatsApp number for registering
+  /** Seat limit for any session (0 / empty = no limit), set by the admin team only */
+  maxRegistrations?: number;
   /** Paid session: set by the admin team only */
   isPaid?: boolean;
   fee?: number;
-  offerText?: string; // registration offer shown with the fee
-  offerFee?: number; // fee after the offer
+  freeFirst?: number; // the first N registrations are free (paid session)
   gpayNumber?: string;
   gpayName?: string;
   /** Division the programme is for. Empty = every region. */

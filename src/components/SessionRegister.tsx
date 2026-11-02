@@ -45,6 +45,7 @@ export const SessionRegister: React.FC<{ programId: string; onBack: () => void }
   const [done, setDone] = useState(false);
   const [proof, setProof] = useState<string | null>(null);
   const [proofName, setProofName] = useState('');
+  const [taken, setTaken] = useState<number | null>(null);
 
   useEffect(() => {
     apiService
@@ -52,6 +53,9 @@ export const SessionRegister: React.FC<{ programId: string; onBack: () => void }
       .then((l: AwarenessProgram[]) => setProgram(l.find((p) => p.id === programId && p.isActive) ?? null))
       .catch(() => setProgram(null));
   }, [programId]);
+  useEffect(() => {
+    sessionRegStorage.list().then((l) => setTaken(l.filter((r) => r.programId === programId).length)).catch(() => setTaken(0));
+  }, [programId, done]);
 
   if (program === undefined) return <p className="text-xs text-slate-400 text-center py-8">Loading...</p>;
   if (!program)
@@ -62,9 +66,12 @@ export const SessionRegister: React.FC<{ programId: string; onBack: () => void }
       </div>
     );
 
+  const seatsLeft = program.maxRegistrations ? Math.max(0, program.maxRegistrations - (taken ?? 0)) : null;
+  const full = seatsLeft === 0;
+  const free = !!program.isPaid && !!program.freeFirst && (taken ?? 0) < program.freeFirst;
+  const payNow = !!program.isPaid && !free;
   const over = new Date(program.endsAt || program.startsAt).getTime() + 3 * 3600000 < Date.now();
 
-  const pay = program.isPaid ? (program.offerFee !== undefined && program.offerFee >= 0 ? program.offerFee : program.fee ?? 0) : 0;
   const pick = async (file?: File) => {
     if (!file) return;
     setError(null);
@@ -102,6 +109,8 @@ export const SessionRegister: React.FC<{ programId: string; onBack: () => void }
       </div>
       {over ? (
         <p className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs font-semibold text-amber-800">This session is over. Registration is closed.</p>
+      ) : full && !done ? (
+        <p className="bg-rose-50 border border-rose-200 rounded-xl p-4 text-xs font-bold text-rose-800">Registration is full. All {program.maxRegistrations} seats are taken.</p>
       ) : done ? (
         <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center space-y-3">
           <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
@@ -121,18 +130,16 @@ export const SessionRegister: React.FC<{ programId: string; onBack: () => void }
           <label className={lbl}>City (optional)<input value={f.city} maxLength={60} onChange={(e) => setF({ ...f, city: e.target.value })} className={`mt-1 ${input}`} /></label>
           <label className={lbl}>People coming with you<input type="number" min={0} max={10} value={f.guests} onChange={(e) => setF({ ...f, guests: Number(e.target.value) })} className={`mt-1 ${input}`} /></label>
           <label className={lbl}>Message (optional)<textarea value={f.note} maxLength={500} rows={2} onChange={(e) => setF({ ...f, note: e.target.value })} className={`mt-1 ${input}`} /></label>
-          {program.isPaid && (
+          {seatsLeft !== null && <p className="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">Limited seats: {seatsLeft} of {program.maxRegistrations} left</p>}
+          {program.isPaid && free && (
+            <p className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+              Free for you. The first {program.freeFirst} registrations are free. No payment is needed.
+            </p>
+          )}
+          {payNow && (
             <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 space-y-2">
               <p className="text-xs font-black text-emerald-900 uppercase tracking-wider">Paid session</p>
-              {program.offerText && <p className="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1">Offer: {program.offerText}</p>}
-              <p className="text-sm text-slate-800">
-                Amount to pay:{' '}
-                {program.offerFee !== undefined && program.offerFee >= 0 ? (
-                  <><b className="text-lg">₹{program.offerFee}</b> <s className="text-slate-500">₹{program.fee}</s></>
-                ) : (
-                  <b className="text-lg">₹{program.fee}</b>
-                )}
-              </p>
+              <p className="text-sm text-slate-800">Amount to pay: <b className="text-lg">₹{program.fee}</b></p>
               <p className="text-sm text-slate-800">
                 Pay by GPay to <b data-testid="gpay-number" className="font-mono text-base">{program.gpayNumber}</b>{program.gpayName ? ` (${program.gpayName})` : ''}
               </p>
@@ -150,7 +157,7 @@ export const SessionRegister: React.FC<{ programId: string; onBack: () => void }
               )}
             </div>
           )}
-          <button type="submit" disabled={busy || (!!program.isPaid && !proof)} className="w-full px-4 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer">
+          <button type="submit" disabled={busy || taken === null || (payNow && !proof)} className="w-full px-4 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer">
             <UserPlus className="w-4 h-4" /> {busy ? 'Please wait...' : 'Register'}
           </button>
         </form>

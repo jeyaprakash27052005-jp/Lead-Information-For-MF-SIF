@@ -62,9 +62,10 @@ export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWh
       </p>
       {p.isPaid && (
         <p className="text-xs font-bold text-emerald-700">
-          Paid session: {p.offerFee !== undefined && p.offerFee >= 0 ? <>₹{p.offerFee} <s className="text-slate-400">₹{p.fee}</s>{p.offerText ? ` (${p.offerText})` : ''}</> : `₹${p.fee}`}
+          Paid session: ₹{p.fee}{p.freeFirst ? ` - first ${p.freeFirst} registrations are free` : ''}
         </p>
       )}
+      {p.maxRegistrations ? <p className="text-[11px] font-bold text-amber-700">Limited seats: {p.maxRegistrations}</p> : null}
       {!compact && p.description && <p className="text-xs text-slate-600 whitespace-pre-line">{p.description}</p>}
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-500 font-semibold">
         {p.mode === 'offline' && p.venue && (

@@ -27,8 +27,8 @@ const empty = () => ({
   contact: '',
   isPaid: false,
   fee: '',
-  offerText: '',
-  offerFee: '',
+  freeFirst: '',
+  maxRegistrations: '',
   gpayNumber: '',
   gpayName: '',
   isActive: true,
@@ -119,9 +119,11 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
     if (form.contact.trim() && !/^[+\d][\d\s-]{6,17}$/.test(form.contact.trim())) return 'Enter a valid contact phone number.';
     if (form.isPaid) {
       if (!(Number(form.fee) > 0)) return 'Enter the fee of the paid session.';
-      if (form.offerFee !== '' && !(Number(form.offerFee) >= 0 && Number(form.offerFee) < Number(form.fee))) return 'The offer fee must be less than the fee.';
+      if (form.freeFirst !== '' && !(Number.isInteger(Number(form.freeFirst)) && Number(form.freeFirst) >= 0)) return 'First free registrations must be a whole number.';
       if (!/^[6-9]\d{9}$/.test(form.gpayNumber.replace(/[\s-]/g, '').replace(/^\+?91/, ''))) return 'Enter a valid 10 digit GPay number.';
     }
+    if (form.maxRegistrations !== '' && !(Number.isInteger(Number(form.maxRegistrations)) && Number(form.maxRegistrations) >= 1)) return 'The registration limit must be a whole number of 1 or more.';
+    if (form.isPaid && form.freeFirst !== '' && form.maxRegistrations !== '' && Number(form.freeFirst) > Number(form.maxRegistrations)) return 'First free registrations cannot be more than the registration limit.';
     return null;
   };
 
@@ -144,8 +146,8 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
       contact: form.contact.trim() || undefined,
       isPaid: form.isPaid,
       fee: form.isPaid ? Number(form.fee) : undefined,
-      offerText: form.isPaid && form.offerText.trim() ? form.offerText.trim() : undefined,
-      offerFee: form.isPaid && form.offerFee !== '' ? Number(form.offerFee) : undefined,
+      freeFirst: form.isPaid && form.freeFirst !== '' && Number(form.freeFirst) > 0 ? Number(form.freeFirst) : undefined,
+      maxRegistrations: form.maxRegistrations !== '' ? Number(form.maxRegistrations) : undefined,
       gpayNumber: form.isPaid ? form.gpayNumber.replace(/[\s-]/g, '').replace(/^\+?91/, '') : undefined,
       gpayName: form.isPaid && form.gpayName.trim() ? form.gpayName.trim() : undefined,
       isActive: form.isActive,
@@ -163,8 +165,8 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
           speaker: data.speaker ?? '',
           contact: data.contact ?? '',
           fee: data.fee ?? 0,
-          offerText: data.offerText ?? '',
-          offerFee: data.offerFee ?? -1,
+          freeFirst: data.freeFirst ?? 0,
+          maxRegistrations: data.maxRegistrations ?? 0,
           gpayNumber: data.gpayNumber ?? '',
           gpayName: data.gpayName ?? '',
           region: data.region,
@@ -202,8 +204,8 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
       contact: p.contact || '',
       isPaid: !!p.isPaid,
       fee: p.fee ? String(p.fee) : '',
-      offerText: p.offerText || '',
-      offerFee: p.offerFee !== undefined && p.offerFee >= 0 ? String(p.offerFee) : '',
+      freeFirst: p.freeFirst ? String(p.freeFirst) : '',
+      maxRegistrations: p.maxRegistrations ? String(p.maxRegistrations) : '',
       gpayNumber: p.gpayNumber || '',
       gpayName: p.gpayName || '',
       isActive: p.isActive,
@@ -329,10 +331,10 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
             <input aria-label="Fee" type="number" min={1} value={form.fee} onChange={(e) => set({ fee: e.target.value })} placeholder="Fee in rupees" className={input} />
             <input aria-label="GPay number" value={form.gpayNumber} onChange={(e) => set({ gpayNumber: e.target.value })} placeholder="GPay number to pay" className={input} />
             <input aria-label="GPay name" value={form.gpayName} onChange={(e) => set({ gpayName: e.target.value })} placeholder="Name on GPay (optional)" className={input} />
-            <input aria-label="Offer fee" type="number" min={0} value={form.offerFee} onChange={(e) => set({ offerFee: e.target.value })} placeholder="Offer fee in rupees (optional)" className={input} />
-            <input aria-label="Offer text" value={form.offerText} onChange={(e) => set({ offerText: e.target.value })} placeholder="Registration offer, for example Early bird offer (optional)" className={`${input} sm:col-span-2`} />
+            <input aria-label="First free registrations" type="number" min={0} value={form.freeFirst} onChange={(e) => set({ freeFirst: e.target.value })} placeholder="First how many registrations are free? (optional, for example 50)" className={`${input} sm:col-span-2`} />
           </div>
         )}
+        <input aria-label="Registration limit" type="number" min={1} value={form.maxRegistrations} onChange={(e) => set({ maxRegistrations: e.target.value })} placeholder="Registration limit - total seats (optional, empty = no limit)" className={input} />
         <div className="grid sm:grid-cols-2 gap-3 items-end">
           <label className="block font-bold text-slate-700 uppercase tracking-wider">
             Who can see it
@@ -406,7 +408,8 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
                 <span className={`px-2 py-0.5 rounded-full font-bold border ${p.isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
                   {p.isActive ? 'Shown to customers' : 'Hidden'}
                 </span>
-                {p.isPaid && <span className="px-2 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Paid ₹{p.offerFee !== undefined && p.offerFee >= 0 ? p.offerFee : p.fee}</span>}
+                {p.isPaid && <span className="px-2 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Paid ₹{p.fee}{p.freeFirst ? ` (first ${p.freeFirst} free)` : ''}</span>}
+                {p.maxRegistrations ? <span className="px-2 py-0.5 rounded-full font-bold bg-amber-50 text-amber-800 border border-amber-200">{regs.filter((r) => r.programId === p.id).length}/{p.maxRegistrations} seats</span> : null}
                 <span className="px-2 py-0.5 rounded-full font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">{p.region || 'All regions'}</span>
                 {p.createdBy && <span className="px-2 py-0.5 rounded-full font-bold bg-slate-50 text-slate-600 border border-slate-200">Added by {p.createdBy}</span>}
                 {isPast(p) && <span className="px-2 py-0.5 rounded-full font-bold bg-amber-50 text-amber-800 border border-amber-200">Completed</span>}

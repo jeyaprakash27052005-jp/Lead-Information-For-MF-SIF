@@ -239,7 +239,8 @@ Menu -> **Event Leads**.
 
 ### Paid awareness sessions
 
-- In **Awareness Programs** (admin only) tick **Paid session** and enter the fee, the GPay number (and name), and optionally an offer text with an offer fee. Only the admin team can set these.
-- The session's registration form then shows the amount (with the offer), the GPay number, and a screenshot upload. **Register** stays disabled until the full payment screenshot is uploaded. The screenshot is shrunk in the browser and saved in the registration.
+- In **Awareness Programs** (admin only) tick **Paid session** and enter the fee, the GPay number (and name), and optionally **First free registrations** (for example 50: the first 50 registrations pay nothing). Only the admin team can set these.
+- The session's registration form then shows the amount, the GPay number, and a screenshot upload. **Register** stays disabled until the full payment screenshot is uploaded. The screenshot is shrunk in the browser and saved in the registration.
 - Admins open **Registrations** on the session to see the amount and **View payment screenshot**. Payments are not checked automatically; the team must confirm the money in GPay.
 - Republish `firestore.rules`.
+- Any session (free or paid) can have a **Registration limit**. Seats left are shown on the form; when all seats are taken the form says registration is full. Counts are read when the form opens, so two people registering at the same second could rarely exceed the limit by one.
