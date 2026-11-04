@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AlertCircle, CalendarDays, CheckCircle2, ImagePlus, MapPin, UserPlus } from 'lucide-react';
 import { AwarenessProgram } from '../types';
+import { sectionsOf } from '../utils/eventPages';
 import { apiService } from '../services/api';
 import { cardNo, cardUrl, qrImage, smallPhoto } from '../utils/idCard';
 import { sessionRegStorage } from '../services/sessionRegStorage';
@@ -114,8 +115,12 @@ export const SessionRegister: React.FC<{ programId: string; start?: string; onBa
     </div>
   );
 
-  const sections = program.sections || [];
-  const nav = [{ id: 'home', title: 'Home' }, ...sections.map((x) => ({ id: x.id, title: x.title })), { id: 'registration', title: 'Registration' }];
+  const sections = sectionsOf(program);
+  // Registration sits before Themes, like the conference page; at the end when there is no Themes page
+  const pages = sections.map((x) => ({ id: x.id, title: x.title }));
+  const at = pages.findIndex((x) => x.title.trim().toLowerCase() === 'themes');
+  const reg = { id: 'registration', title: 'Registration' };
+  const nav = [{ id: 'home', title: 'Home' }, ...(at >= 0 ? [...pages.slice(0, at), reg, ...pages.slice(at)] : [...pages, reg])];
   const custom = sections.find((x) => x.id === active);
   const updated = formatDateTime(program.updatedAt || program.createdAt).split(',')[0];
 
@@ -161,14 +166,11 @@ export const SessionRegister: React.FC<{ programId: string; start?: string; onBa
   return (
     <section className="max-w-5xl mx-auto space-y-4">
       {program.imageUrl && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-2 flex justify-center">
-          <img src={program.imageUrl} alt={program.title} className="max-h-56 w-auto max-w-full object-contain rounded-xl" />
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+          <img src={program.imageUrl} alt={program.title} className="w-full h-auto" />
         </div>
       )}
-      <p className="text-xs text-slate-500">
-        <a href="#/home" className="hover:underline">Home</a> / <a href="#/sessions" className="hover:underline">Events</a> / {program.title}
-      </p>
-      <h1 className="text-xl sm:text-2xl font-black text-slate-900 leading-snug">{program.title}</h1>
+      {!program.imageUrl && <h1 className="text-xl sm:text-2xl font-black text-slate-900 leading-snug">{program.title}</h1>}
       <div className="grid md:grid-cols-[14rem_1fr] gap-4 items-start">
         <aside className="bg-white rounded-2xl border border-slate-200 p-2 flex md:flex-col gap-1 overflow-x-auto md:sticky md:top-20" aria-label="Event pages">
           {nav.map((n) => (

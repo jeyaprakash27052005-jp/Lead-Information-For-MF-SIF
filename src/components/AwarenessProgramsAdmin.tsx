@@ -3,6 +3,7 @@ import { Link2, ScanLine, Users, Megaphone, Plus, Pencil, Trash2, Eye, EyeOff, R
 import { AwarenessProgram, AwarenessSection, SessionRegistration, User } from '../types';
 import { sessionRegStorage } from '../services/sessionRegStorage';
 import { IdScanner } from './IdScanner';
+import { STANDARD_PAGES, standardSections } from '../utils/eventPages';
 import { prepareAdImage } from '../services/adsStorage';
 import { apiService } from '../services/api';
 import { formatDateTime } from '../utils/dateTime';
@@ -16,8 +17,6 @@ interface Props {
   onNotify?: (msg: string, type?: 'success' | 'info' | 'error') => void;
 }
 
-const STANDARD_PAGES = ['Speakers', 'Download Brochure', 'Program Schedule', 'Call for Papers', 'Themes', 'Conference Enquiry', 'FAQ'];
-
 const empty = () => ({
   title: '',
   description: '',
@@ -30,7 +29,7 @@ const empty = () => ({
   speaker: '',
   contact: '',
   imageUrl: '',
-  sections: [] as AwarenessSection[],
+  sections: standardSections(),
   isPaid: false,
   fee: '',
   freeFirst: '',
@@ -232,7 +231,7 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
       speaker: p.speaker || '',
       contact: p.contact || '',
       imageUrl: p.imageUrl || '',
-      sections: p.sections || [],
+      sections: p.sections === undefined ? standardSections() : p.sections,
       isPaid: !!p.isPaid,
       fee: p.fee ? String(p.fee) : '',
       freeFirst: p.freeFirst ? String(p.freeFirst) : '',
