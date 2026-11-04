@@ -282,3 +282,7 @@ Menu -> **Event Leads**.
 ### Logo
 
 - The Mcube Academy logo (`src/assets/mcube-logo.png`) is shown in the headers and login pages of all four sites (admin, customer, ads, health check) and is the browser tab icon (`logo.png` in each site's `public` folder).
+
+### One calculator per sub menu
+
+- A calculator sub menu now opens only its own calculator: **SIP Calculator** shows the SIP calculators, **Lumpsum Calculator** the lumpsum ones, **Dividend Calculator** the dividend one (address `#/calc/sip`, `#/calc/lumpsum`, `#/calc/dividend`). In Website Menus the admin picks which calculator a sub menu opens; when nothing is picked it is guessed from the title, and a title without SIP, Lumpsum or Dividend opens all calculators.

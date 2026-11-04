@@ -10,7 +10,7 @@ import { MyProfile } from './components/MyProfile';
 import { IdCardView } from './components/IdCardView';
 import { FinanceCalculations } from './components/FinanceCalculations';
 import { siteStorage } from './services/siteStorage';
-import { DEFAULT_ITEMS, DEFAULT_MENUS, isRemovedMenu } from './utils/siteDefaults';
+import { DEFAULT_ITEMS, DEFAULT_MENUS, calcTypeOf, isRemovedMenu } from './utils/siteDefaults';
 import { SiteContact, SiteCustomer, SiteItem, SiteMenu } from './types';
 import { AdsAccount, VerifyPanel } from './components/AdsAccount';
 import { QuickResponse } from './components/QuickResponse';
@@ -25,10 +25,11 @@ const readSession = (): string | null => {
   }
 };
 
-type Route = { name: 'home' | 'funds' | 'sessions' | 'contact' | 'calc' | 'login' | 'quick' } | { name: 'page'; id: string } | { name: 'register'; id: string } | { name: 'profile' } | { name: 'id'; token: string };
+type Route = { name: 'home' | 'funds' | 'sessions' | 'contact' | 'calc' | 'login' | 'quick'; only?: string } | { name: 'page'; id: string } | { name: 'register'; id: string } | { name: 'profile' } | { name: 'id'; token: string };
 
 const readRoute = (): Route => {
   const h = window.location.hash.replace(/^#\/?/, '');
+  if (h.startsWith('calc/')) return { name: 'calc', only: h.slice(5) };
   if (h === 'funds' || h === 'sessions' || h === 'contact' || h === 'calc' || h === 'login' || h === 'quick') return { name: h };
   if (h.startsWith('id/')) return { name: 'id', token: decodeURIComponent(h.slice(3)) };
   if (h === 'profile') return { name: 'profile' };
@@ -165,7 +166,7 @@ function Site() {
     if (x.badge === 'Coming Soon' && x.kind === 'page' && !(x.body || '').trim()) return;
     // sub menus the admin marked "login required" open only after login
     if (x.requiresLogin !== false && !customer?.verified) {
-      const target = x.kind === 'route' ? `/${x.route || 'home'}` : x.kind === 'calculator' ? '/calc' : x.kind === 'link' ? '/home' : `/p/${encodeURIComponent(x.id)}`;
+      const target = x.kind === 'route' ? `/${x.route || 'home'}` : x.kind === 'calculator' ? `/calc/${calcTypeOf(x)}` : x.kind === 'link' ? '/home' : `/p/${encodeURIComponent(x.id)}`;
       return goLogin(target, `Please login or create an account to open ${x.title}.`);
     }
     if (x.kind === 'link') {
@@ -173,7 +174,7 @@ function Site() {
       return;
     }
     if (x.kind === 'route') return go(`/${x.route || 'home'}`);
-    if (x.kind === 'calculator') return go('/calc');
+    if (x.kind === 'calculator') return go(`/calc/${calcTypeOf(x)}`);
     go(`/p/${encodeURIComponent(x.id)}`);
   };
 
@@ -356,8 +357,8 @@ function Site() {
         )}
         {ok && route.name === 'calc' && (
           <section className="space-y-4">
-            <h1 className="text-2xl font-black text-slate-900">Investment Calculators</h1>
-            <FinanceCalculations />
+            <h1 className="text-2xl font-black text-slate-900">{route.only ? 'Calculator' : 'Investment Calculators'}</h1>
+            <FinanceCalculations key={route.only || 'all'} only={route.only} />
           </section>
         )}
         {route.name === 'contact' && <Contact />}

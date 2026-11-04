@@ -282,6 +282,8 @@ export interface SiteMenu {
 }
 
 export type SiteItemKind = 'page' | 'link' | 'route' | 'calculator';
+/** Which calculator a calculator sub menu opens (empty = guessed from its title, else all) */
+export type CalcType = 'sip' | 'lumpsum' | 'dividend';
 export type SiteRoute = 'funds' | 'sessions' | 'contact';
 
 /** A sub menu entry under a top menu: opens a page of text, an outside link, a part of the site, or the calculators */
@@ -299,6 +301,7 @@ export interface SiteItem {
   route?: SiteRoute; // (kind = route)
   /** The visitor must login to open this sub menu. Empty = login required. Set by the admin team. */
   requiresLogin?: boolean;
+  calcType?: CalcType; // (kind = calculator)
   order: number;
   isActive: boolean;
   createdAt: string;

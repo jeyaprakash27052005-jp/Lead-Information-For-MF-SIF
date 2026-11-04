@@ -42,9 +42,9 @@ export const DEFAULT_ITEMS: SiteItem[] = (() => {
     i('plan', P, 'Vacation Plan', 'Save for your next trip'),
     i('plan', P, 'Wedding Plan', 'Plan for a wedding step by step'),
     i('plan', P, 'Investment Ideas', 'Ideas for your next investment', { badge: 'New' }),
-    i('plan', C, 'SIP Calculator', 'How much to invest regularly to reach your savings goal', { kind: 'calculator', body: '' }),
-    i('plan', C, 'Lumpsum Calculator', 'Know the value of a one time investment', { kind: 'calculator', body: '' }),
-    i('plan', C, 'Dividend Calculator', 'Dividend income from your units', { kind: 'calculator', body: '' }),
+    i('plan', C, 'SIP Calculator', 'How much to invest regularly to reach your savings goal', { kind: 'calculator', calcType: 'sip', body: '' }),
+    i('plan', C, 'Lumpsum Calculator', 'Know the value of a one time investment', { kind: 'calculator', calcType: 'lumpsum', body: '' }),
+    i('plan', C, 'Dividend Calculator', 'Dividend income from your units', { kind: 'calculator', calcType: 'dividend', body: '' }),
     i('plan', C, 'Retirement Calculator', 'Plan to keep up your lifestyle after retirement', { badge: 'Coming Soon' }),
     i('plan', C, 'SWP Calculator', 'Regular withdrawals from your investment', { badge: 'Coming Soon' }),
 
@@ -72,3 +72,10 @@ export const SITE_ROUTE_LABELS: Record<string, string> = { funds: 'Mutual Fund O
 
 /** The removed Investor Guide menu: never shown, and deleted from the database by the admin screen */
 export const isRemovedMenu = (m: { id: string; label: string }) => m.id === 'guide' || m.label.trim().toLowerCase() === 'investor guide';
+
+/** The calculator a calculator sub menu opens: chosen by the admin, else guessed from its title */
+export const calcTypeOf = (x: { title: string; calcType?: string }): string => {
+  if (x.calcType) return x.calcType;
+  const t = x.title.toLowerCase();
+  return t.includes('sip') ? 'sip' : t.includes('lumpsum') ? 'lumpsum' : t.includes('dividend') ? 'dividend' : '';
+};

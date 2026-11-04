@@ -309,19 +309,27 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
 ];
 
 /** Admin tool (Head, Regional and Area Incharge only): lumpsum and SIP future value and growth, and dividends, each with the formula shown */
-export const FinanceCalculations: React.FC = () => {
-  const [tab, setTab] = useState<Tab>('lump-future');
+const GROUPS: Record<string, { tabs: Tab[]; title: string }> = {
+  sip: { tabs: ['sip-future', 'sip-growth'], title: 'SIP Calculator' },
+  lumpsum: { tabs: ['lump-future', 'lump-growth'], title: 'Lumpsum Calculator' },
+  dividend: { tabs: ['dividend'], title: 'Dividend Calculator' },
+};
+
+export const FinanceCalculations: React.FC<{ only?: string }> = ({ only }) => {
+  const group = only ? GROUPS[only] : undefined;
+  const tabs = group ? TABS.filter((t) => group.tabs.includes(t.id)) : TABS;
+  const [tab, setTab] = useState<Tab>(tabs[0].id);
   return (
     <div className="space-y-5 max-w-5xl mx-auto">
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
         <div className="flex items-center gap-2 text-indigo-600 font-bold text-xs uppercase tracking-wider mb-1">
           <Calculator className="w-4 h-4" /> Investment Calculations
         </div>
-        <h2 className="text-lg font-black text-slate-900">Future value, growth and dividend: lumpsum and SIP shown separately</h2>
+        <h2 className="text-lg font-black text-slate-900">{group ? group.title : 'Future value, growth and dividend: lumpsum and SIP shown separately'}</h2>
         <p className="text-xs text-slate-500 mt-0.5">For explaining numbers to customers. Every result shows the formula used. Projections are estimates and not guaranteed returns.</p>
       </div>
-      <div className="flex flex-wrap gap-2" role="tablist">
-        {TABS.map((t) => (
+      <div className={`flex flex-wrap gap-2 ${tabs.length < 2 ? 'hidden' : ''}`} role="tablist">
+        {tabs.map((t) => (
           <button
             key={t.id}
             role="tab"

@@ -25,6 +25,7 @@ const emptyItem = (menuId = '') => ({
   linkUrl: '',
   route: 'funds' as SiteRoute,
   requiresLogin: true,
+  calcType: '' as '' | 'sip' | 'lumpsum' | 'dividend',
   isActive: true,
 });
 
@@ -199,6 +200,7 @@ export const SiteContentManagement: React.FC<Props> = ({ currentUser, onNotify }
       linkUrl: form.kind === 'link' ? form.linkUrl.trim() : '',
       route: form.kind === 'route' ? form.route : undefined,
       requiresLogin: form.requiresLogin,
+      calcType: form.kind === 'calculator' && form.calcType ? form.calcType : undefined,
       order: old ? old.order : (items.reduce((m, x) => Math.max(m, x.order), 0) || inSection.length) + 1,
       isActive: form.isActive,
       createdAt: old?.createdAt || new Date().toISOString(),
@@ -224,6 +226,7 @@ export const SiteContentManagement: React.FC<Props> = ({ currentUser, onNotify }
       linkUrl: x.linkUrl || '',
       route: x.route || 'funds',
       requiresLogin: x.requiresLogin !== false,
+      calcType: x.calcType || '',
       isActive: x.isActive,
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -382,6 +385,17 @@ export const SiteContentManagement: React.FC<Props> = ({ currentUser, onNotify }
           <label className={lbl}>
             Page text
             <textarea value={form.body} rows={7} maxLength={6000} onChange={(e) => set({ body: e.target.value })} placeholder="Write the guide or promotion. A blank line starts a new paragraph." className={`mt-1 ${input}`} />
+          </label>
+        )}
+        {form.kind === 'calculator' && (
+          <label className={lbl}>
+            Which calculator opens
+            <select value={form.calcType} onChange={(e) => set({ calcType: e.target.value as typeof form.calcType })} className={`mt-1 ${input} bg-white`}>
+              <option value="">Chosen from the title (SIP, Lumpsum or Dividend), else all calculators</option>
+              <option value="sip">SIP calculator only</option>
+              <option value="lumpsum">Lumpsum calculator only</option>
+              <option value="dividend">Dividend calculator only</option>
+            </select>
           </label>
         )}
         {form.kind === 'link' && (
