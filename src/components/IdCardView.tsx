@@ -4,6 +4,7 @@ import { AwarenessProgram, SessionRegistration } from '../types';
 import { apiService } from '../services/api';
 import { sessionRegStorage } from '../services/sessionRegStorage';
 import { formatDateTime } from '../utils/dateTime';
+import { CardForm } from './IdCardForm';
 import { cardNo, cardUrl, downloadCard, qrImage } from '../utils/idCard';
 
 /** Opened by scanning the QR code of an ID card: shows the ID card with a download button (no login needed) */
@@ -11,6 +12,7 @@ export const IdCardView: React.FC<{ token: string }> = ({ token }) => {
   const [state, setState] = useState<{ r: SessionRegistration; p: AwarenessProgram } | null | undefined>(undefined);
   const [qr, setQr] = useState<string | null>(null);
 
+  const [reload, setReload] = useState(0);
   useEffect(() => {
     (async () => {
       try {
@@ -24,11 +26,12 @@ export const IdCardView: React.FC<{ token: string }> = ({ token }) => {
         setState(null);
       }
     })();
-  }, [token]);
+  }, [token, reload]);
 
   if (state === undefined) return <p className="text-xs text-slate-400 text-center py-8">Loading...</p>;
   if (!state) return <p className="max-w-md mx-auto bg-white border border-slate-200 rounded-2xl p-6 text-center text-sm text-slate-600">This ID card was not found.</p>;
   const { r, p } = state;
+  const over = new Date(p.endsAt || p.startsAt).getTime() + 3 * 3600000 < Date.now();
 
   return (
     <section className="max-w-md mx-auto space-y-4">
@@ -55,6 +58,9 @@ export const IdCardView: React.FC<{ token: string }> = ({ token }) => {
       <button onClick={() => downloadCard(r, p)} className="w-full px-4 py-3 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold flex items-center justify-center gap-2 cursor-pointer">
         <Download className="w-4 h-4" /> Download ID card
       </button>
+      <div className="bg-white rounded-2xl border border-slate-200 p-4">
+        {over ? <CardForm r={r} p={p} onSaved={() => setReload((n) => n + 1)} /> : <p className="text-xs text-slate-600">After the event is complete you can come back to this page to add your details and update your ID card.</p>}
+      </div>
     </section>
   );
 };

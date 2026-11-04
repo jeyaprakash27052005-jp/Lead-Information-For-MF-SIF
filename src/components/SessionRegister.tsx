@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AlertCircle, CalendarDays, CheckCircle2, ImagePlus, MapPin, UserPlus } from 'lucide-react';
-import { AwarenessProgram, SiteCustomer } from '../types';
+import { AwarenessProgram } from '../types';
 import { apiService } from '../services/api';
 import { cardNo, cardUrl, qrImage, smallPhoto } from '../utils/idCard';
 import { sessionRegStorage } from '../services/sessionRegStorage';
@@ -38,9 +38,9 @@ const compress = (file: File): Promise<string> =>
   });
 
 /** Separate registration form of one awareness session (opened by its own link) */
-export const SessionRegister: React.FC<{ programId: string; customer: SiteCustomer; onBack: () => void }> = ({ programId, customer, onBack }) => {
+export const SessionRegister: React.FC<{ programId: string; onBack: () => void }> = ({ programId, onBack }) => {
   const [program, setProgram] = useState<AwarenessProgram | null | undefined>(undefined);
-  const [f, setF] = useState({ attendeeType: 'customer' as 'customer' | 'member', first: customer.fullName.split(' ')[0], last: customer.fullName.split(' ').slice(1).join(' '), mobile: customer.mobile, email: customer.email, city: '', guests: 0, note: '' });
+  const [f, setF] = useState({ attendeeType: 'customer' as 'customer' | 'member', first: '', last: '', mobile: '', email: '', city: '', guests: 0, note: '' });
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
@@ -94,7 +94,7 @@ export const SessionRegister: React.FC<{ programId: string; customer: SiteCustom
     try {
       if (!f.first.trim() || !f.last.trim()) throw new Error('Type your first name and last name.');
       if (!f.email.trim()) throw new Error('Type your e-mail address.');
-      const reg = await sessionRegStorage.register(program, { ...f, name: `${f.first.trim()} ${f.last.trim()}`, paymentProof: proof ?? undefined, customerId: customer.id, photo: photo ?? undefined });
+      const reg = await sessionRegStorage.register(program, { ...f, name: `${f.first.trim()} ${f.last.trim()}`, paymentProof: proof ?? undefined, photo: photo ?? undefined });
       const url = cardUrl(reg.cardToken || '');
       setDone2({ no: cardNo(reg), url, qr: await qrImage(url, 260).catch(() => '') });
       setDone(true);
@@ -147,7 +147,7 @@ export const SessionRegister: React.FC<{ programId: string; customer: SiteCustom
               <a href={done2.url} className="inline-block text-xs font-bold text-blue-700 underline">Open ID card</a>
             </div>
           )}
-          <p className="text-xs text-emerald-800">You can also see this in <b>My Profile</b>.</p>
+          <p className="text-xs text-emerald-800">Keep this QR code. After the event, scan it to add your details and download your ID card.</p>
           <button onClick={onBack} className="px-4 py-2 rounded-xl bg-blue-700 text-white text-sm font-bold cursor-pointer">Back to sessions</button>
         </div>
       ) : (

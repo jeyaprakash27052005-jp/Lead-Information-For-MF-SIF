@@ -6,33 +6,19 @@ import { AdsCarousel } from './components/AdsCarousel';
 import { FundAdsList } from './components/FundAdsList';
 import { AwarenessList } from './components/AwarenessList';
 import { SessionRegister } from './components/SessionRegister';
-import { MyProfile } from './components/MyProfile';
 import { IdCardView } from './components/IdCardView';
 import { FinanceCalculations } from './components/FinanceCalculations';
 import { siteStorage } from './services/siteStorage';
 import { DEFAULT_ITEMS, DEFAULT_MENUS, calcTypeOf, isRemovedMenu } from './utils/siteDefaults';
-import { SiteContact, SiteCustomer, SiteItem, SiteMenu } from './types';
-import { AdsAccount, VerifyPanel } from './components/AdsAccount';
-import { QuickResponse } from './components/QuickResponse';
-import { siteCustomerStorage } from './services/siteCustomerStorage';
+import { SiteContact, SiteItem, SiteMenu } from './types';
 
-const SESSION_KEY = 'ads_customer_id';
-const readSession = (): string | null => {
-  try {
-    return localStorage.getItem(SESSION_KEY);
-  } catch (_e) {
-    return null;
-  }
-};
-
-type Route = { name: 'home' | 'funds' | 'sessions' | 'contact' | 'calc' | 'login' | 'quick'; only?: string } | { name: 'page'; id: string } | { name: 'register'; id: string } | { name: 'profile' } | { name: 'id'; token: string };
+type Route = { name: 'home' | 'funds' | 'sessions' | 'contact' | 'calc'; only?: string } | { name: 'page'; id: string } | { name: 'register'; id: string } | { name: 'id'; token: string };
 
 const readRoute = (): Route => {
   const h = window.location.hash.replace(/^#\/?/, '');
   if (h.startsWith('calc/')) return { name: 'calc', only: h.slice(5) };
-  if (h === 'funds' || h === 'sessions' || h === 'contact' || h === 'calc' || h === 'login' || h === 'quick') return { name: h };
+  if (h === 'funds' || h === 'sessions' || h === 'contact' || h === 'calc') return { name: h };
   if (h.startsWith('id/')) return { name: 'id', token: decodeURIComponent(h.slice(3)) };
-  if (h === 'profile') return { name: 'profile' };
   if (h.startsWith('register/')) return { name: 'register', id: decodeURIComponent(h.slice(9)) };
   if (h.startsWith('p/')) return { name: 'page', id: decodeURIComponent(h.slice(2)) };
   return { name: 'home' };
@@ -51,69 +37,6 @@ function Site() {
   const [menus, setMenus] = useState<SiteMenu[]>(DEFAULT_MENUS);
   const [items, setItems] = useState<SiteItem[]>(DEFAULT_ITEMS);
   const headerRef = useRef<HTMLElement | null>(null);
-  const [customer, setCustomer] = useState<SiteCustomer | null>(null);
-  const [sessionChecked, setSessionChecked] = useState(false);
-  const afterLogin = useRef<string>('/home');
-  const [loginMsg, setLoginMsg] = useState<string | undefined>(undefined);
-  const [loginBox, setLoginBox] = useState(false);
-  // everything except Home, Contact, Login and Quick Response (which has its own check) needs a verified login first
-  const routeNeedsLogin = (name: string): boolean => {
-    const linked = items.filter((x) => x.isActive && ((x.kind === 'route' && x.route === name) || (name === 'calc' && x.kind === 'calculator')));
-    return linked.length === 0 || linked.some((x) => x.requiresLogin !== false);
-  };
-  const gated =
-    route.name === 'register' || route.name === 'profile'
-      ? true
-      : route.name === 'funds' || route.name === 'sessions' || route.name === 'calc'
-        ? routeNeedsLogin(route.name)
-        : route.name === 'page'
-          ? items.find((x) => x.id === route.id)?.requiresLogin !== false
-          : false;
-  const ok = !gated || !!customer?.verified;
-  const here = () => window.location.hash.replace(/^#/, '') || '/home';
-
-  useEffect(() => {
-    const id = readSession();
-    if (!id) return setSessionChecked(true);
-    siteCustomerStorage
-      .get(id)
-      .then((c) => setCustomer(c))
-      .catch(() => undefined)
-      .finally(() => setSessionChecked(true));
-  }, []);
-
-  const signedIn = (c: SiteCustomer) => {
-    setCustomer(c);
-    try {
-      localStorage.setItem(SESSION_KEY, c.id);
-    } catch (_e) {
-      // the login simply is not remembered
-    }
-    if (c.verified) {
-      setLoginBox(false);
-      window.location.hash = afterLogin.current;
-      afterLogin.current = '/home';
-    }
-  };
-  const logout = () => {
-    setCustomer(null);
-    try {
-      localStorage.removeItem(SESSION_KEY);
-    } catch (_e) {
-      // ignore
-    }
-    window.location.hash = '/home';
-    setMobile(false);
-  };
-  const goLogin = (next: string, msg?: string) => {
-    afterLogin.current = next;
-    setLoginMsg(msg ?? (next === '/quick' ? 'Please login or create an account to use Quick Response.' : undefined));
-    // the login appears over the page, only when it is needed
-    setLoginBox(true);
-    setMobile(false);
-    setOpenMenu(null);
-  };
-
   useEffect(() => {
     let alive = true;
     const load = async () => {
@@ -167,11 +90,6 @@ function Site() {
 
   const open = (x: SiteItem) => {
     if (x.badge === 'Coming Soon' && x.kind === 'page' && !(x.body || '').trim()) return;
-    // sub menus the admin marked "login required" open only after login
-    if (x.requiresLogin !== false && !customer?.verified) {
-      const target = x.kind === 'route' ? `/${x.route || 'home'}` : x.kind === 'calculator' ? `/calc/${calcTypeOf(x)}` : x.kind === 'link' ? '/home' : `/p/${encodeURIComponent(x.id)}`;
-      return goLogin(target, `Please login or create an account to open ${x.title}.`);
-    }
     if (x.kind === 'link') {
       if (/^https:\/\//i.test(x.linkUrl || '')) window.open(x.linkUrl, '_blank', 'noopener,noreferrer');
       return;
@@ -231,20 +149,7 @@ function Site() {
               </button>
             ))}
           </nav>
-          <div className="hidden xl:flex items-center gap-2 ml-auto">
-            <button onClick={() => (customer?.verified ? go('/quick') : goLogin('/quick'))} className="px-4 py-2 rounded-md border border-slate-800 text-sm font-bold text-slate-900 hover:bg-slate-50">
-              Quick Response
-            </button>
-            {customer ? (
-              <>
-                <span className="text-sm font-semibold text-slate-700 max-w-[10rem] truncate" title={customer.fullName}>Hi, {customer.fullName.split(' ')[0]}</span>
-                <button onClick={() => go('/profile')} className="px-4 py-2 rounded-md border border-slate-800 text-sm font-bold text-slate-900 hover:bg-slate-50">My Profile</button>
-                <button onClick={logout} className="px-4 py-2 rounded-md bg-blue-700 hover:bg-blue-800 text-sm font-bold text-white">Logout</button>
-              </>
-            ) : (
-              <button onClick={() => goLogin('/home')} className="px-5 py-2 rounded-md bg-blue-700 hover:bg-blue-800 text-sm font-bold text-white">Login</button>
-            )}
-          </div>
+          <div className="hidden xl:block ml-auto" />
           <button className="xl:hidden ml-auto p-2 rounded-lg border border-slate-200" aria-label={mobile ? 'Close menu' : 'Open menu'} aria-expanded={mobile} onClick={() => setMobile((o) => !o)}>
             {mobile ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -296,17 +201,6 @@ function Site() {
                 )}
               </div>
             ))}
-            <div className="py-3 flex gap-2">
-              <button onClick={() => (customer?.verified ? go('/quick') : goLogin('/quick'))} className="flex-1 px-4 py-2 rounded-md border border-slate-800 text-sm font-bold">Quick Response</button>
-              {customer ? (
-                <>
-                  <button onClick={() => go('/profile')} className="flex-1 px-4 py-2 rounded-md border border-slate-800 text-sm font-bold">My Profile</button>
-                  <button onClick={logout} className="flex-1 px-4 py-2 rounded-md bg-blue-700 text-sm font-bold text-white">Logout</button>
-                </>
-              ) : (
-                <button onClick={() => goLogin('/home')} className="flex-1 px-4 py-2 rounded-md bg-blue-700 text-sm font-bold text-white">Login</button>
-              )}
-            </div>
           </nav>
         )}
       </header>
@@ -336,57 +230,28 @@ function Site() {
             )}
           </>
         )}
-        {ok && route.name === 'funds' && (
+        {route.name === 'funds' && (
           <section className="space-y-4">
             <h1 className="text-2xl font-black text-slate-900">Mutual Fund Offers</h1>
             <FundAdsList />
           </section>
         )}
-        {ok && route.name === 'sessions' && (
+        {route.name === 'sessions' && (
           <section className="space-y-4">
             <h1 className="text-2xl font-black text-slate-900">Awareness Sessions</h1>
             <AwarenessList registerBase="#/register/" hero allRegions />
           </section>
         )}
-        {ok && route.name === 'register' && customer && <SessionRegister programId={route.id} customer={customer} onBack={() => go('/sessions')} />}
+        {route.name === 'register' && <SessionRegister programId={route.id} onBack={() => go('/sessions')} />}
         {route.name === 'id' && <IdCardView token={route.token} />}
-        {ok && route.name === 'profile' && customer && <MyProfile customer={customer} />}
-        {!ok && (
-          !sessionChecked ? <p className="text-xs text-slate-400 text-center">Loading...</p> : !customer ? (
-            <AdsAccount onLogin={(c) => { afterLogin.current = here(); signedIn(c); }} message={loginMsg || 'Please login or create an account to open this page.'} />
-          ) : (
-            <VerifyPanel customer={customer} onVerified={(c) => { afterLogin.current = here(); signedIn(c); }} />
-          )
-        )}
-        {ok && route.name === 'calc' && (
+        {route.name === 'calc' && (
           <section className="space-y-4">
             <h1 className="text-2xl font-black text-slate-900">{route.only ? 'Calculator' : 'Investment Calculators'}</h1>
             <FinanceCalculations key={route.only || 'all'} only={route.only} />
           </section>
         )}
         {route.name === 'contact' && <Contact />}
-        {route.name === 'login' && (
-          <section className="space-y-4">
-            {!sessionChecked ? <p className="text-xs text-slate-400 text-center">Loading...</p> : customer && !customer.verified ? <VerifyPanel customer={customer} onVerified={signedIn} /> : customer ? (
-              <div className="max-w-md mx-auto bg-white rounded-2xl border border-slate-200 p-6 text-center space-y-3">
-                <p className="text-sm text-slate-700">You are logged in as <b>{customer.fullName}</b>.</p>
-                <button onClick={() => go('/quick')} className="px-5 py-2.5 rounded-xl bg-blue-700 text-white text-sm font-bold cursor-pointer">Open Quick Response</button>
-              </div>
-            ) : (
-              <AdsAccount onLogin={signedIn} message={loginMsg} />
-            )}
-          </section>
-        )}
-        {route.name === 'quick' && (
-          !sessionChecked ? <p className="text-xs text-slate-400 text-center">Loading...</p> : !customer ? (
-            <AdsAccount onLogin={(c) => { afterLogin.current = '/quick'; signedIn(c); }} message="Please login or create an account to use Quick Response." />
-          ) : !customer.verified ? (
-            <VerifyPanel customer={customer} onVerified={(c) => { setCustomer(c); }} />
-          ) : (
-            <QuickResponse customer={customer} />
-          )
-        )}
-        {ok && route.name === 'page' &&
+        {route.name === 'page' &&
           (pageItem ? (
             <article className="max-w-2xl mx-auto space-y-4">
               <p className="text-xs font-bold uppercase tracking-wide text-blue-700">{menus.find((m) => m.id === pageItem.menuId)?.label}</p>
@@ -406,19 +271,6 @@ function Site() {
             <p className="text-center text-sm text-slate-500 py-16">This page is not available. Please use the menu above.</p>
           ))}
       </main>
-
-      {loginBox && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-start justify-center overflow-y-auto p-4 modal-safe" role="dialog" aria-modal="true" onClick={() => setLoginBox(false)}>
-          <div className="w-full max-w-md relative" onClick={(e) => e.stopPropagation()}>
-            <button type="button" aria-label="Close" onClick={() => setLoginBox(false)} className="absolute -top-2 -right-2 z-10 p-1.5 rounded-full bg-white border border-slate-300 shadow cursor-pointer"><X className="w-4 h-4" /></button>
-            {customer && !customer.verified ? (
-              <VerifyPanel customer={customer} onVerified={signedIn} />
-            ) : (
-              <AdsAccount onLogin={signedIn} message={loginMsg} />
-            )}
-          </div>
-        </div>
-      )}
 
     </div>
   );

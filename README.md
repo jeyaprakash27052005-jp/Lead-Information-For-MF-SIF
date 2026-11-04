@@ -299,3 +299,9 @@ Menu -> **Event Leads**.
 - On the advertising website the login now appears as a **popup over the page** only when it is needed: when a visitor opens a sub menu that needs login, taps Quick Response or Login, or opens an event. After login the page they asked for opens. The popup can be closed.
 - Event cards have **Register Now** and **Know more**, and the poster picture itself is a link; all open the event page.
 - The uploaded poster is shown **whole** (not cropped) on the cards, the banner and the event page.
+
+### The advertising website has no login
+
+- The advertising website no longer has Login, Create account, Quick Response, My Profile or any login popup. Every page, menu, calculator and event opens for everyone. (The old customer account and question screens were removed from the website; the admin **Customer Queries** screen remains only for old data.)
+- **Know more** and **Register Now** open the event page directly. The registration form needs only First Name, Last Name, Email, Phone and a photo (and the payment screenshot for paid events). Each registration still gets an event ID and QR code, and is saved as a lead.
+- The ID card details form (name on card, occupation, city, photo, ID card download) is on the page opened by scanning the QR code, and works once the event is complete. Keep the QR code or the link.
