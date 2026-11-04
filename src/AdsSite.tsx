@@ -192,7 +192,7 @@ function Site() {
             <span className="w-9 h-9 rounded-lg bg-blue-700 text-white flex items-center justify-center">
               <Landmark className="w-4 h-4" />
             </span>
-            <span className="font-black text-slate-900 tracking-tight text-sm sm:text-base">Mutual Fund Hub</span>
+            <span className="font-black text-slate-900 tracking-tight text-sm sm:text-base">Mcube Academy</span>
           </button>
           <nav className="hidden xl:flex flex-1 items-center gap-1 ml-4" aria-label="Main">
             {visibleMenus.map((m) => (
