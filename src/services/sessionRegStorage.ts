@@ -6,6 +6,7 @@ import { NATIONAL_HQ_REGION } from '../utils/regions';
 import { isEmail } from '../utils/siteAuth';
 
 const clean = <T,>(o: T): T => JSON.parse(JSON.stringify(o));
+const newToken = () => Array.from(crypto.getRandomValues(new Uint8Array(12)), (b) => b.toString(16).padStart(2, '0')).join('');
 const fail = (what: string) => new Error(`Could not ${what}. Check your connection and that the Firestore rules allow "sessionRegistrations".`);
 
 /** Registrations of the awareness sessions (one form and link per session) */
@@ -31,6 +32,7 @@ export const sessionRegStorage = {
     const now = new Date().toISOString();
     const reg: SessionRegistration = {
       id,
+      cardToken: newToken(),
       programId: program.id,
       programTitle: program.title.slice(0, 200),
       attendeeType: input.attendeeType,
@@ -92,12 +94,22 @@ export const sessionRegStorage = {
   /** The customer types the details that go on the ID card of a completed session */
   async saveCard(id: string, card: { cardName: string; cardOccupation: string; cardCity: string; cardPhoto?: string; cardToken?: string }): Promise<string> {
     try {
-      const cardToken = card.cardToken || Array.from(crypto.getRandomValues(new Uint8Array(12)), (b) => b.toString(16).padStart(2, '0')).join('');
+      const cardToken = card.cardToken || newToken();
       await updateDoc(doc(db, 'sessionRegistrations', id), JSON.parse(JSON.stringify({ ...card, cardToken })));
       return cardToken;
     } catch (_e) {
       throw fail('save the ID card details');
     }
+  },
+  /** Older registrations get their QR code the first time the customer opens My Profile */
+  async ensureToken(id: string): Promise<string> {
+    const t = newToken();
+    try {
+      await updateDoc(doc(db, 'sessionRegistrations', id), { cardToken: t });
+    } catch (_e) {
+      throw fail('make the QR code');
+    }
+    return t;
   },
   /** The page opened by scanning the ID card QR code */
   async getByToken(token: string): Promise<SessionRegistration | null> {

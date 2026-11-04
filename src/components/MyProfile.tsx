@@ -31,15 +31,32 @@ const smallPhoto = (file: File): Promise<string> =>
     img.src = url;
   });
 
+const QrBlock: React.FC<{ r: SessionRegistration; onToken: () => void }> = ({ r, onToken }) => {
+  const [qr, setQr] = useState<string | null>(null);
+  useEffect(() => {
+    if (!r.cardToken) {
+      sessionRegStorage.ensureToken(r.id).then(onToken).catch(() => undefined);
+      return;
+    }
+    qrImage(cardUrl(r.cardToken)).then(setQr).catch(() => setQr(null));
+  }, [r.cardToken]);
+  if (!qr) return null;
+  return (
+    <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl p-3 mt-2">
+      <img src={qr} alt="Event ID QR code" className="w-28 h-28" />
+      <div className="text-[11px] text-slate-600 space-y-1">
+        <p className="font-black text-slate-900 text-sm">Event ID: {cardNo(r)}</p>
+        <p>Scan this QR code to open the ID card and download it.</p>
+      </div>
+    </div>
+  );
+};
+
 const CardForm: React.FC<{ r: SessionRegistration; p: AwarenessProgram; onSaved: () => void }> = ({ r, p, onSaved }) => {
   const [f, setF] = useState({ cardName: r.cardName || r.name, cardOccupation: r.cardOccupation || '', cardCity: r.cardCity || r.city || '' });
   const [photo, setPhoto] = useState<string | undefined>(r.cardPhoto);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [qr, setQr] = useState<string | null>(null);
-  useEffect(() => {
-    if (r.cardToken) qrImage(cardUrl(r.cardToken)).then(setQr).catch(() => setQr(null));
-  }, [r.cardToken]);
   const ready = !!r.cardName;
 
   const save = async (e: React.FormEvent) => {
@@ -71,15 +88,6 @@ const CardForm: React.FC<{ r: SessionRegistration; p: AwarenessProgram; onSaved:
           <input type="file" accept="image/*" className="sr-only" onChange={(e) => e.target.files?.[0] && smallPhoto(e.target.files[0]).then(setPhoto).catch((er) => setError(er.message))} />
         </label>
       </div>
-      {ready && qr && (
-        <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl p-3">
-          <img src={qr} alt="ID card QR code" className="w-28 h-28" />
-          <div className="text-[11px] text-slate-600 space-y-1">
-            <p className="font-black text-slate-900 text-xs">ID: {cardNo(r)}</p>
-            <p>Scan this QR code to open the ID card and download it.</p>
-          </div>
-        </div>
-      )}
       <div className="flex flex-wrap gap-2">
         <button type="submit" disabled={busy} className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold disabled:opacity-60 cursor-pointer">{ready ? 'Update details' : 'Save and generate ID card'}</button>
         {ready && (
@@ -135,6 +143,7 @@ export const MyProfile: React.FC<{ customer: SiteCustomer }> = ({ customer }) =>
               {r.amount ? <span className="px-2 py-0.5 rounded-full font-bold bg-slate-50 text-slate-700 border border-slate-200">Paid ₹{r.amount}</span> : p?.isPaid ? <span className="px-2 py-0.5 rounded-full font-bold bg-slate-50 text-slate-700 border border-slate-200">Free entry</span> : null}
               {done && <span className="px-2 py-0.5 rounded-full font-bold bg-amber-50 text-amber-800 border border-amber-200">Completed</span>}
             </p>
+            <QrBlock r={r} onToken={load} />
             {p && done ? <CardForm r={r} p={p} onSaved={load} /> : <p className="text-[11px] text-slate-500">Your ID card is ready here after the event is complete.</p>}
           </article>
         );

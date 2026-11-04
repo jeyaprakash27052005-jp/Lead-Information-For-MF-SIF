@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AlertCircle, CalendarDays, CheckCircle2, ImagePlus, MapPin, UserPlus } from 'lucide-react';
 import { AwarenessProgram, SiteCustomer } from '../types';
 import { apiService } from '../services/api';
+import { cardNo, cardUrl, qrImage } from '../utils/idCard';
 import { sessionRegStorage } from '../services/sessionRegStorage';
 import { formatDateTime } from '../utils/dateTime';
 
@@ -45,6 +46,7 @@ export const SessionRegister: React.FC<{ programId: string; customer: SiteCustom
   const [done, setDone] = useState(false);
   const [proof, setProof] = useState<string | null>(null);
   const [proofName, setProofName] = useState('');
+  const [done2, setDone2] = useState<{ no: string; qr: string; url: string } | null>(null);
   const [taken, setTaken] = useState<number | null>(null);
 
   useEffect(() => {
@@ -89,7 +91,9 @@ export const SessionRegister: React.FC<{ programId: string; customer: SiteCustom
     setError(null);
     setBusy(true);
     try {
-      await sessionRegStorage.register(program, { ...f, paymentProof: proof ?? undefined, customerId: customer.id });
+      const reg = await sessionRegStorage.register(program, { ...f, paymentProof: proof ?? undefined, customerId: customer.id });
+      const url = cardUrl(reg.cardToken || '');
+      setDone2({ no: cardNo(reg), url, qr: await qrImage(url, 260).catch(() => '') });
       setDone(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not register.');
@@ -115,7 +119,16 @@ export const SessionRegister: React.FC<{ programId: string; customer: SiteCustom
         <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center space-y-3">
           <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
           <p className="text-sm font-bold text-emerald-900">Thank you {f.name}. You are registered.</p>
-          <p className="text-xs text-emerald-800">You can see this in <b>My Profile</b>. The ID card is ready there after the session is complete.</p>
+          {done2 && (
+            <div className="bg-white border border-emerald-200 rounded-xl p-3 space-y-2">
+              <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">Your event ID</p>
+              <p data-testid="event-id" className="font-mono text-2xl font-black text-blue-700">{done2.no}</p>
+              {done2.qr && <img src={done2.qr} alt="Event ID QR code" className="w-44 h-44 mx-auto" />}
+              <p className="text-[11px] text-slate-600">Scan this QR code to open your ID card and download it.</p>
+              <a href={done2.url} className="inline-block text-xs font-bold text-blue-700 underline">Open ID card</a>
+            </div>
+          )}
+          <p className="text-xs text-emerald-800">You can also see this in <b>My Profile</b>.</p>
           <button onClick={onBack} className="px-4 py-2 rounded-xl bg-blue-700 text-white text-sm font-bold cursor-pointer">Back to sessions</button>
         </div>
       ) : (

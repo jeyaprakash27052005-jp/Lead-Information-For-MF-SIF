@@ -259,3 +259,4 @@ Menu -> **Event Leads**.
 - When the customer saves the ID card details, the card gets a random code and a **QR code**. The QR code is shown in My Profile and printed on the downloaded ID card picture.
 - Scanning the QR code opens `#/id/<code>` on the advertising website (no login needed). It shows the ID card (name, event, date, venue, ID number, photo) with a **Download ID card** button. The mobile number is not shown on this page.
 - The QR link works from the website address where the customer made the card, so use the same live address for everyone.
+- The QR code and event ID are made at the moment of registration: the success screen shows them right away, and My Profile shows them for every registered event (older registrations get theirs when My Profile is opened). Scanning opens the ID card page with the Download button.
