@@ -314,3 +314,5 @@ Menu -> **Event Leads**.
 
 - Every event now shows the full conference menu by default: Home, Speakers, Download Brochure, Program Schedule, Call for Papers, Registration, Themes, Conference Enquiry and FAQ. Pages the admin has not filled show "Will be updated soon". In the admin form a new event starts with these pages ready to fill (an event the admin saved without pages keeps none). The brochure PDF is uploaded in the **Download Brochure** page.
 - The poster is shown at full width and full height at the top of the event page (like the top ads). The "Home / Events / title" line is removed, and the title is only written above the menu when there is no poster.
+
+- Event page look: the poster is shown in a wide rectangle (16:9-like) at the top, so a landscape poster fills it and a tall one is shown whole with space at the sides. All text on the event page is Times New Roman, at least 16 px, with headings larger. The "Last Updated on" line and the Register Now button inside Home were removed (use the Registration menu).
