@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link2, Users, Megaphone, Plus, Pencil, Trash2, Eye, EyeOff, RefreshCw, Save, X } from 'lucide-react';
+import { Link2, ScanLine, Users, Megaphone, Plus, Pencil, Trash2, Eye, EyeOff, RefreshCw, Save, X } from 'lucide-react';
 import { AwarenessProgram, SessionRegistration, User } from '../types';
 import { sessionRegStorage } from '../services/sessionRegStorage';
 import { IdScanner } from './IdScanner';
@@ -277,10 +277,16 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
             Programmes you add here appear for customers (Awareness Programs tab) and on the Home Screen. They can only be added from this admin portal.
           </p>
         </div>
-        <button type="button" onClick={load} className="btn-glow px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs font-bold text-slate-700 flex items-center gap-1.5 cursor-pointer">
-          <RefreshCw className="w-3.5 h-3.5" /> Refresh
-        </button>
+        <div className="flex flex-wrap gap-2 shrink-0">
+          <button type="button" onClick={() => setScan((v) => !v)} className="btn-glow px-3 py-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer">
+            <ScanLine className="w-3.5 h-3.5" /> Scan QR code
+          </button>
+          <button type="button" onClick={load} className="btn-glow px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs font-bold text-slate-700 flex items-center gap-1.5 cursor-pointer">
+            <RefreshCw className="w-3.5 h-3.5" /> Refresh
+          </button>
+        </div>
       </div>
+      {scan && <IdScanner programs={list} by={currentUser.name} onChanged={loadRegs} onClose={() => setScan(false)} />}
 
       {problem ? (
         <SaveErrorNotice problem={problem} />
@@ -386,8 +392,6 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
         <ClearFilters show={q !== '' || view !== 'ALL'} onClick={() => { setQ(''); setView('ALL'); }} />
       </div>
 
-      <button type="button" onClick={() => setScan((v) => !v)} className="btn-glow px-4 py-2 rounded-xl bg-blue-700 text-white text-xs font-bold cursor-pointer">Scan ID card (attendance)</button>
-      {scan && <IdScanner programs={list} by={currentUser.name} onChanged={loadRegs} onClose={() => setScan(false)} />}
 
       <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider">
         Advertising website address (used to make each session's registration link)
