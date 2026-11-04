@@ -4,33 +4,12 @@ import { AwarenessProgram, SessionRegistration, SiteCustomer } from '../types';
 import { apiService } from '../services/api';
 import { sessionRegStorage } from '../services/sessionRegStorage';
 import { formatDateTime } from '../utils/dateTime';
-import { cardNo, cardUrl, downloadCard, qrImage } from '../utils/idCard';
+import { cardNo, cardUrl, downloadCard, qrImage, smallPhoto } from '../utils/idCard';
 
 const input = 'w-full px-3 py-2 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
 const lbl = 'block text-xs font-bold text-slate-700 uppercase tracking-wider';
 
 const isOver = (p: AwarenessProgram) => new Date(p.endsAt || p.startsAt).getTime() + 3 * 3600000 < Date.now();
-const smallPhoto = (file: File): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => {
-      const size = 240;
-      const c = document.createElement('canvas');
-      c.width = size;
-      c.height = size;
-      const m = Math.min(img.width, img.height);
-      c.getContext('2d')!.drawImage(img, (img.width - m) / 2, (img.height - m) / 2, m, m, 0, 0, size, size);
-      URL.revokeObjectURL(url);
-      resolve(c.toDataURL('image/jpeg', 0.8));
-    };
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error('This file is not a picture.'));
-    };
-    img.src = url;
-  });
-
 const QrBlock: React.FC<{ r: SessionRegistration; onToken: () => void }> = ({ r, onToken }) => {
   const [qr, setQr] = useState<string | null>(null);
   useEffect(() => {

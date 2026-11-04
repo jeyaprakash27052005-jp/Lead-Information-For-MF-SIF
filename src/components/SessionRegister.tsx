@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AlertCircle, CalendarDays, CheckCircle2, ImagePlus, MapPin, UserPlus } from 'lucide-react';
 import { AwarenessProgram, SiteCustomer } from '../types';
 import { apiService } from '../services/api';
-import { cardNo, cardUrl, qrImage } from '../utils/idCard';
+import { cardNo, cardUrl, qrImage, smallPhoto } from '../utils/idCard';
 import { sessionRegStorage } from '../services/sessionRegStorage';
 import { formatDateTime } from '../utils/dateTime';
 
@@ -46,6 +46,7 @@ export const SessionRegister: React.FC<{ programId: string; customer: SiteCustom
   const [done, setDone] = useState(false);
   const [proof, setProof] = useState<string | null>(null);
   const [proofName, setProofName] = useState('');
+  const [photo, setPhoto] = useState<string | null>(null);
   const [done2, setDone2] = useState<{ no: string; qr: string; url: string } | null>(null);
   const [taken, setTaken] = useState<number | null>(null);
 
@@ -91,7 +92,7 @@ export const SessionRegister: React.FC<{ programId: string; customer: SiteCustom
     setError(null);
     setBusy(true);
     try {
-      const reg = await sessionRegStorage.register(program, { ...f, paymentProof: proof ?? undefined, customerId: customer.id });
+      const reg = await sessionRegStorage.register(program, { ...f, paymentProof: proof ?? undefined, customerId: customer.id, photo: photo ?? undefined });
       const url = cardUrl(reg.cardToken || '');
       setDone2({ no: cardNo(reg), url, qr: await qrImage(url, 260).catch(() => '') });
       setDone(true);
@@ -145,6 +146,16 @@ export const SessionRegister: React.FC<{ programId: string; customer: SiteCustom
           <label className={lbl}>People coming with you<input type="number" min={0} max={10} value={f.guests} onChange={(e) => setF({ ...f, guests: Number(e.target.value) })} className={`mt-1 ${input}`} /></label>
           <label className={lbl}>Message (optional)<textarea value={f.note} maxLength={500} rows={2} onChange={(e) => setF({ ...f, note: e.target.value })} className={`mt-1 ${input}`} /></label>
           {seatsLeft !== null && <p className="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">Limited seats: {seatsLeft} of {program.maxRegistrations} left</p>}
+          <div className="space-y-1.5">
+            <p className={lbl}>Your photo (for the ID card)</p>
+            <div className="flex items-center gap-3">
+              {photo ? <img src={photo} alt="Your photo" className="w-16 h-16 rounded-lg object-cover border border-slate-200" /> : <div className="w-16 h-16 rounded-lg bg-slate-100 border border-dashed border-slate-300" />}
+              <label className="px-4 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold flex items-center gap-2 cursor-pointer">
+                <ImagePlus className="w-4 h-4" /> {photo ? 'Change photo' : 'Upload photo'}
+                <input type="file" accept="image/*" className="sr-only" onChange={(e) => e.target.files?.[0] && smallPhoto(e.target.files[0]).then(setPhoto).catch((er) => setError(er.message))} />
+              </label>
+            </div>
+          </div>
           {program.isPaid && free && (
             <p className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
               Free for you. The first {program.freeFirst} registrations are free. No payment is needed.
@@ -177,7 +188,7 @@ export const SessionRegister: React.FC<{ programId: string; customer: SiteCustom
               )}
             </div>
           )}
-          <button type="submit" disabled={busy || taken === null || (payNow && !proof)} className="w-full px-4 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer">
+          <button type="submit" disabled={busy || taken === null || !photo || (payNow && !proof)} className="w-full px-4 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer">
             <UserPlus className="w-4 h-4" /> {busy ? 'Please wait...' : 'Register'}
           </button>
         </form>

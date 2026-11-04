@@ -441,6 +441,10 @@ export interface SessionRegistration {
   cardPhoto?: string;
   /** Random code in the ID card QR link, so the link cannot be guessed */
   cardToken?: string;
+  /** Attendance: set by the admin team when the ID card is scanned at the event */
+  present?: boolean;
+  presentAt?: string;
+  presentBy?: string;
   note?: string;
   createdAt: string;
 }

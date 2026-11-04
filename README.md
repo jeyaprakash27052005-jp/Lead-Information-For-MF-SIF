@@ -260,3 +260,9 @@ Menu -> **Event Leads**.
 - Scanning the QR code opens `#/id/<code>` on the advertising website (no login needed). It shows the ID card (name, event, date, venue, ID number, photo) with a **Download ID card** button. The mobile number is not shown on this page.
 - The QR link works from the website address where the customer made the card, so use the same live address for everyone.
 - The QR code and event ID are made at the moment of registration: the success screen shows them right away, and My Profile shows them for every registered event (older registrations get theirs when My Profile is opened). Scanning opens the ID card page with the Download button.
+
+### Registration photo and ID card scanning (admin)
+
+- The registration form asks for the customer's **photo** (required). It appears on the ID card, the ID card page and in the admin registrations list.
+- In **Awareness Programs** (admin) tap **Scan ID card (attendance)**: the camera reads the QR code of an ID card (or paste the card link / code), shows the person's photo, name, ID number, event and payment, and **Mark present** records attendance (who and when). **Undo present** reverses it. Registrations marked present show a **Present** badge in the list.
+- The camera needs the admin site to be opened over https and the browser's camera permission.

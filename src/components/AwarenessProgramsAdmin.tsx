@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link2, Users, Megaphone, Plus, Pencil, Trash2, Eye, EyeOff, RefreshCw, Save, X } from 'lucide-react';
 import { AwarenessProgram, SessionRegistration, User } from '../types';
 import { sessionRegStorage } from '../services/sessionRegStorage';
+import { IdScanner } from './IdScanner';
 import { apiService } from '../services/api';
 import { formatDateTime } from '../utils/dateTime';
 import { ConfirmModal } from './ConfirmModal';
@@ -52,6 +53,7 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [regs, setRegs] = useState<SessionRegistration[]>([]);
   const [proof, setProof] = useState<string | null>(null);
+  const [scan, setScan] = useState(false);
   const [openRegs, setOpenRegs] = useState<string | null>(null);
   const [siteUrl, setSiteUrl] = useState(() => {
     try {
@@ -384,6 +386,9 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
         <ClearFilters show={q !== '' || view !== 'ALL'} onClick={() => { setQ(''); setView('ALL'); }} />
       </div>
 
+      <button type="button" onClick={() => setScan((v) => !v)} className="btn-glow px-4 py-2 rounded-xl bg-blue-700 text-white text-xs font-bold cursor-pointer">Scan ID card (attendance)</button>
+      {scan && <IdScanner programs={list} by={currentUser.name} onChanged={loadRegs} onClose={() => setScan(false)} />}
+
       <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider">
         Advertising website address (used to make each session's registration link)
         <input value={siteUrl} onChange={(e) => saveSiteUrl(e.target.value)} placeholder="https://your-ads-site.vercel.app" className="mt-1 w-full px-3 py-2 rounded-xl border border-slate-300 text-xs normal-case font-normal" />
@@ -444,7 +449,7 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
                 {regs.filter((r) => r.programId === p.id).map((r) => (
                   <div key={r.id} className="flex items-start justify-between gap-2 bg-slate-50 rounded-lg px-3 py-2">
                     <p className="min-w-0">
-                      <b>{r.name}</b> ({r.attendeeType}) • <a href={`tel:${r.mobile}`} className="text-indigo-700 font-bold">{r.mobile}</a>
+                      <b>{r.name}</b> ({r.attendeeType}){r.present ? <span className="ml-1 px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold">Present</span> : null} • <a href={`tel:${r.mobile}`} className="text-indigo-700 font-bold">{r.mobile}</a>
                       {r.email ? ` • ${r.email}` : ''}{r.city ? ` • ${r.city}` : ''}{r.guests ? ` • +${r.guests} guest${r.guests > 1 ? 's' : ''}` : ''}
                       {r.note ? <span className="block text-slate-500">{r.note}</span> : null}
                       {r.amount ? <span className="block font-bold text-emerald-700">Paid ₹{r.amount}</span> : null}

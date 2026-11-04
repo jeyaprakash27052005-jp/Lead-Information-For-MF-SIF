@@ -13,7 +13,7 @@ const fail = (what: string) => new Error(`Could not ${what}. Check your connecti
 export const sessionRegStorage = {
   async register(
     program: { id: string; title: string; isPaid?: boolean; fee?: number; freeFirst?: number; maxRegistrations?: number },
-    input: { attendeeType: 'customer' | 'member'; name: string; mobile: string; email: string; city: string; guests: number; note: string; paymentProof?: string; customerId?: string },
+    input: { attendeeType: 'customer' | 'member'; name: string; mobile: string; email: string; city: string; guests: number; note: string; paymentProof?: string; customerId?: string; photo?: string },
   ): Promise<SessionRegistration> {
     const name = input.name.trim().replace(/\s+/g, ' ');
     const mobile = normalizeIndianMobile(input.mobile);
@@ -26,6 +26,7 @@ export const sessionRegStorage = {
     if (program.maxRegistrations && count >= program.maxRegistrations) throw new Error('Registration is full. All seats are taken.');
     const free = !!program.freeFirst && count < program.freeFirst;
     const payNow = !!program.isPaid && !free;
+    if (!input.photo) throw new Error('Upload your photo for the ID card.');
     const amount = payNow ? program.fee ?? 0 : 0;
     if (payNow && !input.paymentProof) throw new Error('Upload the full payment screenshot first.');
     const id = `reg_${program.id}_${mobile}`;
@@ -33,6 +34,7 @@ export const sessionRegStorage = {
     const reg: SessionRegistration = {
       id,
       cardToken: newToken(),
+      cardPhoto: input.photo,
       programId: program.id,
       programTitle: program.title.slice(0, 200),
       attendeeType: input.attendeeType,
@@ -123,6 +125,13 @@ export const sessionRegStorage = {
       return r;
     } catch (_e) {
       throw fail('open the ID card');
+    }
+  },
+  async setPresent(id: string, present: boolean, by: string): Promise<void> {
+    try {
+      await updateDoc(doc(db, 'sessionRegistrations', id), present ? { present: true, presentAt: new Date().toISOString(), presentBy: by } : { present: false, presentAt: '', presentBy: '' });
+    } catch (_e) {
+      throw fail('mark attendance');
     }
   },
   async remove(id: string): Promise<void> {
