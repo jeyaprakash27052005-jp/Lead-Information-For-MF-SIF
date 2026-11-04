@@ -316,3 +316,5 @@ Menu -> **Event Leads**.
 - The poster is shown at full width and full height at the top of the event page (like the top ads). The "Home / Events / title" line is removed, and the title is only written above the menu when there is no poster.
 
 - Event page look: the poster is shown in a wide rectangle (16:9-like) at the top, so a landscape poster fills it and a tall one is shown whole with space at the sides. All text on the event page is Times New Roman, at least 16 px, with headings larger. The "Last Updated on" line and the Register Now button inside Home were removed (use the Registration menu).
+
+- The **Register Now** button is removed from the event cards and from the event Home page: each event card has only a **Know more** button, and people register from the **Registration** item of the event page. Event cards also use Times New Roman at 16 px or larger.
