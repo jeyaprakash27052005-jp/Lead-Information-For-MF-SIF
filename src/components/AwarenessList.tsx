@@ -44,7 +44,7 @@ export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWh
       style={{ ['--d' as string]: `${Math.min(i, 8) * 70}ms` }}
       className={`anim-rise lift-card bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col ${isPast ? 'opacity-70' : ''}`}
     >
-      {p.imageUrl && (registerBase && !isPast ? <a href={`${infoBase || registerBase}${encodeURIComponent(p.id)}`}><img src={p.imageUrl} alt={p.title} className="w-full max-h-48 object-contain bg-slate-100" /></a> : <img src={p.imageUrl} alt={p.title} className="w-full max-h-48 object-contain bg-slate-100" />)}
+      {p.imageUrl && (registerBase && !isPast ? <a href={`${infoBase || registerBase}${encodeURIComponent(p.id)}`}><img src={p.imageUrl} alt={p.title} className="w-full aspect-video object-cover bg-slate-100" /></a> : <img src={p.imageUrl} alt={p.title} className="w-full aspect-video object-cover bg-slate-100" />)}
       <div className="p-5 space-y-2.5 flex-1 flex flex-col">
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-lg font-black text-slate-900 leading-snug">{p.title}</h3>
@@ -121,7 +121,7 @@ export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWh
       {hero && shown[0] && (
         <a href={registerBase ? `${infoBase || registerBase}${encodeURIComponent(shown[0].id)}` : undefined} className="block rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-xs">
           {shown[0].imageUrl ? (
-            <img src={shown[0].imageUrl} alt={shown[0].title} className="w-full max-h-64 object-contain bg-slate-50" />
+            <img src={shown[0].imageUrl} alt={shown[0].title} className="w-full aspect-video object-cover bg-slate-50" />
           ) : (
             <div className="bg-gradient-to-r from-blue-700 to-indigo-800 text-white px-6 py-12 sm:py-16">
               <p className="text-base font-bold uppercase tracking-wider opacity-80">Next session</p>

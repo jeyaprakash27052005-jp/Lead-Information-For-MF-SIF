@@ -260,6 +260,9 @@ export interface AwarenessProgram {
   joinLink?: string; // https link for an online programme
   language?: string;
   speaker?: string;
+  speakerRole?: string; // designation of the speaker
+  speakerBio?: string; // full details about the speaker
+  speakerPhoto?: string; // small photo (data URL) of the speaker
   contact?: string; // phone / WhatsApp number for registering
   imageUrl?: string; // poster / banner picture of the event
   sections?: AwarenessSection[]; // pages shown in the left menu of the event page

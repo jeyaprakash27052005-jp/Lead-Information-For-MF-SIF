@@ -4,7 +4,8 @@ import { AwarenessProgram, AwarenessSection, SessionRegistration, User } from '.
 import { sessionRegStorage } from '../services/sessionRegStorage';
 import { IdScanner } from './IdScanner';
 import { STANDARD_PAGES, standardSections } from '../utils/eventPages';
-import { prepareAdImage } from '../services/adsStorage';
+import { smallPhoto } from '../utils/idCard';
+import { prepareAdImage, toLandscape } from '../services/adsStorage';
 import { apiService } from '../services/api';
 import { formatDateTime } from '../utils/dateTime';
 import { ConfirmModal } from './ConfirmModal';
@@ -27,6 +28,9 @@ const empty = () => ({
   joinLink: '',
   language: '',
   speaker: '',
+  speakerRole: '',
+  speakerBio: '',
+  speakerPhoto: '',
   contact: '',
   imageUrl: '',
   sections: standardSections(),
@@ -167,6 +171,9 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
       joinLink: form.mode === 'online' && form.joinLink.trim() ? form.joinLink.trim() : undefined,
       language: form.language.trim() || undefined,
       speaker: form.speaker.trim() || undefined,
+      speakerRole: form.speakerRole.trim() || undefined,
+      speakerBio: form.speakerBio.trim() || undefined,
+      speakerPhoto: form.speakerPhoto || undefined,
       contact: form.contact.trim() || undefined,
       imageUrl: form.imageUrl || undefined,
       sections: form.sections.filter((x) => x.title.trim()).map((x) => ({ id: x.id, title: x.title.trim(), body: x.body?.trim() || undefined, linkUrl: x.linkUrl?.trim() || undefined, fileUrl: x.fileUrl || undefined, fileName: x.fileName || undefined })),
@@ -189,6 +196,9 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
           joinLink: data.joinLink ?? '',
           language: data.language ?? '',
           speaker: data.speaker ?? '',
+          speakerRole: data.speakerRole ?? '',
+          speakerBio: data.speakerBio ?? '',
+          speakerPhoto: data.speakerPhoto ?? '',
           contact: data.contact ?? '',
           imageUrl: data.imageUrl ?? '',
           sections: data.sections ?? [],
@@ -229,6 +239,9 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
       joinLink: p.joinLink || '',
       language: p.language || '',
       speaker: p.speaker || '',
+      speakerRole: p.speakerRole || '',
+      speakerBio: p.speakerBio || '',
+      speakerPhoto: p.speakerPhoto || '',
       contact: p.contact || '',
       imageUrl: p.imageUrl || '',
       sections: p.sections === undefined ? standardSections() : p.sections,
@@ -359,13 +372,30 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
           <input aria-label="Language" value={form.language} onChange={(e) => set({ language: e.target.value })} placeholder="Language (optional)" className={input} />
           <input aria-label="Contact phone" value={form.contact} onChange={(e) => set({ contact: e.target.value })} placeholder="Contact phone (optional)" className={input} />
         </div>
+        <div className="rounded-xl border border-slate-200 p-3 space-y-2">
+          <p className="text-sm font-bold text-slate-700">Speaker details (shown on the event page)</p>
+          <div className="flex items-start gap-3">
+            {form.speakerPhoto ? <img src={form.speakerPhoto} alt="Speaker" className="w-20 h-20 rounded-xl object-cover border border-slate-200" /> : <div className="w-20 h-20 rounded-xl bg-slate-100 border border-dashed border-slate-300 grid place-items-center text-xs text-slate-400">No photo</div>}
+            <div className="flex-1 space-y-2">
+              <input aria-label="Speaker designation" value={form.speakerRole} onChange={(e) => set({ speakerRole: e.target.value })} placeholder="Designation, e.g. Mutual fund distributor, 15 years experience" className={input} />
+              <div className="flex gap-2 flex-wrap">
+                <label className="px-3 py-2 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white font-bold cursor-pointer">
+                  {form.speakerPhoto ? 'Change speaker photo' : 'Upload speaker photo'}
+                  <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ''; if (file) smallPhoto(file).then((u) => set({ speakerPhoto: u })).catch((er) => setError(er instanceof Error ? er.message : 'Could not read the picture.')); }} />
+                </label>
+                {form.speakerPhoto && <button type="button" onClick={() => set({ speakerPhoto: '' })} className="px-3 py-2 rounded-xl border border-rose-200 text-rose-700 font-bold cursor-pointer">Remove photo</button>}
+              </div>
+            </div>
+          </div>
+          <textarea aria-label="Speaker full details" value={form.speakerBio} onChange={(e) => set({ speakerBio: e.target.value })} rows={4} placeholder="Full details about the speaker: background, experience, qualifications" className={input} />
+        </div>
         <div className="space-y-1.5">
           <p className="font-bold text-slate-700">Event poster / banner picture (shown on the event page and cards)</p>
-          {form.imageUrl && <img src={form.imageUrl} alt="Event poster" className="max-h-40 rounded-lg border border-slate-200" />}
+          {form.imageUrl && <img src={form.imageUrl} alt="Event poster" className="w-full max-w-sm aspect-video object-cover rounded-lg border border-slate-200" />}
           <div className="flex flex-wrap gap-2">
             <label className="btn-glow px-3 py-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold cursor-pointer">
-              {form.imageUrl ? 'Change poster' : 'Upload poster'}
-              <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ''; if (file) prepareAdImage(file).then((u) => set({ imageUrl: u })).catch((er) => setError(er instanceof Error ? er.message : 'Could not read the picture.')); }} />
+              {form.imageUrl ? 'Change poster' : 'Upload poster (landscape)'}
+              <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ''; if (file) prepareAdImage(file).then(toLandscape).then((u) => set({ imageUrl: u })).catch((er) => setError(er instanceof Error ? er.message : 'Could not read the picture.')); }} />
             </label>
             {form.imageUrl && <button type="button" onClick={() => set({ imageUrl: '' })} className="px-3 py-2 rounded-xl border border-rose-200 text-rose-700 font-bold cursor-pointer">Remove poster</button>}
           </div>

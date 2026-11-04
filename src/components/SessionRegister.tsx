@@ -137,6 +137,19 @@ export const SessionRegister: React.FC<{ programId: string; start?: string; onBa
         {program.isPaid && <Row k="Fee">₹{program.fee}{program.freeFirst ? ` (first ${program.freeFirst} registrations are free)` : ''}</Row>}
         {seatsLeft !== null && <Row k="Seats">{seatsLeft} of {program.maxRegistrations} left</Row>}
       </dl>
+      {(program.speakerBio || program.speakerPhoto || program.speakerRole) && (
+        <div className="space-y-3">
+          <h2 className="text-xl font-black text-slate-900">About the speaker:</h2>
+          <div className="flex flex-col sm:flex-row gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            {program.speakerPhoto && <img src={program.speakerPhoto} alt={program.speaker || 'Speaker'} className="w-32 h-32 rounded-2xl object-cover border border-slate-200 shrink-0" />}
+            <div className="space-y-1">
+              {program.speaker && <p className="text-lg font-black text-slate-900">{program.speaker}</p>}
+              {program.speakerRole && <p className="font-bold text-indigo-800">{program.speakerRole}</p>}
+              {program.speakerBio && <p className="text-base text-slate-800 whitespace-pre-line">{program.speakerBio}</p>}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -161,7 +174,7 @@ export const SessionRegister: React.FC<{ programId: string; start?: string; onBa
     <section className="max-w-5xl mx-auto space-y-4 text-base" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
       {program.imageUrl && (
         <div className="bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden">
-          <img src={program.imageUrl} alt={program.title} className="w-full aspect-[16/7] object-contain" />
+          <img src={program.imageUrl} alt={program.title} className="w-full aspect-video object-cover" />
         </div>
       )}
       {!program.imageUrl && <h1 className="text-xl sm:text-2xl font-black text-slate-900 leading-snug">{program.title}</h1>}

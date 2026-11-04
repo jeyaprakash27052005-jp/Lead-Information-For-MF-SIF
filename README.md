@@ -318,3 +318,5 @@ Menu -> **Event Leads**.
 - Event page look: the poster is shown in a wide rectangle (16:9-like) at the top, so a landscape poster fills it and a tall one is shown whole with space at the sides. All text on the event page is Times New Roman, at least 16 px, with headings larger. The "Last Updated on" line and the Register Now button inside Home were removed (use the Registration menu).
 
 - The **Register Now** button is removed from the event cards and from the event Home page: each event card has only a **Know more** button, and people register from the **Registration** item of the event page. Event cards also use Times New Roman at 16 px or larger.
+
+- **Landscape ads and speaker details**: event posters are cropped to landscape (16:9) when the admin uploads them and are always shown in a landscape frame on the event page, event cards and home banner. The admin form has a **Speaker details** box (photo, designation, full details) and the event Home page shows an **About the speaker** card.
