@@ -9,7 +9,7 @@ import { MyProfile } from './components/MyProfile';
 import { IdCardView } from './components/IdCardView';
 import { FinanceCalculations } from './components/FinanceCalculations';
 import { siteStorage } from './services/siteStorage';
-import { DEFAULT_ITEMS, DEFAULT_MENUS } from './utils/siteDefaults';
+import { DEFAULT_ITEMS, DEFAULT_MENUS, isRemovedMenu } from './utils/siteDefaults';
 import { SiteContact, SiteCustomer, SiteItem, SiteMenu } from './types';
 import { AdsAccount, VerifyPanel } from './components/AdsAccount';
 import { QuickResponse } from './components/QuickResponse';
@@ -52,6 +52,8 @@ function Site() {
   const [customer, setCustomer] = useState<SiteCustomer | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
   const afterLogin = useRef<string>('/home');
+  const pendingMenu = useRef<string | null>(null);
+  const [loginMsg, setLoginMsg] = useState<string | undefined>(undefined);
   // everything except Home, Contact, Login and Quick Response (which has its own check) needs a verified login first
   const gated = ['funds', 'sessions', 'calc', 'register', 'page', 'profile'].includes(route.name);
   const ok = !gated || !!customer?.verified;
@@ -77,6 +79,11 @@ function Site() {
     if (c.verified) {
       window.location.hash = afterLogin.current;
       afterLogin.current = '/home';
+      if (pendingMenu.current) {
+        const id = pendingMenu.current;
+        pendingMenu.current = null;
+        setOpenMenu(id);
+      }
     }
   };
   const logout = () => {
@@ -89,8 +96,9 @@ function Site() {
     window.location.hash = '/home';
     setMobile(false);
   };
-  const goLogin = (next: string) => {
+  const goLogin = (next: string, msg?: string) => {
     afterLogin.current = next;
+    setLoginMsg(msg ?? (next === '/quick' ? 'Please login or create an account to use Quick Response.' : undefined));
     window.location.hash = '/login';
     setMobile(false);
     setOpenMenu(null);
@@ -162,7 +170,7 @@ function Site() {
   const itemVisible = (x: SiteItem) =>
     x.isActive && !(x.kind === 'route' && ((x.route === 'funds' && !f.fundAds) || (x.route === 'sessions' && !f.awarenessPrograms)));
 
-  const activeMenus = menus.filter((m) => m.isActive);
+  const activeMenus = menus.filter((m) => m.isActive && !isRemovedMenu(m));
   const menuItems = (id: string) => items.filter((x) => x.menuId === id && itemVisible(x));
   const visibleMenus = activeMenus.filter((m) => menuItems(m.id).length > 0);
   const sectionsOf = (id: string) => {
@@ -176,6 +184,11 @@ function Site() {
   };
 
   const clickMenu = (m: SiteMenu) => {
+    // the menus open only after login
+    if (!customer?.verified) {
+      pendingMenu.current = m.id;
+      return goLogin('/home', `Please login or create an account to open ${m.label}.`);
+    }
     const list = menuItems(m.id);
     if (m.highlight && list.length === 1) return open(list[0]);
     setOpenMenu((o) => (o === m.id ? null : m.id));
@@ -353,7 +366,7 @@ function Site() {
                 <button onClick={() => go('/quick')} className="px-5 py-2.5 rounded-xl bg-blue-700 text-white text-sm font-bold cursor-pointer">Open Quick Response</button>
               </div>
             ) : (
-              <AdsAccount onLogin={signedIn} message={afterLogin.current === '/quick' ? 'Please login or create an account to use Quick Response.' : undefined} />
+              <AdsAccount onLogin={signedIn} message={loginMsg} />
             )}
           </section>
         )}

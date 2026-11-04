@@ -21,7 +21,6 @@ const i = (menuId: string, section: string, title: string, description: string, 
 
 /** Starter menu shown until the admin team saves its own (also used by "Load starter menu" in the admin portal) */
 export const DEFAULT_MENUS: SiteMenu[] = [
-  m('guide', 'Investor Guide', 1),
   m('plan', 'Plan & Calculate', 2),
   m('products', 'Fund Products', 3),
   m('help', 'Help & Services', 4),
@@ -30,27 +29,12 @@ export const DEFAULT_MENUS: SiteMenu[] = [
 
 export const DEFAULT_ITEMS: SiteItem[] = (() => {
   n = 0;
-  const B = 'Mutual Fund Basics';
-  const A = 'Advanced Learning';
   const P = 'Smart Planners';
   const C = 'Calculators';
   const F = 'Fund Categories';
   const O = 'Offers';
   const S = 'Services';
   return [
-    i('guide', B, 'Starter Kit', 'Everything you need to start investing', { badge: 'New' }),
-    i('guide', B, "Beginner's Guide", 'What a mutual fund is and how it works', { badge: 'New' }),
-    i('guide', B, 'Start Your First SIP', 'Begin with a small monthly amount'),
-    i('guide', B, 'Video Tutorials', 'Short videos for new investors'),
-    i('guide', B, 'Jargon Simplified', 'NAV, SIP, expense ratio and more in plain words'),
-    i('guide', B, 'Why Mutual Funds?', 'Professional management and diversification'),
-    i('guide', A, 'Fund Videos', 'Watch quick 5 minute videos about funds'),
-    i('guide', A, 'Podcasts', 'Listen and learn on the go', { badge: 'New' }),
-    i('guide', A, 'Myth Busters', 'Clear the common myths and start investing'),
-    i('guide', A, 'Our Blog', 'Articles for investors'),
-    i('guide', A, 'FAQs', 'Answers to common questions'),
-    i('guide', A, 'Infographics', 'Advanced topics, simplified', { badge: 'Coming Soon' }),
-
     i('plan', P, 'Goal Planner', 'Plan and invest for every goal'),
     i('plan', P, 'My First Crore', 'How a monthly SIP can build towards a big goal'),
     i('plan', P, 'Emergency Planner', 'Keep money ready for the unexpected'),
@@ -85,3 +69,6 @@ export const DEFAULT_ITEMS: SiteItem[] = (() => {
 })();
 
 export const SITE_ROUTE_LABELS: Record<string, string> = { funds: 'Mutual Fund Offers page', sessions: 'Awareness Sessions page', contact: 'Contact Us page' };
+
+/** The removed Investor Guide menu: never shown, and deleted from the database by the admin screen */
+export const isRemovedMenu = (m: { id: string; label: string }) => m.id === 'guide' || m.label.trim().toLowerCase() === 'investor guide';

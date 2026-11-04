@@ -266,3 +266,9 @@ Menu -> **Event Leads**.
 - The registration form asks for the customer's **photo** (required). It appears on the ID card, the ID card page and in the admin registrations list.
 - In **Awareness Programs** (admin) tap **Scan ID card (attendance)**: the camera reads the QR code of an ID card (or paste the card link / code), shows the person's photo, name, ID number, event and payment, and **Mark present** records attendance (who and when). **Undo present** reverses it. Registrations marked present show a **Present** badge in the list.
 - The camera needs the admin site to be opened over https and the browser's camera permission.
+
+### Menus need login; Investor Guide removed
+
+- On the advertising website every top menu (Plan & Calculate, Fund Products, Help & Services, Top Offers, and any menu the admin adds) asks the visitor to login or create an account first. After login the menu opens, with its sub menus (calculators, Awareness Sessions, Complaint Redressal, KYC and so on).
+- The **Investor Guide** menu and its sub menus are removed from the starter menu, hidden on the website, and deleted from the database when the admin opens **Website Menus**.
+- The **Website Menus** admin screen now lists the same menus the website shows: when nothing is saved yet, the starter menu is loaded automatically so every menu and sub menu can be edited, added or deleted there, and the website shows exactly what the admin saved.

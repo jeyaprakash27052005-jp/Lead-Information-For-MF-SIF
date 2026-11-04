@@ -3,7 +3,7 @@ import { LayoutList, Plus, Pencil, Trash2, Eye, EyeOff, ArrowUp, ArrowDown, Uplo
 import { SiteContact, SiteItem, SiteItemKind, SiteMenu, SiteRoute, User } from '../types';
 import { siteStorage } from '../services/siteStorage';
 import { prepareAdImage } from '../services/adsStorage';
-import { DEFAULT_ITEMS, DEFAULT_MENUS, SITE_ROUTE_LABELS } from '../utils/siteDefaults';
+import { DEFAULT_ITEMS, DEFAULT_MENUS, SITE_ROUTE_LABELS, isRemovedMenu } from '../utils/siteDefaults';
 import { findBannedClaim } from '../utils/fundAdRules';
 import { ConfirmModal } from './ConfirmModal';
 
@@ -51,7 +51,18 @@ export const SiteContentManagement: React.FC<Props> = ({ currentUser, onNotify }
   const load = async () => {
     setLoading(true);
     try {
-      const [m, i] = await Promise.all([siteStorage.getMenus(), siteStorage.getItems()]);
+      let [m, i] = await Promise.all([siteStorage.getMenus(), siteStorage.getItems()]);
+      // the Investor Guide menu is removed for good: delete it from the database
+      const gone = m.filter(isRemovedMenu);
+      if (gone.length > 0) {
+        for (const g of gone) await siteStorage.deleteMenu(g.id, i.filter((x) => x.menuId === g.id).map((x) => x.id)).catch(() => undefined);
+        m = m.filter((x) => !isRemovedMenu(x));
+        i = i.filter((x) => !gone.some((g) => g.id === x.menuId));
+      }
+      // the menus of the website are listed here, so load the starter menu once when nothing is saved yet
+      if (m.length === 0 && (await siteStorage.seed(DEFAULT_MENUS, DEFAULT_ITEMS, currentUser.name).then(() => true).catch(() => false))) {
+        [m, i] = await Promise.all([siteStorage.getMenus(), siteStorage.getItems()]);
+      }
       setMenus(m);
       setItems(i);
       const c = await siteStorage.getContact().catch(() => null);
