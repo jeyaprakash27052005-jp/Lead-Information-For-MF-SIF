@@ -293,3 +293,9 @@ Menu -> **Event Leads**.
 - On the advertising website the **Awareness Sessions** page shows the next event as a large banner and then an **Upcoming Events** grid of cards (poster, title, date, time, mode or venue, **Register Now**).
 - **Register Now** opens the event page: poster banner, title, a details table (Date & Time, Mode, Language, Speaker, Fee, Seats, Description) and the registration form on the same page (First Name, Last Name, Email, Phone, photo, payment for paid events). Registrations are saved in the database as before.
 - Fix: events added by a Regional or Area Incharge (which have a division) were hidden on the advertising website and on the public home screen; they are now shown there. The customer portal still shows only the customer's own division.
+
+### Login popup, Know more and full posters
+
+- On the advertising website the login now appears as a **popup over the page** only when it is needed: when a visitor opens a sub menu that needs login, taps Quick Response or Login, or opens an event. After login the page they asked for opens. The popup can be closed.
+- Event cards have **Register Now** and **Know more**, and the poster picture itself is a link; all open the event page.
+- The uploaded poster is shown **whole** (not cropped) on the cards, the banner and the event page.

@@ -55,6 +55,7 @@ function Site() {
   const [sessionChecked, setSessionChecked] = useState(false);
   const afterLogin = useRef<string>('/home');
   const [loginMsg, setLoginMsg] = useState<string | undefined>(undefined);
+  const [loginBox, setLoginBox] = useState(false);
   // everything except Home, Contact, Login and Quick Response (which has its own check) needs a verified login first
   const routeNeedsLogin = (name: string): boolean => {
     const linked = items.filter((x) => x.isActive && ((x.kind === 'route' && x.route === name) || (name === 'calc' && x.kind === 'calculator')));
@@ -89,6 +90,7 @@ function Site() {
       // the login simply is not remembered
     }
     if (c.verified) {
+      setLoginBox(false);
       window.location.hash = afterLogin.current;
       afterLogin.current = '/home';
     }
@@ -106,7 +108,8 @@ function Site() {
   const goLogin = (next: string, msg?: string) => {
     afterLogin.current = next;
     setLoginMsg(msg ?? (next === '/quick' ? 'Please login or create an account to use Quick Response.' : undefined));
-    window.location.hash = '/login';
+    // the login appears over the page, only when it is needed
+    setLoginBox(true);
     setMobile(false);
     setOpenMenu(null);
   };
@@ -403,6 +406,19 @@ function Site() {
             <p className="text-center text-sm text-slate-500 py-16">This page is not available. Please use the menu above.</p>
           ))}
       </main>
+
+      {loginBox && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-start justify-center overflow-y-auto p-4 modal-safe" role="dialog" aria-modal="true" onClick={() => setLoginBox(false)}>
+          <div className="w-full max-w-md relative" onClick={(e) => e.stopPropagation()}>
+            <button type="button" aria-label="Close" onClick={() => setLoginBox(false)} className="absolute -top-2 -right-2 z-10 p-1.5 rounded-full bg-white border border-slate-300 shadow cursor-pointer"><X className="w-4 h-4" /></button>
+            {customer && !customer.verified ? (
+              <VerifyPanel customer={customer} onVerified={signedIn} />
+            ) : (
+              <AdsAccount onLogin={signedIn} message={loginMsg} />
+            )}
+          </div>
+        </div>
+      )}
 
     </div>
   );

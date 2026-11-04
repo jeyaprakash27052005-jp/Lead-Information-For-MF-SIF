@@ -114,7 +114,7 @@ export const SessionRegister: React.FC<{ programId: string; customer: SiteCustom
 
   return (
     <section className="max-w-4xl mx-auto bg-white rounded-2xl border border-slate-200 overflow-hidden">
-      {program.imageUrl && <img src={program.imageUrl} alt={program.title} className="w-full max-h-[420px] object-cover bg-slate-100" />}
+      {program.imageUrl && <img src={program.imageUrl} alt={program.title} className="w-full h-auto bg-slate-100" />}
       <div className="p-5 sm:p-8 space-y-6">
       <div className="space-y-3">
         <h1 className="text-xl sm:text-2xl font-black text-slate-900 leading-snug">{program.title}</h1>
