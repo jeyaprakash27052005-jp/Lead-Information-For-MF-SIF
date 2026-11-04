@@ -8,7 +8,7 @@ import { useAppSettings } from '../context/AppSettings';
 const endOf = (p: AwarenessProgram) => new Date(p.endsAt || p.startsAt).getTime() + 3 * 60 * 60 * 1000;
 
 /** The awareness programmes the admin team added, for customers and the Home Screen (read only) */
-export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWhenEmpty?: boolean; region?: string; registerBase?: string; hero?: boolean; allRegions?: boolean }> = ({ limit, compact, hideWhenEmpty, region, registerBase, hero, allRegions }) => {
+export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWhenEmpty?: boolean; region?: string; registerBase?: string; infoBase?: string; hero?: boolean; allRegions?: boolean }> = ({ limit, compact, hideWhenEmpty, region, registerBase, infoBase, hero, allRegions }) => {
   const { settings } = useAppSettings();
   const [programs, setPrograms] = useState<AwarenessProgram[] | null>(null);
 
@@ -44,7 +44,7 @@ export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWh
       style={{ ['--d' as string]: `${Math.min(i, 8) * 70}ms` }}
       className={`anim-rise lift-card bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col ${isPast ? 'opacity-70' : ''}`}
     >
-      {p.imageUrl && (registerBase && !isPast ? <a href={`${registerBase}${encodeURIComponent(p.id)}`}><img src={p.imageUrl} alt={p.title} className="w-full h-auto bg-slate-100" /></a> : <img src={p.imageUrl} alt={p.title} className="w-full h-auto bg-slate-100" />)}
+      {p.imageUrl && (registerBase && !isPast ? <a href={`${infoBase || registerBase}${encodeURIComponent(p.id)}`}><img src={p.imageUrl} alt={p.title} className="w-full max-h-48 object-contain bg-slate-100" /></a> : <img src={p.imageUrl} alt={p.title} className="w-full max-h-48 object-contain bg-slate-100" />)}
       <div className="p-5 space-y-2.5 flex-1 flex flex-col">
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-sm font-black text-slate-900 leading-snug">{p.title}</h3>
@@ -94,7 +94,7 @@ export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWh
       {!isPast && registerBase && (
         <div className="mt-auto pt-1 flex items-center gap-3">
           <a href={`${registerBase}${encodeURIComponent(p.id)}`} className="btn-glow inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-800 hover:bg-indigo-900 text-white text-xs font-bold">Register Now</a>
-          <a href={`${registerBase}${encodeURIComponent(p.id)}`} className="text-xs font-bold text-indigo-700 underline">Know more</a>
+          <a href={`${infoBase || registerBase}${encodeURIComponent(p.id)}`} className="text-xs font-bold text-indigo-700 underline">Know more</a>
         </div>
       )}
       {!isPast && p.mode === 'online' && p.joinLink && /^https:\/\//i.test(p.joinLink) && (
@@ -120,9 +120,9 @@ export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWh
         </div>
       )}
       {hero && shown[0] && (
-        <a href={registerBase ? `${registerBase}${encodeURIComponent(shown[0].id)}` : undefined} className="block rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-xs">
+        <a href={registerBase ? `${infoBase || registerBase}${encodeURIComponent(shown[0].id)}` : undefined} className="block rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-xs">
           {shown[0].imageUrl ? (
-            <img src={shown[0].imageUrl} alt={shown[0].title} className="w-full h-auto" />
+            <img src={shown[0].imageUrl} alt={shown[0].title} className="w-full max-h-64 object-contain bg-slate-50" />
           ) : (
             <div className="bg-gradient-to-r from-blue-700 to-indigo-800 text-white px-6 py-12 sm:py-16">
               <p className="text-xs font-bold uppercase tracking-wider opacity-80">Next session</p>

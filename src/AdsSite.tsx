@@ -12,13 +12,14 @@ import { siteStorage } from './services/siteStorage';
 import { DEFAULT_ITEMS, DEFAULT_MENUS, calcTypeOf, isRemovedMenu } from './utils/siteDefaults';
 import { SiteContact, SiteItem, SiteMenu } from './types';
 
-type Route = { name: 'home' | 'funds' | 'sessions' | 'contact' | 'calc'; only?: string } | { name: 'page'; id: string } | { name: 'register'; id: string } | { name: 'id'; token: string };
+type Route = { name: 'home' | 'funds' | 'sessions' | 'contact' | 'calc'; only?: string } | { name: 'page'; id: string } | { name: 'register'; id: string } | { name: 'event'; id: string } | { name: 'id'; token: string };
 
 const readRoute = (): Route => {
   const h = window.location.hash.replace(/^#\/?/, '');
   if (h.startsWith('calc/')) return { name: 'calc', only: h.slice(5) };
   if (h === 'funds' || h === 'sessions' || h === 'contact' || h === 'calc') return { name: h };
   if (h.startsWith('id/')) return { name: 'id', token: decodeURIComponent(h.slice(3)) };
+  if (h.startsWith('event/')) return { name: 'event', id: decodeURIComponent(h.slice(6)) };
   if (h.startsWith('register/')) return { name: 'register', id: decodeURIComponent(h.slice(9)) };
   if (h.startsWith('p/')) return { name: 'page', id: decodeURIComponent(h.slice(2)) };
   return { name: 'home' };
@@ -225,7 +226,7 @@ function Site() {
             {f.awarenessPrograms && (
               <section className="space-y-3">
                 <h2 className="text-lg font-black text-slate-900">Upcoming sessions</h2>
-                <AwarenessList limit={2} hideWhenEmpty registerBase="#/register/" allRegions />
+                <AwarenessList limit={2} hideWhenEmpty registerBase="#/register/" infoBase="#/event/" allRegions />
               </section>
             )}
           </>
@@ -239,10 +240,10 @@ function Site() {
         {route.name === 'sessions' && (
           <section className="space-y-4">
             <h1 className="text-2xl font-black text-slate-900">Awareness Sessions</h1>
-            <AwarenessList registerBase="#/register/" hero allRegions />
+            <AwarenessList registerBase="#/register/" infoBase="#/event/" hero allRegions />
           </section>
         )}
-        {route.name === 'register' && <SessionRegister programId={route.id} onBack={() => go('/sessions')} />}
+        {(route.name === 'register' || route.name === 'event') && <SessionRegister programId={route.id} start={route.name === 'register' ? 'registration' : 'home'} onBack={() => go('/sessions')} />}
         {route.name === 'id' && <IdCardView token={route.token} />}
         {route.name === 'calc' && (
           <section className="space-y-4">

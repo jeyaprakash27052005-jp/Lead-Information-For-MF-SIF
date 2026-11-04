@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link2, ScanLine, Users, Megaphone, Plus, Pencil, Trash2, Eye, EyeOff, RefreshCw, Save, X } from 'lucide-react';
-import { AwarenessProgram, SessionRegistration, User } from '../types';
+import { AwarenessProgram, AwarenessSection, SessionRegistration, User } from '../types';
 import { sessionRegStorage } from '../services/sessionRegStorage';
 import { IdScanner } from './IdScanner';
 import { prepareAdImage } from '../services/adsStorage';
@@ -16,6 +16,8 @@ interface Props {
   onNotify?: (msg: string, type?: 'success' | 'info' | 'error') => void;
 }
 
+const STANDARD_PAGES = ['Speakers', 'Download Brochure', 'Program Schedule', 'Call for Papers', 'Themes', 'Conference Enquiry', 'FAQ'];
+
 const empty = () => ({
   title: '',
   description: '',
@@ -28,6 +30,7 @@ const empty = () => ({
   speaker: '',
   contact: '',
   imageUrl: '',
+  sections: [] as AwarenessSection[],
   isPaid: false,
   fee: '',
   freeFirst: '',
@@ -110,6 +113,22 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
     if (allowed && isHead) apiService.getRegions().then((r: string[]) => setRegions(getAllRegions([], [], r))).catch(() => setRegions(getAllRegions()));
   }, [allowed, isHead]);
 
+  const setSec = (i: number, patch: Partial<AwarenessSection>) => setForm((f) => ({ ...f, sections: f.sections.map((x, k) => (k === i ? { ...x, ...patch } : x)) }));
+  const moveSec = (i: number, d: number) =>
+    setForm((f) => {
+      const a = [...f.sections];
+      const j = i + d;
+      if (j < 0 || j >= a.length) return f;
+      [a[i], a[j]] = [a[j], a[i]];
+      return { ...f, sections: a };
+    });
+  const pickFile = (i: number, file: File) => {
+    if (file.size > 450 * 1024) return setError('This file is larger than 450 KB. Upload a smaller file or paste a link instead.');
+    const r = new FileReader();
+    r.onload = () => setSec(i, { fileUrl: String(r.result), fileName: file.name });
+    r.onerror = () => setError('Could not read the file.');
+    r.readAsDataURL(file);
+  };
   const set = (patch: Partial<ReturnType<typeof empty>>) => setForm((f) => ({ ...f, ...patch }));
 
   const validate = (): string | null => {
@@ -121,6 +140,8 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
     if (form.mode === 'online' && form.joinLink.trim() && !/^https:\/\/\S+$/i.test(form.joinLink.trim()))
       return 'The join link must start with https://';
     if (form.contact.trim() && !/^[+\d][\d\s-]{6,17}$/.test(form.contact.trim())) return 'Enter a valid contact phone number.';
+    if (form.sections.some((x) => x.linkUrl?.trim() && !/^https:\/\/\S+$/i.test(x.linkUrl.trim()))) return 'A page link must start with https://';
+    if (form.imageUrl.length + form.sections.reduce((n, x) => n + (x.fileUrl?.length || 0) + (x.body?.length || 0), 0) > 850000) return 'The poster and uploaded files are too large together. Remove a file or use a link instead.';
     if (form.isPaid) {
       if (!(Number(form.fee) > 0)) return 'Enter the fee of the paid session.';
       if (form.freeFirst !== '' && !(Number.isInteger(Number(form.freeFirst)) && Number(form.freeFirst) >= 0)) return 'First free registrations must be a whole number.';
@@ -149,6 +170,7 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
       speaker: form.speaker.trim() || undefined,
       contact: form.contact.trim() || undefined,
       imageUrl: form.imageUrl || undefined,
+      sections: form.sections.filter((x) => x.title.trim()).map((x) => ({ id: x.id, title: x.title.trim(), body: x.body?.trim() || undefined, linkUrl: x.linkUrl?.trim() || undefined, fileUrl: x.fileUrl || undefined, fileName: x.fileName || undefined })),
       isPaid: form.isPaid,
       fee: form.isPaid ? Number(form.fee) : undefined,
       freeFirst: form.isPaid && form.freeFirst !== '' && Number(form.freeFirst) > 0 ? Number(form.freeFirst) : undefined,
@@ -170,6 +192,7 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
           speaker: data.speaker ?? '',
           contact: data.contact ?? '',
           imageUrl: data.imageUrl ?? '',
+          sections: data.sections ?? [],
           fee: data.fee ?? 0,
           freeFirst: data.freeFirst ?? 0,
           maxRegistrations: data.maxRegistrations ?? 0,
@@ -209,6 +232,7 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
       speaker: p.speaker || '',
       contact: p.contact || '',
       imageUrl: p.imageUrl || '',
+      sections: p.sections || [],
       isPaid: !!p.isPaid,
       fee: p.fee ? String(p.fee) : '',
       freeFirst: p.freeFirst ? String(p.freeFirst) : '',
@@ -345,6 +369,34 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
               <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ''; if (file) prepareAdImage(file).then((u) => set({ imageUrl: u })).catch((er) => setError(er instanceof Error ? er.message : 'Could not read the picture.')); }} />
             </label>
             {form.imageUrl && <button type="button" onClick={() => set({ imageUrl: '' })} className="px-3 py-2 rounded-xl border border-rose-200 text-rose-700 font-bold cursor-pointer">Remove poster</button>}
+          </div>
+        </div>
+        <div className="space-y-2 border border-slate-200 rounded-xl p-3">
+          <p className="font-bold text-slate-700">Event page menu (shown on the left of the page that opens with Know more)</p>
+          <p className="text-[11px] text-slate-500">Home (details) and Registration are always there. Add pages such as Speakers, Download Brochure, Program Schedule, Call for Papers, Themes, Conference Enquiry, FAQ.</p>
+          {form.sections.map((sec, i) => (
+            <div key={sec.id} className="bg-slate-50 rounded-lg p-3 space-y-2">
+              <div className="flex gap-2">
+                <input aria-label="Page title" value={sec.title} onChange={(e) => setSec(i, { title: e.target.value })} placeholder="Page name, e.g. Speakers" className={input} />
+                <button type="button" aria-label="Move up" disabled={i === 0} onClick={() => moveSec(i, -1)} className="px-2 rounded-lg border border-slate-300 disabled:opacity-40 cursor-pointer">↑</button>
+                <button type="button" aria-label="Move down" disabled={i === form.sections.length - 1} onClick={() => moveSec(i, 1)} className="px-2 rounded-lg border border-slate-300 disabled:opacity-40 cursor-pointer">↓</button>
+                <button type="button" aria-label="Remove page" onClick={() => set({ sections: form.sections.filter((_, k) => k !== i) })} className="px-2 rounded-lg border border-rose-200 text-rose-700 cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></button>
+              </div>
+              <textarea aria-label="Page text" rows={3} value={sec.body || ''} onChange={(e) => setSec(i, { body: e.target.value })} placeholder="Text of this page (a blank line starts a new paragraph). Leave empty to show Will be updated soon." className={input} />
+              <input aria-label="Page link" value={sec.linkUrl || ''} onChange={(e) => setSec(i, { linkUrl: e.target.value })} placeholder="Button link (https://...) - optional" className={input} />
+              <div className="flex flex-wrap items-center gap-2">
+                <label className="px-3 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 text-white font-bold cursor-pointer">
+                  {sec.fileUrl ? 'Change file' : 'Upload PDF / file'}
+                  <input type="file" accept="application/pdf,image/*" className="sr-only" onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ''; if (file) pickFile(i, file); }} />
+                </label>
+                {sec.fileUrl && <span className="font-semibold text-emerald-700">{sec.fileName || 'File uploaded'}</span>}
+                {sec.fileUrl && <button type="button" onClick={() => setSec(i, { fileUrl: '', fileName: '' })} className="text-rose-700 font-bold cursor-pointer">Remove file</button>}
+              </div>
+            </div>
+          ))}
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={() => set({ sections: [...form.sections, { id: `s_${Date.now()}_${form.sections.length}`, title: '' }] })} className="px-3 py-2 rounded-xl border border-blue-300 text-blue-800 font-bold cursor-pointer">+ Add page</button>
+            <button type="button" onClick={() => set({ sections: [...form.sections, ...STANDARD_PAGES.filter((t) => !form.sections.some((x) => x.title === t)).map((t, k) => ({ id: `s_${Date.now()}_${k}`, title: t }))] })} className="px-3 py-2 rounded-xl border border-slate-300 text-slate-700 font-bold cursor-pointer">Add standard pages</button>
           </div>
         </div>
         <label className="flex items-center gap-2 font-bold text-slate-700">

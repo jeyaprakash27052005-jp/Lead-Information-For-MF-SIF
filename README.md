@@ -305,3 +305,9 @@ Menu -> **Event Leads**.
 - The advertising website no longer has Login, Create account, Quick Response, My Profile or any login popup. Every page, menu, calculator and event opens for everyone. (The old customer account and question screens were removed from the website; the admin **Customer Queries** screen remains only for old data.)
 - **Know more** and **Register Now** open the event page directly. The registration form needs only First Name, Last Name, Email, Phone and a photo (and the payment screenshot for paid events). Each registration still gets an event ID and QR code, and is saved as a lead.
 - The ID card details form (name on card, occupation, city, photo, ID card download) is on the page opened by scanning the QR code, and works once the event is complete. Keep the QR code or the link.
+
+### Event page like the NISM conference page
+
+- **Know more** opens the event page: a small poster banner, the breadcrumb (Home / Events / event name), the event title, a **menu on the left** and the page content on the right with "Last Updated on". The left menu always has **Home** (about the event and the details table) and **Registration** (the form). **Register Now** opens the same page on Registration.
+- In **Awareness Programs** (admin) each event has an **Event page menu**: add pages such as Speakers, Download Brochure, Program Schedule, Call for Papers, Themes, Conference Enquiry and FAQ (or **Add standard pages**), write the text of each, add an optional button link, or upload a PDF (up to 450 KB; bigger brochures should use a link). A page with nothing in it shows "Will be updated soon". The order can be changed. The same format is used for every event.
+- Posters are shown smaller: at most 224 px high on the event page and smaller on the cards.

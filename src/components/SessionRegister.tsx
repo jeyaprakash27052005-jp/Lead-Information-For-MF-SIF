@@ -38,12 +38,14 @@ const compress = (file: File): Promise<string> =>
   });
 
 /** Separate registration form of one awareness session (opened by its own link) */
-export const SessionRegister: React.FC<{ programId: string; onBack: () => void }> = ({ programId, onBack }) => {
+export const SessionRegister: React.FC<{ programId: string; start?: string; onBack: () => void }> = ({ programId, start, onBack }) => {
   const [program, setProgram] = useState<AwarenessProgram | null | undefined>(undefined);
   const [f, setF] = useState({ attendeeType: 'customer' as 'customer' | 'member', first: '', last: '', mobile: '', email: '', city: '', guests: 0, note: '' });
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const [active, setActive] = useState(start || 'home');
+  useEffect(() => setActive(start || 'home'), [start, programId]);
   const [proof, setProof] = useState<string | null>(null);
   const [proofName, setProofName] = useState('');
   const [photo, setPhoto] = useState<string | null>(null);
@@ -112,25 +114,78 @@ export const SessionRegister: React.FC<{ programId: string; onBack: () => void }
     </div>
   );
 
+  const sections = program.sections || [];
+  const nav = [{ id: 'home', title: 'Home' }, ...sections.map((x) => ({ id: x.id, title: x.title })), { id: 'registration', title: 'Registration' }];
+  const custom = sections.find((x) => x.id === active);
+  const updated = formatDateTime(program.updatedAt || program.createdAt).split(',')[0];
+
+  const homeBlock = (
+    <div className="space-y-4">
+      <p className="text-xs text-slate-500">Last Updated on: {updated}</p>
+      <h2 className="text-base font-black text-slate-900">About the event:</h2>
+      {program.description && <p className="text-sm text-slate-800 whitespace-pre-line">{program.description}</p>}
+      <dl className="divide-y divide-slate-100 border-y border-slate-100">
+        <Row k="Date & Time">
+          {formatDateTime(program.startsAt)}{program.endsAt ? ` to ${formatDateTime(program.endsAt)}` : ''} in India
+        </Row>
+        <Row k="Mode">{program.mode === 'online' ? 'Online webinar (the joining link is on the Awareness Sessions page)' : `In person${program.venue ? `, ${program.venue}` : ''}`}</Row>
+        {program.language && <Row k="Language">{program.language}</Row>}
+        {program.speaker && <Row k="Speaker">{program.speaker}</Row>}
+        {program.isPaid && <Row k="Fee">₹{program.fee}{program.freeFirst ? ` (first ${program.freeFirst} registrations are free)` : ''}</Row>}
+        {seatsLeft !== null && <Row k="Seats">{seatsLeft} of {program.maxRegistrations} left</Row>}
+      </dl>
+      {!over && (
+        <button type="button" onClick={() => setActive('registration')} className="px-5 py-2.5 rounded-xl bg-indigo-800 hover:bg-indigo-900 text-white text-sm font-bold cursor-pointer">Register Now</button>
+      )}
+    </div>
+  );
+
+  const customBlock = custom && (
+    <div className="space-y-4">
+      <p className="text-xs text-slate-500">Last Updated on: {updated}</p>
+      <h2 className="text-base font-black text-slate-900">{custom.title}</h2>
+      {custom.body && <div className="space-y-3 text-sm text-slate-800">{custom.body.split(/\n{2,}/).map((para, i) => <p key={i} className="whitespace-pre-line">{para}</p>)}</div>}
+      {(custom.fileUrl || (custom.linkUrl && /^https:\/\//i.test(custom.linkUrl))) && (
+        <a
+          href={custom.fileUrl || custom.linkUrl}
+          {...(custom.fileUrl ? { download: custom.fileName || `${custom.title}.pdf` } : { target: '_blank', rel: 'noopener noreferrer' })}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold"
+        >
+          {custom.fileUrl ? `Download ${custom.title.replace(/^Download\s+/i, '')}` : 'Open'}
+        </a>
+      )}
+      {!custom.body && !custom.fileUrl && !custom.linkUrl && <p className="text-sm font-bold text-amber-700">Will be updated soon</p>}
+    </div>
+  );
+
   return (
-    <section className="max-w-4xl mx-auto bg-white rounded-2xl border border-slate-200 overflow-hidden">
-      {program.imageUrl && <img src={program.imageUrl} alt={program.title} className="w-full h-auto bg-slate-100" />}
-      <div className="p-5 sm:p-8 space-y-6">
-      <div className="space-y-3">
-        <h1 className="text-xl sm:text-2xl font-black text-slate-900 leading-snug">{program.title}</h1>
-        <dl className="divide-y divide-slate-100 border-y border-slate-100">
-          <Row k="Date & Time">
-            {formatDateTime(program.startsAt)}{program.endsAt ? ` to ${formatDateTime(program.endsAt)}` : ''} in India
-          </Row>
-          <Row k="Mode">{program.mode === 'online' ? 'Online webinar (the joining link is on the Awareness Sessions page)' : `In person${program.venue ? `, ${program.venue}` : ''}`}</Row>
-          {program.language && <Row k="Language">{program.language}</Row>}
-          {program.speaker && <Row k="Speaker">{program.speaker}</Row>}
-          {program.isPaid && <Row k="Fee">₹{program.fee}{program.freeFirst ? ` (first ${program.freeFirst} registrations are free)` : ''}</Row>}
-          {seatsLeft !== null && <Row k="Seats">{seatsLeft} of {program.maxRegistrations} left</Row>}
-          {program.description && <Row k="Description">{program.description}</Row>}
-        </dl>
-      </div>
-      {over ? (
+    <section className="max-w-5xl mx-auto space-y-4">
+      {program.imageUrl && (
+        <div className="bg-white rounded-2xl border border-slate-200 p-2 flex justify-center">
+          <img src={program.imageUrl} alt={program.title} className="max-h-56 w-auto max-w-full object-contain rounded-xl" />
+        </div>
+      )}
+      <p className="text-xs text-slate-500">
+        <a href="#/home" className="hover:underline">Home</a> / <a href="#/sessions" className="hover:underline">Events</a> / {program.title}
+      </p>
+      <h1 className="text-xl sm:text-2xl font-black text-slate-900 leading-snug">{program.title}</h1>
+      <div className="grid md:grid-cols-[14rem_1fr] gap-4 items-start">
+        <aside className="bg-white rounded-2xl border border-slate-200 p-2 flex md:flex-col gap-1 overflow-x-auto md:sticky md:top-20" aria-label="Event pages">
+          {nav.map((n) => (
+            <button
+              key={n.id}
+              type="button"
+              onClick={() => setActive(n.id)}
+              className={`text-left whitespace-nowrap px-4 py-2.5 rounded-lg text-sm font-semibold cursor-pointer ${active === n.id ? 'bg-indigo-50 text-indigo-800 border border-indigo-100' : 'text-slate-800 hover:bg-slate-50'}`}
+            >
+              {n.title}
+            </button>
+          ))}
+        </aside>
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-8 space-y-6 min-w-0">
+      {active === 'home' && homeBlock}
+      {custom && active !== 'home' && active !== 'registration' && customBlock}
+      {active === 'registration' && (over ? (
         <p className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs font-semibold text-amber-800">This session is over. Registration is closed.</p>
       ) : full && !done ? (
         <p className="bg-rose-50 border border-rose-200 rounded-xl p-4 text-xs font-bold text-rose-800">Registration is full. All {program.maxRegistrations} seats are taken.</p>
@@ -214,7 +269,8 @@ export const SessionRegister: React.FC<{ programId: string; onBack: () => void }
             <UserPlus className="w-4 h-4" /> {busy ? 'Please wait...' : 'Register'}
           </button>
         </form>
-      )}
+      ))}
+        </div>
       </div>
     </section>
   );

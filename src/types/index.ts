@@ -239,6 +239,16 @@ export interface FundAd {
 }
 
 /** An investor awareness programme (seminar / webinar) that the admin team announces */
+/** One page of an event (like Speakers, Program Schedule, Download Brochure), written by the admin team */
+export interface AwarenessSection {
+  id: string;
+  title: string;
+  body?: string;
+  linkUrl?: string; // https link, shown as a button
+  fileUrl?: string; // uploaded file (data address)
+  fileName?: string;
+}
+
 export interface AwarenessProgram {
   id: string;
   title: string;
@@ -252,6 +262,7 @@ export interface AwarenessProgram {
   speaker?: string;
   contact?: string; // phone / WhatsApp number for registering
   imageUrl?: string; // poster / banner picture of the event
+  sections?: AwarenessSection[]; // pages shown in the left menu of the event page
   /** Seat limit for any session (0 / empty = no limit), set by the admin team only */
   maxRegistrations?: number;
   /** Paid session: set by the admin team only */
