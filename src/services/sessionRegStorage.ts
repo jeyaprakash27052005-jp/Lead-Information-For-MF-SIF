@@ -1,6 +1,6 @@
 import { Lead, SessionRegistration } from '../types';
 import { db } from './firebase';
-import { collection, getDocs, getDoc, doc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, getDoc, doc, setDoc, updateDoc, deleteDoc, query, where } from 'firebase/firestore';
 import { normalizeIndianMobile } from '../utils/validation';
 import { NATIONAL_HQ_REGION } from '../utils/regions';
 import { isEmail } from '../utils/siteAuth';
@@ -90,11 +90,27 @@ export const sessionRegStorage = {
     }
   },
   /** The customer types the details that go on the ID card of a completed session */
-  async saveCard(id: string, card: { cardName: string; cardOccupation: string; cardCity: string; cardPhoto?: string }): Promise<void> {
+  async saveCard(id: string, card: { cardName: string; cardOccupation: string; cardCity: string; cardPhoto?: string; cardToken?: string }): Promise<string> {
     try {
-      await updateDoc(doc(db, 'sessionRegistrations', id), JSON.parse(JSON.stringify(card)));
+      const cardToken = card.cardToken || Array.from(crypto.getRandomValues(new Uint8Array(12)), (b) => b.toString(16).padStart(2, '0')).join('');
+      await updateDoc(doc(db, 'sessionRegistrations', id), JSON.parse(JSON.stringify({ ...card, cardToken })));
+      return cardToken;
     } catch (_e) {
       throw fail('save the ID card details');
+    }
+  },
+  /** The page opened by scanning the ID card QR code */
+  async getByToken(token: string): Promise<SessionRegistration | null> {
+    if (!/^[a-f0-9]{24}$/.test(token)) return null;
+    try {
+      const snap = await getDocs(query(collection(db, 'sessionRegistrations'), where('cardToken', '==', token)));
+      let r: SessionRegistration | null = null;
+      snap.forEach((d) => {
+        if (!r) r = { ...d.data(), id: d.id } as SessionRegistration;
+      });
+      return r;
+    } catch (_e) {
+      throw fail('open the ID card');
     }
   },
   async remove(id: string): Promise<void> {

@@ -6,6 +6,7 @@ import { FundAdsList } from './components/FundAdsList';
 import { AwarenessList } from './components/AwarenessList';
 import { SessionRegister } from './components/SessionRegister';
 import { MyProfile } from './components/MyProfile';
+import { IdCardView } from './components/IdCardView';
 import { FinanceCalculations } from './components/FinanceCalculations';
 import { siteStorage } from './services/siteStorage';
 import { DEFAULT_ITEMS, DEFAULT_MENUS } from './utils/siteDefaults';
@@ -23,11 +24,12 @@ const readSession = (): string | null => {
   }
 };
 
-type Route = { name: 'home' | 'funds' | 'sessions' | 'contact' | 'calc' | 'login' | 'quick' } | { name: 'page'; id: string } | { name: 'register'; id: string } | { name: 'profile' };
+type Route = { name: 'home' | 'funds' | 'sessions' | 'contact' | 'calc' | 'login' | 'quick' } | { name: 'page'; id: string } | { name: 'register'; id: string } | { name: 'profile' } | { name: 'id'; token: string };
 
 const readRoute = (): Route => {
   const h = window.location.hash.replace(/^#\/?/, '');
   if (h === 'funds' || h === 'sessions' || h === 'contact' || h === 'calc' || h === 'login' || h === 'quick') return { name: h };
+  if (h.startsWith('id/')) return { name: 'id', token: decodeURIComponent(h.slice(3)) };
   if (h === 'profile') return { name: 'profile' };
   if (h.startsWith('register/')) return { name: 'register', id: decodeURIComponent(h.slice(9)) };
   if (h.startsWith('p/')) return { name: 'page', id: decodeURIComponent(h.slice(2)) };
@@ -327,6 +329,7 @@ function Site() {
           </section>
         )}
         {ok && route.name === 'register' && customer && <SessionRegister programId={route.id} customer={customer} onBack={() => go('/sessions')} />}
+        {route.name === 'id' && <IdCardView token={route.token} />}
         {ok && route.name === 'profile' && customer && <MyProfile customer={customer} />}
         {!ok && (
           !sessionChecked ? <p className="text-xs text-slate-400 text-center">Loading...</p> : !customer ? (

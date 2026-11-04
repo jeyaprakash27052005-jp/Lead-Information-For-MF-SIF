@@ -4,13 +4,12 @@ import { AwarenessProgram, SessionRegistration, SiteCustomer } from '../types';
 import { apiService } from '../services/api';
 import { sessionRegStorage } from '../services/sessionRegStorage';
 import { formatDateTime } from '../utils/dateTime';
+import { cardNo, cardUrl, downloadCard, qrImage } from '../utils/idCard';
 
 const input = 'w-full px-3 py-2 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
 const lbl = 'block text-xs font-bold text-slate-700 uppercase tracking-wider';
 
 const isOver = (p: AwarenessProgram) => new Date(p.endsAt || p.startsAt).getTime() + 3 * 3600000 < Date.now();
-const cardNo = (r: SessionRegistration) => `${r.programId.slice(-4)}-${r.mobile.slice(-4)}`.toUpperCase();
-
 const smallPhoto = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
@@ -32,63 +31,15 @@ const smallPhoto = (file: File): Promise<string> =>
     img.src = url;
   });
 
-const loadImg = (src: string): Promise<HTMLImageElement> =>
-  new Promise((resolve, reject) => {
-    const i = new Image();
-    i.onload = () => resolve(i);
-    i.onerror = reject;
-    i.src = src;
-  });
-
-/** Draws the ID card on a canvas and downloads it as a picture */
-const downloadCard = async (r: SessionRegistration, p: AwarenessProgram) => {
-  const c = document.createElement('canvas');
-  c.width = 900;
-  c.height = 560;
-  const g = c.getContext('2d')!;
-  g.fillStyle = '#ffffff';
-  g.fillRect(0, 0, 900, 560);
-  g.fillStyle = '#1d4ed8';
-  g.fillRect(0, 0, 900, 110);
-  g.fillStyle = '#ffffff';
-  g.font = 'bold 22px sans-serif';
-  g.fillText('EVENT ID CARD', 40, 45);
-  g.font = 'bold 30px sans-serif';
-  g.fillText(p.title.length > 44 ? `${p.title.slice(0, 43)}...` : p.title, 40, 88);
-  if (r.cardPhoto) {
-    try {
-      g.drawImage(await loadImg(r.cardPhoto), 40, 150, 220, 220);
-    } catch (_e) {
-      /* no photo */
-    }
-  } else {
-    g.fillStyle = '#e2e8f0';
-    g.fillRect(40, 150, 220, 220);
-  }
-  g.fillStyle = '#0f172a';
-  g.font = 'bold 40px sans-serif';
-  g.fillText(r.cardName || r.name, 300, 190);
-  g.font = '26px sans-serif';
-  g.fillStyle = '#334155';
-  const lines = [r.cardOccupation, r.cardCity, `Mobile: ${r.mobile}`, `Date: ${formatDateTime(p.startsAt)}`, p.mode === 'offline' && p.venue ? `Venue: ${p.venue}` : 'Online session'].filter(Boolean) as string[];
-  lines.forEach((t, i) => g.fillText(t.length > 42 ? `${t.slice(0, 41)}...` : t, 300, 245 + i * 42));
-  g.fillStyle = '#1d4ed8';
-  g.font = 'bold 28px monospace';
-  g.fillText(`ID: ${cardNo(r)}`, 40, 480);
-  g.fillStyle = '#64748b';
-  g.font = '18px sans-serif';
-  g.fillText(`Registered as ${r.attendeeType}${r.guests ? ` (+${r.guests} guest${r.guests > 1 ? 's' : ''})` : ''}`, 40, 520);
-  const a = document.createElement('a');
-  a.href = c.toDataURL('image/png');
-  a.download = `id-card-${cardNo(r)}.png`;
-  a.click();
-};
-
 const CardForm: React.FC<{ r: SessionRegistration; p: AwarenessProgram; onSaved: () => void }> = ({ r, p, onSaved }) => {
   const [f, setF] = useState({ cardName: r.cardName || r.name, cardOccupation: r.cardOccupation || '', cardCity: r.cardCity || r.city || '' });
   const [photo, setPhoto] = useState<string | undefined>(r.cardPhoto);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [qr, setQr] = useState<string | null>(null);
+  useEffect(() => {
+    if (r.cardToken) qrImage(cardUrl(r.cardToken)).then(setQr).catch(() => setQr(null));
+  }, [r.cardToken]);
   const ready = !!r.cardName;
 
   const save = async (e: React.FormEvent) => {
@@ -120,6 +71,15 @@ const CardForm: React.FC<{ r: SessionRegistration; p: AwarenessProgram; onSaved:
           <input type="file" accept="image/*" className="sr-only" onChange={(e) => e.target.files?.[0] && smallPhoto(e.target.files[0]).then(setPhoto).catch((er) => setError(er.message))} />
         </label>
       </div>
+      {ready && qr && (
+        <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl p-3">
+          <img src={qr} alt="ID card QR code" className="w-28 h-28" />
+          <div className="text-[11px] text-slate-600 space-y-1">
+            <p className="font-black text-slate-900 text-xs">ID: {cardNo(r)}</p>
+            <p>Scan this QR code to open the ID card and download it.</p>
+          </div>
+        </div>
+      )}
       <div className="flex flex-wrap gap-2">
         <button type="submit" disabled={busy} className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold disabled:opacity-60 cursor-pointer">{ready ? 'Update details' : 'Save and generate ID card'}</button>
         {ready && (

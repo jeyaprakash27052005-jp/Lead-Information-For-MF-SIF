@@ -439,6 +439,8 @@ export interface SessionRegistration {
   cardOccupation?: string;
   cardCity?: string;
   cardPhoto?: string;
+  /** Random code in the ID card QR link, so the link cannot be guessed */
+  cardToken?: string;
   note?: string;
   createdAt: string;
 }

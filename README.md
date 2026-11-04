@@ -253,3 +253,9 @@ Menu -> **Event Leads**.
 - When a session is complete, its card in My Profile asks the customer to type the name, occupation / company, city and upload a photo, then generates an **ID card** (ID number, name, event, date, venue) that can be downloaded as a picture and updated again later.
 - In the admin portal **View payment screenshot** opens the screenshot alone on a dark screen.
 - Republish `firestore.rules`.
+
+### ID card QR code
+
+- When the customer saves the ID card details, the card gets a random code and a **QR code**. The QR code is shown in My Profile and printed on the downloaded ID card picture.
+- Scanning the QR code opens `#/id/<code>` on the advertising website (no login needed). It shows the ID card (name, event, date, venue, ID number, photo) with a **Download ID card** button. The mobile number is not shown on this page.
+- The QR link works from the website address where the customer made the card, so use the same live address for everyone.
