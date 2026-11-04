@@ -1,4 +1,5 @@
 import React from 'react';
+import mcubeLogo from '../assets/mcube-logo.png';
 import { User } from '../types';
 import {
   LogOut,
@@ -75,9 +76,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex flex-wrap items-center justify-between gap-2 min-h-16 py-2">
           {/* Logo & App Title */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold shadow-xs">
-              <Layers className="w-5 h-5 text-indigo-400" />
-            </div>
+            <img src={mcubeLogo} alt="Mcube Academy" className="h-10 w-auto" />
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight leading-none">

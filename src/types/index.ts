@@ -297,6 +297,8 @@ export interface SiteItem {
   imageUrl?: string;
   linkUrl?: string; // https link (kind = link)
   route?: SiteRoute; // (kind = route)
+  /** The visitor must login to open this sub menu. Empty = login required. Set by the admin team. */
+  requiresLogin?: boolean;
   order: number;
   isActive: boolean;
   createdAt: string;

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { MapPin, Mail, Menu, MessageCircle, Phone, X, Send, Landmark, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
+import mcubeLogo from './assets/mcube-logo.png';
+import { MapPin, Mail, Menu, MessageCircle, Phone, X, Send, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { AppSettingsProvider, useAppSettings } from './context/AppSettings';
 import { AdsCarousel } from './components/AdsCarousel';
 import { FundAdsList } from './components/FundAdsList';
@@ -52,10 +53,20 @@ function Site() {
   const [customer, setCustomer] = useState<SiteCustomer | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
   const afterLogin = useRef<string>('/home');
-  const pendingMenu = useRef<string | null>(null);
   const [loginMsg, setLoginMsg] = useState<string | undefined>(undefined);
   // everything except Home, Contact, Login and Quick Response (which has its own check) needs a verified login first
-  const gated = ['funds', 'sessions', 'calc', 'register', 'page', 'profile'].includes(route.name);
+  const routeNeedsLogin = (name: string): boolean => {
+    const linked = items.filter((x) => x.isActive && ((x.kind === 'route' && x.route === name) || (name === 'calc' && x.kind === 'calculator')));
+    return linked.length === 0 || linked.some((x) => x.requiresLogin !== false);
+  };
+  const gated =
+    route.name === 'register' || route.name === 'profile'
+      ? true
+      : route.name === 'funds' || route.name === 'sessions' || route.name === 'calc'
+        ? routeNeedsLogin(route.name)
+        : route.name === 'page'
+          ? items.find((x) => x.id === route.id)?.requiresLogin !== false
+          : false;
   const ok = !gated || !!customer?.verified;
   const here = () => window.location.hash.replace(/^#/, '') || '/home';
 
@@ -79,11 +90,6 @@ function Site() {
     if (c.verified) {
       window.location.hash = afterLogin.current;
       afterLogin.current = '/home';
-      if (pendingMenu.current) {
-        const id = pendingMenu.current;
-        pendingMenu.current = null;
-        setOpenMenu(id);
-      }
     }
   };
   const logout = () => {
@@ -157,6 +163,11 @@ function Site() {
 
   const open = (x: SiteItem) => {
     if (x.badge === 'Coming Soon' && x.kind === 'page' && !(x.body || '').trim()) return;
+    // sub menus the admin marked "login required" open only after login
+    if (x.requiresLogin !== false && !customer?.verified) {
+      const target = x.kind === 'route' ? `/${x.route || 'home'}` : x.kind === 'calculator' ? '/calc' : x.kind === 'link' ? '/home' : `/p/${encodeURIComponent(x.id)}`;
+      return goLogin(target, `Please login or create an account to open ${x.title}.`);
+    }
     if (x.kind === 'link') {
       if (/^https:\/\//i.test(x.linkUrl || '')) window.open(x.linkUrl, '_blank', 'noopener,noreferrer');
       return;
@@ -184,11 +195,6 @@ function Site() {
   };
 
   const clickMenu = (m: SiteMenu) => {
-    // the menus open only after login
-    if (!customer?.verified) {
-      pendingMenu.current = m.id;
-      return goLogin('/home', `Please login or create an account to open ${m.label}.`);
-    }
     const list = menuItems(m.id);
     if (m.highlight && list.length === 1) return open(list[0]);
     setOpenMenu((o) => (o === m.id ? null : m.id));
@@ -202,10 +208,7 @@ function Site() {
       <header ref={headerRef} className="bg-white border-b border-slate-200 sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center gap-4">
           <button onClick={() => go('/home')} className="flex items-center gap-2.5 text-left shrink-0">
-            <span className="w-9 h-9 rounded-lg bg-blue-700 text-white flex items-center justify-center">
-              <Landmark className="w-4 h-4" />
-            </span>
-            <span className="font-black text-slate-900 tracking-tight text-sm sm:text-base">Mcube Academy</span>
+            <img src={mcubeLogo} alt="Mcube Academy" className="h-10 w-auto" />
           </button>
           <nav className="hidden xl:flex flex-1 items-center gap-1 ml-4" aria-label="Main">
             {visibleMenus.map((m) => (
@@ -346,7 +349,7 @@ function Site() {
         {ok && route.name === 'profile' && customer && <MyProfile customer={customer} />}
         {!ok && (
           !sessionChecked ? <p className="text-xs text-slate-400 text-center">Loading...</p> : !customer ? (
-            <AdsAccount onLogin={(c) => { afterLogin.current = here(); signedIn(c); }} message="Please login or create an account to open this page." />
+            <AdsAccount onLogin={(c) => { afterLogin.current = here(); signedIn(c); }} message={loginMsg || 'Please login or create an account to open this page.'} />
           ) : (
             <VerifyPanel customer={customer} onVerified={(c) => { afterLogin.current = here(); signedIn(c); }} />
           )

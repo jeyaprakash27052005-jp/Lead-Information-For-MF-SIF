@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import mcubeLogo from '../assets/mcube-logo.png';
 import { GrowthArt, RotatingTagline } from './intro/GrowthArt';
 import { Layers, ArrowLeft, Lock, User as UserIcon, ArrowRight, AlertCircle, Globe, Shield, Sparkles, LogIn } from 'lucide-react';
 
@@ -38,9 +39,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToCustome
       <nav className="bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-3 shadow-xs">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold shadow-xs">
-              <Layers className="w-5 h-5 text-indigo-400" />
-            </div>
+            <img src={mcubeLogo} alt="Mcube Academy" className="h-10 w-auto" />
             <div>
               <h1 className="text-sm sm:text-base font-black text-slate-900 tracking-tight leading-tight">
                 Mutual fund (SIF) and NPS scheme return calculating site
@@ -109,6 +108,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToCustome
       <div className="flex flex-col justify-center py-8 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
           <div className="text-center mb-6">
+            <img src={mcubeLogo} alt="Mcube Academy" className="h-14 w-auto mx-auto mb-3" />
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold mb-2">
               <Shield className="w-3.5 h-3.5" />
               <span>Admin & Staff Portal Access</span>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { LayoutList, Plus, Pencil, Trash2, Eye, EyeOff, ArrowUp, ArrowDown, Upload, Save, X, RefreshCw, AlertCircle, Download } from 'lucide-react';
+import { LayoutList, Plus, Pencil, Trash2, Eye, EyeOff, ArrowUp, ArrowDown, Upload, Save, X, RefreshCw, AlertCircle, Download, Lock, LockOpen } from 'lucide-react';
 import { SiteContact, SiteItem, SiteItemKind, SiteMenu, SiteRoute, User } from '../types';
 import { siteStorage } from '../services/siteStorage';
 import { prepareAdImage } from '../services/adsStorage';
@@ -24,6 +24,7 @@ const emptyItem = (menuId = '') => ({
   imageUrl: '',
   linkUrl: '',
   route: 'funds' as SiteRoute,
+  requiresLogin: true,
   isActive: true,
 });
 
@@ -197,6 +198,7 @@ export const SiteContentManagement: React.FC<Props> = ({ currentUser, onNotify }
       imageUrl: form.imageUrl,
       linkUrl: form.kind === 'link' ? form.linkUrl.trim() : '',
       route: form.kind === 'route' ? form.route : undefined,
+      requiresLogin: form.requiresLogin,
       order: old ? old.order : (items.reduce((m, x) => Math.max(m, x.order), 0) || inSection.length) + 1,
       isActive: form.isActive,
       createdAt: old?.createdAt || new Date().toISOString(),
@@ -221,6 +223,7 @@ export const SiteContentManagement: React.FC<Props> = ({ currentUser, onNotify }
       imageUrl: x.imageUrl || '',
       linkUrl: x.linkUrl || '',
       route: x.route || 'funds',
+      requiresLogin: x.requiresLogin !== false,
       isActive: x.isActive,
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -410,6 +413,9 @@ export const SiteContentManagement: React.FC<Props> = ({ currentUser, onNotify }
           </div>
         )}
         <label className="flex items-center gap-2 font-bold text-slate-700">
+          <input type="checkbox" checked={form.requiresLogin} onChange={(e) => set({ requiresLogin: e.target.checked })} /> Visitor must login to open this sub menu
+        </label>
+        <label className="flex items-center gap-2 font-bold text-slate-700">
           <input type="checkbox" checked={form.isActive} onChange={(e) => set({ isActive: e.target.checked })} /> Show on the website
         </label>
         <p className="text-[11px] text-slate-500">Words that promise or guarantee returns are not accepted.</p>
@@ -443,6 +449,7 @@ export const SiteContentManagement: React.FC<Props> = ({ currentUser, onNotify }
               </div>
               <button type="button" aria-label="Move up" onClick={() => moveItem(x, -1)} className="p-1.5 rounded-md border border-slate-200 cursor-pointer"><ArrowUp className="w-3.5 h-3.5" /></button>
               <button type="button" aria-label="Move down" onClick={() => moveItem(x, 1)} className="p-1.5 rounded-md border border-slate-200 cursor-pointer"><ArrowDown className="w-3.5 h-3.5" /></button>
+              <button type="button" aria-label={x.requiresLogin !== false ? 'Login required: tap to open without login' : 'Open without login: tap to require login'} title={x.requiresLogin !== false ? 'Login required' : 'Open without login'} onClick={() => run(() => siteStorage.patchItem(x.id, { requiresLogin: x.requiresLogin === false }))} className={`p-1.5 rounded-md border cursor-pointer ${x.requiresLogin !== false ? 'border-amber-300 text-amber-700 bg-amber-50' : 'border-emerald-300 text-emerald-700 bg-emerald-50'}`}>{x.requiresLogin !== false ? <Lock className="w-3.5 h-3.5" /> : <LockOpen className="w-3.5 h-3.5" />}</button>
               <button type="button" aria-label={x.isActive ? 'Hide' : 'Show'} onClick={() => run(() => siteStorage.patchItem(x.id, { isActive: !x.isActive }))} className="p-1.5 rounded-md border border-slate-200 cursor-pointer">{x.isActive ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}</button>
               <button type="button" aria-label="Edit" onClick={() => startEdit(x)} className="p-1.5 rounded-md border border-slate-200 cursor-pointer"><Pencil className="w-3.5 h-3.5" /></button>
               <button type="button" aria-label="Delete" onClick={() => setDelItem(x)} className="p-1.5 rounded-md border border-rose-200 text-rose-700 cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></button>

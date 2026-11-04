@@ -272,3 +272,13 @@ Menu -> **Event Leads**.
 - On the advertising website every top menu (Plan & Calculate, Fund Products, Help & Services, Top Offers, and any menu the admin adds) asks the visitor to login or create an account first. After login the menu opens, with its sub menus (calculators, Awareness Sessions, Complaint Redressal, KYC and so on).
 - The **Investor Guide** menu and its sub menus are removed from the starter menu, hidden on the website, and deleted from the database when the admin opens **Website Menus**.
 - The **Website Menus** admin screen now lists the same menus the website shows: when nothing is saved yet, the starter menu is loaded automatically so every menu and sub menu can be edited, added or deleted there, and the website shows exactly what the admin saved.
+
+### Top menus open freely; the admin chooses which sub menus need login
+
+- On the advertising website the top menus (Plan & Calculate, Fund Products, Help & Services, Top Offers) open and show their sub menus to everyone.
+- Each sub menu has a **login required** setting chosen by the admin team in **Website Menus** (tick "Visitor must login to open this sub menu", or tap the lock button in the list: a closed lock means login is required, an open lock means anyone can open it). New sub menus require login by default. When a visitor opens a sub menu that needs login, the login page appears and, after login, that sub menu opens.
+- Session registration and My Profile always need login.
+
+### Logo
+
+- The Mcube Academy logo (`src/assets/mcube-logo.png`) is shown in the headers and login pages of all four sites (admin, customer, ads, health check) and is the browser tab icon (`logo.png` in each site's `public` folder).

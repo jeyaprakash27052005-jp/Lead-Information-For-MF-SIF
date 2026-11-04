@@ -1,4 +1,5 @@
 import { HeartPulse } from 'lucide-react';
+import mcubeLogo from './assets/mcube-logo.png';
 import { HealthCheckup } from './components/HealthCheckup';
 import { AppSettingsProvider } from './context/AppSettings';
 
@@ -9,9 +10,7 @@ export default function HealthCheckApp() {
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <header className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-rose-600 text-white flex items-center justify-center">
-            <HeartPulse className="w-4 h-4" />
-          </div>
+          <img src={mcubeLogo} alt="Mcube Academy" className="h-9 w-auto" />
           <span className="font-black text-slate-900 tracking-tight text-sm sm:text-base">Finance Health Check-up</span>
         </div>
       </header>
