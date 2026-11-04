@@ -3,6 +3,7 @@ import { Link2, ScanLine, Users, Megaphone, Plus, Pencil, Trash2, Eye, EyeOff, R
 import { AwarenessProgram, SessionRegistration, User } from '../types';
 import { sessionRegStorage } from '../services/sessionRegStorage';
 import { IdScanner } from './IdScanner';
+import { prepareAdImage } from '../services/adsStorage';
 import { apiService } from '../services/api';
 import { formatDateTime } from '../utils/dateTime';
 import { ConfirmModal } from './ConfirmModal';
@@ -26,6 +27,7 @@ const empty = () => ({
   language: '',
   speaker: '',
   contact: '',
+  imageUrl: '',
   isPaid: false,
   fee: '',
   freeFirst: '',
@@ -146,6 +148,7 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
       language: form.language.trim() || undefined,
       speaker: form.speaker.trim() || undefined,
       contact: form.contact.trim() || undefined,
+      imageUrl: form.imageUrl || undefined,
       isPaid: form.isPaid,
       fee: form.isPaid ? Number(form.fee) : undefined,
       freeFirst: form.isPaid && form.freeFirst !== '' && Number(form.freeFirst) > 0 ? Number(form.freeFirst) : undefined,
@@ -166,6 +169,7 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
           language: data.language ?? '',
           speaker: data.speaker ?? '',
           contact: data.contact ?? '',
+          imageUrl: data.imageUrl ?? '',
           fee: data.fee ?? 0,
           freeFirst: data.freeFirst ?? 0,
           maxRegistrations: data.maxRegistrations ?? 0,
@@ -204,6 +208,7 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
       language: p.language || '',
       speaker: p.speaker || '',
       contact: p.contact || '',
+      imageUrl: p.imageUrl || '',
       isPaid: !!p.isPaid,
       fee: p.fee ? String(p.fee) : '',
       freeFirst: p.freeFirst ? String(p.freeFirst) : '',
@@ -330,6 +335,17 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
           <input aria-label="Speaker" value={form.speaker} onChange={(e) => set({ speaker: e.target.value })} placeholder="Speaker (optional)" className={input} />
           <input aria-label="Language" value={form.language} onChange={(e) => set({ language: e.target.value })} placeholder="Language (optional)" className={input} />
           <input aria-label="Contact phone" value={form.contact} onChange={(e) => set({ contact: e.target.value })} placeholder="Contact phone (optional)" className={input} />
+        </div>
+        <div className="space-y-1.5">
+          <p className="font-bold text-slate-700">Event poster / banner picture (shown on the event page and cards)</p>
+          {form.imageUrl && <img src={form.imageUrl} alt="Event poster" className="max-h-40 rounded-lg border border-slate-200" />}
+          <div className="flex flex-wrap gap-2">
+            <label className="btn-glow px-3 py-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold cursor-pointer">
+              {form.imageUrl ? 'Change poster' : 'Upload poster'}
+              <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ''; if (file) prepareAdImage(file).then((u) => set({ imageUrl: u })).catch((er) => setError(er instanceof Error ? er.message : 'Could not read the picture.')); }} />
+            </label>
+            {form.imageUrl && <button type="button" onClick={() => set({ imageUrl: '' })} className="px-3 py-2 rounded-xl border border-rose-200 text-rose-700 font-bold cursor-pointer">Remove poster</button>}
+          </div>
         </div>
         <label className="flex items-center gap-2 font-bold text-slate-700">
           <input type="checkbox" checked={form.isPaid} onChange={(e) => set({ isPaid: e.target.checked })} /> Paid session (members pay and upload the payment screenshot)

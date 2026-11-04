@@ -40,7 +40,7 @@ const compress = (file: File): Promise<string> =>
 /** Separate registration form of one awareness session (opened by its own link) */
 export const SessionRegister: React.FC<{ programId: string; customer: SiteCustomer; onBack: () => void }> = ({ programId, customer, onBack }) => {
   const [program, setProgram] = useState<AwarenessProgram | null | undefined>(undefined);
-  const [f, setF] = useState({ attendeeType: 'customer' as 'customer' | 'member', name: customer.fullName, mobile: customer.mobile, email: customer.email, city: '', guests: 0, note: '' });
+  const [f, setF] = useState({ attendeeType: 'customer' as 'customer' | 'member', first: customer.fullName.split(' ')[0], last: customer.fullName.split(' ').slice(1).join(' '), mobile: customer.mobile, email: customer.email, city: '', guests: 0, note: '' });
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
@@ -92,7 +92,9 @@ export const SessionRegister: React.FC<{ programId: string; customer: SiteCustom
     setError(null);
     setBusy(true);
     try {
-      const reg = await sessionRegStorage.register(program, { ...f, paymentProof: proof ?? undefined, customerId: customer.id, photo: photo ?? undefined });
+      if (!f.first.trim() || !f.last.trim()) throw new Error('Type your first name and last name.');
+      if (!f.email.trim()) throw new Error('Type your e-mail address.');
+      const reg = await sessionRegStorage.register(program, { ...f, name: `${f.first.trim()} ${f.last.trim()}`, paymentProof: proof ?? undefined, customerId: customer.id, photo: photo ?? undefined });
       const url = cardUrl(reg.cardToken || '');
       setDone2({ no: cardNo(reg), url, qr: await qrImage(url, 260).catch(() => '') });
       setDone(true);
@@ -103,14 +105,30 @@ export const SessionRegister: React.FC<{ programId: string; customer: SiteCustom
     }
   };
 
+  const Row: React.FC<{ k: string; children: React.ReactNode }> = ({ k, children }) => (
+    <div className="grid sm:grid-cols-[10rem_1fr] gap-1 sm:gap-4 py-2.5 text-sm">
+      <dt className="text-slate-500 font-semibold">{k}</dt>
+      <dd className="text-slate-900 font-medium whitespace-pre-line">{children}</dd>
+    </div>
+  );
+
   return (
-    <section className="max-w-md mx-auto space-y-4">
-      <div className="bg-white rounded-2xl border border-slate-200 p-5 space-y-1.5">
-        <p className="text-[11px] font-bold text-blue-700 uppercase tracking-wider">Session registration</p>
-        <h1 className="text-lg font-black text-slate-900 leading-snug">{program.title}</h1>
-        <p className="flex items-center gap-1.5 text-xs font-bold text-indigo-700"><CalendarDays className="w-3.5 h-3.5" /> {formatDateTime(program.startsAt)}</p>
-        {program.mode === 'offline' && program.venue && <p className="flex items-center gap-1.5 text-xs text-slate-600 font-semibold"><MapPin className="w-3.5 h-3.5" /> {program.venue}</p>}
-        {program.mode === 'online' && <p className="text-xs text-slate-600 font-semibold">Online session. The joining link is shared on the Awareness Sessions page.</p>}
+    <section className="max-w-4xl mx-auto bg-white rounded-2xl border border-slate-200 overflow-hidden">
+      {program.imageUrl && <img src={program.imageUrl} alt={program.title} className="w-full max-h-[420px] object-cover bg-slate-100" />}
+      <div className="p-5 sm:p-8 space-y-6">
+      <div className="space-y-3">
+        <h1 className="text-xl sm:text-2xl font-black text-slate-900 leading-snug">{program.title}</h1>
+        <dl className="divide-y divide-slate-100 border-y border-slate-100">
+          <Row k="Date & Time">
+            {formatDateTime(program.startsAt)}{program.endsAt ? ` to ${formatDateTime(program.endsAt)}` : ''} in India
+          </Row>
+          <Row k="Mode">{program.mode === 'online' ? 'Online webinar (the joining link is on the Awareness Sessions page)' : `In person${program.venue ? `, ${program.venue}` : ''}`}</Row>
+          {program.language && <Row k="Language">{program.language}</Row>}
+          {program.speaker && <Row k="Speaker">{program.speaker}</Row>}
+          {program.isPaid && <Row k="Fee">₹{program.fee}{program.freeFirst ? ` (first ${program.freeFirst} registrations are free)` : ''}</Row>}
+          {seatsLeft !== null && <Row k="Seats">{seatsLeft} of {program.maxRegistrations} left</Row>}
+          {program.description && <Row k="Description">{program.description}</Row>}
+        </dl>
       </div>
       {over ? (
         <p className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs font-semibold text-amber-800">This session is over. Registration is closed.</p>
@@ -119,7 +137,7 @@ export const SessionRegister: React.FC<{ programId: string; customer: SiteCustom
       ) : done ? (
         <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center space-y-3">
           <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
-          <p className="text-sm font-bold text-emerald-900">Thank you {f.name}. You are registered.</p>
+          <p className="text-sm font-bold text-emerald-900">Thank you {f.first} {f.last}. You are registered.</p>
           {done2 && (
             <div className="bg-white border border-emerald-200 rounded-xl p-3 space-y-2">
               <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">Your event ID</p>
@@ -133,17 +151,21 @@ export const SessionRegister: React.FC<{ programId: string; customer: SiteCustom
           <button onClick={onBack} className="px-4 py-2 rounded-xl bg-blue-700 text-white text-sm font-bold cursor-pointer">Back to sessions</button>
         </div>
       ) : (
-        <form onSubmit={submit} className="bg-white rounded-2xl border border-slate-200 p-5 space-y-3">
+        <form onSubmit={submit} className="space-y-4">
+          <h2 className="text-sm font-black text-slate-900">{program.mode === 'online' ? 'Webinar Registration' : 'Event Registration'}</h2>
           {error && (
             <p role="alert" className="flex items-start gap-2 text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
               <AlertCircle className="w-4 h-4 shrink-0" /> {error}
             </p>
           )}
-          <label className={lbl}>Full name<input value={f.name} maxLength={100} onChange={(e) => setF({ ...f, name: e.target.value })} autoComplete="name" className={`mt-1 ${input}`} /></label>
-          <label className={lbl}>Mobile number<input value={f.mobile} inputMode="tel" maxLength={16} onChange={(e) => setF({ ...f, mobile: e.target.value })} autoComplete="tel" className={`mt-1 ${input}`} /></label>
-          <label className={lbl}>E-mail ID (optional)<input type="email" value={f.email} maxLength={120} onChange={(e) => setF({ ...f, email: e.target.value })} autoComplete="email" className={`mt-1 ${input}`} /></label>
-          <label className={lbl}>City (optional)<input value={f.city} maxLength={60} onChange={(e) => setF({ ...f, city: e.target.value })} className={`mt-1 ${input}`} /></label>
-          <label className={lbl}>People coming with you<input type="number" min={0} max={10} value={f.guests} onChange={(e) => setF({ ...f, guests: Number(e.target.value) })} className={`mt-1 ${input}`} /></label>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <label className={lbl}>First Name *<input required value={f.first} maxLength={50} onChange={(e) => setF({ ...f, first: e.target.value })} placeholder="First Name" autoComplete="given-name" className={`mt-1 ${input}`} /></label>
+            <label className={lbl}>Last Name *<input required value={f.last} maxLength={50} onChange={(e) => setF({ ...f, last: e.target.value })} placeholder="Last Name" autoComplete="family-name" className={`mt-1 ${input}`} /></label>
+            <label className={lbl}>Email Address *<input required type="email" value={f.email} maxLength={120} onChange={(e) => setF({ ...f, email: e.target.value })} placeholder="join@company.com" autoComplete="email" className={`mt-1 ${input}`} /></label>
+            <label className={lbl}>Phone *<input required value={f.mobile} inputMode="tel" maxLength={16} onChange={(e) => setF({ ...f, mobile: e.target.value })} placeholder="Your phone number" autoComplete="tel" className={`mt-1 ${input}`} /></label>
+            <label className={lbl}>City (optional)<input value={f.city} maxLength={60} onChange={(e) => setF({ ...f, city: e.target.value })} className={`mt-1 ${input}`} /></label>
+            <label className={lbl}>People coming with you<input type="number" min={0} max={10} value={f.guests} onChange={(e) => setF({ ...f, guests: Number(e.target.value) })} className={`mt-1 ${input}`} /></label>
+          </div>
           <label className={lbl}>Message (optional)<textarea value={f.note} maxLength={500} rows={2} onChange={(e) => setF({ ...f, note: e.target.value })} className={`mt-1 ${input}`} /></label>
           {seatsLeft !== null && <p className="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">Limited seats: {seatsLeft} of {program.maxRegistrations} left</p>}
           <div className="space-y-1.5">
@@ -193,6 +215,7 @@ export const SessionRegister: React.FC<{ programId: string; customer: SiteCustom
           </button>
         </form>
       )}
+      </div>
     </section>
   );
 };

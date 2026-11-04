@@ -8,7 +8,7 @@ import { useAppSettings } from '../context/AppSettings';
 const endOf = (p: AwarenessProgram) => new Date(p.endsAt || p.startsAt).getTime() + 3 * 60 * 60 * 1000;
 
 /** The awareness programmes the admin team added, for customers and the Home Screen (read only) */
-export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWhenEmpty?: boolean; region?: string; registerBase?: string }> = ({ limit, compact, hideWhenEmpty, region, registerBase }) => {
+export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWhenEmpty?: boolean; region?: string; registerBase?: string; hero?: boolean; allRegions?: boolean }> = ({ limit, compact, hideWhenEmpty, region, registerBase, hero, allRegions }) => {
   const { settings } = useAppSettings();
   const [programs, setPrograms] = useState<AwarenessProgram[] | null>(null);
 
@@ -32,7 +32,7 @@ export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWh
 
   const now = Date.now();
   // a programme with a region is only for customers of that region; without a region it is for everyone
-  const active = programs.filter((p) => p.isActive && (!p.region || p.region === region));
+  const active = programs.filter((p) => p.isActive && (allRegions || !p.region || p.region === region));
   const upcoming = active.filter((p) => endOf(p) >= now);
   const past = active.filter((p) => endOf(p) < now).reverse().slice(0, 3);
   const shown = limit ? upcoming.slice(0, limit) : upcoming;
@@ -42,8 +42,10 @@ export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWh
     <article
       key={p.id}
       style={{ ['--d' as string]: `${Math.min(i, 8) * 70}ms` }}
-      className={`anim-rise lift-card bg-white rounded-2xl border border-slate-200 shadow-xs p-5 space-y-2.5 ${isPast ? 'opacity-70' : ''}`}
+      className={`anim-rise lift-card bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col ${isPast ? 'opacity-70' : ''}`}
     >
+      {p.imageUrl && <img src={p.imageUrl} alt={p.title} className="w-full aspect-[16/9] object-cover bg-slate-100" />}
+      <div className="p-5 space-y-2.5 flex-1 flex flex-col">
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-sm font-black text-slate-900 leading-snug">{p.title}</h3>
         <span
@@ -90,8 +92,8 @@ export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWh
         )}
       </div>
       {!isPast && registerBase && (
-        <a href={`${registerBase}${encodeURIComponent(p.id)}`} className="btn-glow inline-flex items-center gap-1.5 mr-2 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">
-          Register
+        <a href={`${registerBase}${encodeURIComponent(p.id)}`} className="btn-glow inline-flex items-center gap-1.5 mr-2 px-4 py-2.5 rounded-xl bg-indigo-800 hover:bg-indigo-900 text-white text-xs font-bold self-start mt-auto">
+          Register Now
         </a>
       )}
       {!isPast && p.mode === 'online' && p.joinLink && /^https:\/\//i.test(p.joinLink) && (
@@ -104,6 +106,7 @@ export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWh
           <Video className="w-3.5 h-3.5" /> Join online
         </a>
       )}
+      </div>
     </article>
   );
 
@@ -115,7 +118,21 @@ export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWh
           No awareness programmes are scheduled right now. Please check back soon.
         </div>
       )}
-      {shown.length > 0 && <div className="grid gap-4 md:grid-cols-2">{shown.map((p, i) => card(p, i))}</div>}
+      {hero && shown[0] && (
+        <a href={registerBase ? `${registerBase}${encodeURIComponent(shown[0].id)}` : undefined} className="block rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-xs">
+          {shown[0].imageUrl ? (
+            <img src={shown[0].imageUrl} alt={shown[0].title} className="w-full max-h-[380px] object-cover" />
+          ) : (
+            <div className="bg-gradient-to-r from-blue-700 to-indigo-800 text-white px-6 py-12 sm:py-16">
+              <p className="text-xs font-bold uppercase tracking-wider opacity-80">Next session</p>
+              <p className="text-2xl sm:text-3xl font-black mt-1">{shown[0].title}</p>
+              <p className="text-sm font-semibold mt-2">{formatDateTime(shown[0].startsAt)}</p>
+            </div>
+          )}
+        </a>
+      )}
+      {hero && shown.length > 0 && <h2 className="text-center text-2xl font-black text-slate-900 pt-2">Upcoming Events</h2>}
+      {shown.length > 0 && <div className={`grid gap-4 ${hero ? 'sm:grid-cols-2 lg:grid-cols-3' : 'md:grid-cols-2'}`}>{shown.map((p, i) => card(p, i))}</div>}
       {!limit && past.length > 0 && (
         <div className="space-y-3">
           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Recently completed</p>

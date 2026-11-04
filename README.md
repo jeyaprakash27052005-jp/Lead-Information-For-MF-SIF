@@ -286,3 +286,10 @@ Menu -> **Event Leads**.
 ### One calculator per sub menu
 
 - A calculator sub menu now opens only its own calculator: **SIP Calculator** shows the SIP calculators, **Lumpsum Calculator** the lumpsum ones, **Dividend Calculator** the dividend one (address `#/calc/sip`, `#/calc/lumpsum`, `#/calc/dividend`). In Website Menus the admin picks which calculator a sub menu opens; when nothing is picked it is guessed from the title, and a title without SIP, Lumpsum or Dividend opens all calculators.
+
+### Event page like a professional webinar page
+
+- In **Awareness Programs** (admin) the admin can upload a **poster / banner picture** for each event.
+- On the advertising website the **Awareness Sessions** page shows the next event as a large banner and then an **Upcoming Events** grid of cards (poster, title, date, time, mode or venue, **Register Now**).
+- **Register Now** opens the event page: poster banner, title, a details table (Date & Time, Mode, Language, Speaker, Fee, Seats, Description) and the registration form on the same page (First Name, Last Name, Email, Phone, photo, payment for paid events). Registrations are saved in the database as before.
+- Fix: events added by a Regional or Area Incharge (which have a division) were hidden on the advertising website and on the public home screen; they are now shown there. The customer portal still shows only the customer's own division.

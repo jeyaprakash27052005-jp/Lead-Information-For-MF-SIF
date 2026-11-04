@@ -328,7 +328,7 @@ function Site() {
             {f.awarenessPrograms && (
               <section className="space-y-3">
                 <h2 className="text-lg font-black text-slate-900">Upcoming sessions</h2>
-                <AwarenessList limit={2} hideWhenEmpty registerBase="#/register/" />
+                <AwarenessList limit={2} hideWhenEmpty registerBase="#/register/" allRegions />
               </section>
             )}
           </>
@@ -342,7 +342,7 @@ function Site() {
         {ok && route.name === 'sessions' && (
           <section className="space-y-4">
             <h1 className="text-2xl font-black text-slate-900">Awareness Sessions</h1>
-            <AwarenessList registerBase="#/register/" />
+            <AwarenessList registerBase="#/register/" hero allRegions />
           </section>
         )}
         {ok && route.name === 'register' && customer && <SessionRegister programId={route.id} customer={customer} onBack={() => go('/sessions')} />}

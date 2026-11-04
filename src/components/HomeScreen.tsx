@@ -350,7 +350,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
         {settings.features.awarenessPrograms && (
           <section className="space-y-3" aria-label="Upcoming awareness programmes">
-            <AwarenessList limit={2} compact hideWhenEmpty />
+            <AwarenessList limit={2} compact hideWhenEmpty allRegions />
           </section>
         )}
       </main>

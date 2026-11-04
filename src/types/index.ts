@@ -251,6 +251,7 @@ export interface AwarenessProgram {
   language?: string;
   speaker?: string;
   contact?: string; // phone / WhatsApp number for registering
+  imageUrl?: string; // poster / banner picture of the event
   /** Seat limit for any session (0 / empty = no limit), set by the admin team only */
   maxRegistrations?: number;
   /** Paid session: set by the admin team only */
