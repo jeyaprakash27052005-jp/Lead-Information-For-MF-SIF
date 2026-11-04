@@ -169,16 +169,17 @@ export const toLandscape = async (dataUrl: string): Promise<string> => {
   if (dataUrl.startsWith('data:image/gif')) return dataUrl;
   const img = await loadImage(dataUrl);
   const ratio = 16 / 9;
-  let sw = img.width, sh = img.height;
-  if (sw / sh > ratio) sw = Math.round(sh * ratio); else sh = Math.round(sw / ratio);
-  const sx = Math.round((img.width - sw) / 2), sy = Math.round((img.height - sh) / 2);
-  const w = Math.min(sw, 1280), h = Math.round(w / ratio);
+  // Keep the whole poster: fit it inside a 16:9 frame and pad the sides with white (nothing is cut off).
+  const h = Math.min(Math.round(1280 / ratio), Math.max(img.height, Math.round(img.width / ratio)));
+  const w = Math.round(h * ratio);
   const canvas = document.createElement('canvas');
   canvas.width = w; canvas.height = h;
   const ctx = canvas.getContext('2d');
   if (!ctx) return dataUrl;
   ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
-  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+  const scale = Math.min(w / img.width, h / img.height);
+  const dw = Math.round(img.width * scale), dh = Math.round(img.height * scale);
+  ctx.drawImage(img, Math.round((w - dw) / 2), Math.round((h - dh) / 2), dw, dh);
   for (const q of [0.85, 0.7, 0.55, 0.4]) {
     const out = canvas.toDataURL('image/jpeg', q);
     if (out.length <= MAX_IMAGE_DATA_URL_LENGTH) return out;

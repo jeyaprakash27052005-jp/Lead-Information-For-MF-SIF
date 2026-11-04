@@ -320,3 +320,4 @@ Menu -> **Event Leads**.
 - The **Register Now** button is removed from the event cards and from the event Home page: each event card has only a **Know more** button, and people register from the **Registration** item of the event page. Event cards also use Times New Roman at 16 px or larger.
 
 - **Landscape ads and speaker details**: event posters are cropped to landscape (16:9) when the admin uploads them and are always shown in a landscape frame on the event page, event cards and home banner. The admin form has a **Speaker details** box (photo, designation, full details) and the event Home page shows an **About the speaker** card.
+- Event posters are shown in a fixed landscape (16:9) frame and the whole poster is kept (never cropped); speaker photo, designation and full details show on the event page.

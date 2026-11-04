@@ -174,7 +174,7 @@ export const SessionRegister: React.FC<{ programId: string; start?: string; onBa
     <section className="max-w-5xl mx-auto space-y-4 text-base" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
       {program.imageUrl && (
         <div className="bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden">
-          <img src={program.imageUrl} alt={program.title} className="w-full aspect-video object-cover" />
+          <img src={program.imageUrl} alt={program.title} className="w-full aspect-video object-contain bg-white" />
         </div>
       )}
       {!program.imageUrl && <h1 className="text-xl sm:text-2xl font-black text-slate-900 leading-snug">{program.title}</h1>}
