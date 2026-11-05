@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Landmark, Plus, Pencil, Trash2, Eye, EyeOff, ArrowUp, ArrowDown, Upload, Save, X, Play, RefreshCw, AlertCircle } from 'lucide-react';
-import { AdAnimation, AdAnimationSpeed, AdTextEffect, FundAd, User } from '../types';
+import { AdAnimation, AdAnimationSpeed, AdTextEffect, AwarenessSection, FundAd, User } from '../types';
 import { fundAdsStorage } from '../services/fundAdsStorage';
 import { prepareAdImage } from '../services/adsStorage';
 import { AD_ANIMATIONS, AD_SPEEDS, AD_TEXT_EFFECTS } from '../utils/adAnimations';
@@ -23,6 +23,13 @@ const empty = () => ({
   riskLevel: '' as FundAd['riskLevel'] | '',
   minSip: '',
   linkUrl: '',
+  minLumpsum: '',
+  fundManager: '',
+  benchmark: '',
+  expenseRatio: '',
+  exitLoad: '',
+  lockIn: '',
+  sections: [] as AwarenessSection[],
   badge: '',
   imageUrl: '',
   animation: 'zoom-in' as AdAnimation,
@@ -87,7 +94,10 @@ export const FundAdsManagement: React.FC<Props> = ({ currentUser, onNotify }) =>
     if (form.fundHouse.trim().length < 2) return 'Enter the fund house (AMC).';
     if (form.headline.trim().length < 5) return 'Write a headline (at least 5 characters).';
     if (!form.imageUrl) return 'Upload the advertisement image (JPG, PNG or GIF).';
-    if (highlightsList.length > 5) return 'Use at most 5 highlight lines.';
+    if (form.description.trim().length < 10) return 'Write the details about the scheme (shown on the Know more page).';
+    if (highlightsList.length > 10) return 'Use at most 10 highlight lines.';
+    if (form.imageUrl.length + form.sections.reduce((n, x) => n + (x.fileUrl?.length || 0) + (x.body?.length || 0), 0) > 850000) return 'The picture and uploaded files are too large together. Remove a file or use a link instead.';
+    if (form.sections.some((x) => x.linkUrl && !/^https:\/\/\S+$/i.test(x.linkUrl.trim()))) return 'Page links must start with https://';
     if (form.minSip && !(Number(form.minSip) >= 100)) return 'The minimum SIP must be a number, at least 100.';
     if (form.linkUrl.trim() && !/^https:\/\/\S+$/i.test(form.linkUrl.trim())) return 'The link must start with https://';
     const bad = findBannedClaim(form.fundName, form.headline, form.description, form.badge, ...highlightsList);
@@ -105,6 +115,13 @@ export const FundAdsManagement: React.FC<Props> = ({ currentUser, onNotify }) =>
     riskLevel: form.riskLevel || undefined,
     minSip: form.minSip ? Number(form.minSip) : 0,
     linkUrl: form.linkUrl.trim(),
+    minLumpsum: form.minLumpsum ? Number(form.minLumpsum) : 0,
+    fundManager: form.fundManager.trim(),
+    benchmark: form.benchmark.trim(),
+    expenseRatio: form.expenseRatio.trim(),
+    exitLoad: form.exitLoad.trim(),
+    lockIn: form.lockIn.trim(),
+    sections: form.sections.filter((x) => x.title.trim()).map((x) => ({ ...x, title: x.title.trim() })),
     badge: form.badge.trim(),
     imageUrl: form.imageUrl,
     animation: form.animation,
@@ -149,6 +166,13 @@ export const FundAdsManagement: React.FC<Props> = ({ currentUser, onNotify }) =>
       riskLevel: a.riskLevel || '',
       minSip: a.minSip ? String(a.minSip) : '',
       linkUrl: a.linkUrl || '',
+      minLumpsum: a.minLumpsum ? String(a.minLumpsum) : '',
+      fundManager: a.fundManager || '',
+      benchmark: a.benchmark || '',
+      expenseRatio: a.expenseRatio || '',
+      exitLoad: a.exitLoad || '',
+      lockIn: a.lockIn || '',
+      sections: a.sections || [],
       badge: a.badge || '',
       imageUrl: a.imageUrl,
       animation: a.animation || 'none',
@@ -196,6 +220,22 @@ export const FundAdsManagement: React.FC<Props> = ({ currentUser, onNotify }) =>
     return <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-xs text-slate-500">Only the admin team can manage mutual fund advertisements.</div>;
   }
 
+  const setSec = (i: number, patch: Partial<AwarenessSection>) => setForm((f) => ({ ...f, sections: f.sections.map((x, k) => (k === i ? { ...x, ...patch } : x)) }));
+  const moveSec = (i: number, d: number) =>
+    setForm((f) => {
+      const a = [...f.sections];
+      const j = i + d;
+      if (j < 0 || j >= a.length) return f;
+      [a[i], a[j]] = [a[j], a[i]];
+      return { ...f, sections: a };
+    });
+  const pickSecFile = (i: number, file: File) => {
+    if (file.size > 450 * 1024) return setError('This file is larger than 450 KB. Upload a smaller file or paste a link instead.');
+    const r = new FileReader();
+    r.onload = () => setSec(i, { fileUrl: String(r.result), fileName: file.name });
+    r.onerror = () => setError('Could not read the file.');
+    r.readAsDataURL(file);
+  };
   const input = 'w-full px-3 py-2 text-sm font-semibold border border-slate-300 rounded-lg';
   const lbl = 'block text-xs font-bold text-slate-700 uppercase tracking-wider';
   const preview: FundAd = {
@@ -275,11 +315,11 @@ export const FundAdsManagement: React.FC<Props> = ({ currentUser, onNotify }) =>
           <input value={form.headline} onChange={(e) => set({ headline: e.target.value })} maxLength={120} placeholder="e.g. Start a SIP in a small cap fund for the long term" className={`mt-1 ${input}`} />
         </label>
         <label className={lbl}>
-          Details
-          <textarea value={form.description} onChange={(e) => set({ description: e.target.value })} rows={3} maxLength={800} className={`mt-1 ${input}`} />
+          About the scheme * (shown on the Know more page)
+          <textarea value={form.description} onChange={(e) => set({ description: e.target.value })} rows={5} maxLength={2000} className={`mt-1 ${input}`} />
         </label>
         <label className={lbl}>
-          Highlights (one per line, up to 5)
+          Highlights (one per line, up to 10)
           <textarea value={form.highlights} onChange={(e) => set({ highlights: e.target.value })} rows={3} placeholder={'Invests in small companies\nSuits 7 years or more'} className={`mt-1 ${input}`} />
         </label>
         <div className="grid sm:grid-cols-3 gap-3">
@@ -295,6 +335,47 @@ export const FundAdsManagement: React.FC<Props> = ({ currentUser, onNotify }) =>
             Fund house page (https)
             <input value={form.linkUrl} onChange={(e) => set({ linkUrl: e.target.value })} placeholder="https://..." className={`mt-1 ${input}`} />
           </label>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 p-3 space-y-3">
+          <p className="font-bold text-slate-700 text-sm">Scheme details (shown on the Know more page, leave empty if not needed)</p>
+          <div className="grid sm:grid-cols-3 gap-3">
+            <label className={lbl}>Fund manager<input value={form.fundManager} onChange={(e) => set({ fundManager: e.target.value })} maxLength={120} className={`mt-1 ${input}`} /></label>
+            <label className={lbl}>Benchmark<input value={form.benchmark} onChange={(e) => set({ benchmark: e.target.value })} maxLength={120} placeholder="e.g. NIFTY 500 TRI" className={`mt-1 ${input}`} /></label>
+            <label className={lbl}>Expense ratio<input value={form.expenseRatio} onChange={(e) => set({ expenseRatio: e.target.value })} maxLength={40} placeholder="e.g. 0.75%" className={`mt-1 ${input}`} /></label>
+            <label className={lbl}>Exit load<input value={form.exitLoad} onChange={(e) => set({ exitLoad: e.target.value })} maxLength={160} placeholder="e.g. 1% if sold within 1 year" className={`mt-1 ${input}`} /></label>
+            <label className={lbl}>Lock-in<input value={form.lockIn} onChange={(e) => set({ lockIn: e.target.value })} maxLength={80} placeholder="e.g. None" className={`mt-1 ${input}`} /></label>
+            <label className={lbl}>Minimum lumpsum (₹)<input value={form.minLumpsum} inputMode="numeric" onChange={(e) => set({ minLumpsum: e.target.value.replace(/[^0-9]/g, '') })} className={`mt-1 ${input}`} /></label>
+          </div>
+        </div>
+
+        <div className="space-y-2 border border-slate-200 rounded-xl p-3">
+          <p className="font-bold text-slate-700 text-sm">More pages on the Know more menu (optional)</p>
+          <p className="text-[11px] text-slate-500">Home, Highlights, Scheme Details, Calculators, Fund House Page and Scheme Enquiry are always there. Add pages such as Fund Manager, Portfolio, Scheme Documents, FAQ.</p>
+          {form.sections.map((sec, i) => (
+            <div key={sec.id} className="bg-slate-50 rounded-lg p-3 space-y-2">
+              <div className="flex gap-2">
+                <input aria-label="Page title" value={sec.title} onChange={(e) => setSec(i, { title: e.target.value })} placeholder="Page name, e.g. Scheme Documents" className={input} />
+                <button type="button" aria-label="Move up" disabled={i === 0} onClick={() => moveSec(i, -1)} className="px-2 rounded-lg border border-slate-300 disabled:opacity-40 cursor-pointer">↑</button>
+                <button type="button" aria-label="Move down" disabled={i === form.sections.length - 1} onClick={() => moveSec(i, 1)} className="px-2 rounded-lg border border-slate-300 disabled:opacity-40 cursor-pointer">↓</button>
+                <button type="button" aria-label="Remove page" onClick={() => set({ sections: form.sections.filter((_, k) => k !== i) })} className="px-2 rounded-lg border border-rose-200 text-rose-700 cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></button>
+              </div>
+              <textarea aria-label="Page text" rows={3} value={sec.body || ''} onChange={(e) => setSec(i, { body: e.target.value })} placeholder="Text of this page (a blank line starts a new paragraph). Leave empty to show Will be updated soon." className={input} />
+              <input aria-label="Page link" value={sec.linkUrl || ''} onChange={(e) => setSec(i, { linkUrl: e.target.value })} placeholder="Button link (https://...) - optional" className={input} />
+              <div className="flex flex-wrap items-center gap-2">
+                <label className="px-3 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold cursor-pointer">
+                  {sec.fileUrl ? 'Change file' : 'Upload PDF / file'}
+                  <input type="file" accept="application/pdf,image/*" className="sr-only" onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ''; if (file) pickSecFile(i, file); }} />
+                </label>
+                {sec.fileUrl && <span className="text-xs font-semibold text-emerald-700">{sec.fileName || 'File uploaded'}</span>}
+                {sec.fileUrl && <button type="button" onClick={() => setSec(i, { fileUrl: '', fileName: '' })} className="text-xs text-rose-700 font-bold cursor-pointer">Remove file</button>}
+              </div>
+            </div>
+          ))}
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={() => set({ sections: [...form.sections, { id: `s_${Date.now()}_${form.sections.length}`, title: '' }] })} className="px-3 py-2 rounded-xl border border-blue-300 text-blue-800 text-xs font-bold cursor-pointer">+ Add page</button>
+            <button type="button" onClick={() => set({ sections: [...form.sections, ...['Fund Manager', 'Portfolio', 'Scheme Documents', 'FAQ'].filter((t) => !form.sections.some((x) => x.title === t)).map((t, k) => ({ id: `s_${Date.now()}_${k}`, title: t }))] })} className="px-3 py-2 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold cursor-pointer">Add standard pages</button>
+          </div>
         </div>
 
         <div className="rounded-xl border border-indigo-100 bg-indigo-50/30 p-3 space-y-3">

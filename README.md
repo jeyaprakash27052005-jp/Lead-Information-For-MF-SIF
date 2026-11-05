@@ -328,3 +328,4 @@ Menu -> **Event Leads**.
 - Paid events: the admin uploads the payment QR code when creating the event (required); it is shown on the registration form for everyone who pays.
 - The top bar of all sites has a light sky-to-violet gradient; the ads site page has a light tinted background.
 - Customer (ads) site: purple-to-white page background and a soft purple background over the whole site (like the NISM site). The top menu bar stays white.
+- Mutual fund adverts (admin): the form now asks for About the scheme (required), up to 10 highlights, fund manager, benchmark, expense ratio, exit load, lock-in, minimum lumpsum and extra Know more pages (Fund Manager, Portfolio, Scheme Documents, FAQ, with text, link or file). The scheme Know more page shows them.

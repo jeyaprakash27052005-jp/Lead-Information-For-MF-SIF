@@ -225,6 +225,13 @@ export interface FundAd {
   highlights?: string[]; // up to 5 short points
   riskLevel?: 'Low' | 'Low to Moderate' | 'Moderate' | 'Moderately High' | 'High' | 'Very High'; // as printed on the fund's riskometer
   minSip?: number; // rupees a month
+  minLumpsum?: number;
+  fundManager?: string;
+  benchmark?: string;
+  expenseRatio?: string;
+  exitLoad?: string;
+  lockIn?: string;
+  sections?: AwarenessSection[]; // extra pages on the Know more page (Fund Manager, Portfolio, Documents, FAQ ...)
   linkUrl?: string; // https page of the fund house
   badge?: string;
   imageUrl: string; // data URL or https link
