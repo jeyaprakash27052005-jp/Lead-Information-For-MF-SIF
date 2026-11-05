@@ -40,6 +40,7 @@ const empty = () => ({
   maxRegistrations: '',
   gpayNumber: '',
   gpayName: '',
+  paymentQr: '',
   isActive: true,
 });
 
@@ -144,10 +145,11 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
       return 'The join link must start with https://';
     if (form.contact.trim() && !/^[+\d][\d\s-]{6,17}$/.test(form.contact.trim())) return 'Enter a valid contact phone number.';
     if (form.sections.some((x) => x.linkUrl?.trim() && !/^https:\/\/\S+$/i.test(x.linkUrl.trim()))) return 'A page link must start with https://';
-    if (form.imageUrl.length + form.sections.reduce((n, x) => n + (x.fileUrl?.length || 0) + (x.body?.length || 0), 0) > 850000) return 'The poster and uploaded files are too large together. Remove a file or use a link instead.';
+    if (form.imageUrl.length + form.paymentQr.length + form.sections.reduce((n, x) => n + (x.fileUrl?.length || 0) + (x.body?.length || 0), 0) > 850000) return 'The poster and uploaded files are too large together. Remove a file or use a link instead.';
     if (form.isPaid) {
       if (!(Number(form.fee) > 0)) return 'Enter the fee of the paid session.';
       if (form.freeFirst !== '' && !(Number.isInteger(Number(form.freeFirst)) && Number(form.freeFirst) >= 0)) return 'First free registrations must be a whole number.';
+      if (!form.paymentQr) return 'Upload the payment QR code of the person who receives the money.';
       if (!/^[6-9]\d{9}$/.test(form.gpayNumber.replace(/[\s-]/g, '').replace(/^\+?91/, ''))) return 'Enter a valid 10 digit GPay number.';
     }
     if (form.maxRegistrations !== '' && !(Number.isInteger(Number(form.maxRegistrations)) && Number(form.maxRegistrations) >= 1)) return 'The registration limit must be a whole number of 1 or more.';
@@ -183,6 +185,7 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
       maxRegistrations: form.maxRegistrations !== '' ? Number(form.maxRegistrations) : undefined,
       gpayNumber: form.isPaid ? form.gpayNumber.replace(/[\s-]/g, '').replace(/^\+?91/, '') : undefined,
       gpayName: form.isPaid && form.gpayName.trim() ? form.gpayName.trim() : undefined,
+      paymentQr: form.isPaid && form.paymentQr ? form.paymentQr : undefined,
       isActive: form.isActive,
       region: isHead ? region : ownRegion,
     };
@@ -207,6 +210,7 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
           maxRegistrations: data.maxRegistrations ?? 0,
           gpayNumber: data.gpayNumber ?? '',
           gpayName: data.gpayName ?? '',
+          paymentQr: data.paymentQr ?? '',
           region: data.region,
         });
         onNotify?.('Awareness programme updated.');
@@ -251,6 +255,7 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
       maxRegistrations: p.maxRegistrations ? String(p.maxRegistrations) : '',
       gpayNumber: p.gpayNumber || '',
       gpayName: p.gpayName || '',
+      paymentQr: p.paymentQr || '',
       isActive: p.isActive,
     });
     setRegion(isHead ? p.region || '' : ownRegion);
@@ -305,7 +310,27 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
     );
   }
 
-  const input = 'w-full px-3 py-2 text-sm font-semibold border border-slate-300 rounded-lg';
+  /** Payment QR picture: kept sharp (up to 600 px) but small enough for the database */
+const qrImage600 = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    if (!file.type.startsWith('image/')) return reject(new Error('Choose a picture of the QR code.'));
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, 600 / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      const x = c.getContext('2d');
+      if (!x) return reject(new Error('Could not read the picture.'));
+      x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      resolve(c.toDataURL('image/jpeg', 0.9));
+    };
+    img.onerror = () => reject(new Error('Could not read the picture.'));
+    img.src = url;
+  });
+
+const input = 'w-full px-3 py-2 text-sm font-semibold border border-slate-300 rounded-lg';
   return (
     <div className="space-y-5 max-w-4xl mx-auto">
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-start justify-between gap-3">
@@ -436,6 +461,16 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
             <input aria-label="Fee" type="number" min={1} value={form.fee} onChange={(e) => set({ fee: e.target.value })} placeholder="Fee in rupees" className={input} />
             <input aria-label="GPay number" value={form.gpayNumber} onChange={(e) => set({ gpayNumber: e.target.value })} placeholder="GPay number to pay" className={input} />
             <input aria-label="GPay name" value={form.gpayName} onChange={(e) => set({ gpayName: e.target.value })} placeholder="Name on GPay (optional)" className={input} />
+            <div className="sm:col-span-2 flex items-center gap-3">
+              {form.paymentQr ? <img src={form.paymentQr} alt="Payment QR" className="w-24 h-24 object-contain rounded-lg border border-slate-200 bg-white" /> : <div className="w-24 h-24 rounded-lg bg-white border border-dashed border-slate-300 grid place-items-center text-xs text-slate-400 text-center">No QR yet</div>}
+              <div className="space-y-1.5">
+                <p className="text-sm font-bold text-slate-700">Payment QR code (of the person who receives the money). It stays the same and is shown to everyone who registers.</p>
+                <label className="inline-flex px-4 py-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold cursor-pointer">
+                  {form.paymentQr ? 'Change QR code' : 'Upload QR code'}
+                  <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ''; if (file) qrImage600(file).then((u) => set({ paymentQr: u })).catch((er) => setError(er instanceof Error ? er.message : 'Could not read the picture.')); }} />
+                </label>
+              </div>
+            </div>
             <input aria-label="First free registrations" type="number" min={0} value={form.freeFirst} onChange={(e) => set({ freeFirst: e.target.value })} placeholder="First how many registrations are free? (optional, for example 50)" className={`${input} sm:col-span-2`} />
           </div>
         )}

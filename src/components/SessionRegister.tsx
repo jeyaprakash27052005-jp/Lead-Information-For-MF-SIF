@@ -260,6 +260,12 @@ export const SessionRegister: React.FC<{ programId: string; start?: string; onBa
               <p className="text-base text-slate-800">
                 Pay by GPay to <b data-testid="gpay-number" className="font-mono text-base">{program.gpayNumber}</b>{program.gpayName ? ` (${program.gpayName})` : ''}
               </p>
+              {program.paymentQr && (
+                <div className="space-y-1">
+                  <p className={lbl}>Scan this QR code to pay</p>
+                  <img src={program.paymentQr} alt="Payment QR code" className="w-56 max-w-full rounded-lg border border-slate-200 bg-white p-2" />
+                </div>
+              )}
               {!proof && (
                 <div className="space-y-1.5">
                   <p className={lbl}>Upload the full payment screenshot (with transfer details)</p>

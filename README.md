@@ -325,3 +325,4 @@ Menu -> **Event Leads**.
 - Ads site home: upcoming events that have a poster join the moving banner (poster in full, big title, "Know more" opens the event page). The event page has a **Back to Home** button. Each mutual fund card has **Know more about the scheme**, which opens a scheme page (`#/scheme/<id>`) laid out like an event page, also with Back to Home.
 - Ads home: Upcoming sessions and Featured mutual funds now slide by themselves (5 s, arrows, dashes); event posters are smaller (landscape frame, whole poster) with a slow zoom; Back to Home on Mutual Fund Offers and Awareness Sessions pages.
 - Ads site uses the full screen width (no side margins) on home, funds, sessions, event and scheme pages; cards share the whole row.
+- Paid events: the admin uploads the payment QR code when creating the event (required); it is shown on the registration form for everyone who pays.

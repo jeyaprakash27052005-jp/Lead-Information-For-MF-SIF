@@ -274,6 +274,7 @@ export interface AwarenessProgram {
   freeFirst?: number; // the first N registrations are free (paid session)
   gpayNumber?: string;
   gpayName?: string;
+  paymentQr?: string; // QR code picture of the payment receiver (data URL), added by the admin when the event is created
   /** Division the programme is for. Empty = every region. */
   region?: string;
   createdByRole?: UserRole;
