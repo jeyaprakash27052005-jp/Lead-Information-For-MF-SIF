@@ -41,8 +41,9 @@ export const FundDetail: React.FC<{ adId: string; onHome: () => void; onAll: () 
         <ArrowLeft className="w-4 h-4" /> Back to Home
       </button>
       {ad.imageUrl && (
-        <div className="bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden">
-          <img src={ad.imageUrl} alt={ad.fundName} className="w-full aspect-video object-contain bg-white" />
+        <div className="relative max-w-md mx-auto h-36 sm:h-44 bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden">
+          <img src={ad.imageUrl} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-60" />
+          <img src={ad.imageUrl} alt={ad.fundName} className="relative w-full h-full object-contain anim-rise" />
         </div>
       )}
       <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-8 space-y-6">
