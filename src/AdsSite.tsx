@@ -253,6 +253,7 @@ function Site() {
         {route.name === 'id' && <IdCardView token={route.token} />}
         {route.name === 'calc' && (
           <section className="space-y-4">
+            <button type="button" onClick={() => (window.history.length > 1 ? window.history.back() : go('/'))} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-300 bg-white text-slate-800 text-sm font-bold cursor-pointer hover:bg-slate-50"><ArrowLeft className="w-4 h-4" /> Back</button>
             <h1 className="text-2xl font-black text-slate-900">{route.only ? 'Calculator' : 'Investment Calculators'}</h1>
             <FinanceCalculations key={route.only || 'all'} only={route.only} />
           </section>

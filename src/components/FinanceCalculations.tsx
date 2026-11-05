@@ -18,9 +18,8 @@ const Result: React.FC<{ label: string; value: string; strong?: boolean; tone?: 
   </div>
 );
 
-const Formula: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <p className="text-[11px] font-mono bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-600 whitespace-pre-line">{children}</p>
-);
+/** The working formulas are not shown to customers */
+const Formula: React.FC<{ children: React.ReactNode }> = () => null;
 
 const Card: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 space-y-3">
@@ -326,7 +325,7 @@ export const FinanceCalculations: React.FC<{ only?: string }> = ({ only }) => {
           <Calculator className="w-4 h-4" /> Investment Calculations
         </div>
         <h2 className="text-lg font-black text-slate-900">{group ? group.title : 'Future value, growth and dividend: lumpsum and SIP shown separately'}</h2>
-        <p className="text-xs text-slate-500 mt-0.5">For explaining numbers to customers. Every result shows the formula used. Projections are estimates and not guaranteed returns.</p>
+        <p className="text-xs text-slate-500 mt-0.5">For explaining numbers to customers. Projections are estimates and not guaranteed returns.</p>
       </div>
       <div className={`flex flex-wrap gap-2 ${tabs.length < 2 ? 'hidden' : ''}`} role="tablist">
         {tabs.map((t) => (

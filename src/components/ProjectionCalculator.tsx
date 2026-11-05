@@ -367,7 +367,7 @@ export const ProjectionCalculator: React.FC<ProjectionCalculatorProps> = ({ kind
                 ))}
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+              <div className="hidden p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
                 <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider block">Formula used</span>
                 {usesLump && (
                   <>

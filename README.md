@@ -329,3 +329,4 @@ Menu -> **Event Leads**.
 - The top bar of all sites has a light sky-to-violet gradient; the ads site page has a light tinted background.
 - Customer (ads) site: purple-to-white page background and a soft purple background over the whole site (like the NISM site). The top menu bar stays white.
 - Mutual fund adverts (admin): the form now asks for About the scheme (required), up to 10 highlights, fund manager, benchmark, expense ratio, exit load, lock-in, minimum lumpsum and extra Know more pages (Fund Manager, Portfolio, Scheme Documents, FAQ, with text, link or file). The scheme Know more page shows them.
+- Calculators no longer show the working formulas (all customer sites). The calculator page on the ads site has a Back button (returns to the page it was opened from, for example the scheme page).
