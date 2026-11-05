@@ -171,20 +171,20 @@ export const SessionRegister: React.FC<{ programId: string; start?: string; onBa
   );
 
   return (
-    <section className="max-w-5xl mx-auto space-y-4 text-base" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
+    <section className="w-full space-y-4 text-base" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
       {onHome && (
         <button type="button" onClick={onHome} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-300 bg-white text-slate-800 font-bold cursor-pointer hover:bg-slate-50">
           <ArrowLeft className="w-4 h-4" /> Back to Home
         </button>
       )}
       {program.imageUrl && (
-        <div className="relative w-full aspect-video max-h-[34rem] bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden">
+        <div className="relative w-full aspect-[16/9] max-h-[70vh] bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden">
           <img src={program.imageUrl} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-90" />
           <img src={program.imageUrl} alt={program.title} className="relative w-full h-full object-contain anim-rise" />
         </div>
       )}
       {!program.imageUrl && <h1 className="text-xl sm:text-2xl font-black text-slate-900 leading-snug">{program.title}</h1>}
-      <div className="grid md:grid-cols-[14rem_1fr] gap-4 items-start">
+      <div className="grid md:grid-cols-[14rem_1fr] lg:grid-cols-[17rem_1fr] gap-4 items-start">
         <aside className="bg-white rounded-2xl border border-slate-200 p-2 flex md:flex-col gap-1 overflow-x-auto md:sticky md:top-20" aria-label="Event pages">
           {nav.map((n) => (
             <button

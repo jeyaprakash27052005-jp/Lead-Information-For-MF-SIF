@@ -85,6 +85,7 @@ function Site() {
     };
   }, []);
 
+  const wide = route.name === 'event' || route.name === 'register' || route.name === 'scheme';
   const go = (hash: string) => {
     window.location.hash = hash;
     setOpenMenu(null);
@@ -208,7 +209,7 @@ function Site() {
         )}
       </header>
 
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <main className={`flex-1 w-full mx-auto py-6 sm:py-8 space-y-8 ${wide ? 'max-w-none px-3 sm:px-6 lg:px-10' : 'max-w-7xl px-4 sm:px-6 lg:px-8'}`}>
         {route.name === 'home' && (
           <>
             <AdsCarousel eventBase="#/event/" />

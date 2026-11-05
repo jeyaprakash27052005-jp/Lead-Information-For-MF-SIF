@@ -45,17 +45,17 @@ export const FundDetail: React.FC<{ adId: string; onHome: () => void; onAll: () 
   );
 
   return (
-    <section className="max-w-5xl mx-auto space-y-4 text-base" style={font}>
+    <section className="w-full space-y-4 text-base" style={font}>
       <button type="button" onClick={onHome} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-300 bg-white text-slate-800 font-bold cursor-pointer hover:bg-slate-50">
         <ArrowLeft className="w-4 h-4" /> Back to Home
       </button>
       {ad.imageUrl && (
-        <div className="relative w-full aspect-video max-h-[34rem] bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden">
+        <div className="relative w-full aspect-[16/9] max-h-[70vh] bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden">
           <img src={ad.imageUrl} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-90" />
           <img src={ad.imageUrl} alt={ad.fundName} className="relative w-full h-full object-contain anim-rise" />
         </div>
       )}
-      <div className="grid md:grid-cols-[14rem_1fr] gap-4 items-start">
+      <div className="grid md:grid-cols-[14rem_1fr] lg:grid-cols-[17rem_1fr] gap-4 items-start">
         <aside className="bg-white rounded-2xl border border-slate-200 p-2 flex md:flex-col gap-1 overflow-x-auto md:sticky md:top-20" aria-label="Scheme pages">
           {nav.map((n) => (
             <button
