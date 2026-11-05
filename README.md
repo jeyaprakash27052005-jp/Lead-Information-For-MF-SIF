@@ -327,4 +327,4 @@ Menu -> **Event Leads**.
 - Ads site uses the full screen width (no side margins) on home, funds, sessions, event and scheme pages; cards share the whole row.
 - Paid events: the admin uploads the payment QR code when creating the event (required); it is shown on the registration form for everyone who pays.
 - The top bar of all sites has a light sky-to-violet gradient; the ads site page has a light tinted background.
-- Customer (ads) site: purple-to-white page background and a rounded translucent menu bar with white text (like the NISM site). Other sites keep the white top bar.
+- Customer (ads) site: purple-to-white page background and a soft purple background over the whole site (like the NISM site). The top menu bar stays white.
