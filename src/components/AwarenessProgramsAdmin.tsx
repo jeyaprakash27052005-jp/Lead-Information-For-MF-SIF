@@ -178,7 +178,7 @@ export const AwarenessProgramsAdmin: React.FC<Props> = ({ currentUser, onNotify 
       speakerPhoto: form.speakerPhoto || undefined,
       contact: form.contact.trim() || undefined,
       imageUrl: form.imageUrl || undefined,
-      sections: form.sections.filter((x) => x.title.trim()).map((x) => ({ id: x.id, title: x.title.trim(), body: x.body?.trim() || undefined, linkUrl: x.linkUrl?.trim() || undefined, fileUrl: x.fileUrl || undefined, fileName: x.fileName || undefined })),
+      sections: form.sections.filter((x) => x.title.trim()).map((x) => ({ id: x.id, title: x.title.trim(), body: x.body?.trim() || undefined, linkUrl: x.linkUrl?.trim() || undefined, fileUrl: x.fileUrl || undefined, fileName: x.fileName || undefined, imageUrl: x.imageUrl || undefined })),
       isPaid: form.isPaid,
       fee: form.isPaid ? Number(form.fee) : undefined,
       freeFirst: form.isPaid && form.freeFirst !== '' && Number(form.freeFirst) > 0 ? Number(form.freeFirst) : undefined,
@@ -437,6 +437,14 @@ const input = 'w-full px-3 py-2 text-sm font-semibold border border-slate-300 ro
                 <button type="button" aria-label="Remove page" onClick={() => set({ sections: form.sections.filter((_, k) => k !== i) })} className="px-2 rounded-lg border border-rose-200 text-rose-700 cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></button>
               </div>
               <textarea aria-label="Page text" rows={3} value={sec.body || ''} onChange={(e) => setSec(i, { body: e.target.value })} placeholder="Text of this page (a blank line starts a new paragraph). Leave empty to show Will be updated soon." className={input} />
+              <div className="flex flex-wrap items-center gap-3">
+                {sec.imageUrl && <img src={sec.imageUrl} alt="Page picture" className="w-20 h-20 rounded-lg object-cover border border-slate-200" />}
+                <label className="px-3 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 text-white font-bold cursor-pointer">
+                  {sec.imageUrl ? 'Change picture' : 'Upload picture (for example speaker photo)'}
+                  <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ''; if (file) smallPhoto(file).then((u) => setSec(i, { imageUrl: u })).catch((er) => setError(er instanceof Error ? er.message : 'Could not read the picture.')); }} />
+                </label>
+                {sec.imageUrl && <button type="button" onClick={() => setSec(i, { imageUrl: '' })} className="text-rose-700 font-bold cursor-pointer">Remove picture</button>}
+              </div>
               <input aria-label="Page link" value={sec.linkUrl || ''} onChange={(e) => setSec(i, { linkUrl: e.target.value })} placeholder="Button link (https://...) - optional" className={input} />
               <div className="flex flex-wrap items-center gap-2">
                 <label className="px-3 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 text-white font-bold cursor-pointer">

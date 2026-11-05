@@ -162,6 +162,7 @@ export const SessionRegister: React.FC<{ programId: string; start?: string; onBa
     <div className="space-y-4">
       <h2 className="text-2xl font-black text-slate-900">{custom.title}</h2>
       {isSpeakers && hasSpeaker && speakerBlock}
+      {custom.imageUrl && <img src={custom.imageUrl} alt={custom.title} draggable={false} onContextMenu={(e) => e.preventDefault()} className="w-40 h-40 rounded-2xl object-cover border border-slate-200 select-none pointer-events-none" />}
       {custom.body && <div className="space-y-3 text-lg text-slate-800">{custom.body.split(/\n{2,}/).map((para, i) => <p key={i} className="whitespace-pre-line">{para}</p>)}</div>}
       {((custom.fileUrl && isBrochure) || (custom.linkUrl && /^https:\/\//i.test(custom.linkUrl))) && (
         <a
@@ -172,7 +173,7 @@ export const SessionRegister: React.FC<{ programId: string; start?: string; onBa
           {custom.fileUrl && isBrochure ? `Download ${custom.title.replace(/^Download\s+/i, '')}` : 'Open'}
         </a>
       )}
-      {!custom.body && !(isSpeakers && hasSpeaker) && !(custom.fileUrl && isBrochure) && !custom.linkUrl && <p className="text-lg font-bold text-amber-700">Will be updated soon</p>}
+      {!custom.body && !(isSpeakers && hasSpeaker) && !custom.imageUrl && !(custom.fileUrl && isBrochure) && !custom.linkUrl && <p className="text-lg font-bold text-amber-700">Will be updated soon</p>}
     </div>
   );
 

@@ -254,6 +254,7 @@ export interface AwarenessSection {
   linkUrl?: string; // https link, shown as a button
   fileUrl?: string; // uploaded file (data address)
   fileName?: string;
+  imageUrl?: string; // picture shown on this page (for example the speaker photo), display only
 }
 
 export interface AwarenessProgram {
