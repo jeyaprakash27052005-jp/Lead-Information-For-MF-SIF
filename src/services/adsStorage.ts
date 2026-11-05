@@ -176,7 +176,12 @@ export const toLandscape = async (dataUrl: string): Promise<string> => {
   canvas.width = w; canvas.height = h;
   const ctx = canvas.getContext('2d');
   if (!ctx) return dataUrl;
+  // side areas are filled with a blurred copy of the poster, so no empty space is left
   ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
+  const fill = Math.max(w / img.width, h / img.height);
+  try { (ctx as CanvasRenderingContext2D & { filter: string }).filter = 'blur(24px)'; } catch (_e) { /* no blur support */ }
+  ctx.drawImage(img, Math.round((w - img.width * fill) / 2), Math.round((h - img.height * fill) / 2), Math.round(img.width * fill), Math.round(img.height * fill));
+  try { (ctx as CanvasRenderingContext2D & { filter: string }).filter = 'none'; } catch (_e) { /* ignore */ }
   const scale = Math.min(w / img.width, h / img.height);
   const dw = Math.round(img.width * scale), dh = Math.round(img.height * scale);
   ctx.drawImage(img, Math.round((w - dw) / 2), Math.round((h - dh) / 2), dw, dh);
