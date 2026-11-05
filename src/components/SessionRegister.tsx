@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { AlertCircle, CalendarDays, CheckCircle2, ImagePlus, MapPin, UserPlus } from 'lucide-react';
+import { AlertCircle, ArrowLeft, CalendarDays, CheckCircle2, ImagePlus, MapPin, UserPlus } from 'lucide-react';
 import { AwarenessProgram } from '../types';
 import { sectionsOf } from '../utils/eventPages';
 import { apiService } from '../services/api';
@@ -39,7 +39,7 @@ const compress = (file: File): Promise<string> =>
   });
 
 /** Separate registration form of one awareness session (opened by its own link) */
-export const SessionRegister: React.FC<{ programId: string; start?: string; onBack: () => void }> = ({ programId, start, onBack }) => {
+export const SessionRegister: React.FC<{ programId: string; start?: string; onBack: () => void; onHome?: () => void }> = ({ programId, start, onBack, onHome }) => {
   const [program, setProgram] = useState<AwarenessProgram | null | undefined>(undefined);
   const [f, setF] = useState({ attendeeType: 'customer' as 'customer' | 'member', first: '', last: '', mobile: '', email: '', city: '', guests: 0, note: '' });
   const [error, setError] = useState<string | null>(null);
@@ -172,6 +172,11 @@ export const SessionRegister: React.FC<{ programId: string; start?: string; onBa
 
   return (
     <section className="max-w-5xl mx-auto space-y-4 text-base" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
+      {onHome && (
+        <button type="button" onClick={onHome} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-300 bg-white text-slate-800 font-bold cursor-pointer hover:bg-slate-50">
+          <ArrowLeft className="w-4 h-4" /> Back to Home
+        </button>
+      )}
       {program.imageUrl && (
         <div className="bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden">
           <img src={program.imageUrl} alt={program.title} className="w-full aspect-video object-contain bg-white" />

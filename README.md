@@ -321,3 +321,5 @@ Menu -> **Event Leads**.
 
 - **Landscape ads and speaker details**: event posters are cropped to landscape (16:9) when the admin uploads them and are always shown in a landscape frame on the event page, event cards and home banner. The admin form has a **Speaker details** box (photo, designation, full details) and the event Home page shows an **About the speaker** card.
 - Event posters are shown in a fixed landscape (16:9) frame and the whole poster is kept (never cropped); speaker photo, designation and full details show on the event page.
+
+- Ads site home: upcoming events that have a poster join the moving banner (poster in full, big title, "Know more" opens the event page). The event page has a **Back to Home** button. Each mutual fund card has **Know more about the scheme**, which opens a scheme page (`#/scheme/<id>`) laid out like an event page, also with Back to Home.

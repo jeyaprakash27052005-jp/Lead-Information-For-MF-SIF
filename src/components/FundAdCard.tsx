@@ -6,7 +6,7 @@ import { adTextClass } from '../utils/adAnimations';
 import { formatInr } from '../utils/currency';
 
 /** One mutual fund advertisement */
-export const FundAdCard: React.FC<{ ad: FundAd; playKey?: string | number; compact?: boolean }> = ({ ad, playKey, compact }) => (
+export const FundAdCard: React.FC<{ ad: FundAd; playKey?: string | number; compact?: boolean; detailBase?: string }> = ({ ad, playKey, compact, detailBase }) => (
   <article className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col lift-card">
     <div className="relative h-44 bg-slate-900">
       <AnimatedAd ad={{ imageUrl: ad.imageUrl, title: ad.fundName, animation: ad.animation, animationSpeed: ad.animationSpeed }} playKey={playKey} className="absolute inset-0" />
@@ -35,7 +35,12 @@ export const FundAdCard: React.FC<{ ad: FundAd; playKey?: string | number; compa
         {ad.riskLevel && <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">Riskometer: {ad.riskLevel}</span>}
         {ad.minSip ? <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">SIP from {formatInr(ad.minSip)}</span> : null}
       </div>
-      {ad.linkUrl && /^https:\/\//i.test(ad.linkUrl) && (
+      {detailBase && (
+        <a href={`${detailBase}${encodeURIComponent(ad.id)}`} className="btn-glow inline-flex items-center gap-1.5 self-start px-3.5 py-2 rounded-xl bg-indigo-800 hover:bg-indigo-900 text-white text-xs font-bold">
+          Know more about the scheme
+        </a>
+      )}
+      {!detailBase && ad.linkUrl && /^https:\/\//i.test(ad.linkUrl) && (
         <a
           href={ad.linkUrl}
           target="_blank"

@@ -6,19 +6,21 @@ import { AdsCarousel } from './components/AdsCarousel';
 import { FundAdsList } from './components/FundAdsList';
 import { AwarenessList } from './components/AwarenessList';
 import { SessionRegister } from './components/SessionRegister';
+import { FundDetail } from './components/FundDetail';
 import { IdCardView } from './components/IdCardView';
 import { FinanceCalculations } from './components/FinanceCalculations';
 import { siteStorage } from './services/siteStorage';
 import { DEFAULT_ITEMS, DEFAULT_MENUS, calcTypeOf, isRemovedMenu } from './utils/siteDefaults';
 import { SiteContact, SiteItem, SiteMenu } from './types';
 
-type Route = { name: 'home' | 'funds' | 'sessions' | 'contact' | 'calc'; only?: string } | { name: 'page'; id: string } | { name: 'register'; id: string } | { name: 'event'; id: string } | { name: 'id'; token: string };
+type Route = { name: 'scheme'; id: string } | { name: 'home' | 'funds' | 'sessions' | 'contact' | 'calc'; only?: string } | { name: 'page'; id: string } | { name: 'register'; id: string } | { name: 'event'; id: string } | { name: 'id'; token: string };
 
 const readRoute = (): Route => {
   const h = window.location.hash.replace(/^#\/?/, '');
   if (h.startsWith('calc/')) return { name: 'calc', only: h.slice(5) };
   if (h === 'funds' || h === 'sessions' || h === 'contact' || h === 'calc') return { name: h };
   if (h.startsWith('id/')) return { name: 'id', token: decodeURIComponent(h.slice(3)) };
+  if (h.startsWith('scheme/')) return { name: 'scheme', id: decodeURIComponent(h.slice(7)) };
   if (h.startsWith('event/')) return { name: 'event', id: decodeURIComponent(h.slice(6)) };
   if (h.startsWith('register/')) return { name: 'register', id: decodeURIComponent(h.slice(9)) };
   if (h.startsWith('p/')) return { name: 'page', id: decodeURIComponent(h.slice(2)) };
@@ -209,7 +211,7 @@ function Site() {
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {route.name === 'home' && (
           <>
-            <AdsCarousel />
+            <AdsCarousel eventBase="#/event/" />
             <section className="text-center space-y-2 py-4">
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900">Invest with understanding</h1>
               <p className="text-sm text-slate-600 max-w-xl mx-auto">Learn the basics, plan your goals, see the latest mutual fund offers and join our free investor sessions.</p>
@@ -217,7 +219,7 @@ function Site() {
             {f.fundAds && (
               <section className="space-y-3">
                 <h2 className="text-lg font-black text-slate-900">Featured mutual funds</h2>
-                <FundAdsList limit={3} hideWhenEmpty />
+                <FundAdsList limit={3} hideWhenEmpty detailBase="#/scheme/" />
                 <button onClick={() => go('/funds')} className="inline-flex items-center gap-1 text-sm font-bold text-blue-700 hover:underline">
                   See all mutual funds <ArrowRight className="w-4 h-4" />
                 </button>
@@ -234,7 +236,7 @@ function Site() {
         {route.name === 'funds' && (
           <section className="space-y-4">
             <h1 className="text-2xl font-black text-slate-900">Mutual Fund Offers</h1>
-            <FundAdsList />
+            <FundAdsList detailBase="#/scheme/" />
           </section>
         )}
         {route.name === 'sessions' && (
@@ -243,7 +245,8 @@ function Site() {
             <AwarenessList registerBase="#/register/" infoBase="#/event/" hero allRegions />
           </section>
         )}
-        {(route.name === 'register' || route.name === 'event') && <SessionRegister programId={route.id} start={route.name === 'register' ? 'registration' : 'home'} onBack={() => go('/sessions')} />}
+        {(route.name === 'register' || route.name === 'event') && <SessionRegister programId={route.id} start={route.name === 'register' ? 'registration' : 'home'} onBack={() => go('/sessions')} onHome={() => go('/')} />}
+        {route.name === 'scheme' && <FundDetail adId={route.id} onHome={() => go('/')} onAll={() => go('/funds')} />}
         {route.name === 'id' && <IdCardView token={route.token} />}
         {route.name === 'calc' && (
           <section className="space-y-4">

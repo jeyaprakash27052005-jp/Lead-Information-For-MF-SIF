@@ -7,7 +7,7 @@ import { FundAdCard } from './FundAdCard';
 import { FUND_CATEGORIES } from '../utils/fundAdRules';
 
 /** The mutual fund advertisements the admin team added (read only, for customers and the Home Screen) */
-export const FundAdsList: React.FC<{ limit?: number; compact?: boolean; hideWhenEmpty?: boolean }> = ({ limit, compact, hideWhenEmpty }) => {
+export const FundAdsList: React.FC<{ limit?: number; compact?: boolean; hideWhenEmpty?: boolean; detailBase?: string }> = ({ limit, compact, hideWhenEmpty, detailBase }) => {
   const { settings } = useAppSettings();
   const [ads, setAds] = useState<FundAd[] | null>(null);
   const [cat, setCat] = useState('ALL');
@@ -57,7 +57,7 @@ export const FundAdsList: React.FC<{ limit?: number; compact?: boolean; hideWhen
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {shown.map((a) => (
-            <FundAdCard key={a.id} ad={a} compact={compact} />
+            <FundAdCard key={a.id} ad={a} compact={compact} detailBase={detailBase} />
           ))}
         </div>
       )}

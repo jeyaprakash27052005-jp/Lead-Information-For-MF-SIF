@@ -1,15 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, Pause, Play, Sparkles } from 'lucide-react';
-import { AdBanner } from '../types';
+import { AdBanner, AwarenessProgram } from '../types';
+import { apiService } from '../services/api';
 import { adsStorageService } from '../services/adsStorage';
 import { useAppSettings } from '../context/AppSettings';
 import { AnimatedAd } from './AnimatedAd';
 import { adTextClass } from '../utils/adAnimations';
 
 /** The moving ads (with their animations) that the admin team added, for the customer's home screen */
-export const AdsCarousel: React.FC<{ onAction?: (linkUrl: string) => void; fallback?: React.ReactNode }> = ({ onAction, fallback = null }) => {
+type Slide = { id: string; imageUrl: string; title: string; subtitle?: string; badge?: string; href?: string; ad?: AdBanner; isEvent?: boolean };
+const endOf = (p: AwarenessProgram) => new Date(p.endsAt || p.startsAt).getTime() + 3 * 60 * 60 * 1000;
+
+/** The moving ads (with their animations) that the admin team added, for the customer's home screen. With eventBase, upcoming events with a poster join the slider and open their event page. */
+export const AdsCarousel: React.FC<{ onAction?: (linkUrl: string) => void; fallback?: React.ReactNode; eventBase?: string }> = ({ onAction, fallback = null, eventBase }) => {
   const { settings } = useAppSettings();
-  const [ads, setAds] = useState<AdBanner[] | null>(null);
+  const [adList, setAdList] = useState<AdBanner[] | null>(null);
+  const [events, setEvents] = useState<AwarenessProgram[]>([]);
   const [slide, setSlide] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -17,13 +23,32 @@ export const AdsCarousel: React.FC<{ onAction?: (linkUrl: string) => void; fallb
     let alive = true;
     adsStorageService
       .getAds()
-      .then((list) => alive && setAds(list.filter((a) => a.isActive)))
-      .catch(() => alive && setAds([]));
+      .then((list) => alive && setAdList(list.filter((a) => a.isActive)))
+      .catch(() => alive && setAdList([]));
     return () => {
       alive = false;
     };
   }, []);
 
+  useEffect(() => {
+    if (!eventBase) return;
+    let alive = true;
+    apiService
+      .getAwarenessPrograms()
+      .then((l: AwarenessProgram[]) => alive && setEvents(l.filter((p) => p.isActive && p.imageUrl && endOf(p) >= Date.now())))
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [eventBase]);
+
+  const ads: Slide[] | null =
+    adList === null
+      ? null
+      : [
+          ...events.map((p) => ({ id: `ev_${p.id}`, imageUrl: p.imageUrl as string, title: p.title, subtitle: p.speaker ? `Speaker: ${p.speaker}` : undefined, badge: 'Upcoming event', href: `${eventBase}${encodeURIComponent(p.id)}`, isEvent: true })),
+          ...adList.map((a) => ({ id: a.id, imageUrl: a.imageUrl, title: a.title, subtitle: a.subtitle, badge: a.badge, href: a.linkUrl, ad: a })),
+        ];
   const count = ads?.length ?? 0;
   useEffect(() => {
     if (slide >= count) setSlide(0);
@@ -43,7 +68,7 @@ export const AdsCarousel: React.FC<{ onAction?: (linkUrl: string) => void; fallb
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      <div className="relative h-56 sm:h-72 md:h-80">
+      <div className="relative h-60 sm:h-80 md:h-[26rem]">
         {ads.map((ad, i) => {
           const on = i === slide;
           return (
@@ -51,22 +76,34 @@ export const AdsCarousel: React.FC<{ onAction?: (linkUrl: string) => void; fallb
               key={ad.id}
               className={`absolute inset-0 transition-opacity duration-700 flex flex-col justify-end p-5 sm:p-8 ${on ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}
             >
-              <AnimatedAd ad={ad} playKey={on ? 'on' : 'off'} className="absolute inset-0" />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
-              <div key={on ? 'on' : 'off'} className={`relative z-20 max-w-xl space-y-1.5 ${adTextClass(ad)}`}>
+              {ad.isEvent ? (
+                <>
+                  <img src={ad.imageUrl} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-70" />
+                  <img src={ad.imageUrl} alt={ad.title} className={`absolute inset-0 w-full h-full object-contain ${on ? 'anim-rise' : ''}`} />
+                </>
+              ) : (
+                ad.ad && <AnimatedAd ad={ad.ad} playKey={on ? 'on' : 'off'} className="absolute inset-0" />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent" />
+              <div key={on ? 'on' : 'off'} className={`relative z-20 max-w-2xl space-y-2 ${ad.ad ? adTextClass(ad.ad) : 'anim-rise'}`}>
                 {ad.badge && (
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-600/90 text-white text-[10px] font-black uppercase tracking-wide">
                     <Sparkles className="w-3 h-3" /> {ad.badge}
                   </span>
                 )}
-                <h2 className="text-lg sm:text-2xl font-black text-white drop-shadow-md">{ad.title}</h2>
+                <h2 className="text-xl sm:text-3xl font-black text-white drop-shadow-md leading-tight">{ad.title}</h2>
                 {ad.subtitle && <p className="text-xs sm:text-sm text-slate-200 line-clamp-2 font-medium">{ad.subtitle}</p>}
-                {ad.linkUrl && /^https?:\/\//i.test(ad.linkUrl) && (
+                {ad.isEvent && ad.href && (
+                  <a href={ad.href} className="btn-glow inline-block mt-1 px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold">
+                    Know more
+                  </a>
+                )}
+                {!ad.isEvent && ad.href && /^https?:\/\//i.test(ad.href) && (
                   <a
-                    href={ad.linkUrl}
+                    href={ad.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={() => onAction?.(ad.linkUrl as string)}
+                    onClick={() => onAction?.(ad.href as string)}
                     className="btn-glow inline-block mt-1 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold"
                   >
                     Explore
