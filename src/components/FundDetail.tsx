@@ -31,12 +31,12 @@ export const FundDetail: React.FC<{ adId: string; onHome: () => void; onAll: () 
   ];
   const custom = extra.find((x) => `x_${x.id}` === active);
   const font = { fontFamily: "'Times New Roman', Times, serif" } as React.CSSProperties;
-  if (ad === undefined) return <p className="text-base text-slate-400 text-center py-8">Loading...</p>;
+  if (ad === undefined) return <p className="text-lg text-slate-400 text-center py-8">Loading...</p>;
   if (!ad)
     return (
       <div className="max-w-md mx-auto bg-white rounded-2xl border border-slate-200 p-6 text-center space-y-3" style={font}>
-        <p className="text-base text-slate-700">This scheme was not found.</p>
-        <button onClick={onAll} className="px-4 py-2 rounded-xl bg-blue-700 text-white text-base font-bold cursor-pointer">See all mutual funds</button>
+        <p className="text-lg text-slate-700">This scheme was not found.</p>
+        <button onClick={onAll} className="px-4 py-2 rounded-xl bg-blue-700 text-white text-lg font-bold cursor-pointer">See all mutual funds</button>
       </div>
     );
 
@@ -48,7 +48,7 @@ export const FundDetail: React.FC<{ adId: string; onHome: () => void; onAll: () 
   );
 
   return (
-    <section className="w-full space-y-4 text-base" style={font}>
+    <section className="w-full space-y-4 text-lg" style={font}>
       <button type="button" onClick={onHome} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-300 bg-white text-slate-800 font-bold cursor-pointer hover:bg-slate-50">
         <ArrowLeft className="w-4 h-4" /> Back to Home
       </button>
@@ -65,7 +65,7 @@ export const FundDetail: React.FC<{ adId: string; onHome: () => void; onAll: () 
               key={n.id}
               type="button"
               onClick={() => setActive(n.id)}
-              className={`text-left whitespace-nowrap px-4 py-2.5 rounded-lg text-base font-semibold cursor-pointer ${active === n.id ? 'bg-indigo-50 text-indigo-800 border border-indigo-100' : 'text-slate-800 hover:bg-slate-50'}`}
+              className={`text-left whitespace-nowrap px-4 py-2.5 rounded-lg text-lg font-semibold cursor-pointer ${active === n.id ? 'bg-indigo-50 text-indigo-800 border border-indigo-100' : 'text-slate-800 hover:bg-slate-50'}`}
             >
               {n.title}
             </button>
@@ -74,15 +74,15 @@ export const FundDetail: React.FC<{ adId: string; onHome: () => void; onAll: () 
         <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-8 space-y-5 min-w-0">
           {active === 'home' && (
             <>
-              <h2 className="text-xl font-black text-slate-900">About the scheme:</h2>
-              <p className="text-lg font-bold text-slate-900">{ad.fundName}</p>
+              <h2 className="text-2xl font-black text-slate-900">About the scheme:</h2>
+              <p className="text-xl font-bold text-slate-900">{ad.fundName}</p>
               {ad.headline && <p className="font-bold text-indigo-800">{ad.headline}</p>}
               {ad.description ? <p className="text-slate-800 whitespace-pre-line">{ad.description}</p> : <p className="font-bold text-amber-700">Will be updated soon</p>}
             </>
           )}
           {active === 'highlights' && (
             <>
-              <h2 className="text-xl font-black text-slate-900">Key highlights:</h2>
+              <h2 className="text-2xl font-black text-slate-900">Key highlights:</h2>
               {ad.highlights && ad.highlights.length > 0 ? (
                 <ul className="list-disc pl-5 space-y-2 text-slate-800">{ad.highlights.map((h) => <li key={h}>{h}</li>)}</ul>
               ) : (
@@ -92,7 +92,7 @@ export const FundDetail: React.FC<{ adId: string; onHome: () => void; onAll: () 
           )}
           {active === 'details' && (
             <>
-              <h2 className="text-xl font-black text-slate-900">Scheme details:</h2>
+              <h2 className="text-2xl font-black text-slate-900">Scheme details:</h2>
               <table className="w-full text-left">
                 <tbody>
                   <Row k="Fund house">{ad.fundHouse}</Row>
@@ -111,7 +111,7 @@ export const FundDetail: React.FC<{ adId: string; onHome: () => void; onAll: () 
           )}
           {custom && (
             <>
-              <h2 className="text-xl font-black text-slate-900">{custom.title}:</h2>
+              <h2 className="text-2xl font-black text-slate-900">{custom.title}:</h2>
               {custom.body && (custom.body.split(/\n{2,}/).map((para, i) => <p key={i} className="text-slate-800 whitespace-pre-line">{para}</p>))}
               <div className="flex flex-wrap gap-3">
                 {custom.fileUrl && (
@@ -126,7 +126,7 @@ export const FundDetail: React.FC<{ adId: string; onHome: () => void; onAll: () 
           )}
           {active === 'calc' && (
             <>
-              <h2 className="text-xl font-black text-slate-900">Calculators:</h2>
+              <h2 className="text-2xl font-black text-slate-900">Calculators:</h2>
               <p className="text-slate-800">Work out what a monthly SIP or a one-time investment can grow to.</p>
               <div className="flex flex-wrap gap-3">
                 <a href="#/calc/sip" className="btn-glow px-5 py-2.5 rounded-xl bg-indigo-800 hover:bg-indigo-900 text-white font-bold">SIP calculator</a>
@@ -136,7 +136,7 @@ export const FundDetail: React.FC<{ adId: string; onHome: () => void; onAll: () 
           )}
           {active === 'link' && (
             <>
-              <h2 className="text-xl font-black text-slate-900">Fund house page:</h2>
+              <h2 className="text-2xl font-black text-slate-900">Fund house page:</h2>
               {ad.linkUrl && /^https:\/\//i.test(ad.linkUrl) ? (
                 <a href={ad.linkUrl} target="_blank" rel="noopener noreferrer" className="btn-glow inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-indigo-800 hover:bg-indigo-900 text-white font-bold">
                   Open {ad.fundHouse} <ExternalLink className="w-4 h-4" />
@@ -148,12 +148,12 @@ export const FundDetail: React.FC<{ adId: string; onHome: () => void; onAll: () 
           )}
           {active === 'enquiry' && (
             <>
-              <h2 className="text-xl font-black text-slate-900">Scheme enquiry:</h2>
+              <h2 className="text-2xl font-black text-slate-900">Scheme enquiry:</h2>
               <p className="text-slate-800">Want to invest in {ad.fundName} or know more? Talk to our team.</p>
               <a href="#/contact" className="btn-glow inline-block px-5 py-2.5 rounded-xl bg-indigo-800 hover:bg-indigo-900 text-white font-bold">Contact us</a>
             </>
           )}
-          <p className="text-sm text-slate-500 pt-2 border-t border-slate-100">Mutual fund investments are subject to market risks. Read all scheme related documents carefully.</p>
+          <p className="text-base text-slate-500 pt-2 border-t border-slate-100">Mutual fund investments are subject to market risks. Read all scheme related documents carefully.</p>
           <button type="button" onClick={onAll} className="px-5 py-2.5 rounded-xl border border-slate-300 font-bold text-slate-800 cursor-pointer hover:bg-slate-50">See all mutual funds</button>
         </div>
       </div>
