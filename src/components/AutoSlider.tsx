@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const perViewFor = () => (typeof window === 'undefined' ? 3 : window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 3);
+const perViewFor = () => (typeof window === 'undefined' ? 3 : window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : window.innerWidth < 1600 ? 3 : 4);
 
 /** Cards that slide by themselves (every 5 seconds), with arrows and dashes; stops while the mouse is over it. Shows a plain grid when everything fits. */
 export const AutoSlider: React.FC<{ items: React.ReactNode[] }> = ({ items }) => {
@@ -14,7 +14,9 @@ export const AutoSlider: React.FC<{ items: React.ReactNode[] }> = ({ items }) =>
     return () => window.removeEventListener('resize', on);
   }, []);
   const n = items.length;
-  const last = Math.max(0, n - per);
+  // fewer cards than places: the cards share the whole width, no empty space
+  const shownPer = Math.max(1, Math.min(per, n));
+  const last = Math.max(0, n - shownPer);
   useEffect(() => {
     if (start > last) setStart(0);
   }, [start, last]);
@@ -24,7 +26,7 @@ export const AutoSlider: React.FC<{ items: React.ReactNode[] }> = ({ items }) =>
     return () => clearInterval(t);
   }, [last, paused]);
 
-  const w = 100 / per;
+  const w = 100 / shownPer;
   return (
     <div className="relative" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
       <div className="overflow-hidden -mx-2">

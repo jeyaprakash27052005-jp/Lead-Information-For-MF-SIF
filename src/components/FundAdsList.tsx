@@ -56,7 +56,7 @@ export const FundAdsList: React.FC<{ limit?: number; compact?: boolean; hideWhen
           No mutual fund offers right now. Please check back soon.
         </div>
       ) : (
-        slider ? <AutoSlider items={shown.map((a) => <FundAdCard key={a.id} ad={a} compact={compact} detailBase={detailBase} />)} /> : <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        slider ? <AutoSlider items={shown.map((a) => <FundAdCard key={a.id} ad={a} compact={compact} detailBase={detailBase} />)} /> : <div className="grid gap-4 grid-cols-[repeat(auto-fit,minmax(18rem,1fr))]">
           {shown.map((a) => (
             <FundAdCard key={a.id} ad={a} compact={compact} detailBase={detailBase} />
           ))}

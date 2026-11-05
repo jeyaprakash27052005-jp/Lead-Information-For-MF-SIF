@@ -8,7 +8,7 @@ import { formatInr } from '../utils/currency';
 /** One mutual fund advertisement */
 export const FundAdCard: React.FC<{ ad: FundAd; playKey?: string | number; compact?: boolean; detailBase?: string }> = ({ ad, playKey, compact, detailBase }) => (
   <article className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col lift-card">
-    <div className="relative h-44 bg-slate-900">
+    <div className="relative h-48 sm:h-56 bg-slate-900">
       <AnimatedAd ad={{ imageUrl: ad.imageUrl, title: ad.fundName, animation: ad.animation, animationSpeed: ad.animationSpeed }} playKey={playKey} className="absolute inset-0" />
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent" />
       {ad.badge && <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-indigo-600 text-white text-[10px] font-black uppercase tracking-wide">{ad.badge}</span>}

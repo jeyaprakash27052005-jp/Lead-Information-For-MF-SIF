@@ -85,7 +85,7 @@ function Site() {
     };
   }, []);
 
-  const wide = route.name === 'event' || route.name === 'register' || route.name === 'scheme';
+  const wide = route.name !== 'contact' && route.name !== 'page';
   const go = (hash: string) => {
     window.location.hash = hash;
     setOpenMenu(null);
@@ -132,7 +132,7 @@ function Site() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <header ref={headerRef} className="bg-white border-b border-slate-200 sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center gap-4">
+        <div className="w-full px-3 sm:px-6 lg:px-10 h-16 flex items-center gap-4">
           <button onClick={() => go('/home')} className="flex items-center gap-2.5 text-left shrink-0">
             <img src={mcubeLogo} alt="Mcube Academy" className="h-10 w-auto" />
           </button>
@@ -161,7 +161,7 @@ function Site() {
 
         {panel && (
           <div className="hidden xl:block absolute inset-x-0 top-full bg-white border-b border-slate-200 shadow-lg" role="region" aria-label={panel.label}>
-            <div className="max-w-7xl mx-auto px-8 py-7 grid gap-x-10 gap-y-6" style={{ gridTemplateColumns: `repeat(${Math.min(Math.max(sectionsOf(panel.id).length, 1), 4)}, minmax(0, 1fr))` }}>
+            <div className="w-full px-10 py-7 grid gap-x-10 gap-y-6" style={{ gridTemplateColumns: `repeat(${Math.min(Math.max(sectionsOf(panel.id).length, 1), 4)}, minmax(0, 1fr))` }}>
               {sectionsOf(panel.id).map((sec) => (
                 <div key={sec.title} className="space-y-3">
                   <p className="text-[13px] font-bold uppercase tracking-wide text-blue-700/80">{sec.title}</p>

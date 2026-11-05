@@ -45,7 +45,7 @@ export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWh
       style={{ ['--d' as string]: `${Math.min(i, 8) * 70}ms` }}
       className={`anim-rise lift-card bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col ${isPast ? 'opacity-70' : ''}`}
     >
-      {p.imageUrl && (registerBase && !isPast ? <a href={`${infoBase || registerBase}${encodeURIComponent(p.id)}`}><img src={p.imageUrl} alt={p.title} className="w-full h-44 object-contain bg-slate-100 zoom-slow bg-slate-100" /></a> : <img src={p.imageUrl} alt={p.title} className="w-full h-44 object-contain bg-slate-100 zoom-slow bg-slate-100" />)}
+      {p.imageUrl && (registerBase && !isPast ? <a href={`${infoBase || registerBase}${encodeURIComponent(p.id)}`}><img src={p.imageUrl} alt={p.title} className="w-full h-48 sm:h-60 object-contain bg-slate-100 zoom-slow bg-slate-100" /></a> : <img src={p.imageUrl} alt={p.title} className="w-full h-48 sm:h-60 object-contain bg-slate-100 zoom-slow bg-slate-100" />)}
       <div className="p-5 space-y-2.5 flex-1 flex flex-col">
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-lg font-black text-slate-900 leading-snug">{p.title}</h3>
@@ -134,11 +134,11 @@ export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWh
       )}
       {hero && shown.length > 0 && <h2 className="text-center text-3xl font-black text-slate-900 pt-2">Upcoming Events</h2>}
       {shown.length > 0 && slider && <AutoSlider items={shown.map((p, i) => card(p, i))} />}
-      {shown.length > 0 && !slider && <div className={`grid gap-4 ${hero ? 'sm:grid-cols-2 lg:grid-cols-3' : 'md:grid-cols-2'}`}>{shown.map((p, i) => card(p, i))}</div>}
+      {shown.length > 0 && !slider && <div className={`grid gap-4 ${hero ? 'grid-cols-[repeat(auto-fit,minmax(18rem,1fr))]' : 'grid-cols-[repeat(auto-fit,minmax(18rem,1fr))]'}`}>{shown.map((p, i) => card(p, i))}</div>}
       {!limit && past.length > 0 && (
         <div className="space-y-3">
           <p className="text-base font-bold text-slate-400 uppercase tracking-wider">Recently completed</p>
-          <div className="grid gap-4 md:grid-cols-2">{past.map((p, i) => card(p, i, true))}</div>
+          <div className="grid gap-4 grid-cols-[repeat(auto-fit,minmax(18rem,1fr))]">{past.map((p, i) => card(p, i, true))}</div>
         </div>
       )}
     </div>
