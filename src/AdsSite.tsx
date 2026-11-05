@@ -130,11 +130,11 @@ function Site() {
   const panel = visibleMenus.find((m) => m.id === openMenu);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-indigo-50/60 via-slate-50 to-sky-50 flex flex-col">
-      <header ref={headerRef} className="bg-gradient-to-r from-sky-100 via-indigo-100 to-violet-100 border-b border-indigo-200 sticky top-0 z-30">
-        <div className="w-full px-3 sm:px-6 lg:px-10 h-16 flex items-center gap-4">
+    <div className="min-h-screen bg-white flex flex-col" style={{ backgroundImage: 'linear-gradient(180deg, #7a76ad 0px, #a3a1c8 240px, #dcdbea 520px, #ffffff 780px)', backgroundRepeat: 'no-repeat' }}>
+      <header ref={headerRef} className="sticky top-0 z-30 px-3 sm:px-6 lg:px-10 pt-3 pb-1">
+        <div className="w-full px-3 sm:px-5 h-14 flex items-center gap-4 rounded-full border border-white/50 bg-white/25 backdrop-blur-md shadow-sm">
           <button onClick={() => go('/home')} className="flex items-center gap-2.5 text-left shrink-0">
-            <img src={mcubeLogo} alt="Mcube Academy" className="h-10 w-auto mix-blend-multiply" />
+            <img src={mcubeLogo} alt="Mcube Academy" className="h-9 w-auto rounded-md bg-white" />
           </button>
           <nav className="hidden xl:flex flex-1 items-center gap-1 ml-4" aria-label="Main">
             {visibleMenus.map((m) => (
@@ -144,8 +144,8 @@ function Site() {
                 aria-expanded={openMenu === m.id}
                 className={
                   m.highlight
-                    ? 'ml-2 px-3.5 py-1.5 rounded-md text-sm font-bold bg-blue-100 text-blue-800 border border-blue-300 hover:bg-blue-200'
-                    : `px-3 py-2 text-sm font-semibold inline-flex items-center gap-1 whitespace-nowrap ${openMenu === m.id ? 'text-blue-700' : 'text-slate-800 hover:text-blue-700'}`
+                    ? 'ml-2 px-3.5 py-1.5 rounded-full text-sm font-bold bg-white/90 text-indigo-900 border border-white hover:bg-white'
+                    : `px-3 py-2 text-sm font-semibold inline-flex items-center gap-1 whitespace-nowrap ${openMenu === m.id ? 'text-yellow-300' : 'text-white hover:text-yellow-300'}`
                 }
               >
                 {m.label}
@@ -154,13 +154,13 @@ function Site() {
             ))}
           </nav>
           <div className="hidden xl:block ml-auto" />
-          <button className="xl:hidden ml-auto p-2 rounded-lg border border-slate-200" aria-label={mobile ? 'Close menu' : 'Open menu'} aria-expanded={mobile} onClick={() => setMobile((o) => !o)}>
+          <button className="xl:hidden ml-auto p-2 rounded-full border border-white/60 text-white" aria-label={mobile ? 'Close menu' : 'Open menu'} aria-expanded={mobile} onClick={() => setMobile((o) => !o)}>
             {mobile ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
 
         {panel && (
-          <div className="hidden xl:block absolute inset-x-0 top-full bg-white border-b border-slate-200 shadow-lg" role="region" aria-label={panel.label}>
+          <div className="hidden xl:block absolute inset-x-3 sm:inset-x-6 lg:inset-x-10 top-full mt-1 bg-white rounded-2xl border border-slate-200 shadow-lg" role="region" aria-label={panel.label}>
             <div className="w-full px-10 py-7 grid gap-x-10 gap-y-6" style={{ gridTemplateColumns: `repeat(${Math.min(Math.max(sectionsOf(panel.id).length, 1), 4)}, minmax(0, 1fr))` }}>
               {sectionsOf(panel.id).map((sec) => (
                 <div key={sec.title} className="space-y-3">
@@ -181,7 +181,7 @@ function Site() {
         )}
 
         {mobile && (
-          <nav className="xl:hidden border-t border-slate-200 bg-white px-4 py-2 max-h-[75vh] overflow-y-auto" aria-label="Mobile">
+          <nav className="xl:hidden mt-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 max-h-[75vh] overflow-y-auto" aria-label="Mobile">
             {visibleMenus.map((m) => (
               <div key={m.id} className="border-b border-slate-100 last:border-0">
                 <button onClick={() => clickMenu(m)} className="w-full flex items-center justify-between py-3 text-sm font-bold text-slate-800">

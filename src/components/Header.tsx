@@ -70,13 +70,13 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="bg-gradient-to-r from-sky-100 via-indigo-100 to-violet-100 border-b border-indigo-200 sticky top-0 z-30 shadow-xs">
+    <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
       {/* Top Windows-style brand bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-center justify-between gap-2 min-h-16 py-2">
           {/* Logo & App Title */}
           <div className="flex items-center gap-3">
-            <img src={mcubeLogo} alt="Mcube Academy" className="h-10 w-auto mix-blend-multiply" />
+            <img src={mcubeLogo} alt="Mcube Academy" className="h-10 w-auto" />
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight leading-none">
