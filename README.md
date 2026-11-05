@@ -326,3 +326,4 @@ Menu -> **Event Leads**.
 - Ads home: Upcoming sessions and Featured mutual funds now slide by themselves (5 s, arrows, dashes); event posters are smaller (landscape frame, whole poster) with a slow zoom; Back to Home on Mutual Fund Offers and Awareness Sessions pages.
 - Ads site uses the full screen width (no side margins) on home, funds, sessions, event and scheme pages; cards share the whole row.
 - Paid events: the admin uploads the payment QR code when creating the event (required); it is shown on the registration form for everyone who pays.
+- The top bar of all sites has a light sky-to-violet gradient; the ads site page has a light tinted background.

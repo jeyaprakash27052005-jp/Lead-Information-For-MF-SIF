@@ -130,11 +130,11 @@ function Site() {
   const panel = visibleMenus.find((m) => m.id === openMenu);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <header ref={headerRef} className="bg-white border-b border-slate-200 sticky top-0 z-30">
+    <div className="min-h-screen bg-gradient-to-b from-indigo-50/60 via-slate-50 to-sky-50 flex flex-col">
+      <header ref={headerRef} className="bg-gradient-to-r from-sky-100 via-indigo-100 to-violet-100 border-b border-indigo-200 sticky top-0 z-30">
         <div className="w-full px-3 sm:px-6 lg:px-10 h-16 flex items-center gap-4">
           <button onClick={() => go('/home')} className="flex items-center gap-2.5 text-left shrink-0">
-            <img src={mcubeLogo} alt="Mcube Academy" className="h-10 w-auto" />
+            <img src={mcubeLogo} alt="Mcube Academy" className="h-10 w-auto mix-blend-multiply" />
           </button>
           <nav className="hidden xl:flex flex-1 items-center gap-1 ml-4" aria-label="Main">
             {visibleMenus.map((m) => (
