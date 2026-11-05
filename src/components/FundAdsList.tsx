@@ -4,10 +4,11 @@ import { FundAd } from '../types';
 import { fundAdsStorage } from '../services/fundAdsStorage';
 import { useAppSettings } from '../context/AppSettings';
 import { FundAdCard } from './FundAdCard';
+import { AutoSlider } from './AutoSlider';
 import { FUND_CATEGORIES } from '../utils/fundAdRules';
 
 /** The mutual fund advertisements the admin team added (read only, for customers and the Home Screen) */
-export const FundAdsList: React.FC<{ limit?: number; compact?: boolean; hideWhenEmpty?: boolean; detailBase?: string }> = ({ limit, compact, hideWhenEmpty, detailBase }) => {
+export const FundAdsList: React.FC<{ limit?: number; compact?: boolean; hideWhenEmpty?: boolean; detailBase?: string; slider?: boolean }> = ({ limit, compact, hideWhenEmpty, detailBase, slider }) => {
   const { settings } = useAppSettings();
   const [ads, setAds] = useState<FundAd[] | null>(null);
   const [cat, setCat] = useState('ALL');
@@ -55,7 +56,7 @@ export const FundAdsList: React.FC<{ limit?: number; compact?: boolean; hideWhen
           No mutual fund offers right now. Please check back soon.
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        slider ? <AutoSlider items={shown.map((a) => <FundAdCard key={a.id} ad={a} compact={compact} detailBase={detailBase} />)} /> : <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {shown.map((a) => (
             <FundAdCard key={a.id} ad={a} compact={compact} detailBase={detailBase} />
           ))}

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import mcubeLogo from './assets/mcube-logo.png';
-import { MapPin, Mail, Menu, MessageCircle, Phone, X, Send, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { MapPin, Mail, Menu, MessageCircle, Phone, X, Send, ArrowLeft, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { AppSettingsProvider, useAppSettings } from './context/AppSettings';
 import { AdsCarousel } from './components/AdsCarousel';
 import { FundAdsList } from './components/FundAdsList';
@@ -219,7 +219,7 @@ function Site() {
             {f.fundAds && (
               <section className="space-y-3">
                 <h2 className="text-lg font-black text-slate-900">Featured mutual funds</h2>
-                <FundAdsList limit={3} hideWhenEmpty detailBase="#/scheme/" />
+                <FundAdsList limit={12} hideWhenEmpty detailBase="#/scheme/" slider />
                 <button onClick={() => go('/funds')} className="inline-flex items-center gap-1 text-sm font-bold text-blue-700 hover:underline">
                   See all mutual funds <ArrowRight className="w-4 h-4" />
                 </button>
@@ -228,19 +228,21 @@ function Site() {
             {f.awarenessPrograms && (
               <section className="space-y-3">
                 <h2 className="text-lg font-black text-slate-900">Upcoming sessions</h2>
-                <AwarenessList limit={2} hideWhenEmpty registerBase="#/register/" infoBase="#/event/" allRegions />
+                <AwarenessList limit={12} hideWhenEmpty registerBase="#/register/" infoBase="#/event/" allRegions slider />
               </section>
             )}
           </>
         )}
         {route.name === 'funds' && (
           <section className="space-y-4">
+            <button type="button" onClick={() => go('/')} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-300 bg-white text-slate-800 text-sm font-bold cursor-pointer hover:bg-slate-50"><ArrowLeft className="w-4 h-4" /> Back to Home</button>
             <h1 className="text-2xl font-black text-slate-900">Mutual Fund Offers</h1>
             <FundAdsList detailBase="#/scheme/" />
           </section>
         )}
         {route.name === 'sessions' && (
           <section className="space-y-4">
+            <button type="button" onClick={() => go('/')} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-300 bg-white text-slate-800 text-sm font-bold cursor-pointer hover:bg-slate-50"><ArrowLeft className="w-4 h-4" /> Back to Home</button>
             <h1 className="text-2xl font-black text-slate-900">Awareness Sessions</h1>
             <AwarenessList registerBase="#/register/" infoBase="#/event/" hero allRegions />
           </section>

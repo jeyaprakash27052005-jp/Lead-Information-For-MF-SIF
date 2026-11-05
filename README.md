@@ -323,3 +323,4 @@ Menu -> **Event Leads**.
 - Event posters are shown in a fixed landscape (16:9) frame and the whole poster is kept (never cropped); speaker photo, designation and full details show on the event page.
 
 - Ads site home: upcoming events that have a poster join the moving banner (poster in full, big title, "Know more" opens the event page). The event page has a **Back to Home** button. Each mutual fund card has **Know more about the scheme**, which opens a scheme page (`#/scheme/<id>`) laid out like an event page, also with Back to Home.
+- Ads home: Upcoming sessions and Featured mutual funds now slide by themselves (5 s, arrows, dashes); event posters are smaller (landscape frame, whole poster) with a slow zoom; Back to Home on Mutual Fund Offers and Awareness Sessions pages.

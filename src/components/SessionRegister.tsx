@@ -178,8 +178,9 @@ export const SessionRegister: React.FC<{ programId: string; start?: string; onBa
         </button>
       )}
       {program.imageUrl && (
-        <div className="bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden">
-          <img src={program.imageUrl} alt={program.title} className="w-full aspect-video object-contain bg-white" />
+        <div className="relative max-w-2xl mx-auto h-56 sm:h-64 bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden">
+          <img src={program.imageUrl} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-60" />
+          <img src={program.imageUrl} alt={program.title} className="relative w-full h-full object-contain anim-rise" />
         </div>
       )}
       {!program.imageUrl && <h1 className="text-xl sm:text-2xl font-black text-slate-900 leading-snug">{program.title}</h1>}

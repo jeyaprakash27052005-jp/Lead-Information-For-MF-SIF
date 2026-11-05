@@ -4,11 +4,12 @@ import { AwarenessProgram } from '../types';
 import { apiService } from '../services/api';
 import { formatDateTime } from '../utils/dateTime';
 import { useAppSettings } from '../context/AppSettings';
+import { AutoSlider } from './AutoSlider';
 
 const endOf = (p: AwarenessProgram) => new Date(p.endsAt || p.startsAt).getTime() + 3 * 60 * 60 * 1000;
 
 /** The awareness programmes the admin team added, for customers and the Home Screen (read only) */
-export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWhenEmpty?: boolean; region?: string; registerBase?: string; infoBase?: string; hero?: boolean; allRegions?: boolean }> = ({ limit, compact, hideWhenEmpty, region, registerBase, infoBase, hero, allRegions }) => {
+export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWhenEmpty?: boolean; region?: string; registerBase?: string; infoBase?: string; hero?: boolean; allRegions?: boolean; slider?: boolean }> = ({ limit, compact, hideWhenEmpty, region, registerBase, infoBase, hero, allRegions, slider }) => {
   const { settings } = useAppSettings();
   const [programs, setPrograms] = useState<AwarenessProgram[] | null>(null);
 
@@ -44,7 +45,7 @@ export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWh
       style={{ ['--d' as string]: `${Math.min(i, 8) * 70}ms` }}
       className={`anim-rise lift-card bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col ${isPast ? 'opacity-70' : ''}`}
     >
-      {p.imageUrl && (registerBase && !isPast ? <a href={`${infoBase || registerBase}${encodeURIComponent(p.id)}`}><img src={p.imageUrl} alt={p.title} className="w-full aspect-video object-contain bg-white bg-slate-100" /></a> : <img src={p.imageUrl} alt={p.title} className="w-full aspect-video object-contain bg-white bg-slate-100" />)}
+      {p.imageUrl && (registerBase && !isPast ? <a href={`${infoBase || registerBase}${encodeURIComponent(p.id)}`}><img src={p.imageUrl} alt={p.title} className="w-full h-44 object-contain bg-slate-100 zoom-slow bg-slate-100" /></a> : <img src={p.imageUrl} alt={p.title} className="w-full h-44 object-contain bg-slate-100 zoom-slow bg-slate-100" />)}
       <div className="p-5 space-y-2.5 flex-1 flex flex-col">
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-lg font-black text-slate-900 leading-snug">{p.title}</h3>
@@ -121,7 +122,7 @@ export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWh
       {hero && shown[0] && (
         <a href={registerBase ? `${infoBase || registerBase}${encodeURIComponent(shown[0].id)}` : undefined} className="block rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-xs">
           {shown[0].imageUrl ? (
-            <img src={shown[0].imageUrl} alt={shown[0].title} className="w-full aspect-video object-contain bg-white bg-slate-50" />
+            <img src={shown[0].imageUrl} alt={shown[0].title} className="w-full h-44 sm:h-52 object-contain bg-slate-50" />
           ) : (
             <div className="bg-gradient-to-r from-blue-700 to-indigo-800 text-white px-6 py-12 sm:py-16">
               <p className="text-base font-bold uppercase tracking-wider opacity-80">Next session</p>
@@ -132,7 +133,8 @@ export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWh
         </a>
       )}
       {hero && shown.length > 0 && <h2 className="text-center text-3xl font-black text-slate-900 pt-2">Upcoming Events</h2>}
-      {shown.length > 0 && <div className={`grid gap-4 ${hero ? 'sm:grid-cols-2 lg:grid-cols-3' : 'md:grid-cols-2'}`}>{shown.map((p, i) => card(p, i))}</div>}
+      {shown.length > 0 && slider && <AutoSlider items={shown.map((p, i) => card(p, i))} />}
+      {shown.length > 0 && !slider && <div className={`grid gap-4 ${hero ? 'sm:grid-cols-2 lg:grid-cols-3' : 'md:grid-cols-2'}`}>{shown.map((p, i) => card(p, i))}</div>}
       {!limit && past.length > 0 && (
         <div className="space-y-3">
           <p className="text-base font-bold text-slate-400 uppercase tracking-wider">Recently completed</p>

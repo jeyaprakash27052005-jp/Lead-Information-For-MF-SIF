@@ -216,3 +216,8 @@ button[role='radio']:not(:disabled):hover {
   margin-top: auto;
   margin-bottom: auto;
 }
+
+/* slow zoom on event posters in cards */
+@keyframes zoom-slow { from { transform: scale(1); } to { transform: scale(1.06); } }
+.zoom-slow { animation: zoom-slow 6s ease-in-out infinite alternate; }
+@media (prefers-reduced-motion: reduce) { .zoom-slow { animation: none; } }
