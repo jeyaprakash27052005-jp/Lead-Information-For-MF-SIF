@@ -122,6 +122,7 @@ export const SessionRegister: React.FC<{ programId: string; start?: string; onBa
   const reg = { id: 'registration', title: 'Registration' };
   const nav = [{ id: 'home', title: 'Home' }, ...(at >= 0 ? [...pages.slice(0, at), reg, ...pages.slice(at)] : [...pages, reg])];
   const custom = sections.find((x) => x.id === active);
+  const isBrochure = !!custom && /brochure/i.test(custom.title); // only the Download Brochure page offers a download
 
   const homeBlock = (
     <div className="space-y-4">
@@ -141,7 +142,7 @@ export const SessionRegister: React.FC<{ programId: string; start?: string; onBa
         <div className="space-y-3">
           <h2 className="text-2xl font-black text-slate-900">About the speaker:</h2>
           <div className="flex flex-col sm:flex-row gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            {program.speakerPhoto && <img src={program.speakerPhoto} alt={program.speaker || 'Speaker'} className="w-32 h-32 rounded-2xl object-cover border border-slate-200 shrink-0" />}
+            {program.speakerPhoto && <img src={program.speakerPhoto} alt={program.speaker || 'Speaker'} draggable={false} onContextMenu={(e) => e.preventDefault()} className="w-32 h-32 rounded-2xl object-cover border border-slate-200 shrink-0 select-none pointer-events-none" />}
             <div className="space-y-1">
               {program.speaker && <p className="text-xl font-black text-slate-900">{program.speaker}</p>}
               {program.speakerRole && <p className="font-bold text-indigo-800">{program.speakerRole}</p>}
@@ -157,16 +158,16 @@ export const SessionRegister: React.FC<{ programId: string; start?: string; onBa
     <div className="space-y-4">
       <h2 className="text-2xl font-black text-slate-900">{custom.title}</h2>
       {custom.body && <div className="space-y-3 text-lg text-slate-800">{custom.body.split(/\n{2,}/).map((para, i) => <p key={i} className="whitespace-pre-line">{para}</p>)}</div>}
-      {(custom.fileUrl || (custom.linkUrl && /^https:\/\//i.test(custom.linkUrl))) && (
+      {((custom.fileUrl && isBrochure) || (custom.linkUrl && /^https:\/\//i.test(custom.linkUrl))) && (
         <a
-          href={custom.fileUrl || custom.linkUrl}
-          {...(custom.fileUrl ? { download: custom.fileName || `${custom.title}.pdf` } : { target: '_blank', rel: 'noopener noreferrer' })}
+          href={(isBrochure && custom.fileUrl) || custom.linkUrl}
+          {...(custom.fileUrl && isBrochure ? { download: custom.fileName || `${custom.title}.pdf` } : { target: '_blank', rel: 'noopener noreferrer' })}
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-lg font-bold"
         >
-          {custom.fileUrl ? `Download ${custom.title.replace(/^Download\s+/i, '')}` : 'Open'}
+          {custom.fileUrl && isBrochure ? `Download ${custom.title.replace(/^Download\s+/i, '')}` : 'Open'}
         </a>
       )}
-      {!custom.body && !custom.fileUrl && !custom.linkUrl && <p className="text-lg font-bold text-amber-700">Will be updated soon</p>}
+      {!custom.body && !(custom.fileUrl && isBrochure) && !custom.linkUrl && <p className="text-lg font-bold text-amber-700">Will be updated soon</p>}
     </div>
   );
 

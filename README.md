@@ -331,3 +331,4 @@ Menu -> **Event Leads**.
 - Mutual fund adverts (admin): the form now asks for About the scheme (required), up to 10 highlights, fund manager, benchmark, expense ratio, exit load, lock-in, minimum lumpsum and extra Know more pages (Fund Manager, Portfolio, Scheme Documents, FAQ, with text, link or file). The scheme Know more page shows them.
 - Calculators no longer show the working formulas (all customer sites). The calculator page on the ads site has a Back button (returns to the page it was opened from, for example the scheme page).
 - Know more pages (event and scheme): larger text (about 18 px body, bigger headings and menu).
+- Know more pages: only a page whose name contains Brochure (Download Brochure) offers a file download; other pages show text and links only. The speaker photo is display only (no drag or right-click save).

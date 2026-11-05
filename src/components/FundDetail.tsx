@@ -114,14 +114,14 @@ export const FundDetail: React.FC<{ adId: string; onHome: () => void; onAll: () 
               <h2 className="text-2xl font-black text-slate-900">{custom.title}:</h2>
               {custom.body && (custom.body.split(/\n{2,}/).map((para, i) => <p key={i} className="text-slate-800 whitespace-pre-line">{para}</p>))}
               <div className="flex flex-wrap gap-3">
-                {custom.fileUrl && (
+                {custom.fileUrl && /brochure/i.test(custom.title) && (
                   <a href={custom.fileUrl} download={custom.fileName || `${custom.title}`} className="btn-glow px-5 py-2.5 rounded-xl bg-indigo-800 hover:bg-indigo-900 text-white font-bold">Download {custom.fileName || 'file'}</a>
                 )}
                 {custom.linkUrl && /^https:\/\//i.test(custom.linkUrl) && (
                   <a href={custom.linkUrl} target="_blank" rel="noopener noreferrer" className="btn-glow inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-indigo-800 hover:bg-indigo-900 text-white font-bold">Open link <ExternalLink className="w-4 h-4" /></a>
                 )}
               </div>
-              {!custom.body && !custom.fileUrl && !custom.linkUrl && <p className="font-bold text-amber-700">Will be updated soon</p>}
+              {!custom.body && !(custom.fileUrl && /brochure/i.test(custom.title)) && !custom.linkUrl && <p className="font-bold text-amber-700">Will be updated soon</p>}
             </>
           )}
           {active === 'calc' && (
