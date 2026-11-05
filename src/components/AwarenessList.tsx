@@ -43,12 +43,12 @@ export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWh
     <article
       key={p.id}
       style={{ ['--d' as string]: `${Math.min(i, 8) * 70}ms` }}
-      className={`anim-rise lift-card bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col ${isPast ? 'opacity-70' : ''}`}
+      className={`anim-rise lift-card bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col w-full ${isPast ? 'opacity-70' : ''}`}
     >
-      {p.imageUrl && (registerBase && !isPast ? <a href={`${infoBase || registerBase}${encodeURIComponent(p.id)}`}><img src={p.imageUrl} alt={p.title} className="w-full h-48 sm:h-60 object-contain bg-slate-100 zoom-slow bg-slate-100" /></a> : <img src={p.imageUrl} alt={p.title} className="w-full h-48 sm:h-60 object-contain bg-slate-100 zoom-slow bg-slate-100" />)}
+      {p.imageUrl && (registerBase && !isPast ? <a href={`${infoBase || registerBase}${encodeURIComponent(p.id)}`}><img src={p.imageUrl} alt={p.title} className="w-full h-40 object-contain bg-slate-100 zoom-slow" /></a> : <img src={p.imageUrl} alt={p.title} className="w-full h-40 object-contain bg-slate-100 zoom-slow" />)}
       <div className="p-5 space-y-2.5 flex-1 flex flex-col">
       <div className="flex items-start justify-between gap-3">
-        <h3 className="text-lg font-black text-slate-900 leading-snug">{p.title}</h3>
+        <h3 className="text-lg font-black text-slate-900 leading-snug line-clamp-2">{p.title}</h3>
         <span
           className={`shrink-0 px-2 py-0.5 rounded-full text-base font-bold border ${
             p.mode === 'online' ? 'bg-sky-50 text-sky-700 border-sky-200' : 'bg-amber-50 text-amber-800 border-amber-200'
@@ -69,7 +69,7 @@ export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWh
         </p>
       )}
       {p.maxRegistrations ? <p className="text-base font-bold text-amber-700">Limited seats: {p.maxRegistrations}</p> : null}
-      {!compact && p.description && <p className="text-base text-slate-600 whitespace-pre-line">{p.description}</p>}
+      {!compact && p.description && <p className="text-base text-slate-600 line-clamp-3">{p.description}</p>}
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-base text-slate-500 font-semibold">
         {p.mode === 'offline' && p.venue && (
           <span className="flex items-center gap-1">
@@ -134,11 +134,11 @@ export const AwarenessList: React.FC<{ limit?: number; compact?: boolean; hideWh
       )}
       {hero && shown.length > 0 && <h2 className="text-center text-3xl font-black text-slate-900 pt-2">Upcoming Events</h2>}
       {shown.length > 0 && slider && <AutoSlider items={shown.map((p, i) => card(p, i))} />}
-      {shown.length > 0 && !slider && <div className={`grid gap-4 ${hero ? 'grid-cols-[repeat(auto-fit,minmax(18rem,1fr))]' : 'grid-cols-[repeat(auto-fit,minmax(18rem,1fr))]'}`}>{shown.map((p, i) => card(p, i))}</div>}
+      {shown.length > 0 && !slider && <div className={`grid gap-4 ${hero ? 'grid-cols-[repeat(auto-fill,minmax(19rem,22rem))]' : 'grid-cols-[repeat(auto-fill,minmax(19rem,22rem))]'}`}>{shown.map((p, i) => card(p, i))}</div>}
       {!limit && past.length > 0 && (
         <div className="space-y-3">
           <p className="text-base font-bold text-slate-400 uppercase tracking-wider">Recently completed</p>
-          <div className="grid gap-4 grid-cols-[repeat(auto-fit,minmax(18rem,1fr))]">{past.map((p, i) => card(p, i, true))}</div>
+          <div className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(19rem,22rem))]">{past.map((p, i) => card(p, i, true))}</div>
         </div>
       )}
     </div>

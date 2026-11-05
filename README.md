@@ -332,3 +332,4 @@ Menu -> **Event Leads**.
 - Calculators no longer show the working formulas (all customer sites). The calculator page on the ads site has a Back button (returns to the page it was opened from, for example the scheme page).
 - Know more pages (event and scheme): larger text (about 18 px body, bigger headings and menu).
 - Know more pages: only a page whose name contains Brochure (Download Brochure) offers a file download; other pages show text and links only. The speaker photo is display only (no drag or right-click save).
+- Upcoming event and fund cards have a standard size: short poster, title in 2 lines, description in 3 lines; the full text is on the Know more page.

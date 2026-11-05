@@ -14,8 +14,8 @@ export const AutoSlider: React.FC<{ items: React.ReactNode[] }> = ({ items }) =>
     return () => window.removeEventListener('resize', on);
   }, []);
   const n = items.length;
-  // fewer cards than places: the cards share the whole width, no empty space
-  const shownPer = Math.max(1, Math.min(per, n));
+  // every card keeps the same standard size
+  const shownPer = per;
   const last = Math.max(0, n - shownPer);
   useEffect(() => {
     if (start > last) setStart(0);
