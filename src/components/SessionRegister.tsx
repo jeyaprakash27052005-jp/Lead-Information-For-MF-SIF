@@ -122,7 +122,23 @@ export const SessionRegister: React.FC<{ programId: string; start?: string; onBa
   const reg = { id: 'registration', title: 'Registration' };
   const nav = [{ id: 'home', title: 'Home' }, ...(at >= 0 ? [...pages.slice(0, at), reg, ...pages.slice(at)] : [...pages, reg])];
   const custom = sections.find((x) => x.id === active);
+  const isSpeakers = !!custom && /speaker/i.test(custom.title); // the Speakers page shows the speaker details added with the event
   const isBrochure = !!custom && /brochure/i.test(custom.title); // only the Download Brochure page offers a download
+
+  const hasSpeaker = !!(program.speakerBio || program.speakerPhoto || program.speakerRole || program.speaker);
+  const speakerBlock = (
+    <div className="space-y-3">
+          <h2 className="text-2xl font-black text-slate-900">About the speaker:</h2>
+          <div className="flex flex-col sm:flex-row gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            {program.speakerPhoto && <img src={program.speakerPhoto} alt={program.speaker || 'Speaker'} draggable={false} onContextMenu={(e) => e.preventDefault()} className="w-32 h-32 rounded-2xl object-cover border border-slate-200 shrink-0 select-none pointer-events-none" />}
+            <div className="space-y-1">
+              {program.speaker && <p className="text-xl font-black text-slate-900">{program.speaker}</p>}
+              {program.speakerRole && <p className="font-bold text-indigo-800">{program.speakerRole}</p>}
+              {program.speakerBio && <p className="text-lg text-slate-800 whitespace-pre-line">{program.speakerBio}</p>}
+            </div>
+          </div>
+        </div>
+  );
 
   const homeBlock = (
     <div className="space-y-4">
@@ -138,25 +154,14 @@ export const SessionRegister: React.FC<{ programId: string; start?: string; onBa
         {program.isPaid && <Row k="Fee">₹{program.fee}{program.freeFirst ? ` (first ${program.freeFirst} registrations are free)` : ''}</Row>}
         {seatsLeft !== null && <Row k="Seats">{seatsLeft} of {program.maxRegistrations} left</Row>}
       </dl>
-      {(program.speakerBio || program.speakerPhoto || program.speakerRole) && (
-        <div className="space-y-3">
-          <h2 className="text-2xl font-black text-slate-900">About the speaker:</h2>
-          <div className="flex flex-col sm:flex-row gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            {program.speakerPhoto && <img src={program.speakerPhoto} alt={program.speaker || 'Speaker'} draggable={false} onContextMenu={(e) => e.preventDefault()} className="w-32 h-32 rounded-2xl object-cover border border-slate-200 shrink-0 select-none pointer-events-none" />}
-            <div className="space-y-1">
-              {program.speaker && <p className="text-xl font-black text-slate-900">{program.speaker}</p>}
-              {program.speakerRole && <p className="font-bold text-indigo-800">{program.speakerRole}</p>}
-              {program.speakerBio && <p className="text-lg text-slate-800 whitespace-pre-line">{program.speakerBio}</p>}
-            </div>
-          </div>
-        </div>
-      )}
+      {hasSpeaker && speakerBlock}
     </div>
   );
 
   const customBlock = custom && (
     <div className="space-y-4">
       <h2 className="text-2xl font-black text-slate-900">{custom.title}</h2>
+      {isSpeakers && hasSpeaker && speakerBlock}
       {custom.body && <div className="space-y-3 text-lg text-slate-800">{custom.body.split(/\n{2,}/).map((para, i) => <p key={i} className="whitespace-pre-line">{para}</p>)}</div>}
       {((custom.fileUrl && isBrochure) || (custom.linkUrl && /^https:\/\//i.test(custom.linkUrl))) && (
         <a
@@ -167,7 +172,7 @@ export const SessionRegister: React.FC<{ programId: string; start?: string; onBa
           {custom.fileUrl && isBrochure ? `Download ${custom.title.replace(/^Download\s+/i, '')}` : 'Open'}
         </a>
       )}
-      {!custom.body && !(custom.fileUrl && isBrochure) && !custom.linkUrl && <p className="text-lg font-bold text-amber-700">Will be updated soon</p>}
+      {!custom.body && !(isSpeakers && hasSpeaker) && !(custom.fileUrl && isBrochure) && !custom.linkUrl && <p className="text-lg font-bold text-amber-700">Will be updated soon</p>}
     </div>
   );
 

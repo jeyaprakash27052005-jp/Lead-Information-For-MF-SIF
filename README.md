@@ -333,3 +333,4 @@ Menu -> **Event Leads**.
 - Know more pages (event and scheme): larger text (about 18 px body, bigger headings and menu).
 - Know more pages: only a page whose name contains Brochure (Download Brochure) offers a file download; other pages show text and links only. The speaker photo is display only (no drag or right-click save).
 - Upcoming event and fund cards have a standard size: short poster, title in 2 lines, description in 3 lines; the full text is on the Know more page.
+- Event Know more: the speaker photo, name, designation and full details also show on the Speakers page (and on Home).
