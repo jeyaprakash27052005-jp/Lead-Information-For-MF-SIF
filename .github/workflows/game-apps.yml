@@ -1,0 +1,111 @@
+name: Game apps (Windows, Mac, Android, iOS)
+
+# Builds the Investment Business game for all four platforms.
+# Run it from the Actions tab ("Run workflow"), or push a tag like game-v1.0.0
+# to also publish a GitHub Release with every download attached.
+on:
+  workflow_dispatch:
+  push:
+    tags: ["game-v*"]
+    paths: ["apps/game/**", ".github/workflows/game-apps.yml"]
+    branches: ["**"]
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    working-directory: apps/game
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: apps/game/package-lock.json }
+      - run: npm ci
+      - run: npm run build:win
+        env: { CSC_IDENTITY_AUTO_DISCOVERY: "false" }
+      - uses: actions/upload-artifact@v4
+        with: { name: windows, path: "apps/game/release/*.exe", if-no-files-found: error }
+
+  mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: apps/game/package-lock.json }
+      - run: npm ci
+      - run: npm run build:mac
+        env: { CSC_IDENTITY_AUTO_DISCOVERY: "false" }
+      - uses: actions/upload-artifact@v4
+        with: { name: mac, path: "apps/game/release/*.dmg", if-no-files-found: error }
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: apps/game/package-lock.json }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - run: npm ci
+      - run: npm run android:add
+      - name: Build APK (test install)
+        run: cd android && ./gradlew assembleDebug && cp app/build/outputs/apk/debug/app-debug.apk ../release-android-test.apk
+      - name: Build signed APK and AAB for Play Store (only if the keystore secrets are set)
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KS_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        if: env.KS_B64 != ''
+        run: |
+          echo "$KS_B64" | base64 -d > release.keystore
+          npx cap build android --keystorepath "$PWD/release.keystore" --keystorepass "$KS_PASS" --keystorealias "$KS_ALIAS" --keystorealiaspass "$KEY_PASS" --androidreleasetype APK
+          npx cap build android --keystorepath "$PWD/release.keystore" --keystorepass "$KS_PASS" --keystorealias "$KS_ALIAS" --keystorealiaspass "$KEY_PASS" --androidreleasetype AAB
+          find android/app/build/outputs -name "*release*.apk" -exec cp {} release-android.apk \;
+          find android/app/build/outputs -name "*release*.aab" -exec cp {} release-android-playstore.aab \;
+          rm release.keystore
+      - uses: actions/upload-artifact@v4
+        with: { name: android, path: "apps/game/release-android*", if-no-files-found: error }
+
+  ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: apps/game/package-lock.json }
+      - run: npm ci
+      - run: npm run ios:add
+      - name: Build unsigned iPhone app
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath ios-build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build
+          mkdir -p Payload && cp -R ios-build/Build/Products/Release-iphoneos/App.app Payload/
+          zip -qr Investment-Business-ios-unsigned.ipa Payload
+      - name: Zip the Xcode project (open on a Mac to sign and send to the App Store)
+        run: zip -qr Investment-Business-ios-xcode-project.zip ios -x "ios/App/Pods/*"
+      - uses: actions/upload-artifact@v4
+        with: { name: ios, path: "apps/game/Investment-Business-ios-*", if-no-files-found: error }
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/game-v')
+    needs: [windows, mac, android, ios]
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: . } }
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: out, merge-multiple: true }
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: Investment Business ${{ github.ref_name }}
+          files: out/*
+          body: |
+            Downloads for the Investment Business game:
+            - Windows laptop: Investment-Business-Setup-*.exe (installer) or Investment-Business-Portable-*.exe (no install)
+            - Mac: Investment-Business-*-mac.dmg (first time: right-click the app, then Open)
+            - Android: release-android-test.apk (or release-android.apk when signed)
+            - iPhone / iPad: install from the web link (Share, then Add to Home Screen). The .ipa and Xcode project are for App Store submission.

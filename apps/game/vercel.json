@@ -1,0 +1,9 @@
+{
+  "installCommand": "echo no install needed",
+  "buildCommand": "echo no build needed",
+  "outputDirectory": "www",
+  "framework": null,
+  "headers": [
+    { "source": "/sw.js", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "name": "investment-business-game",
+  "productName": "Investment Business",
+  "version": "1.0.0",
+  "description": "Investment Business: a money-habits board game by Mcube Academy",
+  "author": "Mcube Academy",
+  "private": true,
+  "main": "electron/main.cjs",
+  "scripts": {
+    "web": "npx --yes serve www",
+    "desktop": "electron .",
+    "build:win": "electron-builder --win --publish never",
+    "build:mac": "electron-builder --mac --publish never",
+    "build:linux": "electron-builder --linux --publish never",
+    "android:add": "cap add android && capacitor-assets generate --android && cap sync android",
+    "ios:add": "cap add ios && capacitor-assets generate --ios && cap sync ios",
+    "sync": "cap sync",
+    "android:open": "cap open android",
+    "ios:open": "cap open ios"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/assets": "^4.0.0",
+    "@capacitor/cli": "^8.6.0",
+    "@capacitor/core": "^8.6.0",
+    "@capacitor/filesystem": "^8.1.5",
+    "@capacitor/ios": "^8.6.0",
+    "@capacitor/share": "^8.0.3",
+    "electron": "^45.2.3",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "com.mcubeacademy.investmentbusiness",
+    "productName": "Investment Business",
+    "copyright": "Mcube Academy",
+    "directories": {
+      "output": "release",
+      "buildResources": "resources"
+    },
+    "files": [
+      "electron/**",
+      "www/**",
+      "resources/icon.png",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "resources/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "artifactName": "Investment-Business-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "Investment-Business-Portable-${version}.${ext}"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "category": "public.app-category.education",
+      "icon": "resources/icon.png",
+      "artifactName": "Investment-Business-${version}-mac.${ext}"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Education"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jeyaprakash27052005-jp/Lead-Information-For-MF-SIF"
+  }
+}
