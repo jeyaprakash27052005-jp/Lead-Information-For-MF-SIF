@@ -9,9 +9,9 @@
   "scripts": {
     "web": "npx --yes serve www",
     "desktop": "electron .",
-    "build:win": "electron-builder --win",
-    "build:mac": "electron-builder --mac",
-    "build:linux": "electron-builder --linux",
+    "build:win": "electron-builder --win --publish never",
+    "build:mac": "electron-builder --mac --publish never",
+    "build:linux": "electron-builder --linux --publish never",
     "android:add": "cap add android && capacitor-assets generate --android && cap sync android",
     "ios:add": "cap add ios && capacitor-assets generate --ios && cap sync ios",
     "sync": "cap sync",
