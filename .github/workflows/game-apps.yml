@@ -91,21 +91,56 @@ jobs:
       - uses: actions/upload-artifact@v4
         with: { name: ios, path: "apps/game/Investment-Business-ios-*", if-no-files-found: error }
 
-  release:
-    if: startsWith(github.ref, 'refs/tags/game-v')
+  # Puts every install file in its own folder with install steps:
+  # Investment-Business-Downloads/1-Windows-Laptop, 2-Mac, 3-Android, 4-iPhone-iPad
+  downloads:
     needs: [windows, mac, android, ios]
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: . } }
     steps:
+      - uses: actions/checkout@v4
+        with: { sparse-checkout: apps/game/install }
       - uses: actions/download-artifact@v4
-        with: { path: out, merge-multiple: true }
+        with: { path: built }
+      - name: Sort files into one folder per device
+        run: |
+          D=Investment-Business-Downloads
+          cp -R apps/game/install "$D"
+          cp built/windows/*.exe "$D/1-Windows-Laptop/"
+          cp built/mac/*.dmg "$D/2-Mac/"
+          if [ -f built/android/release-android.apk ]; then
+            cp built/android/release-android.apk "$D/3-Android/Investment-Business-Android.apk"
+          else
+            cp built/android/release-android-test.apk "$D/3-Android/Investment-Business-Android.apk"
+          fi
+          if [ -f built/android/release-android-playstore.aab ]; then
+            mkdir -p "$D/3-Android/for-Play-Store"
+            cp built/android/release-android-playstore.aab "$D/3-Android/for-Play-Store/Investment-Business-PlayStore.aab"
+          fi
+          cp built/ios/* "$D/4-iPhone-iPad/"
+          mkdir zips
+          for f in "$D"/*/; do n=$(basename "$f"); (cd "$D" && zip -qr "../zips/Investment-Business-$n.zip" "$n" README.txt); done
+          find "$D" -type f | sort
+      - uses: actions/upload-artifact@v4
+        with: { name: Investment-Business-Downloads, path: Investment-Business-Downloads, if-no-files-found: error }
+      - uses: actions/upload-artifact@v4
+        with: { name: zips, path: zips, retention-days: 7 }
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/game-v')
+    needs: [downloads]
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: . } }
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: zips, path: zips }
       - uses: softprops/action-gh-release@v2
         with:
           name: Investment Business ${{ github.ref_name }}
-          files: out/*
+          files: zips/*.zip
           body: |
-            Downloads for the Investment Business game:
-            - Windows laptop: Investment-Business-Setup-*.exe (installer) or Investment-Business-Portable-*.exe (no install)
-            - Mac: Investment-Business-*-mac.dmg (first time: right-click the app, then Open)
-            - Android: release-android-test.apk (or release-android.apk when signed)
-            - iPhone / iPad: install from the web link (Share, then Add to Home Screen). The .ipa and Xcode project are for App Store submission.
+            Download the zip for your device. Each one has the install file and HOW-TO-INSTALL.txt.
+            - Windows laptop / PC: Investment-Business-1-Windows-Laptop.zip
+            - Mac: Investment-Business-2-Mac.zip
+            - Android: Investment-Business-3-Android.zip
+            - iPhone / iPad: Investment-Business-4-iPhone-iPad.zip (install from the web link: Safari > Share > Add to Home Screen)

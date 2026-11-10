@@ -16,7 +16,18 @@ The game works offline on every device. Leads are saved on the device the game i
 GitHub builds everything for you.
 
 1. On GitHub open **Actions > Game apps (Windows, Mac, Android, iOS) > Run workflow**.
-2. When it finishes (about 15 minutes), open the run and download **windows**, **mac**, **android** and **ios** at the bottom of the page.
+2. When it finishes (about 15 minutes), open the run and download **Investment-Business-Downloads** at the bottom of the page. It has one folder per device, each with the install file and a `HOW-TO-INSTALL.txt`:
+
+```
+Investment-Business-Downloads/
+  README.txt
+  1-Windows-Laptop/   Investment-Business-Setup-1.0.0.exe, Investment-Business-Portable-1.0.0.exe
+  2-Mac/              Investment-Business-1.0.0-mac.dmg
+  3-Android/          Investment-Business-Android.apk  (and for-Play-Store/ .aab when signed)
+  4-iPhone-iPad/      Xcode project and unsigned .ipa (players install from the web link)
+```
+
+The install steps for each folder are kept in `install/` here; edit them there.
 
 To publish a download page with all files attached, create a tag:
 
@@ -28,7 +39,7 @@ git tag game-v1.0.0
 git push origin game-v1.0.0
 ```
 
-The files then appear under **Releases** on GitHub. Share that link with players.
+The Releases page on GitHub then has one zip per device (`Investment-Business-1-Windows-Laptop.zip`, `-2-Mac.zip`, `-3-Android.zip`, `-4-iPhone-iPad.zip`). Share that link with players.
 
 ## 2. Web link (also the iPhone install)
 
