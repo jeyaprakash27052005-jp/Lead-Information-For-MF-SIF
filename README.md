@@ -11,6 +11,10 @@ One repository, four separate websites that share the same code and the same onl
 
 Shared code lives in `src/` (components, services, utils). Each website has its own `vercel.json`.
 
+## Investment Business game (Windows, Mac, Android, iPhone)
+
+The board game in `apps/game` can be downloaded as a Windows `.exe`, a Mac `.dmg` and an Android `.apk`, and installed on iPhone from its web link. GitHub builds the files: **Actions > Game apps > Run workflow**. Full steps are in `apps/game/README.md`.
+
 ## Deploy on Vercel (three projects from this one repo)
 
 Create four Vercel projects from this repository and set **Root Directory** for each one:

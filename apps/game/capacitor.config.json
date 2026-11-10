@@ -1,0 +1,8 @@
+{
+  "appId": "com.mcubeacademy.investmentbusiness",
+  "appName": "Investment Business",
+  "webDir": "www",
+  "backgroundColor": "#fbfbf8",
+  "android": { "allowMixedContent": false },
+  "ios": { "contentInset": "never" }
+}

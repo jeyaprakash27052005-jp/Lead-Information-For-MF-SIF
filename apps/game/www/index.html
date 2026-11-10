@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Investment Business by Mcube Academy</title>
+<meta name="theme-color" content="#5B3FD0">
+<meta name="description" content="A money-habits board game by Mcube Academy.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Investment Business">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>
+:root{--bg:#fbfbf8;--fg:#1d2220;--mut:#5f655f;--bd:#cfd2c8;--card:#f1f2ec;--ac:#5B3FD0;--acfg:#fff;--mid:rgba(255,255,255,.72);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#181a19;--fg:#ece9e0;--mut:#a8aca3;--bd:#3d423e;--card:#232624;--ac:#9B87F5;--acfg:#14102e;--mid:rgba(24,26,25,.72)}}
+:root[data-theme="dark"]{--bg:#181a19;--fg:#ece9e0;--mut:#a8aca3;--bd:#3d423e;--card:#232624;--ac:#9B87F5;--acfg:#14102e;--mid:rgba(24,26,25,.72)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#app{max-width:480px;margin:0 auto;padding:14px 12px 28px}
+h1{font:700 26px/1.15 Georgia,serif;margin:6px 0 4px}
+h3{font:700 17px Georgia,serif;margin:18px 0 6px}
+.sub,.foot{color:var(--mut);font-size:14px}
+.board{display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(6,1fr);aspect-ratio:1/1;width:100%;gap:2px;background:#E4DFF7;padding:3px;border-radius:12px}
+.sq{position:relative;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:5px 2px 2px;text-align:center;font-size:10.5px;line-height:1.15;min-width:0;overflow:hidden;box-shadow:inset 0 -3px 0 rgba(0,0,0,.07)}
+.sq b{font-weight:700}
+.g{background:#C9F0D8;color:#0B4A2A}.r{background:#FFD3D3;color:#7A1212}.c{background:#FFEBA6;color:#5A3A00}.n{background:#D2E2FF;color:#12397D}
+.tk{position:absolute;bottom:2px;left:0;right:0;display:flex;justify-content:center;gap:2px}
+.tk i{width:11px;height:11px;border-radius:50%;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.4)}
+.mid{grid-area:2/2/6/6;position:relative;overflow:hidden;background:var(--mid);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;padding:4px}
+.mid>*{position:relative;z-index:1}.mid::before,.mid::after{position:absolute;bottom:2px;font-size:58px;line-height:1;opacity:.45;z-index:0}.mid::before{content:'\1F402';left:3px}.mid::after{content:'\1F43B';right:3px}.logo{display:block;width:120px;height:auto;border-radius:10px}.mid .logo{width:76px}
+.who{font-weight:700;font-size:14px}
+.dice{width:46px;height:46px;border:2px solid var(--fg);border-radius:10px;display:flex;align-items:center;justify-content:center;font:700 24px Georgia,serif}
+button{font:700 15px system-ui,sans-serif;border:0;border-radius:10px;padding:10px 16px;background:var(--ac);color:var(--acfg);cursor:pointer;min-height:44px}
+button:disabled{opacity:.45}
+button.alt{background:transparent;color:var(--fg);border:1.5px solid var(--bd)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
+.msg{margin-top:12px;border:1.5px solid var(--bd);border-left:7px solid #3E6FD8;border-radius:10px;padding:10px 12px;min-height:84px;background:var(--card)}
+.msg.g{border-left-color:#1E9E62}.msg.r{border-left-color:#E04848}.msg.c{border-left-color:#F5B31B}
+.msg{display:flex;gap:12px;align-items:flex-start}.msg .em{font-size:44px;line-height:1.1;flex:none}.msg h2{font:700 20px Georgia,serif;margin:0 0 4px}.msg p{margin:0 0 5px;font-size:16px;line-height:1.4}.msg p b{font-weight:700}
+.score{margin-top:12px;display:grid;gap:6px}
+.pl{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px solid var(--bd);border-radius:10px;font-size:15px}
+.pl.on{border-color:var(--ac);background:var(--card)}
+.pl i{width:14px;height:14px;border-radius:50%;flex:none}
+.pl span{margin-left:auto;color:var(--mut);font-size:13px;text-align:right}
+.pick{display:flex;gap:8px;margin:10px 0 16px}
+.rules{padding-left:20px;font-size:15px}
+.cc{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:13.5px;line-height:1.3}
+.cc div{display:flex;gap:6px}.cc b{flex:none;min-width:58px}
+.p{color:#1E9E62}.m{color:#E04848}.a{color:#B7791F}
+@media (prefers-color-scheme:dark){.p{color:#5fd49a}.m{color:#ff8a8a}.a{color:#F5B31B}}
+label{display:block;font-weight:600;font-size:14px;margin:10px 0 3px}
+input[type=text],input[type=tel],input[type=email]{width:100%;font:16px system-ui;padding:10px;border:1.5px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--fg)}
+.ck{display:flex;gap:8px;align-items:flex-start;font-weight:400;font-size:13.5px}
+.ck input{margin-top:4px;width:18px;height:18px;flex:none}
+.err{color:#E04848;font-weight:600;font-size:14px;margin:8px 0;min-height:20px}
+.lead{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}.lead td,.lead th{border-bottom:1px solid var(--bd);padding:4px;text-align:left}
+.no{flex:none;width:20px;height:20px;border-radius:50%;background:var(--ac);color:var(--acfg);font:700 11px/20px system-ui;text-align:center;font-style:normal}
+.win{text-align:center;border-radius:14px;padding:16px;margin-top:12px;background:linear-gradient(#FFF3C4,#FFE08A);color:#4a3200;border:2px solid #E5B100}.win .tr{font-size:64px;line-height:1}.win h2{font:700 22px Georgia,serif;margin:4px 0}.win .big{font:700 26px Georgia,serif;margin:0}.win p{margin:4px 0}
+.prod{padding:0;list-style:none;margin:6px 0}.prod li{padding:8px 10px;border:1.5px solid var(--bd);border-radius:10px;margin-bottom:6px;font-size:15px}
+.slog{border-left:6px solid var(--ac);background:var(--card);border-radius:10px;padding:6px 12px}.slog p{margin:8px 0;font-size:15px}
+a.btn{display:inline-block;background:var(--ac);color:var(--acfg);padding:11px 16px;border-radius:10px;font-weight:700;text-decoration:none}
+</style></head>
+<body><div id="app"></div>
+<script>
+var LAPS=2,CASH=100000,COL=["#D85A30","#378ADD","#1D9E75","#7F77DD"],db=null,isEd=false,R={};
+var MEM={},LK="mcube_leads_v1",PIN="2026";
+function ld(){try{return JSON.parse(localStorage.getItem(LK)||"[]")}catch(e){try{return JSON.parse(MEM[LK]||"[]")}catch(x){return[]}}}
+function sv(a){var t=JSON.stringify(a);try{localStorage.setItem(LK,t)}catch(e){}MEM[LK]=t}
+function persist(){try{localStorage.setItem("mc_t","1");localStorage.removeItem("mc_t");return true}catch(e){return false}}
+var LOGO='<img class="logo" alt="Mcube Academy" src="data:image/jpeg;base64,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">';
+var SQA=[
+{n:"START",a:0,t:"n",l:"Each time you pass START you get ₹2,000, like a monthly saving. Saving regularly adds up."},
+{n:"Save monthly",a:5000,t:"g",l:"A SIP means putting a fixed small amount into a mutual fund every month. Start early and stay regular."},
+{n:"Chance A",t:"c",d:"A"},
+{n:"Bank deposit",a:1000,t:"n",l:"A fixed deposit (FD) keeps money safe and earns steady interest, but usually grows less. Good for short-term needs."},
+{n:"Card debt",a:-2000,t:"r",l:"Unpaid credit card bills charge very high interest. Pay the full bill every month."},
+{n:"Market falls",a:-3000,t:"r",l:"Share prices go down at times. Stay calm and stick to your plan."},
+{n:"Gold",a:2000,t:"g",l:"Gold can hold its value when other things fall."},
+{n:"Chance A",t:"c",d:"A"},
+{n:"Costs rise",a:-1500,t:"r",l:"Prices go up every year (inflation), so money lying idle buys less over time."},
+{n:"Health cover",a:1500,t:"g",l:"Health insurance pays big hospital bills, so your savings stay safe."},
+{n:"Rainy day fund",a:500,t:"n",l:"Keep 3 to 6 months of expenses aside for emergencies."},
+{n:"Shares",a:4000,t:"g",l:"Buying shares means owning a small part of a company. They can grow more over many years, but go up and down."},
+{n:"Sold in fear",a:-2000,t:"r",l:"Selling when prices fall turns a temporary loss into a real one. Be patient."},
+{n:"Chance B",t:"c",d:"B"},
+{n:"Save tax",a:1500,t:"g",l:"Some savings schemes reduce the tax you pay, so more money stays with you."},
+{n:"Goal done",a:8000,t:"g",l:"Saving for a clear goal, like a house or education, keeps you going."},
+{n:"Spread it",a:1500,t:"g",l:"Don’t keep all your money in one place. Spreading it (diversification) cushions a fall."},
+{n:"Late start",a:-1000,t:"r",l:"Starting late means less time to grow. The earlier, the better."},
+{n:"Save more",a:2000,t:"g",l:"Raise your monthly saving when your income grows to reach goals faster."},
+{n:"Chance B",t:"c",d:"B"}];
+var XA={"START":["🏁","Every time you pass START you get ₹2,000, like your monthly saving.","Saving a little every month adds up."],
+"Save monthly":["🗓️","You put a fixed amount, like ₹500, into a mutual fund every month. This is called a SIP.","Start early and never skip."],
+"Bank deposit":["🏦","You keep money in the bank for a fixed time and get fixed interest. This is called an FD.","Very safe, but it grows slowly."],
+"Card debt":["💳","You did not pay your credit card bill on time, so the bank charges you extra interest.","Pay the full bill every month."],
+"Market falls":["📉","Share prices went down for a while, so your money is worth less today.","Prices often come back, so stay calm."],
+"Gold":["🪙","You bought gold. Gold often keeps its value when other things fall.","Keep a small part of your money in gold."],
+"Costs rise":["🏷️","Things cost more every year (this is called inflation), so the same money buys less.","Money kept idle slowly loses value."],
+"Health cover":["🏥","You have health insurance, so the insurance company pays big hospital bills.","Insurance protects your savings."],
+"Rainy day fund":["☂️","You keep money aside for emergencies like a job loss or a hospital bill.","Keep 3 to 6 months of expenses ready."],
+"Shares":["📈","You bought a small part of a company. If the company grows, your money can grow too.","Prices go up and down, so give it many years."],
+"Sold in fear":["😨","Prices fell and you sold in a hurry. A small loss became a real loss.","Do not sell just because you are scared."],
+"Save tax":["🧾","You put money in a tax-saving scheme, so you pay less income tax.","Plan your tax early in the year."],
+"Goal done":["🏠","You saved for a goal, like a house or your child’s education, and you reached it.","A clear goal keeps you saving."],
+"Spread it":["🧺","You put your money in different places: shares, gold and bank. This is called diversification.","If one falls, the others protect you."],
+"Late start":["⏳","You started saving late, so your money had less time to grow.","The best time to start is today."],
+"Save more":["🪜","You raised your monthly saving because your salary went up.","Save a bit more each year."]};
+var PROD='<h3>Learn finance with Mcube Academy</h3><p class="sub">Transforming learners into finance professionals</p><ul class="prod"><li>📊 <b>Mutual Fund Distribution</b> (NISM Series V-A)</li><li>📉 <b>Derivatives</b>: trading and risk management (NISM Series VIII)</li><li>🧭 <b>Investment Advisory</b> (NISM Series X-A and X-B)</li><li>🔎 <b>Equity Research</b> (NISM Series XV)</li><li>🏦 <b>Investment Banking</b> and financial services courses</li><li>🎓 <b>Career guidance and mentoring</b></li><li>📚 Also: equity, debt, forex and commodity training, MF, SIF, PMS and AIF learning, NISM 5D and 21</li></ul><p><a class="btn" href="https://mcubeacademy.com" target="_blank" rel="noopener" onclick="return ext(this.href)">Visit mcubeacademy.com</a></p>';
+var MODE="adult",BONUS=2000,LR=1,SQ,X,DK;
+var DKA={A:[
+{t:"Rainy-day money helped",a:2000,e:"☂️",l:"A surprise bill came, but you had savings."},
+{t:"Started saving early",a:3000,e:"🌱",l:"Time is your biggest ally."},
+{t:"Spread your money",a:2500,e:"🧺",l:"One investment fell, the others cushioned it."},
+{t:"Followed a tip blindly",a:-2500,e:"🤫",l:"You invested without checking."},
+{t:"Sold in fear",a:-2000,e:"😨",l:"You turned a temporary loss into a real one."},
+{t:"Review your goals",a:0,e:"🎯",act:"again",l:"Name one goal: house, education or retirement. Roll again!"}],
+B:[
+{t:"Stayed patient",a:3000,e:"🧘",l:"You ignored the noise and held on."},
+{t:"Saved more monthly",a:2000,e:"🪜",l:"You raised your SIP as your income grew."},
+{t:"Insurance helped",a:1500,e:"🏥",l:"A medical bill was covered, so savings stayed safe."},
+{t:"No rainy-day money",a:-2000,e:"💸",l:"You had to break an investment early."},
+{t:"Skipped monthly saving",a:-1000,e:"⏭️",l:"Waiting for the “perfect time” costs you."},
+{t:"Share a tip",a:0,e:"💬",act:"move2",l:"Tell the group one money habit you follow. Move 2 squares ahead."}]};
+var DKK={A:[
+{t:"Grandma’s gift",a:300,e:"🎁",l:"Grandma gave you money. Say thanks and save some!"},
+{t:"Piggy bank saved the day",a:200,e:"🐷",l:"You needed money for a school trip, and you had savings."},
+{t:"Learned about money",a:100,e:"📚",l:"You read a money story. Knowing more helps you choose well."},
+{t:"Spent it all on sweets",a:-200,e:"🍭",l:"The sweets finished in minutes. Think before you spend."},
+{t:"Lost your money",a:-150,e:"😢",l:"You left coins lying around. Keep them safe in a piggy bank."},
+{t:"Share a smile",a:0,e:"💬",act:"again",l:"Tell the group your favourite way to save. Roll again!"}]};
+var SQK=[
+{n:"START",a:0,t:"n"},{n:"Piggy bank",a:300,t:"g"},{n:"Chance",t:"c",d:"A"},{n:"Kids bank",a:100,t:"n"},
+{n:"Too many toys",a:-200,t:"r"},{n:"Lost coins",a:-150,t:"r"},{n:"Birthday gift",a:200,t:"g"},{n:"Chance",t:"c",d:"A"},
+{n:"Candy rush",a:-100,t:"r"},{n:"Chore money",a:200,t:"g"},{n:"Rainy day jar",a:100,t:"n"},{n:"Plant a seed",a:300,t:"g"},
+{n:"Fancy toy",a:-200,t:"r"},{n:"Chance",t:"c",d:"A"},{n:"Save for goal",a:200,t:"g"},{n:"Goal done",a:500,t:"g"},
+{n:"Two jars",a:150,t:"g"},{n:"Broken toy",a:-150,t:"r"},{n:"Weekly saving",a:250,t:"g"},{n:"Chance",t:"c",d:"A"}];
+var XK={"START":["🏁","Every time you pass START you get ₹200 pocket money.","Pocket money is yours to save and spend wisely."],
+"Piggy bank":["🐷","You put coins in your piggy bank. A little each day becomes a lot.","Save first, then spend."],
+"Kids bank":["🏦","A bank keeps your money safe and gives you a little extra, called interest.","A bank is safer than a pocket."],
+"Too many toys":["🧸","You bought a toy you did not need.","Ask: is it a need or a want?"],
+"Lost coins":["😟","Your coins got lost because they were not kept safely.","Keep your money in a piggy bank."],
+"Birthday gift":["🎁","You got money as a gift.","Save some, spend some."],
+"Candy rush":["🍬","You spent your pocket money on sweets all at once.","Wait and think before you spend."],
+"Chore money":["🧹","You helped at home and earned money.","Hard work earns money."],
+"Rainy day jar":["☂️","You keep some coins aside for surprises.","A small jar helps in a big need."],
+"Plant a seed":["🌱","Money can grow like a plant if you give it time. This is called investing.","Be patient, like waiting for a mango tree."],
+"Fancy toy":["🎮","You wanted it, but you did not really need it.","Needs first, wants later."],
+"Save for goal":["🚲","You saved a little every week for something you want.","A goal keeps you saving."],
+"Goal done":["🎉","You saved enough and got your dream bicycle!","Patience wins."],
+"Two jars":["🫙","You keep one jar to spend and one to save.","Never keep all your money in one place."],
+"Broken toy":["🔧","A cheap toy broke very quickly.","Pick things that last."],
+"Weekly saving":["📅","You saved a little every week.","Small savings make a big pile."]};
+var PRODK=PROD.replace("Learn finance with Mcube Academy","For parents: learn finance with Mcube Academy");
+function slog(){var k=MODE=="kids";return'<h3>Words to save by</h3><div class="slog"><p><b>Savings slogan:</b> “'+(k?"Save a little every day, dream big!":"Save first, spend later, dream bigger.")+'”</p>'+(k?"":'<p><b>Warren Buffett:</b> “Be fearful when others are greedy, and be greedy only when others are fearful.”</p>')+'<p><b>Warren Buffett:</b> “Someone’s sitting in the shade today because someone planted a tree a long time ago.”</p></div>'}
+function setMode(k){MODE=k?"kids":"adult";$("mg").className=k?"alt":"";$("mk").className=k?"":"alt"}
+
+var P=[],cur=0,busy=false,di=0,deck=[];
+function $(i){return document.getElementById(i)}
+function fmt(n){return(n<0?"-":"+")+"₹"+Math.abs(n).toLocaleString("en-IN")}
+function rup(n){return"₹"+n.toLocaleString("en-IN")}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function rc(i){if(i<=5)return[5,5-i];if(i<=9)return[10-i,0];if(i==10)return[0,0];if(i<=15)return[0,i-10];return[i-15,5]}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+function setup(){
+$("app").innerHTML=LOGO.replace("<svg",'<svg style="width:180px;color:var(--fg)"')+'<h1>Investment Business</h1><p class="sub">A money-habits board game. Learn by playing with play money.</p><p class="sub"><b>Save first, spend later, dream bigger.</b></p>'+
+'<ol class="rules"><li>Register once with your name, mobile and email.</li><li>Roll the dice and move clockwise.</li><li>Read the lesson on each square.</li><li>On a Chance square, take the card with the same number as your dice.</li><li>Finish '+LAPS+' laps. The most play money wins.</li></ol>'+
+'<strong>Who is playing?</strong><div class="pick"><button id="mg" onclick="setMode(0)">Grown-ups</button><button id="mk" class="alt" onclick="setMode(1)">Kids</button></div><strong>How many players?</strong><div class="pick">'+[1,2,3,4].map(function(n){return'<button onclick="begin('+n+')">'+n+'</button>'}).join("")+'</div><div class="err" id="err"></div>'+
+(persist()?"":'<p class="err">This browser is not saving data. Staff must tap Download CSV after every player.</p>')+'<button class="alt" onclick="showLeads()">Staff: view leads</button>'+
+'<p class="foot">Play money only. Investments are subject to market risks.</p>';setMode(MODE=="kids"?1:0)}
+function begin(n){R={n:n,i:0,list:[]};reg()}
+function reg(e){
+$("app").innerHTML=LOGO.replace("<svg",'<svg style="width:150px;color:var(--fg)"')+'<h1>Player '+(R.i+1)+' of '+R.n+'</h1><p class="sub">Please enter your details to play. Each mobile number and email can play once.</p>'+
+'<label for="nm">'+(MODE=="kids"?"Child’s name":"Name")+'</label><input id="nm" type="text" autocomplete="off">'+
+'<label for="ph">'+(MODE=="kids"?"Parent’s mobile number":"Mobile number")+'</label><input id="ph" type="tel" inputmode="numeric" autocomplete="off" placeholder="10-digit number">'+
+'<label for="em">'+(MODE=="kids"?"Parent’s email ID":"Email ID")+'</label><input id="em" type="email" autocomplete="off">'+
+'<label class="ck"><input id="ck" type="checkbox"><span>'+(MODE=="kids"?"I am the parent or guardian, and I agree that Mcube Academy may contact me about courses and investor education.":"I agree that Mcube Academy may contact me about courses and investor education.")+'</span></label>'+
+'<div class="err" id="err" aria-live="polite">'+(e||"")+'</div><button id="go" onclick="register()">Save and continue</button> <button class="alt" onclick="setup()">Back</button>'}
+async function hs(s){if(window.crypto&&crypto.subtle){var b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("mcube|"+s));return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,"0")}).join("").slice(0,32)}var x=5381;for(var i=0;i<s.length;i++)x=((x<<5)+x+s.charCodeAt(i))|0;return"f"+(x>>>0).toString(36)}
+async function register(){
+var nm=$("nm").value.trim(),d=$("ph").value.replace(/\D/g,""),em=$("em").value.trim().toLowerCase(),er=$("err");
+if(d.length==12&&d.slice(0,2)=="91")d=d.slice(2);if(d.length==11&&d[0]=="0")d=d.slice(1);
+if(nm.length<2)return er.textContent="Please enter your name.";
+if(!/^[6-9]\d{9}$/.test(d))return er.textContent="Please enter a valid 10-digit mobile number.";
+if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em))return er.textContent="Please enter a valid email ID.";
+if(!$("ck").checked)return er.textContent="Please tick the box to agree.";
+if(R.list.some(function(p){return p.phone==d||p.email==em}))return er.textContent="This mobile number or email is already used in this game.";
+var L=ld();
+if(L.some(function(l){return l.phone==d||l.email==em}))return er.textContent="This mobile number or email has already played. Each person can play once.";
+L.push({name:nm,phone:d,email:em,consent:true,registeredAt:new Date().toISOString()});sv(L);
+R.list.push({name:nm,phone:d,email:em});R.i++;
+if(R.i<R.n)reg();else start()}
+function start(){
+var K=MODE=="kids";SQ=K?SQK:SQA;X=K?XK:XA;DK=K?DKK:DKA;BONUS=K?200:2000;CASH=K?1000:100000;
+P=R.list.map(function(r,i){return{name:r.name,phone:r.phone,c:COL[i],pos:0,cash:CASH,laps:0,done:false}});
+cur=0;busy=false;
+var cells="";for(var k=0;k<20;k++){var s=SQ[k],p=rc(k);
+cells+='<div class="sq '+s.t+'" style="grid-row:'+(p[0]+1)+';grid-column:'+(p[1]+1)+'"><b>'+s.n+'</b><span>'+(s.t=="c"?"Draw card":(s.a?fmt(s.a):(k?"":(K?"₹1,000":"₹1 lakh"))))+'</span><div class="tk" id="t'+k+'"></div></div>'}
+function rules(){var A=DK.A,B=DK.B,h='<h3>Chance card rules</h3><p class="sub">Land on Chance and take the card with the same number as your dice roll.</p><div class="cc">';
+if(B)h+='<strong>Chance A</strong><strong>Chance B</strong>';
+for(var i=0;i<6;i++){h+=row(A[i],i)+(B?row(B[i],i):"")}
+return h+'</div>'}
+function row(c,i){return'<div><i class="no">'+(i+1)+'</i><b class="'+(c.a>0?"p":c.a<0?"m":"a")+'">'+(c.a?fmt(c.a):"Action")+'</b><span>'+c.t+(c.act=="again"?": roll again":c.act=="move2"?": move 2 squares":"")+'</span></div>'}
+$("app").innerHTML='<div class="board">'+cells+'<div class="mid">'+LOGO+'<div class="who" id="who"></div><div class="dice" id="dice" aria-live="polite">?</div><button id="roll" onclick="roll()">Roll dice</button></div></div>'+
+'<div class="msg n" id="msg" aria-live="polite"></div><div class="score" id="score"></div><div id="fin"></div>'+
+rules()+slog()+
+'<p class="foot"><button class="alt" onclick="setup()">New game</button></p><p class="foot">Play money only. Investments are subject to market risks.</p>';
+say("Welcome","Roll the dice to begin. Move clockwise and learn from every square.","n","👋");render()}
+function say(h,b,t,e,k){var m=$("msg");m.className="msg "+t;m.innerHTML='<div class="em">'+(e||"💬")+'</div><div><h2>'+h+'</h2><p>'+b+'</p>'+(k?'<p><b>Remember:</b> '+k+'</p>':'')+'</div>'}
+function render(){
+for(var k=0;k<20;k++)$("t"+k).innerHTML=P.filter(function(p){return p.pos==k}).map(function(p){return'<i style="background:'+p.c+'"></i>'}).join("");
+var w=$("who");w.textContent=P[cur].name+"’s turn";w.style.color=P[cur].c;$("roll").disabled=busy;
+$("score").innerHTML=P.map(function(p,i){return'<div class="pl'+(i==cur&&!allDone()?" on":"")+'"><i style="background:'+p.c+'"></i>'+esc(p.name)+'<span><strong>'+rup(p.cash)+'</strong><br>'+(p.done?"Finished":"Lap "+Math.min(p.laps+1,LAPS)+" of "+LAPS)+'</span></div>'}).join("")}
+function allDone(){return P.every(function(p){return p.done})}
+function roll(){
+if(busy)return;busy=true;render();
+var d=$("dice"),n=0,iv=setInterval(function(){d.textContent=1+Math.floor(Math.random()*6);n++;
+if(n>8){clearInterval(iv);var v=1+Math.floor(Math.random()*6);d.textContent=v;LR=v;say(esc(P[cur].name)+" rolled "+v,"Moving "+v+" step"+(v>1?"s":"")+" clockwise…","n","🎲");setTimeout(function(){move(P[cur],v,false)},500)}},70)}
+function move(p,steps,skip){
+var left=steps,iv=setInterval(function(){p.pos=(p.pos+1)%20;if(p.pos==0){p.laps++;p.cash+=BONUS}left--;render();
+if(left<=0){clearInterval(iv);setTimeout(function(){land(p,skip)},250)}},240)}
+function land(p,skip){
+var s=SQ[p.pos];
+if(s.t=="c"){
+if(skip){say("Chance","No second card this turn.","c");return finish(p,false)}
+var c=DK[s.d||"A"][LR-1];p.cash+=c.a;say(c.t+(c.a?" "+fmt(c.a):""),"🎲 You rolled "+LR+", so you take card "+LR+". "+c.l,c.a<0?"r":c.a>0?"g":"c",c.e);
+if(c.act=="again")return finish(p,true);
+if(c.act=="move2"){render();return setTimeout(function(){move(p,2,true)},1500)}
+return finish(p,false)}
+p.cash+=s.a||0;var x=X[s.n];say(s.n+(s.a?" "+fmt(s.a):""),x[1],s.t,x[0],x[2]);finish(p,false)}
+function finish(p,again){
+if(p.laps>=LAPS)p.done=true;
+if(allDone()){render();return setTimeout(result,1500)}
+if(!(again&&!p.done)){do{cur=(cur+1)%P.length}while(P[cur].done)}
+busy=false;render()}
+function result(){
+var r=P.slice().sort(function(a,b){return b.cash-a.cash}),w=r[0];
+$("roll").disabled=true;$("who").textContent="Game over";
+say("Game over","Everyone finished "+LAPS+" laps. See the winner below.","g","🏁");
+$("fin").innerHTML='<div class="win"><div class="tr">🏆</div><h2>Winner: '+esc(w.name)+'</h2><p class="big">'+rup(w.cash)+'</p><p>Reward: <b>Mcube Champion Trophy</b></p></div>'+(r.length>1?'<p>'+r.map(function(p,i){return(i+1)+". "+esc(p.name)+": "+rup(p.cash)}).join("<br>")+'</p>':"")+'<p><b>Takeaway:</b> '+(MODE=="kids"?"save a little, think before you spend, and share with others.":"start early, save regularly, spread your money, and don’t panic.")+'</p>'+(MODE=="kids"?PRODK:PROD);
+$("fin").scrollIntoView({behavior:"smooth"});
+var L=ld();P.forEach(function(p){L.forEach(function(l){if(l.phone==p.phone){l.score=p.cash;l.played=true}})});sv(L)}
+function showLeads(ok){
+if(!ok){$("app").innerHTML='<h1>Staff</h1><label for="pn">Enter staff PIN</label><input id="pn" type="password" inputmode="numeric"><div class="err" id="err"></div><button onclick="chk()">Open</button> <button class="alt" onclick="setup()">Back</button>';return}
+var rows=ld();window._rows=rows;
+$("app").innerHTML='<h1>Leads ('+rows.length+')</h1><table class="lead"><tr><th>Name</th><th>Mobile</th><th>Email</th><th>Score</th><th></th></tr>'+rows.map(function(r,i){return"<tr><td>"+esc(r.name)+"</td><td>"+esc(r.phone)+"</td><td>"+esc(r.email)+"</td><td>"+(r.score||"")+'</td><td><button class="alt" id="d'+i+'" style="padding:4px 8px;min-height:32px;font-size:12px" onclick="del('+i+')">Delete</button></td></tr>'}).join("")+'</table><button onclick="csv()">Download CSV</button> <button class="alt" onclick="setup()">Back</button><div class="err" id="err"></div>'}
+function chk(){if($("pn").value==PIN)showLeads(true);else $("err").textContent="Wrong PIN."}
+function del(i){var b=$("d"+i);if(b.dataset.s!="1"){b.dataset.s="1";b.textContent="Confirm delete";return}
+var ph=window._rows[i].phone;sv(ld().filter(function(l){return l.phone!=ph}));showLeads(true)}
+function csv(){var q=function(v){return'"'+String(v==null?"":v).replace(/"/g,'""')+'"'};
+var t="\ufeffName,Mobile,Email,Score,Registered\n"+window._rows.map(function(r){return[r.name,r.phone,r.email,r.score,r.registeredAt].map(q).join(",")}).join("\n");
+if(nativeCsv(t))return;
+var b=new Blob([t],{type:"text/csv"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="mcube-leads.csv";document.body.appendChild(a);a.click();a.remove()}
+var CAP=window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform();
+function ext(u){if(CAP){location.href=u;return false}return true}
+function nativeCsv(t){if(!CAP)return false;var C=window.Capacitor.Plugins,FS=C.Filesystem,SH=C.Share,e=$("err");
+if(!FS||!SH){if(e)e.textContent="Saving is not available on this phone.";return true}
+var nm="mcube-leads-"+new Date().toISOString().slice(0,10)+".csv";
+FS.writeFile({path:nm,data:t,directory:"CACHE",encoding:"utf8"}).then(function(r){return SH.share({title:"Mcube leads",files:[r.uri]})}).catch(function(x){if(e&&!/cancel/i.test(String(x&&x.message)))e.textContent="Could not save the file: "+(x&&x.message||x)});return true}
+if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)&&!CAP)addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});
+setup();
+</script></body></html>
