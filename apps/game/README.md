@@ -9,6 +9,8 @@ The game lives in `www/index.html`. The same file is packaged four ways:
 | **Android** | `release-android-test.apk` (install directly), plus a signed `.apk` and Play Store `.aab` when keys are set | Capacitor (`capacitor.config.json`) |
 | **iPhone / iPad** | Install from the web link with **Share > Add to Home Screen**. The build also gives an Xcode project and an unsigned `.ipa` for the App Store | Capacitor + web app (`manifest.webmanifest`, `sw.js`) |
 
+The screen adapts to the device: on phones (upright) the board is on top with the message and scores below; on laptops, Macs, tablets and phones turned sideways the board fills the screen height with the message, scores and rules beside it.
+
 The game works offline on every device. Leads are saved on the device the game is played on, so staff should open **Staff: view leads** (PIN `2026`) and tap **Download CSV** on each device. On Android and iPhone apps the CSV opens the share menu (WhatsApp, Gmail, Drive, Files).
 
 ## 1. Get the download files (no computer setup needed)

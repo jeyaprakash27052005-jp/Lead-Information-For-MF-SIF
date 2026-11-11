@@ -17,20 +17,20 @@
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-#app{max-width:480px;margin:0 auto;padding:14px 12px 28px}
+#app{max-width:520px;margin:0 auto;padding:16px max(16px,env(safe-area-inset-right,0px)) 28px max(16px,env(safe-area-inset-left,0px))}
 h1{font:700 26px/1.15 Georgia,serif;margin:6px 0 4px}
 h3{font:700 17px Georgia,serif;margin:18px 0 6px}
 .sub,.foot{color:var(--mut);font-size:14px}
-.board{display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(6,1fr);aspect-ratio:1/1;width:100%;gap:2px;background:#E4DFF7;padding:3px;border-radius:12px}
-.sq{position:relative;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:5px 2px 2px;text-align:center;font-size:10.5px;line-height:1.15;min-width:0;overflow:hidden;box-shadow:inset 0 -3px 0 rgba(0,0,0,.07)}
+.board{display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(6,1fr);aspect-ratio:1/1;width:100%;max-width:calc(100vh - 32px);max-width:calc(100dvh - 32px);margin:0 auto;container-type:inline-size;gap:2px;background:#E4DFF7;padding:3px;border-radius:12px}
+.sq{position:relative;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 2px 12px;text-align:center;font-size:10.5px;font-size:clamp(9px,2.35cqi,16px);line-height:1.15;min-width:0;overflow:hidden;box-shadow:inset 0 -3px 0 rgba(0,0,0,.07)}
 .sq b{font-weight:700}
 .g{background:#C9F0D8;color:#0B4A2A}.r{background:#FFD3D3;color:#7A1212}.c{background:#FFEBA6;color:#5A3A00}.n{background:#D2E2FF;color:#12397D}
 .tk{position:absolute;bottom:2px;left:0;right:0;display:flex;justify-content:center;gap:2px}
-.tk i{width:11px;height:11px;border-radius:50%;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.4)}
+.tk i{width:11px;height:11px;width:clamp(10px,2.6cqi,20px);height:clamp(10px,2.6cqi,20px);border-radius:50%;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.4)}
 .mid{grid-area:2/2/6/6;position:relative;overflow:hidden;background:var(--mid);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;padding:4px}
-.mid>*{position:relative;z-index:1}.mid::before,.mid::after{position:absolute;bottom:2px;font-size:58px;line-height:1;opacity:.45;z-index:0}.mid::before{content:'\1F402';left:3px}.mid::after{content:'\1F43B';right:3px}.logo{display:block;width:120px;height:auto;border-radius:10px}.mid .logo{width:76px}
-.who{font-weight:700;font-size:14px}
-.dice{width:46px;height:46px;border:2px solid var(--fg);border-radius:10px;display:flex;align-items:center;justify-content:center;font:700 24px Georgia,serif}
+.mid>*{position:relative;z-index:1}.mid::before,.mid::after{position:absolute;bottom:2px;font-size:58px;line-height:1;opacity:.45;z-index:0}.mid::before{content:'\1F402';left:3px}.mid::after{content:'\1F43B';right:3px}.logo{display:block;width:120px;height:auto;border-radius:10px}.mid .logo{width:76px;width:clamp(56px,17cqi,140px)}.mid::before,.mid::after{font-size:clamp(40px,13cqi,110px)}.mid button{font-size:clamp(15px,3cqi,20px);padding:clamp(10px,2cqi,14px) clamp(16px,4cqi,28px)}
+.who{font-weight:700;font-size:14px;font-size:clamp(13px,3.2cqi,22px)}
+.dice{width:46px;height:46px;width:clamp(42px,10cqi,76px);height:clamp(42px,10cqi,76px);font-size:clamp(22px,5.4cqi,40px)!important;border:2px solid var(--fg);border-radius:10px;display:flex;align-items:center;justify-content:center;font:700 24px Georgia,serif}
 button{font:700 15px system-ui,sans-serif;border:0;border-radius:10px;padding:10px 16px;background:var(--ac);color:var(--acfg);cursor:pointer;min-height:44px}
 button:disabled{opacity:.45}
 button.alt{background:transparent;color:var(--fg);border:1.5px solid var(--bd)}
@@ -60,6 +60,39 @@ input[type=text],input[type=tel],input[type=email]{width:100%;font:16px system-u
 .prod{padding:0;list-style:none;margin:6px 0}.prod li{padding:8px 10px;border:1.5px solid var(--bd);border-radius:10px;margin-bottom:6px;font-size:15px}
 .slog{border-left:6px solid var(--ac);background:var(--card);border-radius:10px;padding:6px 12px}.slog p{margin:8px 0;font-size:15px}
 a.btn{display:inline-block;background:var(--ac);color:var(--acfg);padding:11px 16px;border-radius:10px;font-weight:700;text-decoration:none}
+/* ---------- Layout that adapts to the device ---------- */
+#app.s-play{max-width:1400px}#app.s-wide{max-width:960px}
+.game{display:grid;gap:14px}.game .msg{margin-top:0}.game .score{margin-top:0}.now{display:grid;gap:12px}
+.tbl{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.card{background:var(--card);border:1.5px solid var(--bd);border-radius:14px;padding:16px}
+.home .pick button{flex:1}
+.form h1{margin-top:10px}
+/* Laptop, desktop, tablet landscape, phone landscape: board on the left, game info on the right */
+@media (min-width:900px),(orientation:landscape) and (min-width:600px){
+ .game{grid-template-columns:auto minmax(280px,1fr);align-items:start;gap:20px}
+ .game .left{position:sticky;top:12px}
+ .game .board{width:min(calc(100vh - 32px),calc(100vw - 380px),820px);width:min(calc(100dvh - 32px),calc(100vw - 380px),820px);max-width:none}
+ .game .side{min-width:0;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain;padding-right:4px}
+ .game .now{position:sticky;top:0;z-index:2;background:var(--bg);padding-bottom:10px;display:grid;gap:10px}
+ .side .cc{grid-template-columns:1fr 1fr}
+}
+/* Phone landscape: very little height, so tighten the side panel */
+@media (orientation:landscape) and (max-height:540px){
+ #app.s-play{padding-top:8px;padding-bottom:8px}
+ .game .left{top:8px}.game .side{max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px)}.now .score{grid-template-columns:1fr 1fr;gap:6px}.game .board{width:min(calc(100vh - 16px),calc(100vw - 340px));width:min(calc(100dvh - 16px),calc(100vw - 340px))}
+ .game{grid-template-columns:auto minmax(240px,1fr)}
+ .msg{min-height:0;padding:8px 10px}.msg .em{font-size:32px}.msg h2{font-size:17px}.msg p{font-size:14px}
+ .pl{padding:6px 8px;font-size:14px}
+}
+/* Laptop and tablet: home screen in two columns */
+@media (min-width:860px){
+ #app.s-home{max-width:1040px}
+ .home{display:grid;grid-template-columns:1.1fr 1fr;gap:36px;align-items:center;min-height:calc(100vh - 60px);min-height:calc(100dvh - 60px)}
+ .home h1{font-size:40px}
+ #app.s-form{max-width:560px}.form{margin-top:4vh}
+}
+/* Big screens (classroom projector, large monitor): larger text */
+@media (min-width:1600px) and (min-height:900px){body{font-size:18px}.msg h2{font-size:24px}.msg p{font-size:18px}.pl{font-size:17px}}
 </style></head>
 <body><div id="app"></div>
 <script>
@@ -163,19 +196,21 @@ function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;
 function rc(i){if(i<=5)return[5,5-i];if(i<=9)return[10-i,0];if(i==10)return[0,0];if(i<=15)return[0,i-10];return[i-15,5]}
 function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
 function setup(){
-$("app").innerHTML=LOGO.replace("<svg",'<svg style="width:180px;color:var(--fg)"')+'<h1>Investment Business</h1><p class="sub">A money-habits board game. Learn by playing with play money.</p><p class="sub"><b>Save first, spend later, dream bigger.</b></p>'+
-'<ol class="rules"><li>Register once with your name, mobile and email.</li><li>Roll the dice and move clockwise.</li><li>Read the lesson on each square.</li><li>On a Chance square, take the card with the same number as your dice.</li><li>Finish '+LAPS+' laps. The most play money wins.</li></ol>'+
-'<strong>Who is playing?</strong><div class="pick"><button id="mg" onclick="setMode(0)">Grown-ups</button><button id="mk" class="alt" onclick="setMode(1)">Kids</button></div><strong>How many players?</strong><div class="pick">'+[1,2,3,4].map(function(n){return'<button onclick="begin('+n+')">'+n+'</button>'}).join("")+'</div><div class="err" id="err"></div>'+
+$("app").className="s-home";
+$("app").innerHTML='<div class="home"><div class="intro">'+LOGO+'<h1>Investment Business</h1><p class="sub">A money-habits board game. Learn by playing with play money.</p><p class="sub"><b>Save first, spend later, dream bigger.</b></p>'+
+'<ol class="rules"><li>Register once with your name, mobile and email.</li><li>Roll the dice and move clockwise.</li><li>Read the lesson on each square.</li><li>On a Chance square, take the card with the same number as your dice.</li><li>Finish '+LAPS+' laps. The most play money wins.</li></ol></div>'+
+'<div class="card"><strong>Who is playing?</strong><div class="pick"><button id="mg" onclick="setMode(0)">Grown-ups</button><button id="mk" class="alt" onclick="setMode(1)">Kids</button></div><strong>How many players?</strong><div class="pick">'+[1,2,3,4].map(function(n){return'<button onclick="begin('+n+')">'+n+'</button>'}).join("")+'</div><div class="err" id="err"></div>'+
 (persist()?"":'<p class="err">This browser is not saving data. Staff must tap Download CSV after every player.</p>')+'<button class="alt" onclick="showLeads()">Staff: view leads</button>'+
-'<p class="foot">Play money only. Investments are subject to market risks.</p>';setMode(MODE=="kids"?1:0)}
+'<p class="foot">Play money only. Investments are subject to market risks.</p></div></div>';setMode(MODE=="kids"?1:0)}
 function begin(n){R={n:n,i:0,list:[]};reg()}
 function reg(e){
-$("app").innerHTML=LOGO.replace("<svg",'<svg style="width:150px;color:var(--fg)"')+'<h1>Player '+(R.i+1)+' of '+R.n+'</h1><p class="sub">Please enter your details to play. Each mobile number and email can play once.</p>'+
+$("app").className="s-form";
+$("app").innerHTML='<div class="form card">'+LOGO+'<h1>Player '+(R.i+1)+' of '+R.n+'</h1><p class="sub">Please enter your details to play. Each mobile number and email can play once.</p>'+
 '<label for="nm">'+(MODE=="kids"?"Child’s name":"Name")+'</label><input id="nm" type="text" autocomplete="off">'+
 '<label for="ph">'+(MODE=="kids"?"Parent’s mobile number":"Mobile number")+'</label><input id="ph" type="tel" inputmode="numeric" autocomplete="off" placeholder="10-digit number">'+
 '<label for="em">'+(MODE=="kids"?"Parent’s email ID":"Email ID")+'</label><input id="em" type="email" autocomplete="off">'+
 '<label class="ck"><input id="ck" type="checkbox"><span>'+(MODE=="kids"?"I am the parent or guardian, and I agree that Mcube Academy may contact me about courses and investor education.":"I agree that Mcube Academy may contact me about courses and investor education.")+'</span></label>'+
-'<div class="err" id="err" aria-live="polite">'+(e||"")+'</div><button id="go" onclick="register()">Save and continue</button> <button class="alt" onclick="setup()">Back</button>'}
+'<div class="err" id="err" aria-live="polite">'+(e||"")+'</div><button id="go" onclick="register()">Save and continue</button> <button class="alt" onclick="setup()">Back</button></div>'}
 async function hs(s){if(window.crypto&&crypto.subtle){var b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("mcube|"+s));return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,"0")}).join("").slice(0,32)}var x=5381;for(var i=0;i<s.length;i++)x=((x<<5)+x+s.charCodeAt(i))|0;return"f"+(x>>>0).toString(36)}
 async function register(){
 var nm=$("nm").value.trim(),d=$("ph").value.replace(/\D/g,""),em=$("em").value.trim().toLowerCase(),er=$("err");
@@ -201,10 +236,11 @@ if(B)h+='<strong>Chance A</strong><strong>Chance B</strong>';
 for(var i=0;i<6;i++){h+=row(A[i],i)+(B?row(B[i],i):"")}
 return h+'</div>'}
 function row(c,i){return'<div><i class="no">'+(i+1)+'</i><b class="'+(c.a>0?"p":c.a<0?"m":"a")+'">'+(c.a?fmt(c.a):"Action")+'</b><span>'+c.t+(c.act=="again"?": roll again":c.act=="move2"?": move 2 squares":"")+'</span></div>'}
-$("app").innerHTML='<div class="board">'+cells+'<div class="mid">'+LOGO+'<div class="who" id="who"></div><div class="dice" id="dice" aria-live="polite">?</div><button id="roll" onclick="roll()">Roll dice</button></div></div>'+
-'<div class="msg n" id="msg" aria-live="polite"></div><div class="score" id="score"></div><div id="fin"></div>'+
+$("app").className="s-play";
+$("app").innerHTML='<div class="game"><div class="left"><div class="board">'+cells+'<div class="mid">'+LOGO+'<div class="who" id="who"></div><div class="dice" id="dice" aria-live="polite">?</div><button id="roll" onclick="roll()">Roll dice</button></div></div></div><div class="side"><div class="now">'+
+'<div class="msg n" id="msg" aria-live="polite"></div><div class="score" id="score"></div></div><div id="fin"></div>'+
 rules()+slog()+
-'<p class="foot"><button class="alt" onclick="setup()">New game</button></p><p class="foot">Play money only. Investments are subject to market risks.</p>';
+'<p class="foot"><button class="alt" onclick="setup()">New game</button></p><p class="foot">Play money only. Investments are subject to market risks.</p></div></div>';
 say("Welcome","Roll the dice to begin. Move clockwise and learn from every square.","n","👋");render()}
 function say(h,b,t,e,k){var m=$("msg");m.className="msg "+t;m.innerHTML='<div class="em">'+(e||"💬")+'</div><div><h2>'+h+'</h2><p>'+b+'</p>'+(k?'<p><b>Remember:</b> '+k+'</p>':'')+'</div>'}
 function render(){
@@ -238,12 +274,12 @@ var r=P.slice().sort(function(a,b){return b.cash-a.cash}),w=r[0];
 $("roll").disabled=true;$("who").textContent="Game over";
 say("Game over","Everyone finished "+LAPS+" laps. See the winner below.","g","🏁");
 $("fin").innerHTML='<div class="win"><div class="tr">🏆</div><h2>Winner: '+esc(w.name)+'</h2><p class="big">'+rup(w.cash)+'</p><p>Reward: <b>Mcube Champion Trophy</b></p></div>'+(r.length>1?'<p>'+r.map(function(p,i){return(i+1)+". "+esc(p.name)+": "+rup(p.cash)}).join("<br>")+'</p>':"")+'<p><b>Takeaway:</b> '+(MODE=="kids"?"save a little, think before you spend, and share with others.":"start early, save regularly, spread your money, and don’t panic.")+'</p>'+(MODE=="kids"?PRODK:PROD);
-$("fin").scrollIntoView({behavior:"smooth"});
+var nw=document.querySelector(".now");$("fin").style.scrollMarginTop=(nw&&getComputedStyle(nw).position=="sticky"?nw.offsetHeight+8:0)+"px";$("fin").scrollIntoView({behavior:"smooth"});
 var L=ld();P.forEach(function(p){L.forEach(function(l){if(l.phone==p.phone){l.score=p.cash;l.played=true}})});sv(L)}
 function showLeads(ok){
-if(!ok){$("app").innerHTML='<h1>Staff</h1><label for="pn">Enter staff PIN</label><input id="pn" type="password" inputmode="numeric"><div class="err" id="err"></div><button onclick="chk()">Open</button> <button class="alt" onclick="setup()">Back</button>';return}
+if(!ok){$("app").className="s-form";$("app").innerHTML='<h1>Staff</h1><label for="pn">Enter staff PIN</label><input id="pn" type="password" inputmode="numeric"><div class="err" id="err"></div><button onclick="chk()">Open</button> <button class="alt" onclick="setup()">Back</button>';return}
 var rows=ld();window._rows=rows;
-$("app").innerHTML='<h1>Leads ('+rows.length+')</h1><table class="lead"><tr><th>Name</th><th>Mobile</th><th>Email</th><th>Score</th><th></th></tr>'+rows.map(function(r,i){return"<tr><td>"+esc(r.name)+"</td><td>"+esc(r.phone)+"</td><td>"+esc(r.email)+"</td><td>"+(r.score||"")+'</td><td><button class="alt" id="d'+i+'" style="padding:4px 8px;min-height:32px;font-size:12px" onclick="del('+i+')">Delete</button></td></tr>'}).join("")+'</table><button onclick="csv()">Download CSV</button> <button class="alt" onclick="setup()">Back</button><div class="err" id="err"></div>'}
+$("app").className="s-wide";$("app").innerHTML='<h1>Leads ('+rows.length+')</h1><div class="tbl"><table class="lead"><tr><th>Name</th><th>Mobile</th><th>Email</th><th>Score</th><th></th></tr>'+rows.map(function(r,i){return"<tr><td>"+esc(r.name)+"</td><td>"+esc(r.phone)+"</td><td>"+esc(r.email)+"</td><td>"+(r.score||"")+'</td><td><button class="alt" id="d'+i+'" style="padding:4px 8px;min-height:32px;font-size:12px" onclick="del('+i+')">Delete</button></td></tr>'}).join("")+'</table></div><button onclick="csv()">Download CSV</button> <button class="alt" onclick="setup()">Back</button><div class="err" id="err"></div>'}
 function chk(){if($("pn").value==PIN)showLeads(true);else $("err").textContent="Wrong PIN."}
 function del(i){var b=$("d"+i);if(b.dataset.s!="1"){b.dataset.s="1";b.textContent="Confirm delete";return}
 var ph=window._rows[i].phone;sv(ld().filter(function(l){return l.phone!=ph}));showLeads(true)}
