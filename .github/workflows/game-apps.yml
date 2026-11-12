@@ -118,6 +118,13 @@ jobs:
             cp built/android/release-android-playstore.aab "$D/3-Android/for-Play-Store/Investment-Business-PlayStore.aab"
           fi
           cp built/ios/* "$D/4-iPhone-iPad/"
+          # Same file names every time, so the download links on the game website never change
+          mkdir direct
+          cp built/windows/*Setup*.exe direct/Investment-Business-Windows-Setup.exe
+          cp built/windows/*Portable*.exe direct/Investment-Business-Windows-Portable.exe
+          cp built/mac/*.dmg direct/Investment-Business-Mac.dmg
+          cp "$D/3-Android/Investment-Business-Android.apk" direct/Investment-Business-Android.apk
+          ls -la direct
           mkdir zips
           for f in "$D"/*/; do n=$(basename "$f"); (cd "$D" && zip -qr "../zips/Investment-Business-$n.zip" "$n" README.txt); done
           find "$D" -type f | sort
@@ -125,6 +132,35 @@ jobs:
         with: { name: Investment-Business-Downloads, path: Investment-Business-Downloads, if-no-files-found: error }
       - uses: actions/upload-artifact@v4
         with: { name: zips, path: zips, retention-days: 7 }
+      - uses: actions/upload-artifact@v4
+        with: { name: direct, path: direct, retention-days: 7 }
+
+  # Public download links (no GitHub login needed), replaced by every successful build:
+  #   https://github.com/<owner>/<repo>/releases/download/game-app/Investment-Business-Windows-Setup.exe  (and -Portable.exe, -Mac.dmg, -Android.apk)
+  # The game website's Download page (apps/game/www/download.html) points at these.
+  publish-downloads:
+    needs: [downloads]
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    concurrency: { group: game-app-release, cancel-in-progress: false }
+    defaults: { run: { working-directory: . } }
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: direct, path: direct }
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: game-app
+          name: Investment Business app (latest)
+          make_latest: true
+          overwrite_files: true
+          files: direct/*
+          body: |
+            Latest Investment Business game installers. These links always give the newest version:
+            - Windows laptop / PC (installer): Investment-Business-Windows-Setup.exe
+            - Windows (no install): Investment-Business-Windows-Portable.exe
+            - Mac: Investment-Business-Mac.dmg
+            - Android: Investment-Business-Android.apk
+            - iPhone / iPad: open the game website in Safari, then Share > Add to Home Screen.
 
   release:
     if: startsWith(github.ref, 'refs/tags/game-v')

@@ -13,6 +13,20 @@ The screen adapts to the device: on phones (upright) the board is on top with th
 
 The game works offline on every device. Leads are saved on the device the game is played on, so staff should open **Staff login** and tap **Download CSV** on each device. The staff PIN is set by Head or Regional Incharge in the admin portal: **Feature Controls > Investment Business game: staff PIN**. Until a PIN is set there, the starting PIN is `2026`. Apps pick up a new PIN the next time they are online and remember it for offline use. On Android and iPhone apps the CSV opens the share menu (WhatsApp, Gmail, Drive, Files).
 
+## Download links for players (no GitHub login)
+
+Every successful build publishes the installers as public files with fixed links, so the links never change and always give the newest version:
+
+| Device | Link |
+|---|---|
+| Windows installer | https://github.com/jeyaprakash27052005-jp/Lead-Information-For-MF-SIF/releases/download/game-app/Investment-Business-Windows-Setup.exe |
+| Windows portable | https://github.com/jeyaprakash27052005-jp/Lead-Information-For-MF-SIF/releases/download/game-app/Investment-Business-Windows-Portable.exe |
+| Mac | https://github.com/jeyaprakash27052005-jp/Lead-Information-For-MF-SIF/releases/download/game-app/Investment-Business-Mac.dmg |
+| Android | https://github.com/jeyaprakash27052005-jp/Lead-Information-For-MF-SIF/releases/download/game-app/Investment-Business-Android.apk |
+| iPhone / iPad | game website in Safari > Share > Add to Home Screen |
+
+Easiest for players: the game website has a **Download the app** button (page `download.html`). It detects the device and offers the right file. Share `https://<your game site>/download.html`.
+
 ## 1. Get the download files (no computer setup needed)
 
 GitHub builds everything for you.
