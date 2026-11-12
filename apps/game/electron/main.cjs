@@ -14,7 +14,7 @@ function createWindow() {
     minHeight: 520,
     center: true,
     title: "Investment Business",
-    backgroundColor: "#fbfbf8",
+    backgroundColor: "#ffffff",
     icon: path.join(__dirname, "..", "resources", "icon.png"),
     autoHideMenuBar: true,
     webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true },
