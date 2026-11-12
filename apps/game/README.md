@@ -11,7 +11,7 @@ The game lives in `www/index.html`. The same file is packaged four ways:
 
 The screen adapts to the device: on phones (upright) the board is on top with the message and scores below; on laptops, Macs, tablets and phones turned sideways the board fills the screen height with the message, scores and rules beside it.
 
-The game works offline on every device. Leads are saved on the device the game is played on, so staff should open **Staff: view leads** (PIN `2026`) and tap **Download CSV** on each device. On Android and iPhone apps the CSV opens the share menu (WhatsApp, Gmail, Drive, Files).
+The game works offline on every device. Leads are saved on the device the game is played on, so staff should open **Staff login** and tap **Download CSV** on each device. The staff PIN is set by Head or Regional Incharge in the admin portal: **Feature Controls > Investment Business game: staff PIN**. Until a PIN is set there, the starting PIN is `2026`. Apps pick up a new PIN the next time they are online and remember it for offline use. On Android and iPhone apps the CSV opens the share menu (WhatsApp, Gmail, Drive, Files).
 
 ## 1. Get the download files (no computer setup needed)
 
@@ -100,4 +100,5 @@ After changing `www/index.html`, run `npm run sync` for the phone apps, and chan
 |---|---|
 | App name and ID (`com.mcubeacademy.investmentbusiness`) | `package.json` (`build`) and `capacitor.config.json` |
 | App icon | `resources/icon.png` (desktop), `assets/` (phones), `www/icons/` (web) |
-| Staff PIN, number of laps, starting money | top of the script in `www/index.html` (`PIN`, `LAPS`, `CASH`) |
+| Staff PIN | admin portal: Feature Controls > Investment Business game: staff PIN |
+| Starting staff PIN (used until one is set in admin), number of laps, starting money | top of the script in `www/index.html` (`PIN`, `LAPS`, `CASH`) |

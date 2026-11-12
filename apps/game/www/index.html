@@ -50,7 +50,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--fg);outline-off
 .p{color:#1E9E62}.m{color:#E04848}.a{color:#B7791F}
 @media (prefers-color-scheme:dark){.p{color:#5fd49a}.m{color:#ff8a8a}.a{color:#F5B31B}}
 label{display:block;font-weight:600;font-size:14px;margin:10px 0 3px}
-input[type=text],input[type=tel],input[type=email]{width:100%;font:16px system-ui;padding:10px;border:1.5px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--fg)}
+input[type=text],input[type=tel],input[type=email],input[type=password]{width:100%;font:16px system-ui;padding:10px;border:1.5px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--fg)}
 .ck{display:flex;gap:8px;align-items:flex-start;font-weight:400;font-size:13.5px}
 .ck input{margin-top:4px;width:18px;height:18px;flex:none}
 .err{color:#E04848;font-weight:600;font-size:14px;margin:8px 0;min-height:20px}
@@ -200,7 +200,7 @@ $("app").className="s-home";
 $("app").innerHTML='<div class="home"><div class="intro">'+LOGO+'<h1>Investment Business</h1><p class="sub">A money-habits board game. Learn by playing with play money.</p><p class="sub"><b>Save first, spend later, dream bigger.</b></p>'+
 '<ol class="rules"><li>Register once with your name, mobile and email.</li><li>Roll the dice and move clockwise.</li><li>Read the lesson on each square.</li><li>On a Chance square, take the card with the same number as your dice.</li><li>Finish '+LAPS+' laps. The most play money wins.</li></ol></div>'+
 '<div class="card"><strong>Who is playing?</strong><div class="pick"><button id="mg" onclick="setMode(0)">Grown-ups</button><button id="mk" class="alt" onclick="setMode(1)">Kids</button></div><strong>How many players?</strong><div class="pick">'+[1,2,3,4].map(function(n){return'<button onclick="begin('+n+')">'+n+'</button>'}).join("")+'</div><div class="err" id="err"></div>'+
-(persist()?"":'<p class="err">This browser is not saving data. Staff must tap Download CSV after every player.</p>')+'<button class="alt" onclick="showLeads()">Staff: view leads</button>'+
+(persist()?"":'<p class="err">This browser is not saving data. Staff must tap Download CSV after every player.</p>')+'<button class="alt" onclick="showLeads()">🔒 Staff login</button>'+
 '<p class="foot">Play money only. Investments are subject to market risks.</p></div></div>';setMode(MODE=="kids"?1:0)}
 function begin(n){R={n:n,i:0,list:[]};reg()}
 function reg(e){
@@ -277,10 +277,41 @@ $("fin").innerHTML='<div class="win"><div class="tr">🏆</div><h2>Winner: '+esc
 var nw=document.querySelector(".now");$("fin").style.scrollMarginTop=(nw&&getComputedStyle(nw).position=="sticky"?nw.offsetHeight+8:0)+"px";$("fin").scrollIntoView({behavior:"smooth"});
 var L=ld();P.forEach(function(p){L.forEach(function(l){if(l.phone==p.phone){l.score=p.cash;l.played=true}})});sv(L)}
 function showLeads(ok){
-if(!ok){$("app").className="s-form";$("app").innerHTML='<h1>Staff</h1><label for="pn">Enter staff PIN</label><input id="pn" type="password" inputmode="numeric"><div class="err" id="err"></div><button onclick="chk()">Open</button> <button class="alt" onclick="setup()">Back</button>';return}
+if(!ok){$("app").className="s-form";$("app").innerHTML='<div class="card">'+LOGO+'<h1>Staff login</h1><p class="sub">For Mcube Academy staff. Enter the staff PIN set in the admin portal (Feature Controls).</p><label for="pn">Staff PIN</label><input id="pn" type="password" inputmode="numeric" autocomplete="current-password" maxlength="8"><div class="err" id="err" aria-live="polite"></div><button id="lg" onclick="chk()">Login</button> <button class="alt" onclick="setup()">Back</button></div>';$("pn").addEventListener("keydown",function(e){if(e.key=="Enter")chk()});$("pn").focus();return}
 var rows=ld();window._rows=rows;
-$("app").className="s-wide";$("app").innerHTML='<h1>Leads ('+rows.length+')</h1><div class="tbl"><table class="lead"><tr><th>Name</th><th>Mobile</th><th>Email</th><th>Score</th><th></th></tr>'+rows.map(function(r,i){return"<tr><td>"+esc(r.name)+"</td><td>"+esc(r.phone)+"</td><td>"+esc(r.email)+"</td><td>"+(r.score||"")+'</td><td><button class="alt" id="d'+i+'" style="padding:4px 8px;min-height:32px;font-size:12px" onclick="del('+i+')">Delete</button></td></tr>'}).join("")+'</table></div><button onclick="csv()">Download CSV</button> <button class="alt" onclick="setup()">Back</button><div class="err" id="err"></div>'}
-function chk(){if($("pn").value==PIN)showLeads(true);else $("err").textContent="Wrong PIN."}
+$("app").className="s-wide";$("app").innerHTML='<h1>Staff: players ('+rows.length+')</h1><div class="tbl"><table class="lead"><tr><th>Name</th><th>Mobile</th><th>Email</th><th>Score</th><th></th></tr>'+rows.map(function(r,i){return"<tr><td>"+esc(r.name)+"</td><td>"+esc(r.phone)+"</td><td>"+esc(r.email)+"</td><td>"+(r.score||"")+'</td><td><button class="alt" id="d'+i+'" style="padding:4px 8px;min-height:32px;font-size:12px" onclick="del('+i+')">Delete</button></td></tr>'}).join("")+'</table></div><button onclick="csv()">Download CSV</button> <button class="alt" onclick="setup()">Log out</button><div class="err" id="err"></div>'}
+var FB={p:"extended-history-5xctm",d:"ai-studio-leadflowmanager-bcefb4c1-411b-40a6-bac1-6db2d10e0822",k:"AIzaSyDYJFZoBMkmXl8f0N1BthmNx3uBrH0u3H8"},PK="mcube_staff_pin_v1",BAD={n:0,until:0};
+function hx(buf){return Array.from(new Uint8Array(buf)).map(function(x){return x.toString(16).padStart(2,"0")}).join("")}
+/* SHA-256: the browser's own when available, otherwise a small built-in copy */
+function sha256(s){var b=new TextEncoder().encode(s);if(window.crypto&&crypto.subtle)return crypto.subtle.digest("SHA-256",b).then(hx);
+var K=[],H=[],i,j,w=[],pr=function(n){for(var f=2;f*f<=n;f++)if(n%f==0)return 0;return 1},fr=function(x){return(x-Math.floor(x))*4294967296|0};
+for(i=2,j=0;j<64;i++)if(pr(i)){if(j<8)H[j]=fr(Math.pow(i,1/2));K[j++]=fr(Math.pow(i,1/3))}
+var l=b.length,m=new Uint8Array(((l+9+63)>>6)<<6);m.set(b);m[l]=128;var bl=l*8;m[m.length-4]=bl>>>24;m[m.length-3]=bl>>>16&255;m[m.length-2]=bl>>>8&255;m[m.length-1]=bl&255;
+var r=function(x,n){return x>>>n|x<<32-n};
+for(var o=0;o<m.length;o+=64){for(i=0;i<16;i++)w[i]=m[o+i*4]<<24|m[o+i*4+1]<<16|m[o+i*4+2]<<8|m[o+i*4+3];
+for(i=16;i<64;i++){var a0=w[i-15],a1=w[i-2];w[i]=(w[i-16]+(r(a0,7)^r(a0,18)^a0>>>3)+w[i-7]+(r(a1,17)^r(a1,19)^a1>>>10))|0}
+var a=H[0],bb=H[1],c=H[2],d=H[3],e=H[4],f=H[5],g=H[6],hh=H[7];
+for(i=0;i<64;i++){var t1=hh+(r(e,6)^r(e,11)^r(e,25))+(e&f^~e&g)+K[i]+w[i]|0,t2=(r(a,2)^r(a,13)^r(a,22))+(a&bb^a&c^bb&c)|0;hh=g;g=f;f=e;e=d+t1|0;d=c;c=bb;bb=a;a=t1+t2|0}
+H=[H[0]+a|0,H[1]+bb|0,H[2]+c|0,H[3]+d|0,H[4]+e|0,H[5]+f|0,H[6]+g|0,H[7]+hh|0]}
+return Promise.resolve(H.map(function(x){return("0000000"+(x>>>0).toString(16)).slice(-8)}).join(""))}
+function pinHash(p){return sha256("mcube-game-staff|"+p)}
+/* The staff PIN is set by Head / Regional Incharge in the admin portal (Feature Controls > game staff PIN).
+   Only a scrambled copy is stored. The last one seen is remembered so Staff login also works offline.
+   Until a PIN is set in the admin portal, the starting PIN is used. */
+function staffHash(){var url="https://firestore.googleapis.com/v1/projects/"+FB.p+"/databases/"+encodeURIComponent(FB.d)+"/documents/settings/gameStaff?key="+FB.k;
+var ctl=window.AbortController?new AbortController():null,tm=setTimeout(function(){if(ctl)ctl.abort()},7000);
+return fetch(url,{signal:ctl&&ctl.signal,cache:"no-store"}).then(function(r){clearTimeout(tm);
+if(r.status==404){try{localStorage.removeItem(PK)}catch(e){}return pinHash(PIN)}
+if(!r.ok)throw 0;return r.json().then(function(j){var v=j&&j.fields&&j.fields.pinHash&&j.fields.pinHash.stringValue;if(!/^[0-9a-f]{64}$/.test(v||""))throw 0;try{localStorage.setItem(PK,v)}catch(e){}return v})})
+.catch(function(){clearTimeout(tm);var c=null;try{c=localStorage.getItem(PK)}catch(e){}return c||pinHash(PIN)})}
+function chk(){var e=$("err"),b=$("lg"),v=$("pn").value.trim();
+if(Date.now()<BAD.until){e.textContent="Too many wrong tries. Please wait "+Math.ceil((BAD.until-Date.now())/1000)+" seconds.";return}
+if(!v){e.textContent="Enter the staff PIN.";return}
+b.disabled=true;b.textContent="Checking…";e.textContent="";
+Promise.all([pinHash(v),staffHash()]).then(function(x){
+if(x[0]==x[1]){BAD.n=0;showLeads(true);return}
+BAD.n++;if(BAD.n>=5){BAD.n=0;BAD.until=Date.now()+30000}
+b.disabled=false;b.textContent="Login";$("pn").value="";$("pn").focus();e.textContent="Wrong PIN."+(BAD.until>Date.now()?" Please wait 30 seconds.":"")})}
 function del(i){var b=$("d"+i);if(b.dataset.s!="1"){b.dataset.s="1";b.textContent="Confirm delete";return}
 var ph=window._rows[i].phone;sv(ld().filter(function(l){return l.phone!=ph}));showLeads(true)}
 function csv(){var q=function(v){return'"'+String(v==null?"":v).replace(/"/g,'""')+'"'};

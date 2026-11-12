@@ -646,6 +646,32 @@ export const firebaseDbService = {
     }
   },
 
+  // ---- Investment Business game: staff PIN (only a scrambled copy is stored) -----------------
+  async getGameStaffPin(): Promise<{ set: boolean; updatedAt?: string; updatedBy?: string }> {
+    try {
+      const snap = await getDoc(doc(db, 'settings', 'gameStaff'));
+      if (!snap.exists()) return { set: false };
+      const d = snap.data() as { pinHash?: string; updatedAt?: string; updatedBy?: string };
+      return { set: typeof d.pinHash === 'string', updatedAt: d.updatedAt, updatedBy: d.updatedBy };
+    } catch (_e) {
+      return { set: false };
+    }
+  },
+
+  async saveGameStaffPin(pin: string, updatedBy: string): Promise<{ updatedAt: string; updatedBy: string }> {
+    await ensureFirestoreDatabaseSeeded();
+    if (!/^[0-9]{4,8}$/.test(pin)) throw new Error('The PIN must be 4 to 8 digits.');
+    const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('mcube-game-staff|' + pin));
+    const pinHash = Array.from(new Uint8Array(bytes)).map((b) => b.toString(16).padStart(2, '0')).join('');
+    const data = { pinHash, updatedAt: new Date().toISOString(), updatedBy: updatedBy.slice(0, 200) };
+    try {
+      await setDoc(doc(db, 'settings', 'gameStaff'), data);
+      return { updatedAt: data.updatedAt, updatedBy: data.updatedBy };
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, 'settings/gameStaff');
+    }
+  },
+
   // ---- Finance Health Check-up questions (written by the admin team) -------------------------
   /** Returns null when the admin team has not saved their own question set yet */
   async getHealthConfig(): Promise<HealthConfig | null> {

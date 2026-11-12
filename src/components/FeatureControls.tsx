@@ -5,6 +5,7 @@ import { apiService } from '../services/api';
 import { SaveErrorNotice, SaveProblem, describeSaveError } from './SaveErrorNotice';
 import { useAppSettings } from '../context/AppSettings';
 import { FEATURE_LABELS, mergeSettings } from '../utils/appSettings';
+import { GameStaffPin } from './GameStaffPin';
 
 interface FeatureControlsProps {
   currentUser: User;
@@ -337,6 +338,8 @@ export const FeatureControls: React.FC<FeatureControlsProps> = ({ currentUser, o
         </div>
         {testMsg && <p className={`text-xs font-semibold ${testMsg.ok ? 'text-emerald-700' : 'text-rose-600'}`}>{testMsg.text}</p>}
       </div>
+
+      <GameStaffPin currentUser={currentUser} onNotify={onNotify} />
     </div>
   );
 };

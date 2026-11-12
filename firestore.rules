@@ -212,7 +212,11 @@ service cloud.firestore {
           && request.resource.data.hours is string && request.resource.data.hours.size() <= 120)
         || (docId == 'healthCheck'
           && request.resource.data.categories is list && request.resource.data.categories.size() <= 30
-          && request.resource.data.questions is list && request.resource.data.questions.size() <= 200);
+          && request.resource.data.questions is list && request.resource.data.questions.size() <= 200)
+        || (docId == 'gameStaff'
+          && request.resource.data.pinHash is string && request.resource.data.pinHash.matches('^[0-9a-f]{64}$')
+          && request.resource.data.updatedAt is string && request.resource.data.updatedAt.size() <= 40
+          && request.resource.data.updatedBy is string && request.resource.data.updatedBy.size() <= 200);
       allow delete: if false;
     }
 

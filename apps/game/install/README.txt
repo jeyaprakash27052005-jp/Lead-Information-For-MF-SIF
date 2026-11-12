@@ -11,4 +11,5 @@ Open the folder for your device:
 Each folder has a HOW-TO-INSTALL.txt with the steps.
 
 Staff: leads are saved on the device where the game is played.
-Open "Staff: view leads" (PIN) and tap "Download CSV" on each device.
+Open "Staff login" (PIN set in the admin portal, Feature Controls) and tap
+"Download CSV" on each device.

@@ -15,6 +15,10 @@ Shared code lives in `src/` (components, services, utils). Each website has its 
 
 The board game in `apps/game` can be downloaded as a Windows `.exe`, a Mac `.dmg` and an Android `.apk`, and installed on iPhone from its web link. GitHub builds the files: **Actions > Game apps > Run workflow**. Website: the Vercel project `mf-nps-game` (Root Directory `apps/game`), updated automatically from `main`. Full steps are in `apps/game/README.md`.
 
+### Game staff PIN
+
+Head and Regional Incharge set the PIN for **Staff login** in the game under **Feature Controls > Investment Business game: staff PIN** (4 to 8 digits). Only a scrambled copy is stored, in `settings/gameStaff`. Publish `firestore.rules` once after this update, otherwise saving the PIN shows "the online database is blocking it". Until a PIN is set, the game uses the starting PIN `2026`.
+
 ## Automatic publishing
 
 Changes pushed to any `claude/` branch are merged into `main` automatically by `.github/workflows/auto-merge-to-main.yml`. Vercel then updates the live sites from `main`. If a change clashes with something on `main`, that workflow fails and the branch has to be merged by hand on GitHub.
