@@ -1,17 +1,37 @@
 import React, { useState } from 'react';
 import mcubeLogo from '../assets/mcube-logo.png';
 import { GrowthArt, RotatingTagline } from './intro/GrowthArt';
-import { Layers, ArrowLeft, Lock, User as UserIcon, ArrowRight, AlertCircle, Globe, Shield, Sparkles, LogIn } from 'lucide-react';
+import { Layers, ArrowLeft, Lock, User as UserIcon, ArrowRight, AlertCircle, Globe, Shield, Sparkles, LogIn, Hash } from 'lucide-react';
+import { PIN_RULE, PIN_HELP, pinWaitSeconds, notePinFailure, clearPinFailures } from '../utils/pin';
 
 interface LoginPageProps {
   onLogin: (username: string, password?: string) => Promise<void>;
+  /** Sign in with username + login PIN (shown as a second option when given) */
+  onPinLogin?: (username: string, pin: string) => Promise<void>;
   onSwitchToCustomerPortal?: () => void;
   onBackToHome?: () => void;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToCustomerPortal, onBackToHome }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onPinLogin, onSwitchToCustomerPortal, onBackToHome }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [mode, setMode] = useState<'password' | 'pin'>(() => {
+    try {
+      return onPinLogin && localStorage.getItem('mcube_login_mode') === 'pin' ? 'pin' : 'password';
+    } catch {
+      return 'password';
+    }
+  });
+  const [pin, setPin] = useState('');
+  const pickMode = (m: 'password' | 'pin') => {
+    setMode(m);
+    setError(null);
+    try {
+      localStorage.setItem('mcube_login_mode', m);
+    } catch {
+      /* not saved */
+    }
+  };
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,12 +42,34 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToCustome
       return;
     }
 
+    if (mode === 'pin' && onPinLogin) {
+      const wait = pinWaitSeconds(username.trim());
+      if (wait) {
+        setError(`Too many wrong PINs. Try again in ${Math.ceil(wait / 60)} minute(s), or sign in with your password.`);
+        return;
+      }
+      if (!PIN_RULE.test(pin)) {
+        setError(PIN_HELP);
+        return;
+      }
+    }
+
     setLoading(true);
     setError(null);
     try {
-      await onLogin(username.trim(), password);
+      if (mode === 'pin' && onPinLogin) {
+        await onPinLogin(username.trim(), pin);
+        clearPinFailures(username.trim());
+      } else {
+        await onLogin(username.trim(), password);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      const message = err instanceof Error ? err.message : 'Login failed';
+      if (mode === 'pin' && /Invalid PIN/.test(message)) {
+        notePinFailure(username.trim());
+        setPin('');
+      }
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -142,6 +184,18 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToCustome
               </div>
             )}
 
+            {onPinLogin && (
+              <div className="grid grid-cols-2 gap-1 p-1 mb-4 rounded-lg bg-slate-100 text-xs font-bold" role="tablist" aria-label="Sign in with">
+                {(['password', 'pin'] as const).map((m) => (
+                  <button key={m} type="button" role="tab" aria-selected={mode === m} onClick={() => pickMode(m)}
+                    className={`py-2 rounded-md flex items-center justify-center gap-1.5 cursor-pointer transition-colors ${mode === m ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-700'}`}>
+                    {m === 'password' ? <Lock className="w-3.5 h-3.5" /> : <Hash className="w-3.5 h-3.5" />}
+                    {m === 'password' ? 'Password' : 'PIN'}
+                  </button>
+                ))}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label
@@ -164,6 +218,29 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToCustome
                 </div>
               </div>
 
+              {mode === 'pin' && onPinLogin ? (
+              <div>
+                <label htmlFor="pin" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Login PIN
+                </label>
+                <div className="relative">
+                  <Hash className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                  <input
+                    id="pin"
+                    type="password"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    required
+                    value={pin}
+                    onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="4 to 6 digits"
+                    className="w-full pl-9 pr-3 py-2 text-sm tracking-[0.3em] border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500 font-mono"
+                  />
+                </div>
+                <p className="mt-1 text-[11px] text-slate-500">No PIN yet? Sign in with your password, then open Password &amp; PIN to set one.</p>
+              </div>
+              ) : (
               <div>
                 <label
                   htmlFor="password"
@@ -184,6 +261,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSwitchToCustome
                   />
                 </div>
               </div>
+              )}
 
               <button
                 type="submit"

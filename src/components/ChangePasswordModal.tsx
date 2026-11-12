@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { User } from '../types';
 import { apiService } from '../services/api';
 import { X, Lock, CheckCircle2, AlertCircle, KeyRound } from 'lucide-react';
+import { OwnPinForm } from './PinForms';
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentUser: User;
   onSuccess: () => void;
+  /** Called after the user sets, changes or removes their login PIN */
+  onPinSaved?: (u: User, message: string) => void;
 }
 
 const ChangePasswordModalInner: React.FC<ChangePasswordModalProps> = ({
@@ -15,7 +18,11 @@ const ChangePasswordModalInner: React.FC<ChangePasswordModalProps> = ({
   onClose,
   currentUser,
   onSuccess,
+  onPinSaved,
 }) => {
+  // Admin users can also keep a login PIN; customers only have a password
+  const pinAllowed = currentUser.role !== 'customer';
+  const [tab, setTab] = useState<'password' | 'pin'>('password');
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -71,7 +78,7 @@ const ChangePasswordModalInner: React.FC<ChangePasswordModalProps> = ({
             </div>
             <div>
               <h2 className="text-sm font-bold text-white tracking-tight">
-                Change Password
+                {pinAllowed ? 'Password & PIN' : 'Change Password'}
               </h2>
               <p className="text-[11px] text-slate-300">
                 Update login credentials for @{currentUser.username}
@@ -86,6 +93,20 @@ const ChangePasswordModalInner: React.FC<ChangePasswordModalProps> = ({
           </button>
         </div>
 
+        {pinAllowed && (
+          <div className="flex border-b border-slate-200 text-xs font-bold">
+            {(['password', 'pin'] as const).map((t) => (
+              <button key={t} type="button" onClick={() => setTab(t)}
+                className={`flex-1 py-2.5 border-b-2 -mb-px transition-colors ${tab === t ? 'border-indigo-600 text-indigo-700' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
+                {t === 'password' ? 'Change password' : `Login PIN${currentUser.hasPin ? ' (set)' : ''}`}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {tab === 'pin' && pinAllowed ? (
+          <OwnPinForm currentUser={currentUser} onClose={onClose} onSaved={(u, m) => onPinSaved?.(u, m)} />
+        ) : (
         <form onSubmit={handleSubmit}>
           <div className="p-6 space-y-4">
             {error && (
@@ -172,6 +193,7 @@ const ChangePasswordModalInner: React.FC<ChangePasswordModalProps> = ({
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );

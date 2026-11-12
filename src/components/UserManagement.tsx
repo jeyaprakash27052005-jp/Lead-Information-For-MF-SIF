@@ -19,6 +19,7 @@ import {
 import { DEFAULT_REGIONS, isHqRegion } from '../utils/regions';
 import { SearchBox, SelectFilter, ClearFilters } from './FilterControls';
 import { CustomerPermissionsModal } from './CustomerPermissionsModal';
+import { HeadPinModal } from './PinForms';
 
 interface UserManagementProps {
   users: User[];
@@ -35,6 +36,8 @@ interface UserManagementProps {
   }) => Promise<void>;
   onToggleStatus: (userId: string, newStatus: 'active' | 'inactive') => Promise<void>;
   onDeleteUser: (userId: string) => Promise<void>;
+  /** Head Incharge changed a user's login PIN */
+  onUserPinChanged?: (u: User, message: string) => void;
   onEditUserProfile: (user: User) => void;
   onUpdatePermissions?: (userId: string, permissions: CustomerPermissionSettings) => Promise<void>;
   onToggleSipAccess?: (userId: string, enabled: boolean) => Promise<void>;
@@ -51,6 +54,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
   onDeleteUser,
   onEditUserProfile,
   onUpdatePermissions,
+  onUserPinChanged,
   onToggleSipAccess,
   onCreateRegion,
   onDeleteRegion,
@@ -62,6 +66,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
   const canCreateUsers = isHead || isRegional;
 
   const [permUser, setPermUser] = useState<User | null>(null);
+  const [pinUser, setPinUser] = useState<User | null>(null);
   const [roleFilter, setRoleFilter] = useState<'all' | UserRole>('all');
   const [userSearch, setUserSearch] = useState('');
   const [userStatusFilter, setUserStatusFilter] = useState('ALL');
@@ -503,6 +508,19 @@ export const UserManagement: React.FC<UserManagementProps> = ({
                           </button>
                         )}
 
+                        {/* Login PIN - Head Incharge can set, reset or remove any admin user's PIN */}
+                        {isHead && u.role !== 'customer' && onUserPinChanged && (
+                          <button
+                            onClick={() => setPinUser(u)}
+                            className={`px-2.5 py-1 rounded text-xs font-semibold border transition-colors cursor-pointer ${
+                              u.hasPin ? 'text-violet-700 bg-violet-50 hover:bg-violet-100 border-violet-200' : 'text-slate-600 bg-white hover:bg-slate-50 border-slate-200'
+                            }`}
+                            title={u.hasPin ? `Change or remove the login PIN of ${u.name}` : `Set a login PIN for ${u.name}`}
+                          >
+                            PIN: {u.hasPin ? 'Set' : 'None'}
+                          </button>
+                        )}
+
                         {/* Customer feature permissions - Head and Regional Incharge only */}
                         {u.role === 'customer' &&
                           onUpdatePermissions &&
@@ -571,6 +589,10 @@ export const UserManagement: React.FC<UserManagementProps> = ({
           </table>
         </div>
       </div>
+
+      {pinUser && onUserPinChanged && (
+        <HeadPinModal head={currentUser} user={pinUser} onClose={() => setPinUser(null)} onSaved={onUserPinChanged} />
+      )}
 
       {permUser && onUpdatePermissions && (
         <CustomerPermissionsModal

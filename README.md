@@ -19,6 +19,15 @@ The board game in `apps/game` can be downloaded as a Windows `.exe`, a Mac `.dmg
 
 Head and Regional Incharge set the PIN for **Staff login** in the game under **Feature Controls > Investment Business game: staff PIN** (4 to 8 digits). Only a scrambled copy is stored, in `settings/gameStaff`. Publish `firestore.rules` once after this update, otherwise saving the PIN shows "the online database is blocking it". Until a PIN is set, the game uses the starting PIN `2026`.
 
+### Admin login PIN
+
+Admin users (Head, Regional Incharge, Area Incharge) can sign in with **username + PIN** instead of the password: the login card has a **Password | PIN** switch.
+
+- **Own PIN:** after signing in with the password, open **Password & PIN** (top bar) > **Login PIN**. Enter the current password to confirm, then a PIN of 4 to 6 digits. The PIN can be changed or removed there at any time.
+- **Head Incharge:** in **User Management** every admin user has a **PIN: Set / None** button to set a new PIN (for example when it is forgotten) or remove it. Only the Head can change someone else's PIN.
+- Only a scrambled copy (SHA-256) of the PIN is stored on the user record. After 5 wrong PINs, PIN sign-in on that device waits 5 minutes; the password still works.
+- Publish `firestore.rules` after this update (it checks the stored PIN format).
+
 ## Automatic publishing
 
 Changes pushed to any `claude/` branch are merged into `main` automatically by `.github/workflows/auto-merge-to-main.yml`. Vercel then updates the live sites from `main`. If a change clashes with something on `main`, that workflow fails and the branch has to be merged by hand on GitHub.

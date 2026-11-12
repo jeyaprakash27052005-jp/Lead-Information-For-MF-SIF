@@ -17,7 +17,8 @@ service cloud.firestore {
         && request.resource.data.designation is string && request.resource.data.designation.size() <= 128
         && request.resource.data.role in ['head', 'regional_incharge', 'area_incharge', 'customer']
         && request.resource.data.region is string && request.resource.data.region.size() <= 128
-        && request.resource.data.status in ['active', 'inactive'];
+        && request.resource.data.status in ['active', 'inactive']
+        && (!('pinHash' in request.resource.data) || (request.resource.data.pinHash is string && request.resource.data.pinHash.matches('^[0-9a-f]{64}$')));
       allow delete: if isValidId(userId);
     }
 

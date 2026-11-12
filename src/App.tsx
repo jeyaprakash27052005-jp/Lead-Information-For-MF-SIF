@@ -324,7 +324,22 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
 
   // Auth actions
   const handleLogin = async (username: string, password?: string) => {
-    const res = await apiService.login(username, password);
+    afterAdminLogin(await apiService.login(username, password));
+  };
+
+  // Admin sign-in with username + login PIN
+  const handlePinLogin = async (username: string, pin: string) => {
+    afterAdminLogin(await apiService.loginWithPin(username, pin));
+  };
+
+  // A user's record changed (for example their login PIN): refresh the list and, if it is them, their session
+  const handleUserPinChanged = (u: User, message: string) => {
+    setUsers((prev) => prev.map((x) => (x.id === u.id ? u : x)));
+    if (currentUser && u.id === currentUser.id) setCurrentUser(u);
+    showFeedback(message);
+  };
+
+  const afterAdminLogin = (res: { user: User }) => {
     setCurrentUser(res.user);
     void loadData(); // pick up anything added since the page was opened (new leads, health check-up reports)
     showFeedback(`Welcome, ${res.user.name} (${res.user.designation})`);
@@ -654,6 +669,7 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
         ) : (
           <LoginPage
             onLogin={handleLogin}
+            onPinLogin={handlePinLogin}
             onSwitchToCustomerPortal={
               portal === 'all'
                 ? () => {
@@ -940,6 +956,7 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
                 onDeleteUser={handleDeleteUser}
                 onUpdatePermissions={handleUpdatePermissions}
                 onToggleSipAccess={handleToggleSipAccess}
+                onUserPinChanged={handleUserPinChanged}
                 onEditUserProfile={(user) => {
                   setProfileUserToEdit(user);
                   setIsProfileModalOpen(true);
@@ -1047,6 +1064,7 @@ function AppInner({ portal = 'all' }: { portal?: AppPortal } = {}) {
         onSuccess={() => {
           showFeedback('Your password has been updated in online database.');
         }}
+        onPinSaved={handleUserPinChanged}
       />
 
       {/* MODAL 5: User Profile Update Modal (Head profile and other users profile) */}

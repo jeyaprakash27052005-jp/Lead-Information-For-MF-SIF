@@ -15,6 +15,10 @@ export interface User {
   permissions?: CustomerPermissionSettings;
   /** Area Incharge only: a Head or Regional Incharge has switched the SIP Reminders feature on for this person */
   sipRemindersEnabled?: boolean;
+  /** A login PIN is set for this admin user (the PIN itself is never sent to the screen) */
+  hasPin?: boolean;
+  pinSetAt?: string;
+  pinSetBy?: string;
 }
 
 /** What an admin saved for one customer. `explicit` marks values chosen in the Permissions window (false = blocked for this customer). */

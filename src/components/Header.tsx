@@ -155,10 +155,10 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   onClick={onOpenChangePassword}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors"
-                  title="Change your account password"
+                  title="Change your password or login PIN"
                 >
                   <KeyRound className="w-3.5 h-3.5 text-slate-500" />
-                  <span className="hidden md:inline">Change Password</span>
+                  <span className="hidden md:inline">Password &amp; PIN</span>
                 </button>
 
                 {/* Logout Button */}

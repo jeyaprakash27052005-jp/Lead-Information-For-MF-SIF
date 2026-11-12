@@ -18,6 +18,7 @@ import { mergeSettings } from '../utils/appSettings';
 import { HealthConfig, cleanHealthConfig } from '../utils/healthCheck';
 import { DEFAULT_REGIONS, NATIONAL_HQ_REGION } from '../utils/regions';
 import { normalizeIndianMobile, isValidPan } from '../utils/validation';
+import { PIN_RULE, PIN_HELP, hashAdminPin } from '../utils/pin';
 
 export const DEFAULT_SCHEMES: InvestmentScheme[] = [
   {
@@ -241,7 +242,14 @@ export async function testConnection(): Promise<boolean> {
 
 interface StoredUser extends User {
   password?: string;
+  pinHash?: string;
 }
+
+/** Removes the password and PIN before a user record reaches the screen */
+const toSafeUser = (data: StoredUser): User => {
+  const { password: _p, pinHash, ...rest } = data;
+  return { ...rest, hasPin: typeof pinHash === 'string' && pinHash.length === 64 } as User;
+};
 
 // Only the Head login is created, and only when the online database has no Head account yet
 // (a brand-new database). All other users, leads and regions live in the online Firestore.
@@ -344,7 +352,7 @@ export const firebaseDbService = {
         throw new Error('Invalid password. Please check your credentials.');
       }
 
-      const { password: _p, ...safeUser } = user;
+      const safeUser = toSafeUser(user as StoredUser);
       return { user: safeUser as User };
     } catch (error) {
       if (error instanceof Error && (error.message.includes('not found') || error.message.includes('deactivated') || error.message.includes('password'))) {
@@ -362,7 +370,7 @@ export const firebaseDbService = {
       const users: User[] = [];
       snap.forEach((d) => {
         const data = d.data() as StoredUser;
-        const { password: _p, ...safeUser } = data;
+        const safeUser = toSafeUser(data as StoredUser);
         users.push(safeUser as User);
       });
       return users;
@@ -412,7 +420,7 @@ export const firebaseDbService = {
       };
 
       await setDoc(doc(db, path, newId), newUser);
-      const { password: _p, ...safeUser } = newUser;
+      const safeUser = toSafeUser(newUser as StoredUser);
       return safeUser as User;
     } catch (error) {
       if (error instanceof Error && error.message.includes('already assigned')) {
@@ -435,7 +443,7 @@ export const firebaseDbService = {
       await updateDoc(userRef, { status });
       const updatedSnap = await getDoc(userRef);
       const data = updatedSnap.data() as StoredUser;
-      const { password: _p, ...safeUser } = data;
+      const safeUser = toSafeUser(data as StoredUser);
       return safeUser as User;
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, path);
@@ -454,7 +462,7 @@ export const firebaseDbService = {
       await updateDoc(userRef, { permissions });
       const updatedSnap = await getDoc(userRef);
       const data = updatedSnap.data() as StoredUser;
-      const { password: _p, ...safeUser } = data;
+      const safeUser = toSafeUser(data as StoredUser);
       return safeUser as User;
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, path);
@@ -472,7 +480,7 @@ export const firebaseDbService = {
       }
       await updateDoc(userRef, { sipRemindersEnabled: enabled });
       const data = (await getDoc(userRef)).data() as StoredUser;
-      const { password: _p, ...safeUser } = data;
+      const safeUser = toSafeUser(data as StoredUser);
       return safeUser as User;
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, path);
@@ -511,7 +519,7 @@ export const firebaseDbService = {
       await updateDoc(userRef, updates);
       const updatedSnap = await getDoc(userRef);
       const data = updatedSnap.data() as StoredUser;
-      const { password: _p, ...safeUser } = data;
+      const safeUser = toSafeUser(data as StoredUser);
       return safeUser as User;
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, path);
@@ -544,6 +552,65 @@ export const firebaseDbService = {
         throw error;
       }
       handleFirestoreError(error, OperationType.UPDATE, path);
+    }
+  },
+
+  // ---- Login PIN for admin users ----------------------------------------------------------
+  /** Sign in with username + PIN (admin roles only) */
+  async loginWithPin(username: string, pin: string): Promise<{ user: User }> {
+    await ensureFirestoreDatabaseSeeded();
+    if (!PIN_RULE.test(pin)) throw new Error('Invalid PIN. ' + PIN_HELP);
+    const snap = await getDocs(collection(db, 'users')).catch((error) => handleFirestoreError(error, OperationType.LIST, 'users'));
+    let user: StoredUser | undefined;
+    snap.forEach((d) => {
+      const u = d.data() as StoredUser;
+      if (u.username.toLowerCase() === username.trim().toLowerCase()) user = u;
+    });
+    if (!user || user.role === 'customer') throw new Error('User not found. Please contact the Head of Operations.');
+    if (user.status === 'inactive') throw new Error('This account has been deactivated. Please contact your administrator.');
+    if (!user.pinHash) throw new Error('No PIN is set for this user yet. Sign in with your password, then set a PIN under Password & PIN.');
+    if ((await hashAdminPin(user.id, pin)) !== user.pinHash) throw new Error('Invalid PIN. Please try again.');
+    return { user: toSafeUser(user) };
+  },
+
+  /** The signed-in user sets, changes or removes (pin = null) their own PIN; their password confirms it is them */
+  async setOwnPin(userId: string, currentPassword: string, pin: string | null): Promise<User> {
+    await ensureFirestoreDatabaseSeeded();
+    const ref = doc(db, 'users', userId);
+    const snap = await getDoc(ref).catch((error) => handleFirestoreError(error, OperationType.GET, `users/${userId}`));
+    if (!snap.exists()) throw new Error('User not found');
+    const data = snap.data() as StoredUser;
+    if (data.password && data.password !== currentPassword) throw new Error('Current password does not match.');
+    return this.writePin(data, pin, 'Self');
+  },
+
+  /** Head Incharge sets, resets or removes (pin = null) the PIN of any admin user */
+  async setUserPinByHead(head: User, userId: string, pin: string | null): Promise<User> {
+    await ensureFirestoreDatabaseSeeded();
+    if (head.role !== 'head') throw new Error('Only the Head Incharge can change another user\'s PIN.');
+    const snap = await getDoc(doc(db, 'users', userId)).catch((error) => handleFirestoreError(error, OperationType.GET, `users/${userId}`));
+    if (!snap.exists()) throw new Error('User not found');
+    const data = snap.data() as StoredUser;
+    if (data.role === 'customer') throw new Error('PIN sign-in is only for admin users.');
+    return this.writePin(data, pin, `${head.name} (Head Incharge)`);
+  },
+
+  async writePin(data: StoredUser, pin: string | null, by: string): Promise<User> {
+    const ref = doc(db, 'users', data.id);
+    try {
+      if (pin === null) {
+        await updateDoc(ref, { pinHash: deleteField(), pinSetAt: deleteField(), pinSetBy: deleteField() });
+        const { pinSetAt: _a, pinSetBy: _b, ...rest } = data;
+        return toSafeUser({ ...rest, pinHash: undefined });
+      }
+      if (!PIN_RULE.test(pin)) throw new Error(PIN_HELP);
+      const pinHash = await hashAdminPin(data.id, pin);
+      const pinSetAt = new Date().toISOString();
+      await updateDoc(ref, { pinHash, pinSetAt, pinSetBy: by });
+      return toSafeUser({ ...data, pinHash, pinSetAt, pinSetBy: by });
+    } catch (error) {
+      if (error instanceof Error && error.message === PIN_HELP) throw error;
+      handleFirestoreError(error, OperationType.UPDATE, `users/${data.id}`);
     }
   },
 
@@ -1170,7 +1237,7 @@ export const firebaseDbService = {
 
     await setDoc(doc(db, 'users', customerUserId), newCustomerUser);
 
-    const { password: _p, ...safeUser } = newCustomerUser;
+    const safeUser = toSafeUser(newCustomerUser as StoredUser);
     return {
       user: safeUser as User,
       lead: newLead,
