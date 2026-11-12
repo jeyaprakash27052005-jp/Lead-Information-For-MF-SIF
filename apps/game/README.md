@@ -45,11 +45,7 @@ The Releases page on GitHub then has one zip per device (`Investment-Business-1-
 
 ## 2. Web link (also the iPhone install)
 
-The game website is published automatically with GitHub Pages:
-
-**https://jeyaprakash27052005-jp.github.io/Lead-Information-For-MF-SIF/**
-
-One-time setup: on GitHub open **Settings > Pages** and set **Source** to **GitHub Actions**. After that, every change to `apps/game/www` on `main` is put online within a couple of minutes (workflow: `.github/workflows/game-site.yml`). Changes made on a `claude/` branch are merged into `main` automatically (`.github/workflows/auto-merge-to-main.yml`), so they go live too.
+The game website is the Vercel project **mf-nps-game** (Root Directory `apps/game`, no build settings). It updates automatically whenever `main` changes. Changes made on a `claude/` branch are merged into `main` automatically (`.github/workflows/auto-merge-to-main.yml`), so they go live too.
 
 Players open the link and:
 

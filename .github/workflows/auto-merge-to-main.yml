@@ -1,15 +1,13 @@
 name: Publish changes to main (automatic)
 
 # Every push to a claude/ branch is merged into main straight away,
-# so Vercel updates the live sites and the game website is republished.
+# so Vercel updates the live sites (admin, customer, health check, game).
 on:
   push:
     branches: ["claude/**"]
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 concurrency:
   group: auto-merge-main
@@ -33,6 +31,3 @@ jobs:
             echo "::error::These changes clash with something already on main. Merge ${{ github.ref_name }} into main by hand on GitHub."; exit 1; }
           git push origin HEAD:main
 
-  game-site:
-    needs: merge
-    uses: ./.github/workflows/game-site.yml

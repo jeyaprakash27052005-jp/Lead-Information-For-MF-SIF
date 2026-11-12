@@ -13,7 +13,7 @@ Shared code lives in `src/` (components, services, utils). Each website has its 
 
 ## Investment Business game (Windows, Mac, Android, iPhone)
 
-The board game in `apps/game` can be downloaded as a Windows `.exe`, a Mac `.dmg` and an Android `.apk`, and installed on iPhone from its web link. GitHub builds the files: **Actions > Game apps > Run workflow**. Website: https://jeyaprakash27052005-jp.github.io/Lead-Information-For-MF-SIF/ (GitHub Pages, updates automatically). Full steps are in `apps/game/README.md`.
+The board game in `apps/game` can be downloaded as a Windows `.exe`, a Mac `.dmg` and an Android `.apk`, and installed on iPhone from its web link. GitHub builds the files: **Actions > Game apps > Run workflow**. Website: the Vercel project `mf-nps-game` (Root Directory `apps/game`), updated automatically from `main`. Full steps are in `apps/game/README.md`.
 
 ## Automatic publishing
 
