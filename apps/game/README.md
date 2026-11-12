@@ -87,7 +87,42 @@ base64 -w0 mcube.keystore
 
 Add these in GitHub **Settings > Secrets and variables > Actions**: `ANDROID_KEYSTORE_BASE64` (the base64 text), `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` (`mcube`), `ANDROID_KEY_PASSWORD`. The next run then also gives `release-android.apk` and `release-android-playstore.aab` (upload the `.aab` to Google Play Console).
 
-**iPhone (App Store):** needs an Apple Developer account (USD 99 a year) and a Mac. Unzip `Investment-Business-ios-xcode-project.zip`, open `ios/App/App.xcodeproj` in Xcode, choose your team under **Signing & Capabilities**, then **Product > Archive > Distribute App**. The unsigned `.ipa` cannot be installed on a normal iPhone; use the web link instead until the app is on the App Store.
+## iPhone app (TestFlight, App Store or ad hoc)
+
+iPhones only install apps signed by Apple. There are three ways, from easiest:
+
+| Way | Needs | Who can install |
+|---|---|---|
+| **Safari > Share > Add to Home Screen** | nothing | anyone (the game shows these steps on iPhones; works offline) |
+| **TestFlight** (then the App Store) | Apple Developer account (USD 99 a year) | anyone with the TestFlight link, up to 10,000 people; App Store after Apple's review |
+| **Ad hoc** | Apple Developer account | only iPhones whose device ID is registered (up to 100 a year) |
+
+### One-time setup (TestFlight / App Store)
+
+1. Join the **Apple Developer Program** at developer.apple.com (as Mcube Academy).
+2. In **App Store Connect > Apps > +**, create a new app: name *Investment Business*, bundle ID `com.mcubeacademy.investmentbusiness` (register it under Certificates, Identifiers & Profiles > Identifiers if it is not offered), SKU e.g. `investment-business`.
+3. In **App Store Connect > Users and Access > Integrations > App Store Connect API**, create a key with **Admin** access. Download the `.p8` file (only possible once) and note the **Key ID** and **Issuer ID**.
+4. Note your **Team ID** (developer.apple.com > Account > Membership details).
+5. In GitHub, **Settings > Secrets and variables > Actions > New repository secret**, add:
+
+| Secret | Value |
+|---|---|
+| `APPLE_TEAM_ID` | your Team ID, e.g. `A1B2C3D4E5` |
+| `ASC_KEY_ID` | the Key ID |
+| `ASC_ISSUER_ID` | the Issuer ID |
+| `ASC_KEY_P8_BASE64` | the `.p8` file as base64 (command below) |
+
+```bash
+base64 -i AuthKey_XXXXXXXXXX.p8 | tr -d '\n'
+```
+
+From the next build on, the iPhone app is signed automatically and uploaded to App Store Connect. After Apple's processing (10 to 30 minutes) it appears under **TestFlight**. There, create an **External testing** group, add the build, and switch on the **Public link**. Paste that link into `www/app-links.js` as `iosTestFlight`; the Download page then shows **Install with TestFlight**. When you submit for the App Store and it is approved, put the App Store link in `iosAppStore`.
+
+### Ad hoc instead of TestFlight
+
+Register each iPhone's device ID under Certificates, Identifiers & Profiles > Devices. Then in GitHub **Settings > Secrets and variables > Actions > Variables** add `IOS_DISTRIBUTION` = `adhoc`. Each build then publishes `Investment-Business-iPhone.ipa` with the other downloads, and setting `iosAdHoc: true` in `www/app-links.js` shows an **Install app** button on the Download page (open it in Safari on a registered iPhone).
+
+The signed iPhone steps run only on GitHub's Mac machines with your Apple keys, so they have not been tried yet; the first run's log in the Actions tab shows any Apple account step still missing.
 
 ## Build on your own computer
 

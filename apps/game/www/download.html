@@ -58,14 +58,16 @@ ol{padding-left:20px;margin:6px 0 0;font-size:14px;color:#374151}ol li{margin:3p
     <p>Android 7 or newer, phone or tablet. Tap the downloaded file to install.</p>
     <div class="links"><a class="btn" data-file="Investment-Business-Android.apk">Download for Android (.apk)</a></div></div>
   <div class="card" id="c-ios"><div class="t"><span>📱</span>iPhone / iPad</div>
-    <p>Apple does not allow app files outside the App Store. Install from the website instead, it works offline:</p>
-    <ol><li>Open <a href="./" id="gamelink">the game</a> in <b>Safari</b></li><li>Tap <b>Share</b> (square with arrow)</li><li>Tap <b>Add to Home Screen</b></li></ol></div>
+    <div class="links" id="ios-links"></div>
+    <p id="ios-web">Install from the website, it works offline and opens full screen like an app:</p>
+    <ol><li>Open <a href="./" id="gamelink">the game</a> in <b>Safari</b></li><li>Tap <b>Share</b> (square with arrow)</li><li>Tap <b>Add to Home Screen</b>, then <b>Add</b></li></ol></div>
 </div>
 
 <div class="note" id="tips"></div>
 
 <p class="foot">Play money only. Investments are subject to market risks. · <a href="./">Play in the browser</a> · <a href="https://mcubeacademy.com" target="_blank" rel="noopener">mcubeacademy.com</a></p>
 </div>
+<script src="app-links.js"></script>
 <script>
 // Installers are published automatically by GitHub Actions (.github/workflows/game-apps.yml) on every build.
 var BASE="https://github.com/jeyaprakash27052005-jp/Lead-Information-For-MF-SIF/releases/download/game-app/";
@@ -78,9 +80,17 @@ var H={
  mac:["🍎","Mac","Investment-Business-Mac.dmg","Download for Mac"],
  and:["🤖","Android","Investment-Business-Android.apk","Download for Android"],
  ios:["📱","iPhone / iPad","","Open the game"]};
+var L=window.APP_LINKS||{},IL=[];
+if(L.iosAppStore)IL.push(["App Store",L.iosAppStore,"Get it on the App Store"]);
+if(L.iosTestFlight)IL.push(["TestFlight",L.iosTestFlight,"Install with TestFlight"]);
+if(L.iosAdHoc)IL.push(["Ad hoc","itms-services://?action=download-manifest&url="+encodeURIComponent(BASE+"Investment-Business-iPhone-manifest.plist"),"Install app (registered iPhones)"]);
+document.getElementById("ios-links").innerHTML=IL.map(function(x,i){return'<a class="btn'+(i?" alt":"")+'" href="'+x[1]+'">'+x[2]+'</a>'}).join("");
+if(IL.length){document.getElementById("ios-web").textContent="Or install from the website (works offline):";
+ if(L.iosTestFlight&&!L.iosAppStore)document.getElementById("ios-links").insertAdjacentHTML("beforeend",'<span class="size">TestFlight: first install Apple’s free TestFlight app, then tap the button.</span>')}
+if(IL.length)H.ios=["📱","iPhone / iPad","",IL[0][2]];
 var hero=document.getElementById("hero"),h=H[os];
 if(h){document.getElementById("c-"+os).classList.add("me");
- hero.innerHTML='<div class="ic">'+h[0]+'</div><div><h2>Your device: '+h[1]+'</h2><p>'+(os=="ios"?"Open the game in Safari, tap Share, then Add to Home Screen.":"The newest version downloads straight away. It works offline after installing.")+'</p></div><div class="go"><a class="btn" href="'+(h[2]?BASE+h[2]:"./")+'">'+h[3]+'</a></div>';}
+ hero.innerHTML='<div class="ic">'+h[0]+'</div><div><h2>Your device: '+h[1]+'</h2><p>'+(os=="ios"?(IL.length?"Tap the button to install. You can also add the website to your Home Screen.":"Open the game in Safari, tap Share, then Add to Home Screen."):"The newest version downloads straight away. It works offline after installing.")+'</p></div><div class="go"><a class="btn" href="'+(h[2]?BASE+h[2]:(os=="ios"&&IL.length?IL[0][1]:"./"))+'">'+h[3]+'</a></div>';}
 else hero.innerHTML='<div class="ic">⬇️</div><div><h2>Choose your device below</h2><p>Windows, Mac and Android files download straight away. iPhone and iPad install from the website.</p></div>';
 var T={
  win:'<b>First time on Windows:</b> if “Windows protected your PC” appears, click <b>More info</b> then <b>Run anyway</b>.',

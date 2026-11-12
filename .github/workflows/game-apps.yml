@@ -71,25 +71,89 @@ jobs:
       - uses: actions/upload-artifact@v4
         with: { name: android, path: "apps/game/release-android*", if-no-files-found: error }
 
+  # iPhone / iPad.
+  # Always: an unsigned test build and the Xcode project.
+  # With the Apple secrets (see apps/game/README.md, "iPhone app"): Xcode signs the app itself
+  # (automatic signing with an App Store Connect API key) and
+  #   - IOS_DISTRIBUTION = testflight (default): uploads to App Store Connect -> TestFlight / App Store
+  #   - IOS_DISTRIBUTION = adhoc: makes a signed .ipa for registered iPhones, published on the download page
   ios:
     runs-on: macos-latest
+    env:
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+      IOS_DISTRIBUTION: ${{ vars.IOS_DISTRIBUTION || 'testflight' }}
+      BUNDLE_ID: com.mcubeacademy.investmentbusiness
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm, cache-dependency-path: apps/game/package-lock.json }
       - run: npm ci
       - run: npm run ios:add
-      - name: Build unsigned iPhone app
+      - name: iPhone app settings (name, version, all orientations, no encryption questions)
+        run: |
+          P=ios/App/App/Info.plist
+          VER=$(node -p "require('./package.json').version")
+          /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName Investment Business" "$P" 2>/dev/null || /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string Investment Business" "$P"
+          /usr/libexec/PlistBuddy -c "Delete :ITSAppUsesNonExemptEncryption" "$P" 2>/dev/null || true
+          /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" "$P"
+          echo "VER=$VER" >> "$GITHUB_ENV"
+          echo "BUILD=$((1000 + ${{ github.run_number }}))" >> "$GITHUB_ENV"
+      - name: Build unsigned iPhone app (test build)
         run: |
           xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release \
             -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath ios-build \
+            MARKETING_VERSION=$VER CURRENT_PROJECT_VERSION=$BUILD \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build
           mkdir -p Payload && cp -R ios-build/Build/Products/Release-iphoneos/App.app Payload/
           zip -qr Investment-Business-ios-unsigned.ipa Payload
-      - name: Zip the Xcode project (open on a Mac to sign and send to the App Store)
+      - name: Zip the Xcode project (open on a Mac to sign and send to the App Store by hand)
         run: zip -qr Investment-Business-ios-xcode-project.zip ios -x "ios/App/Pods/*"
+      - name: Sign the iPhone app and send it out (only when the Apple secrets are set)
+        if: env.ASC_KEY_P8_BASE64 != '' && env.APPLE_TEAM_ID != ''
+        run: |
+          KEY="$RUNNER_TEMP/AuthKey_$ASC_KEY_ID.p8"
+          echo "$ASC_KEY_P8_BASE64" | base64 --decode > "$KEY"
+          AUTH=(-allowProvisioningUpdates -authenticationKeyPath "$KEY" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID")
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" CODE_SIGN_STYLE=Automatic PRODUCT_BUNDLE_IDENTIFIER="$BUNDLE_ID" \
+            MARKETING_VERSION=$VER CURRENT_PROJECT_VERSION=$BUILD "${AUTH[@]}" archive
+          if [ "$IOS_DISTRIBUTION" = "adhoc" ]; then METHOD=release-testing; DEST=export; else METHOD=app-store-connect; DEST=upload; fi
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>$METHOD</string>
+            <key>destination</key><string>$DEST</string>
+            <key>teamID</key><string>$APPLE_TEAM_ID</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict></plist>
+          PLIST
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" -exportPath "$RUNNER_TEMP/export" "${AUTH[@]}"
+          if [ "$DEST" = "export" ]; then
+            cp "$RUNNER_TEMP"/export/*.ipa Investment-Business-iPhone.ipa
+            # Over-the-air install file for the download page (itms-services link)
+            BASE="https://github.com/${{ github.repository }}/releases/download/game-app"
+            cat > Investment-Business-iPhone-manifest.plist <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict><key>items</key><array><dict>
+            <key>assets</key><array><dict><key>kind</key><string>software-package</string><key>url</key><string>$BASE/Investment-Business-iPhone.ipa</string></dict></array>
+            <key>metadata</key><dict><key>bundle-identifier</key><string>$BUNDLE_ID</string><key>bundle-version</key><string>$VER</string><key>kind</key><string>software</string><key>title</key><string>Investment Business</string></dict>
+          </dict></array></dict></plist>
+          PLIST
+            echo "Signed ad hoc .ipa ready."
+          else
+            echo "Uploaded build $VER ($BUILD) to App Store Connect. It appears in TestFlight after Apple's processing (10-30 minutes)."
+          fi
+          rm -f "$KEY"
       - uses: actions/upload-artifact@v4
-        with: { name: ios, path: "apps/game/Investment-Business-ios-*", if-no-files-found: error }
+        with: { name: ios, path: "apps/game/Investment-Business-ios*\napps/game/Investment-Business-iPhone*", if-no-files-found: error }
 
   # Puts every install file in its own folder with install steps:
   # Investment-Business-Downloads/1-Windows-Laptop, 2-Mac, 3-Android, 4-iPhone-iPad
@@ -124,6 +188,7 @@ jobs:
           cp built/windows/*Portable*.exe direct/Investment-Business-Windows-Portable.exe
           cp built/mac/*.dmg direct/Investment-Business-Mac.dmg
           cp "$D/3-Android/Investment-Business-Android.apk" direct/Investment-Business-Android.apk
+          cp built/ios/Investment-Business-iPhone.ipa built/ios/Investment-Business-iPhone-manifest.plist direct/ 2>/dev/null || true
           ls -la direct
           mkdir zips
           for f in "$D"/*/; do n=$(basename "$f"); (cd "$D" && zip -qr "../zips/Investment-Business-$n.zip" "$n" README.txt); done

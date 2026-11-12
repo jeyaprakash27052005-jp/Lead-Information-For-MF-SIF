@@ -5,6 +5,7 @@
 <meta name="theme-color" content="#ffffff">
 <meta name="description" content="A money-habits board game by Mcube Academy.">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Investment Business">
 <link rel="manifest" href="manifest.webmanifest">
@@ -58,6 +59,7 @@ input:focus{border-color:var(--ac)}
 .win{text-align:center;border-radius:14px;padding:20px 16px;margin-top:12px;background:linear-gradient(#fffbeb,#fff);color:#78350f;border:1px solid #fcd34d;box-shadow:var(--sh)}.win .tr{font-size:64px;line-height:1}.win h2{font:700 20px var(--font);margin:4px 0}.win .big{font:800 28px var(--font);letter-spacing:-.02em;margin:0}.win p{margin:4px 0}
 .prod{padding:0;list-style:none;margin:6px 0}.prod li{padding:10px 12px;border:1px solid var(--bd);border-radius:10px;margin-bottom:6px;font-size:15px;background:#fff}
 .slog{border:1px solid var(--bd);border-left:4px solid var(--ac);background:var(--soft);border-radius:10px;padding:6px 14px}.slog p{margin:8px 0;font-size:15px}
+.iostip{margin-top:14px;padding:12px 14px;border:1px solid #c7d2fe;background:#eef2ff;border-radius:12px;font-size:14px;line-height:1.45;display:grid;gap:4px;color:#1e1b4b}.iostip a{color:var(--ac)}
 a.btn.alt-link{background:#fff;color:#344054;border:1px solid var(--bd2);box-shadow:none;padding:10px 16px;font-size:15px;line-height:22px;vertical-align:middle}a.btn.alt-link:hover{background:var(--soft)}
 a.btn{display:inline-block;background:var(--ac);color:var(--acfg);padding:11px 18px;border-radius:8px;font-weight:600;text-decoration:none}
 /* ---------- Layout that adapts to the device ---------- */
@@ -201,7 +203,7 @@ $("app").innerHTML='<div class="home"><div class="intro">'+LOGO+'<h1>Investment 
 '<ol class="rules"><li>Register once with your name, mobile and email.</li><li>Roll the dice and move clockwise.</li><li>Read the lesson on each square.</li><li>On a Chance square, take the card with the same number as your dice.</li><li>Finish '+LAPS+' laps. The most play money wins.</li></ol></div>'+
 '<div class="card"><strong>Who is playing?</strong><div class="pick"><button id="mg" onclick="setMode(0)">Grown-ups</button><button id="mk" class="alt" onclick="setMode(1)">Kids</button></div><strong>How many players?</strong><div class="pick">'+[1,2,3,4].map(function(n){return'<button onclick="begin('+n+')">'+n+'</button>'}).join("")+'</div><div class="err" id="err"></div>'+
 (persist()?"":'<p class="err">This browser is not saving data. Staff must tap Download CSV after every player.</p>')+'<button class="alt" onclick="showLeads()">🔒 Staff login</button>'+(inApp()?"":' <a class="btn alt-link" href="download.html">⬇ Download the app</a>')+
-'<p class="foot">Play money only. Investments are subject to market risks.</p></div></div>';setMode(MODE=="kids"?1:0)}
+'<p class="foot">Play money only. Investments are subject to market risks.</p>'+iosTip()+'</div></div>';setMode(MODE=="kids"?1:0)}
 function begin(n){R={n:n,i:0,list:[]};reg()}
 function reg(e){
 $("app").className="s-form";
@@ -318,6 +320,8 @@ function csv(){var q=function(v){return'"'+String(v==null?"":v).replace(/"/g,'""
 var t="\ufeffName,Mobile,Email,Score,Registered\n"+window._rows.map(function(r){return[r.name,r.phone,r.email,r.score,r.registeredAt].map(q).join(",")}).join("\n");
 if(nativeCsv(t))return;
 var b=new Blob([t],{type:"text/csv"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="mcube-leads.csv";document.body.appendChild(a);a.click();a.remove()}
+function isIOS(){var u=navigator.userAgent;return /iPhone|iPad|iPod/.test(u)||(/Mac/.test(navigator.platform)&&navigator.maxTouchPoints>1)}
+function iosTip(){if(!isIOS()||inApp())return"";return'<div class="iostip"><b>📱 Install on your iPhone / iPad</b><span>In Safari tap <b>Share</b> <span aria-hidden="true">⬆</span>, then <b>Add to Home Screen</b>. The game then opens full screen and works offline. <a href="download.html">More options</a></span></div>'}
 function inApp(){try{return !!CAP||/Electron/.test(navigator.userAgent)||matchMedia("(display-mode: standalone)").matches||navigator.standalone===true}catch(e){return false}}
 var CAP=window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform();
 function ext(u){if(CAP){location.href=u;return false}return true}
