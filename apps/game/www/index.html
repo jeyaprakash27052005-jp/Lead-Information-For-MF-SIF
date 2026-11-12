@@ -60,6 +60,15 @@ input:focus{border-color:var(--ac)}
 .prod{padding:0;list-style:none;margin:6px 0}.prod li{padding:10px 12px;border:1px solid var(--bd);border-radius:10px;margin-bottom:6px;font-size:15px;background:#fff}
 .slog{border:1px solid var(--bd);border-left:4px solid var(--ac);background:var(--soft);border-radius:10px;padding:6px 14px}.slog p{margin:8px 0;font-size:15px}
 .iostip{margin-top:14px;padding:12px 14px;border:1px solid #c7d2fe;background:#eef2ff;border-radius:12px;font-size:14px;line-height:1.45;display:grid;gap:4px;color:#1e1b4b}.iostip a{color:var(--ac)}
+.tool{display:flex;align-items:center;justify-content:center}
+@container (max-width:520px){.mid.sp .logo{display:none}.mid.sp{gap:3px}}
+.wheel-wrap{position:relative;width:clamp(96px,30cqi,240px);aspect-ratio:1;container-type:inline-size}
+.wheel{position:absolute;inset:0;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px var(--bd2),var(--sh);will-change:transform}
+.wheel span{position:absolute;left:50%;top:50%;width:0;height:0;display:flex;align-items:center;justify-content:center}
+.wheel span b{display:block;color:#fff;font:800 clamp(12px,13cqi,30px)/1 var(--font);text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.ptr{position:absolute;left:50%;top:-6%;transform:translateX(-50%);width:0;height:0;border-left:7cqi solid transparent;border-right:7cqi solid transparent;border-top:13cqi solid #111827;z-index:2;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
+.hub{position:absolute;left:50%;top:50%;width:30cqi;height:30cqi;transform:translate(-50%,-50%);border-radius:50%;background:#fff;border:1px solid var(--bd2);box-shadow:var(--sh);display:flex;align-items:center;justify-content:center;font:800 15cqi/1 var(--font);color:#111827;z-index:1}
+@media (prefers-reduced-motion:reduce){.wheel{transition-duration:.6s!important}}
 a.btn.alt-link{background:#fff;color:#344054;border:1px solid var(--bd2);box-shadow:none;padding:10px 16px;font-size:15px;line-height:22px;vertical-align:middle}a.btn.alt-link:hover{background:var(--soft)}
 a.btn{display:inline-block;background:var(--ac);color:var(--acfg);padding:11px 18px;border-radius:8px;font-weight:600;text-decoration:none}
 /* ---------- Layout that adapts to the device ---------- */
@@ -200,7 +209,7 @@ function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()
 function setup(){
 $("app").className="s-home";
 $("app").innerHTML='<div class="home"><div class="intro">'+LOGO+'<h1>Investment Business</h1><p class="sub">A money-habits board game. Learn by playing with play money.</p><p class="sub"><b>Save first, spend later, dream bigger.</b></p>'+
-'<ol class="rules"><li>Register once with your name, mobile and email.</li><li>Roll the dice and move clockwise.</li><li>Read the lesson on each square.</li><li>On a Chance square, take the card with the same number as your dice.</li><li>Finish '+LAPS+' laps. The most play money wins.</li></ol></div>'+
+'<ol class="rules"><li>Register once with your name, mobile and email.</li><li>'+(SPIN?"Spin the wheel":"Roll the dice")+' and move clockwise.</li><li>Read the lesson on each square.</li><li>On a Chance square, take the card with the same number as your '+(SPIN?"spin":"dice")+'.</li><li>Finish '+LAPS+' laps. The most play money wins.</li></ol></div>'+
 '<div class="card"><strong>Who is playing?</strong><div class="pick"><button id="mg" onclick="setMode(0)">Grown-ups</button><button id="mk" class="alt" onclick="setMode(1)">Kids</button></div><strong>How many players?</strong><div class="pick">'+[1,2,3,4].map(function(n){return'<button onclick="begin('+n+')">'+n+'</button>'}).join("")+'</div><div class="err" id="err"></div>'+
 (persist()?"":'<p class="err">This browser is not saving data. Staff must tap Download CSV after every player.</p>')+'<button class="alt" onclick="showLeads()">🔒 Staff login</button>'+(inApp()?"":' <a class="btn alt-link" href="download.html">⬇ Download the app</a>')+
 '<p class="foot">Play money only. Investments are subject to market risks.</p>'+iosTip()+'</div></div>';setMode(MODE=="kids"?1:0)}
@@ -233,17 +242,17 @@ P=R.list.map(function(r,i){return{name:r.name,phone:r.phone,c:COL[i],pos:0,cash:
 cur=0;busy=false;
 var cells="";for(var k=0;k<20;k++){var s=SQ[k],p=rc(k);
 cells+='<div class="sq '+s.t+'" style="grid-row:'+(p[0]+1)+';grid-column:'+(p[1]+1)+'"><b>'+s.n+'</b><span>'+(s.t=="c"?"Draw card":(s.a?fmt(s.a):(k?"":(K?"₹1,000":"₹1 lakh"))))+'</span><div class="tk" id="t'+k+'"></div></div>'}
-function rules(){var A=DK.A,B=DK.B,h='<h3>Chance card rules</h3><p class="sub">Land on Chance and take the card with the same number as your dice roll.</p><div class="cc">';
+function rules(){var A=DK.A,B=DK.B,h='<h3>Chance card rules</h3><p class="sub">Land on Chance and take the card with the same number as your '+(SPIN?"spin":"dice roll")+'.</p><div class="cc">';
 if(B)h+='<strong>Chance A</strong><strong>Chance B</strong>';
 for(var i=0;i<6;i++){h+=row(A[i],i)+(B?row(B[i],i):"")}
 return h+'</div>'}
-function row(c,i){return'<div><i class="no">'+(i+1)+'</i><b class="'+(c.a>0?"p":c.a<0?"m":"a")+'">'+(c.a?fmt(c.a):"Action")+'</b><span>'+c.t+(c.act=="again"?": roll again":c.act=="move2"?": move 2 squares":"")+'</span></div>'}
+function row(c,i){return'<div><i class="no">'+(i+1)+'</i><b class="'+(c.a>0?"p":c.a<0?"m":"a")+'">'+(c.a?fmt(c.a):"Action")+'</b><span>'+c.t+(c.act=="again"?(SPIN?": spin again":": roll again"):c.act=="move2"?": move 2 squares":"")+'</span></div>'}
 $("app").className="s-play";
-$("app").innerHTML='<div class="game"><div class="left"><div class="board">'+cells+'<div class="mid">'+LOGO+'<div class="who" id="who"></div><div class="dice" id="dice" aria-live="polite">?</div><button id="roll" onclick="roll()">Roll dice</button></div></div></div><div class="side"><div class="now">'+
+$("app").innerHTML='<div class="game"><div class="left"><div class="board">'+cells+'<div class="mid'+(SPIN?" sp":"")+'">'+LOGO+'<div class="who" id="who"></div><div class="tool" id="tool">'+(SPIN?wheelHTML():'<div class="dice" id="dice" aria-live="polite">?</div>')+'</div><button id="roll" onclick="roll()">'+(SPIN?"Spin":"Roll dice")+'</button></div></div></div><div class="side"><div class="now">'+
 '<div class="msg n" id="msg" aria-live="polite"></div><div class="score" id="score"></div></div><div id="fin"></div>'+
 rules()+slog()+
 '<p class="foot"><button class="alt" onclick="setup()">New game</button></p><p class="foot">Play money only. Investments are subject to market risks.</p></div></div>';
-say("Welcome","Roll the dice to begin. Move clockwise and learn from every square.","n","👋");render()}
+say("Welcome",(SPIN?"Spin the wheel":"Roll the dice")+" to begin. Move clockwise and learn from every square.","n",SPIN?"🎡":"👋");render()}
 function say(h,b,t,e,k){var m=$("msg");m.className="msg "+t;m.innerHTML='<div class="em">'+(e||"💬")+'</div><div><h2>'+h+'</h2><p>'+b+'</p>'+(k?'<p><b>Remember:</b> '+k+'</p>':'')+'</div>'}
 function render(){
 for(var k=0;k<20;k++)$("t"+k).innerHTML=P.filter(function(p){return p.pos==k}).map(function(p){return'<i style="background:'+p.c+'"></i>'}).join("");
@@ -252,6 +261,7 @@ $("score").innerHTML=P.map(function(p,i){return'<div class="pl'+(i==cur&&!allDon
 function allDone(){return P.every(function(p){return p.done})}
 function roll(){
 if(busy)return;busy=true;render();
+if(SPIN)return spin();
 var d=$("dice"),n=0,iv=setInterval(function(){d.textContent=1+Math.floor(Math.random()*6);n++;
 if(n>8){clearInterval(iv);var v=1+Math.floor(Math.random()*6);d.textContent=v;LR=v;say(esc(P[cur].name)+" rolled "+v,"Moving "+v+" step"+(v>1?"s":"")+" clockwise…","n","🎲");setTimeout(function(){move(P[cur],v,false)},500)}},70)}
 function move(p,steps,skip){
@@ -261,7 +271,7 @@ function land(p,skip){
 var s=SQ[p.pos];
 if(s.t=="c"){
 if(skip){say("Chance","No second card this turn.","c");return finish(p,false)}
-var c=DK[s.d||"A"][LR-1];p.cash+=c.a;say(c.t+(c.a?" "+fmt(c.a):""),"🎲 You rolled "+LR+", so you take card "+LR+". "+c.l,c.a<0?"r":c.a>0?"g":"c",c.e);
+var c=DK[s.d||"A"][LR-1];p.cash+=c.a;say(c.t+(c.a?" "+fmt(c.a):""),(SPIN?"🎡 You spun ":"🎲 You rolled ")+LR+", so you take card "+LR+". "+(SPIN?c.l.replace("Roll again","Spin again"):c.l),c.a<0?"r":c.a>0?"g":"c",c.e);
 if(c.act=="again")return finish(p,true);
 if(c.act=="move2"){render();return setTimeout(function(){move(p,2,true)},1500)}
 return finish(p,false)}
@@ -330,5 +340,24 @@ if(!FS||!SH){if(e)e.textContent="Saving is not available on this phone.";return 
 var nm="mcube-leads-"+new Date().toISOString().slice(0,10)+".csv";
 FS.writeFile({path:nm,data:t,directory:"CACHE",encoding:"utf8"}).then(function(r){return SH.share({title:"Mcube leads",files:[r.uri]})}).catch(function(x){if(e&&!/cancel/i.test(String(x&&x.message)))e.textContent="Could not save the file: "+(x&&x.message||x)});return true}
 if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)&&!CAP)addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});
-setup();
+/* ---- Spinning wheel (chosen by the Head Incharge in the admin portal) ---- */
+var WCOL=["#4F3CC9","#16a34a","#d97706","#2563eb","#dc2626","#0891b2"],WROT=0;
+function wheelHTML(){var g=WCOL.map(function(c,i){return c+" "+(i*60)+"deg "+((i+1)*60)+"deg"}).join(",");
+var n="";for(var i=0;i<6;i++)n+='<span style="transform:rotate('+(i*60+30)+'deg) translateY(-34cqi)"><b style="transform:rotate('+(-(i*60+30))+'deg)">'+(i+1)+'</b></span>';
+return'<div class="wheel-wrap" aria-live="polite" id="wv"><div class="ptr"></div><div class="wheel" id="wheel" style="background:conic-gradient('+g+')">'+n+'</div><div class="hub" id="hub">?</div></div>'}
+function spin(){var v=1+Math.floor(Math.random()*6),w=$("wheel"),hub=$("hub");
+/* segment v is centred at (v-1)*60+30 degrees; turn it to the pointer at the top */
+var target=360-((v-1)*60+30)+(Math.random()*36-18),base=WROT-(WROT%360);WROT=base+360*5+target;
+hub.textContent="";w.style.transition="transform 2.6s cubic-bezier(.17,.67,.21,1)";w.style.transform="rotate("+WROT+"deg)";
+say(esc(P[cur].name)+" is spinning…","Watch where the arrow stops.","n","🎡");
+setTimeout(function(){hub.textContent=v;LR=v;say(esc(P[cur].name)+" spun "+v,"Moving "+v+" step"+(v>1?"s":"")+" clockwise…","n","🎡");setTimeout(function(){move(P[cur],v,false)},500)},2700)}
+/* Game settings from the admin portal (settings/game). Remembered for offline use; dice until the Head chooses. */
+var GK="mcube_game_settings_v1",SPIN=false;
+try{SPIN=(JSON.parse(localStorage.getItem(GK)||"{}").mover=="spinner")}catch(e){}
+function loadGameSettings(){var url="https://firestore.googleapis.com/v1/projects/"+FB.p+"/databases/"+encodeURIComponent(FB.d)+"/documents/settings/game?key="+FB.k;
+return fetch(url,{cache:"no-store"}).then(function(r){if(r.status==404)return{mover:"dice"};if(!r.ok)throw 0;return r.json().then(function(j){var m=j&&j.fields&&j.fields.mover&&j.fields.mover.stringValue;return{mover:m=="spinner"?"spinner":"dice"}})})
+.then(function(s){try{localStorage.setItem(GK,JSON.stringify(s))}catch(e){}var was=SPIN;SPIN=s.mover=="spinner";
+/* update the home screen if it is showing and nothing has started yet */
+if(was!=SPIN&&!P.length&&document.querySelector(".home"))setup()}).catch(function(){})}
+setup();loadGameSettings();
 </script></body></html>

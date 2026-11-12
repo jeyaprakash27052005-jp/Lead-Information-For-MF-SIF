@@ -19,6 +19,10 @@ The board game in `apps/game` can be downloaded as a Windows `.exe`, a Mac `.dmg
 
 Head and Regional Incharge set the PIN for **Staff login** in the game under **Feature Controls > Investment Business game: staff PIN** (4 to 8 digits). Only a scrambled copy is stored, in `settings/gameStaff`. Publish `firestore.rules` once after this update, otherwise saving the PIN shows "the online database is blocking it". Until a PIN is set, the game uses the starting PIN `2026`.
 
+### Game: dice or spinning wheel (Head Incharge only)
+
+In **Feature Controls > Investment Business game: how players move**, the Head Incharge chooses **Dice** or **Spinning wheel** (a wheel numbered 1 to 6). It is saved in `settings/game` and applies to the game website and all apps the next time they are online (they remember it for offline play). Until it is set, the game uses the dice. Publish `firestore.rules` after this update.
+
 ### Admin login PIN
 
 Admin users (Head, Regional Incharge, Area Incharge) can sign in with **username + PIN** instead of the password: the login card has a **Password | PIN** switch.

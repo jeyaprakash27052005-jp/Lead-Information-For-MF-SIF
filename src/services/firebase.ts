@@ -713,6 +713,29 @@ export const firebaseDbService = {
     }
   },
 
+  // ---- Investment Business game: how players move (Head Incharge only) -----------------------
+  async getGameSettings(): Promise<{ mover: 'dice' | 'spinner'; updatedAt?: string; updatedBy?: string }> {
+    try {
+      const snap = await getDoc(doc(db, 'settings', 'game'));
+      const d = (snap.exists() ? snap.data() : {}) as { mover?: string; updatedAt?: string; updatedBy?: string };
+      return { mover: d.mover === 'spinner' ? 'spinner' : 'dice', updatedAt: d.updatedAt, updatedBy: d.updatedBy };
+    } catch (_e) {
+      return { mover: 'dice' };
+    }
+  },
+
+  async saveGameSettings(head: User, mover: 'dice' | 'spinner'): Promise<{ mover: 'dice' | 'spinner'; updatedAt: string; updatedBy: string }> {
+    await ensureFirestoreDatabaseSeeded();
+    if (head.role !== 'head') throw new Error('Only the Head Incharge can change the game settings.');
+    const data = { mover, updatedAt: new Date().toISOString(), updatedBy: `${head.name} (Head Incharge)`.slice(0, 200) };
+    try {
+      await setDoc(doc(db, 'settings', 'game'), data);
+      return data;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, 'settings/game');
+    }
+  },
+
   // ---- Investment Business game: staff PIN (only a scrambled copy is stored) -----------------
   async getGameStaffPin(): Promise<{ set: boolean; updatedAt?: string; updatedBy?: string }> {
     try {

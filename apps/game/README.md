@@ -149,5 +149,6 @@ After changing `www/index.html`, run `npm run sync` for the phone apps, and chan
 |---|---|
 | App name and ID (`com.mcubeacademy.investmentbusiness`) | `package.json` (`build`) and `capacitor.config.json` |
 | App icon | `resources/icon.png` (desktop), `assets/` (phones), `www/icons/` (web) |
+| Dice or spinning wheel | admin portal (Head Incharge only): Feature Controls > Investment Business game: how players move |
 | Staff PIN | admin portal: Feature Controls > Investment Business game: staff PIN |
 | Starting staff PIN (used until one is set in admin), number of laps, starting money | top of the script in `www/index.html` (`PIN`, `LAPS`, `CASH`) |
