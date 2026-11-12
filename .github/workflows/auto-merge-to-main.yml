@@ -1,0 +1,38 @@
+name: Publish changes to main (automatic)
+
+# Every push to a claude/ branch is merged into main straight away,
+# so Vercel updates the live sites and the game website is republished.
+on:
+  push:
+    branches: ["claude/**"]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: auto-merge-main
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: main, fetch-depth: 0 }
+      - name: Merge ${{ github.ref_name }} into main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin "${{ github.ref_name }}"
+          if git merge-base --is-ancestor FETCH_HEAD HEAD; then
+            echo "main already has these changes."; exit 0
+          fi
+          git merge --no-edit FETCH_HEAD -m "Publish ${{ github.ref_name }} to main" || {
+            echo "::error::These changes clash with something already on main. Merge ${{ github.ref_name }} into main by hand on GitHub."; exit 1; }
+          git push origin HEAD:main
+
+  game-site:
+    needs: merge
+    uses: ./.github/workflows/game-site.yml
