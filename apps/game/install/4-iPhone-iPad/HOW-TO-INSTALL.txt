@@ -1,0 +1,19 @@
+INVESTMENT BUSINESS - iPHONE / iPAD
+===================================
+
+Apple does not allow installing app files directly on an iPhone.
+Use the web link instead. It installs like an app and works offline.
+
+Install (takes 30 seconds)
+  1. Open the game's web link in Safari.
+  2. Tap the Share button (square with an arrow).
+  3. Tap "Add to Home Screen", then "Add".
+  4. Open "Investment Business" from the home screen.
+
+Files in this folder (for the App Store only, not for players)
+  Investment-Business-ios-xcode-project.zip
+      Open on a Mac in Xcode, choose your Apple Developer team under
+      Signing & Capabilities, then Product > Archive > Distribute App.
+      Needs an Apple Developer account.
+  Investment-Business-ios-unsigned.ipa
+      Unsigned build. It cannot be installed on a normal iPhone.

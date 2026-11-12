@@ -1,0 +1,19 @@
+INVESTMENT BUSINESS - MAC (MacBook, iMac)
+=========================================
+
+File in this folder
+  Investment-Business-1.0.0-mac.dmg   Works on Intel and Apple chip (M1, M2, M3, M4) Macs
+
+Install
+  1. Double-click Investment-Business-1.0.0-mac.dmg
+  2. Drag "Investment Business" into the Applications folder.
+  3. Open Applications, RIGHT-click "Investment Business" and choose Open,
+     then click Open again. (Only needed the first time.)
+
+If macOS says the app "is damaged" or "cannot be opened"
+  System Settings > Privacy & Security > scroll down > "Open Anyway".
+
+Remove
+  Drag "Investment Business" from Applications to the Bin.
+
+Works offline.

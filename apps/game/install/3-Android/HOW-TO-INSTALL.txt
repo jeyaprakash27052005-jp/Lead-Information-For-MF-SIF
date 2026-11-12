@@ -1,0 +1,19 @@
+INVESTMENT BUSINESS - ANDROID PHONE / TABLET
+============================================
+
+File in this folder
+  Investment-Business-Android.apk
+
+Install
+  1. Copy the .apk to the phone (WhatsApp it to yourself, Google Drive, or USB cable).
+  2. Tap the file on the phone.
+  3. If asked, allow "Install unknown apps" for that app (Files, Chrome or WhatsApp),
+     then go back and tap Install.
+  4. Open "Investment Business" from the home screen.
+
+If Play Protect shows a warning, tap "More details" > "Install anyway".
+
+Without the file
+  Open the game's web link in Chrome > menu (three dots) > "Install app".
+
+Works offline. Android 7 or newer.
