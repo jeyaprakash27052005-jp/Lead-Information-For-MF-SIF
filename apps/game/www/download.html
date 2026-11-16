@@ -63,7 +63,6 @@ ol{padding-left:20px;margin:6px 0 0;font-size:14px;color:#374151}ol li{margin:3p
     <ol><li>Open <a href="./" id="gamelink">the game</a> in <b>Safari</b></li><li>Tap <b>Share</b> (square with arrow)</li><li>Tap <b>Add to Home Screen</b>, then <b>Add</b></li></ol></div>
 </div>
 
-<div class="note" id="tips"></div>
 
 <p class="foot">Play money only. Investments are subject to market risks. · <a href="./">Play in the browser</a> · <a href="https://mcubeacademy.com" target="_blank" rel="noopener">mcubeacademy.com</a></p>
 </div>
@@ -92,11 +91,5 @@ var hero=document.getElementById("hero"),h=H[os];
 if(h){document.getElementById("c-"+os).classList.add("me");
  hero.innerHTML='<div class="ic">'+h[0]+'</div><div><h2>Your device: '+h[1]+'</h2><p>'+(os=="ios"?(IL.length?"Tap the button to install. You can also add the website to your Home Screen.":"Open the game in Safari, tap Share, then Add to Home Screen."):"The newest version downloads straight away. It works offline after installing.")+'</p></div><div class="go"><a class="btn" href="'+(h[2]?BASE+h[2]:(os=="ios"&&IL.length?IL[0][1]:"./"))+'">'+h[3]+'</a></div>';}
 else hero.innerHTML='<div class="ic">⬇️</div><div><h2>Choose your device below</h2><p>Windows, Mac and Android files download straight away. iPhone and iPad install from the website.</p></div>';
-var T={
- win:'<b>First time on Windows:</b> if “Windows protected your PC” appears, click <b>More info</b> then <b>Run anyway</b>.',
- mac:'<b>First time on Mac:</b> right-click the app in Applications and choose <b>Open</b>, then <b>Open</b> again. If macOS still blocks it: System Settings › Privacy &amp; Security › <b>Open Anyway</b>.',
- and:'<b>First time on Android:</b> allow “Install unknown apps” for your browser when asked. If Play Protect warns you, tap <b>More details</b> › <b>Install anyway</b>.',
- ios:'<b>iPhone / iPad:</b> use Safari (not Chrome) for Add to Home Screen. The game then opens full screen like an app.'};
-document.getElementById("tips").innerHTML=(T[os]||T.win+"<br>"+T.mac+"<br>"+T.and)+'<br><b>Staff:</b> players’ details are saved on each device. Use Staff login › Download CSV on every device.';
 </script>
 </body></html>
