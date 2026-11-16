@@ -13,7 +13,7 @@ function createWindow() {
     minWidth: 360,
     minHeight: 520,
     center: true,
-    title: "Investment Business",
+    title: "Mcube Games",
     backgroundColor: "#ffffff",
     icon: path.join(__dirname, "..", "resources", "icon.png"),
     autoHideMenuBar: true,

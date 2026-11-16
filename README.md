@@ -11,17 +11,23 @@ One repository, four separate websites that share the same code and the same onl
 
 Shared code lives in `src/` (components, services, utils). Each website has its own `vercel.json`.
 
-## Investment Business game (Windows, Mac, Android, iPhone)
+## Mcube Games and the Game Admin site
 
-The board game in `apps/game` can be downloaded as a Windows `.exe`, a Mac `.dmg` and an Android `.apk`, and installed on iPhone from its web link. GitHub builds the files: **Actions > Game apps > Run workflow**. Website: the Vercel project `mf-nps-game` (Root Directory `apps/game`), updated automatically from `main`. Full steps are in `apps/game/README.md`.
+| Website | Folder | Who uses it |
+|---|---|---|
+| **Mcube Games** | `apps/game` | Anyone: the games hub with 6 games (Investment Business, Money Adventure, ₹1 Lakh → ₹10 Lakh Challenge, Bull vs Bear – Aadu Puli, Pallanguli Investment Game, Personal Finance Management). Also downloadable as Windows, Mac and Android apps and installable on iPhone. Vercel project `mf-nps-game` (Root Directory `apps/game`). |
+| **Mcube Game Admin** | `apps/game-admin` | Head Incharge only: game players and results, export to Excel / CSV, games on or off and their order, one play per mobile, dice or spinning wheel, game staff PIN. Create a Vercel project with Root Directory `apps/game-admin` (no environment variables needed). |
 
-### Game staff PIN
+The game controls are only in the Game Admin site; the main Admin Portal has none.
 
-Head and Regional Incharge set the PIN for **Staff login** in the game under **Feature Controls > Investment Business game: staff PIN** (4 to 8 digits). Only a scrambled copy is stored, in `settings/gameStaff`. Publish `firestore.rules` once after this update, otherwise saving the PIN shows "the online database is blocking it". Until a PIN is set, the game uses the starting PIN `2026`.
+- **Players and results:** every game asks for name and mobile (some also email or age) with consent, and saves the registration and the result in the Firestore collection `gamePlayers` (one record per player per game). Games played offline are sent when the device is online again.
+- **One play per mobile:** on by default for each game, across all devices; the Head can switch it off per game in Game Admin > Games.
+- **Game settings:** saved in `settings/gameHub` (games shown, order, one play per mobile, dice or spinner); the game staff PIN in `settings/gameStaff`.
+- **Sign in:** Game Admin uses the same username and password or login PIN as the Admin Portal, Head Incharge only.
+- Publish `firestore.rules` after this update (it adds `gamePlayers` and `settings/gameHub`).
+- Optional: set `VITE_GAMES_SITE_URL` in the Game Admin Vercel project to show an "Open the games site" link.
 
-### Game: dice or spinning wheel (Head Incharge only)
-
-In **Feature Controls > Investment Business game: how players move**, the Head Incharge chooses **Dice** or **Spinning wheel** (a wheel numbered 1 to 6). It is saved in `settings/game` and applies to the game website and all apps the next time they are online (they remember it for offline play). Until it is set, the game uses the dice. Publish `firestore.rules` after this update.
+Apps, downloads and iPhone setup: see `apps/game/README.md`.
 
 ### Admin login PIN
 

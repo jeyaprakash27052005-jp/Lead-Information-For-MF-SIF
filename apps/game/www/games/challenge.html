@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>₹1 Lakh to ₹10 Lakh Challenge · Mcube Games</title>
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" type="image/png" href="../icons/icon-192.png">
+<link rel="stylesheet" href="../shared/mcube.css">
+<script src="../shared/mcube.js"></script>
+<style>
+:root{color-scheme:light;--bg:#ffffff;--ink:#111827;--mut:#6b7280;--card:#fff;--line:#e5e7eb;--acc:#4F3CC9;--ok:#17803d;--bad:#c0392b;--gold:#b7791f;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--mg-font)}
+.w{padding:18px max(14px,env(safe-area-inset-right)) 30px max(14px,env(safe-area-inset-left))}
+.w{max-width:480px;margin:0 auto}
+h1{font-size:1.7rem;letter-spacing:-.02em;margin:4px 0 6px}
+h2{font-size:1.2rem;margin:0 0 6px}
+.sub{color:var(--mut);margin:0 0 14px;font-size:.95rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card ol{margin:6px 0 0;padding-left:20px;line-height:1.6}
+button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.btn{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:13px 20px;font:inherit;font-weight:700;cursor:pointer;width:100%;margin-top:6px}
+.btn:disabled{opacity:.45}.btn.alt{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.opt{display:block;width:100%;text-align:left;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:13px;margin-bottom:9px;font:inherit;font-weight:600;cursor:pointer}
+.opt:active{transform:scale(.98)}
+.row{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}.row:first-of-type{border-top:0}
+.row .n{flex:1;font-size:.95rem}.row .n small{display:block;color:var(--mut);font-size:.75rem}
+.st{display:flex;align-items:center;gap:6px}
+.st button{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:1.2rem;cursor:pointer}
+.st span{width:74px;text-align:center;font-weight:700;font-size:.9rem}
+.hud{display:flex;justify-content:space-between;font-weight:700;flex-wrap:wrap;gap:6px}
+.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden;margin:8px 0 2px}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--gold));transition:width .6s}
+.big{font-size:2.2rem;font-weight:800;letter-spacing:-.02em}.ok{color:var(--ok)}.bad{color:var(--bad)}.mut{color:var(--mut)}
+.kv{display:flex;justify-content:space-between;padding:5px 0;border-top:1px solid var(--line);font-size:.95rem}.kv:first-of-type{border-top:0}
+.alert{border-left:6px solid var(--bad)}
+.note{color:var(--mut);font-size:.75rem;text-align:center;margin-top:16px}
+[hidden]{display:none!important}svg{display:block;width:100%;height:auto}
+.card{box-shadow:0 1px 3px rgba(16,24,40,.06)}.btn{border-radius:8px;font-weight:600}.btn:hover:not(:disabled){background:#3f2fb0}
+.opt:hover{border-color:var(--acc);background:#f8f7ff}
+.bar i{background:linear-gradient(90deg,#4F3CC9,#b7791f)}
+@media (min-width:820px){.w{max-width:760px}#s2 #rows{display:grid;grid-template-columns:1fr 1fr;column-gap:24px}#s2 .row:nth-of-type(2){border-top:0}#opts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}#opts .opt{margin:0}}
+</style>
+</head>
+<body><script>MG.topbar("₹1 Lakh → ₹10 Lakh Challenge")</script><div class="w">
+
+<section id="s1">
+<h1>💰 ₹1 Lakh → ₹10 Lakh</h1>
+<p class="sub">Can you turn ₹1,00,000 into ₹10,00,000 through smart investment decisions?</p>
+<div class="card"><b>How to play</b><ol>
+<li>You receive an imaginary ₹1,00,000.</li>
+<li>Choose your investment avenues.</li>
+<li>Face 3 surprise financial situations. After each one, 5 years pass.</li>
+<li>Decide using risk and returns.</li>
+<li>After 15 years, see your final portfolio value.</li></ol></div>
+<button class="btn" id="start">Start the challenge</button>
+</section>
+
+<section id="s2" hidden>
+<h2>Step 1: Build your portfolio</h2>
+<p class="sub">Split your ₹1,00,000 into 10 parts of ₹10,000. Use all 10.</p>
+<div class="card" id="rows"></div>
+<div class="card hud"><span id="left"></span><span class="mut">Target ₹10,00,000</span></div>
+<button class="btn" id="lock" disabled>Lock my portfolio</button>
+</section>
+
+<section id="s3" hidden>
+<div class="card"><div class="hud"><span id="pv"></span><span id="yr" class="mut"></span></div><div class="bar"><i id="pb"></i></div><small class="mut">Progress to ₹10,00,000</small></div>
+<div class="card alert" id="sit"></div>
+<div id="opts"></div>
+<div class="card" id="out" hidden></div>
+<div id="yrs"></div>
+<button class="btn" id="ff" hidden>⏩ Fast-forward 5 years</button>
+<button class="btn" id="nx" hidden>Next</button>
+</section>
+
+<section id="s4" hidden>
+<div class="card"><div class="mut">Your final portfolio</div><div class="big" id="fv"></div><p id="tier" style="font-weight:700;margin:6px 0 0"></p></div>
+<div class="card" id="ch"></div>
+<div class="card" id="hold"></div>
+<div class="card" id="les"></div>
+<button class="btn" id="again">🔁 Play again</button>
+</section>
+
+<p class="note">Imaginary money and made-up average returns, for learning only. Not financial advice. Real returns vary and are never guaranteed.</p>
+</div>
+<script>
+// name, icon, avg yearly %, ups-and-downs %
+const A=[["Mutual Funds","🧺",12,10],["Stock Market","📈",14,22],["Fixed Deposit","🏦",7,0],["Gold","🥇",8,12],["Real Estate","🏠",8,5],["PPF","🐷",7.1,0],["NPS","👴",10,5],["Govt Bonds","📜",7,2],["Silver","🥈",7,22],["ETF","🧩",12,15]];
+const EQ=[0,1,9],SAFE=[2,5,7],ALL=[0,1,2,3,4,5,6,7,8,9],TARGET=1e6;
+const $=i=>document.getElementById(i);
+const fm=x=>"₹"+Math.round(x).toLocaleString("en-IN");
+const risk=sd=>sd<=3?"Low":sd<=10?"Medium":"High";
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+let b,u,hist,lessons,pick,si,mods,cur;
+const tot=()=>b.reduce((a,c)=>a+c,0);
+const sum=g=>g.reduce((a,i)=>a+b[i],0);
+const sc=(g,f)=>g.forEach(i=>b[i]*=f);
+function mv(g,to,f=1){const a=sum(g)*f;sc(g,1-f);b[to]+=a}
+function pf(f,to){const a=tot()*f;sc(ALL,1-f);b[to]+=a}
+function take(a,groups){for(const g of groups){const t=sum(g),x=Math.min(a,t);if(t>0){sc(g,1-x/t);a-=x}if(a<=0)break}}
+// surprises
+const S=[
+{ic:"📉",n:"Market crash!",tx:()=>"Stock markets fell sharply. Your mutual funds, stocks and ETFs lost about 35% and silver lost 25%. Everyone is panicking.",on(){sc(EQ,.65);sc([8],.75)},mods:{0:[9,0],1:[9,0],9:[9,0],8:[6,0]},o:[
+ ["Sell equity and move the cash to FD",()=>{mv(EQ,2);return "You sold at the bottom and parked the cash in an FD."},"Selling in a crash locks in the loss. Markets often recover."],
+ ["Hold and stay calm",()=>"You stayed invested and waited.","Staying calm in a crash let your investments recover."],
+ ["Buy more: move half of your safe money into ETFs",()=>{mv(SAFE,9,.5);return "You moved half of your FD, PPF and bond money into ETFs at low prices."},"Buying at low prices is brave. It can pay off, but a rebound is never guaranteed."]]},
+{ic:"🚑",n:"Medical emergency!",tx:s=>"A family member needs "+fm(s.amt)+" for hospital bills right now. Where will the money come from?",on(s){s.amt=Math.round(tot()*.15/1000)*1000},o:[
+ ["Use safe money first (FD, PPF, bonds)",s=>{take(s.amt,[SAFE,[3,6],EQ,[4,8]]);return "You paid "+fm(s.amt)+" from safe money."},"Keeping an emergency fund in safe assets avoids forced selling."],
+ ["Sell equity (stocks, funds, ETFs)",s=>{take(s.amt,[EQ,[3,6],SAFE,[4,8]]);return "You sold equity to pay "+fm(s.amt)+"."},"Selling equity in an emergency can force you to sell at a bad time."],
+ ["Take a loan (30% extra cost)",s=>{take(s.amt*1.3,[ALL]);return "You will repay "+fm(s.amt*1.3)+", taken from across your portfolio."},"Loans for emergencies are costly. An emergency fund is cheaper."]]},
+{ic:"🏗️",n:"Real estate boom?",tx:()=>"A builder offers plots in a fast-growing area. Real estate may boom, or it may bust. Nobody knows.",mods:{4:[10,12]},o:[
+ ["Move 30% of your portfolio into Real Estate",()=>{pf(.3,4);return "You moved 30% of your money into land."},"Putting a lot in one asset can pay off big or hurt badly."],
+ ["Invest a little: 10% into Real Estate",()=>{pf(.1,4);return "You moved 10% into real estate."},"A small bet lets you join the opportunity without big risk."],
+ ["Skip it and stay as you are",()=>"You skipped the offer.","Diversifying keeps single surprises from hurting too much."]]},
+{ic:"🚀",n:"Startup opportunity!",tx:()=>"A friend’s startup wants investors. It could fail completely, or become a star. You will know in 5 years.",o:[
+ ["Invest 20% of your portfolio",()=>{pf(.2,10);return "You invested 20% in the startup."},"High-risk bets can win big or lose everything. Risk only what you can afford to lose."],
+ ["Make a small bet: 5%",()=>{pf(.05,10);return "You invested 5% in the startup."},"A small bet gives a chance of a big win with limited damage."],
+ ["Skip it",()=>"You passed on the startup.","Saying no to risky bets is also a decision."]]},
+{ic:"🎁",n:"Surprise bonus!",tx:()=>"Your company gives you a ₹30,000 bonus. What will you do with it?",o:[
+ ["Invest it in Stocks",()=>{b[1]+=3e4;return "₹30,000 added to the Stock Market."},"Investing a bonus early gives it years to grow."],
+ ["Invest it in Gold",()=>{b[3]+=3e4;return "₹30,000 added to Gold."},"Adding money to a steady asset grows your base."],
+ ["Spend it on a holiday 🏖️",()=>"You enjoyed a lovely holiday!","Spending is fine, but invested money can grow for years."]]},
+{ic:"🪙",n:"Gold and silver rally!",tx:()=>"Prices are rising and metals are shining. Gold and silver are in demand.",mods:{3:[6,6],8:[4,6]},o:[
+ ["Move 20% of your portfolio into Gold",()=>{pf(.2,3);return "You moved 20% into Gold."},"Gold can cushion a portfolio when other things fall."],
+ ["Move 20% into Silver",()=>{pf(.2,8);return "You moved 20% into Silver."},"Silver swings a lot, so rallies and falls both come quickly."],
+ ["Stay as you are",()=>"You stayed put.","Chasing a rally late can be risky. Staying put is a valid choice."]]}];
+function show(n){["s1","s2","s3","s4"].forEach((s,i)=>$(s).hidden=i+1!==n);window.scrollTo(0,0)}
+function head(){const t=tot();$("pv").textContent="💼 "+fm(t);$("pb").style.width=Math.min(100,t/TARGET*100)+"%"}
+let reg=null;
+$("start").onclick=async()=>{if(!reg){try{reg=(await MG.registerForm({game:"challenge"}))[0]}catch(x){return}}b=Array(11).fill(0);u=Array(10).fill(0);hist=[1e5];lessons=[];si=0;mods={};
+  pick=S.map((s,i)=>[Math.random(),i]).sort((x,y)=>x[0]-y[0]).slice(0,3).map(x=>x[1]);renderAlloc();show(2)};
+function renderAlloc(){
+  const used=u.reduce((a,c)=>a+c,0);
+  $("rows").innerHTML=A.map((a,i)=>`<div class="row"><div class="n">${a[1]} ${a[0]}<small>avg ${a[2]}% · risk ${risk(a[3])}</small></div><div class="st"><button data-i="${i}" data-d="-1" aria-label="less ${a[0]}">−</button><span>${fm(u[i]*1e4)}</span><button data-i="${i}" data-d="1" aria-label="more ${a[0]}">+</button></div></div>`).join("");
+  $("left").textContent="Left to invest: "+fm((10-used)*1e4);$("left").className=used===10?"ok":"";$("lock").disabled=used!==10}
+$("rows").onclick=e=>{const t=e.target.closest("[data-i]");if(!t)return;const i=+t.dataset.i,d=+t.dataset.d,used=u.reduce((a,c)=>a+c,0);
+  if(d>0&&used>=10)return;u[i]=Math.max(0,u[i]+d);renderAlloc()};
+$("lock").onclick=()=>{A.forEach((_,i)=>b[i]=u[i]*1e4);newSurprise();show(3)};
+function newSurprise(){
+  cur=S[pick[si]];if(cur.on)cur.on(cur);mods=cur.mods||{};head();
+  $("yr").textContent="Year "+(si*5)+" of 15";
+  $("sit").innerHTML=`<b>${cur.ic} Surprise ${si+1} of 3: ${cur.n}</b><p style="margin:6px 0 0">${cur.tx(cur)}</p><p class="mut" style="margin:8px 0 0;font-size:.85rem">Your portfolio is now ${fm(tot())}. What will you do?</p>`;
+  $("opts").innerHTML=cur.o.map((o,k)=>`<button class="opt" data-k="${k}">${o[0]}</button>`).join("");
+  $("opts").hidden=false;["out","ff","nx"].forEach(x=>$(x).hidden=true);$("yrs").innerHTML="";}
+$("opts").onclick=e=>{const t=e.target.closest("[data-k]");if(!t)return;const o=cur.o[+t.dataset.k];
+  $("opts").hidden=true;const msg=o[1](cur);lessons.push(o[2]);head();
+  $("out").hidden=false;$("out").innerHTML=`<b>Your decision</b><p style="margin:6px 0 0">${msg}</p><p class="mut" style="margin:6px 0 0">Portfolio now: ${fm(tot())}</p>`;$("ff").hidden=false};
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+$("ff").onclick=async()=>{
+  $("ff").hidden=true;const before=b.slice(),start=tot();let m10="";
+  for(let y=1;y<=5;y++){
+    for(let i=0;i<10;i++){const md=mods[i]||[0,0],r=Math.max(-.6,(A[i][2]+md[0]+(A[i][3]+md[1])*gauss())/100);b[i]*=1+r}
+    if(y===5&&b[10]>0){const x=Math.random(),mu=x<.25?0:x<.65?1.5:x<.9?3.5:8,s0=b[10];b[10]*=mu;
+      m10=mu===0?"🚀 The startup failed. You lost "+fm(s0)+".":"🚀 The startup grew "+mu+"x! Your "+fm(s0)+" became "+fm(b[10])+".";b[2]+=b[10];b[10]=0}
+    hist.push(tot());head();$("yr").textContent="Year "+(si*5+y)+" of 15";
+    const p=hist[hist.length-2],c=hist[hist.length-1];
+    $("yrs").insertAdjacentHTML("beforeend",`<div class="kv"><span>Year ${si*5+y}</span><b class="${c>=p?"ok":"bad"}">${fm(c)} (${c>=p?"+":""}${((c/p-1)*100).toFixed(1)}%)</b></div>`);
+    await wait(650)}
+  let best=null,worst=null;ALL.forEach(i=>{if(before[i]>1){const g=b[i]/before[i];if(!best||g>best[1])best=[i,g];if(!worst||g<worst[1])worst=[i,g]}});
+  $("out").hidden=false;$("out").innerHTML=`<b>5 years later</b><p style="margin:6px 0 0">${fm(start)} → <b class="${tot()>=start?"ok":"bad"}">${fm(tot())}</b></p>`+(best?`<p class="mut" style="margin:6px 0 0">Best: ${A[best[0]][1]} ${A[best[0]][0]} (${best[1].toFixed(2)}x). Weakest: ${A[worst[0]][1]} ${A[worst[0]][0]} (${worst[1].toFixed(2)}x).</p>`:"")+(m10?`<p style="margin:6px 0 0">${m10}</p>`:"");
+  $("nx").hidden=false;$("nx").textContent=si<2?"Next surprise ➡️":"See my final result 🏁"};
+$("nx").onclick=()=>{si++;if(si<3){newSurprise();window.scrollTo(0,0)}else final()};
+function final(){
+  const t=tot();$("fv").textContent=fm(t);$("fv").className="big "+(t>=TARGET?"ok":"");
+  $("tier").textContent=t>=TARGET?"🏆 Legend! You turned ₹1 lakh into ₹10 lakh!":t>=5e5?"🧙 Wealth Wizard! More than 5x your money.":t>=2.5e5?"🎯 Smart Investor! You more than doubled your money.":t>=1.2e5?"🐢 Safe Saver. You grew your money steadily.":"📚 Keep learning. Try a different mix next time.";
+  const W=320,H=140,mx=Math.max(TARGET,...hist)*1.05,X=i=>12+i/15*(W-24),Y=v=>H-16-v/mx*(H-30);
+  $("ch").innerHTML=`<b>Your journey over 15 years</b><svg viewBox="0 0 ${W} ${H}"><line x1="12" x2="${W-12}" y1="${Y(TARGET)}" y2="${Y(TARGET)}" stroke="#b7791f" stroke-width="2" stroke-dasharray="6 5"/><text x="14" y="${Y(TARGET)-5}" font-size="10" fill="#b7791f">Target ₹10,00,000</text><polyline fill="none" stroke="#0f8aa3" stroke-width="3.5" stroke-linejoin="round" points="${hist.map((v,i)=>X(i)+","+Y(v)).join(" ")}"/></svg>`;
+  $("hold").innerHTML="<b>What you hold now</b>"+ALL.filter(i=>b[i]>1).sort((x,y)=>b[y]-b[x]).map(i=>`<div class="kv"><span>${A[i][1]} ${A[i][0]}</span><b>${fm(b[i])}</b></div>`).join("");
+  $("les").innerHTML="<b>💡 What you learned from your decisions</b><ul style='margin:8px 0 0;padding-left:20px;line-height:1.5'>"+lessons.map(l=>"<li>"+l+"</li>").join("")+"</ul>";
+  const tierShort=t>=TARGET?"Legend":t>=5e5?"Wealth Wizard":t>=2.5e5?"Smart Investor":t>=1.2e5?"Safe Saver":"Keep learning";
+  const hold={};ALL.forEach(i=>{if(b[i]>1)hold[A[i][0]]=Math.round(b[i])});
+  MG.finish(reg&&reg.id,tierShort,Math.round(t),{start:"Rs 1,00,000",target:"Rs 10,00,000",reached:t>=TARGET?"Yes":"No",surprises:pick.map(i=>S[i].n).join(", "),holdings:hold});
+  show(4)}
+$("again").onclick=()=>{reg=null;show(1)};
+</script>
+</body>
+</html>

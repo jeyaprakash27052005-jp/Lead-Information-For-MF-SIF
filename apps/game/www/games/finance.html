@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Personal Finance Management · Mcube Games</title>
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" type="image/png" href="../icons/icon-192.png">
+<link rel="stylesheet" href="../shared/mcube.css">
+<script src="../shared/mcube.js"></script>
+<style>
+:root{--bg:#fff8e7;--ink:#1d2b3a;--card:#fff;--line:#1d2b3a22;--dec:#1e88e5;--rnd:#e91e8c;--life:#ff8f00;--up:#43a047;--biz:#8e5bd8;--loan:#546e7a;--ins:#00897b;--med:#e53935;--start:#fdd835;--bad:#d32f2f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;padding:10px}
+h1{font-size:1.15rem;margin:4px 0 8px;letter-spacing:.5px;color:#12a060}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:min(96vw,560px);margin-bottom:8px}
+.stat{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:5px 6px;text-align:center;font-size:.68rem}
+.stat b{display:block;font-size:.88rem}
+.board{position:relative;width:min(96vw,560px);aspect-ratio:1;display:grid;grid-template:repeat(7,1fr)/repeat(7,1fr);gap:3px}
+.t{border-radius:8px;color:#fff;font-size:clamp(.45rem,1.9vw,.68rem);font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.1;padding:2px;position:relative}
+.t i{font-style:normal;font-size:clamp(.9rem,4vw,1.4rem)}
+.t.start,.t.dec2{color:#333}
+.center{grid-area:2/2/7/7;background:var(--card);border-radius:16px;border:2px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px;text-align:center}
+.die{font-size:clamp(2.2rem,12vw,3.6rem);line-height:1}
+button{font:inherit;font-weight:700;border:0;border-radius:999px;padding:10px 20px;background:#12a060;color:#fff;cursor:pointer}
+button:focus-visible{outline:3px solid #ffb300;outline-offset:2px}button:disabled{opacity:.45}
+button.alt{background:var(--ink);color:var(--bg)}
+.log{font-size:clamp(.65rem,2.5vw,.8rem);max-height:34%;overflow:auto;width:100%;opacity:.85}
+.pawn{position:absolute;inset:auto;width:55%;height:55%;max-width:30px;max-height:30px;border-radius:50%;background:#111;border:3px solid #fff;box-shadow:0 2px 6px #0007;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#fff;transition:all .15s;pointer-events:none;z-index:3;top:20%;left:22%}
+.modal{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;padding:16px;z-index:9}
+.modal.on{display:flex}
+.box{background:var(--card);border-radius:18px;max-width:380px;width:100%;padding:18px;border-top:10px solid var(--c,#999);display:flex;flex-direction:column;gap:10px}
+.box h2{margin:0;font-size:1.05rem}.box p{margin:0;line-height:1.4}
+.pos{color:#12a060;font-weight:700}.neg{color:var(--bad);font-weight:700}
+.legend{width:min(96vw,560px);font-size:.72rem;opacity:.8;margin-top:8px;line-height:1.4}
+.board{width:min(96vw,560px,max(300px,calc(100dvh - 200px)))}.stats{width:min(96vw,560px)}.box{max-height:92dvh;overflow:auto;animation:pop .2s}@keyframes pop{from{transform:scale(.85);opacity:0}}
+body{background:#fff;--ink:#111827}h1{font-size:1.5rem;color:#111827;letter-spacing:-.02em}
+.board{background:#fff;padding:5px;border-radius:20px;box-shadow:0 6px 0 #0002}.t{border:3px solid #fff;box-shadow:0 3px 0 #0002;font-size:clamp(.5rem,2.2vw,.75rem)}
+.center{background:#f4fff8;color:#1d2b3a;border-color:#12a06055}.stat{background:#fff;color:#1d2b3a}.legend{color:#1d2b3a}
+.pawn{animation:hop .25s}@keyframes hop{50%{transform:translateY(-9px) scale(1.2)}}
+/* Mcube Games: white theme and layout for every screen size */
+body{font-family:var(--mg-font);padding:0;display:block;color-scheme:light}
+.pf{display:flex;flex-direction:column;align-items:center;padding:10px max(10px,env(safe-area-inset-right)) 24px max(10px,env(safe-area-inset-left))}
+.board{box-shadow:0 1px 3px rgba(16,24,40,.08);border:1px solid #e5e7eb}.stat{border-width:1px}.center{background:#fafafa;border-width:1px}
+button{border-radius:8px;background:#4F3CC9}button.alt{background:#fff;color:#344054;border:1px solid #d1d5db}
+.box{border-radius:14px}
+@media (min-width:1000px){.pf{display:grid;grid-template-columns:auto minmax(280px,360px);grid-template-areas:"h h" "b s" "b l" "b x";grid-template-rows:auto auto auto 1fr;column-gap:20px;justify-content:center;align-items:start}
+ .pf h1{grid-area:h;text-align:center}.pf .board{grid-area:b;width:min(760px,calc(100dvh - 140px))}.pf .stats{grid-area:s;width:100%;grid-template-columns:1fr 1fr}.pf .legend{grid-area:l;width:100%;margin-top:12px}.pf .acts{grid-area:x}}
+</style></head><body>
+<script>MG.topbar("Personal Finance Management")</script><div class="pf">
+<h1>Personal Finance Management</h1>
+<div class="stats">
+<div class="stat">Month<b id="sM">1/12</b></div><div class="stat">Cash<b id="sC"></b></div>
+<div class="stat">Invested<b id="sI"></b></div><div class="stat">Debt<b id="sD"></b></div>
+<div class="stat" style="grid-column:span 2">Monthly salary<b id="sS"></b></div>
+<div class="stat">Insurance<b id="sIn"></b></div><div class="stat">Side income<b id="sB"></b></div>
+</div>
+<div class="board" id="board">
+<div class="center"><div class="die" id="die">🎲</div><button id="roll">Roll dice</button><div class="log" id="log"></div></div>
+</div>
+<div class="legend">How to play: each lap round the board is one month. Passing Start pays your salary and your living expenses (₹18,000), plus loan interest (10%). At the end of the months you choose, your net worth (cash + investments − debt) decides your rating.</div>
+<div class="acts"><button class="alt" id="newg" style="margin-top:10px">New game</button> <button class="alt" id="mute" style="margin-top:10px">🔊 Sound on</button></div></div>
+<div class="modal" id="modal"><div class="box" id="box"></div></div>
+<script>
+const $=id=>document.getElementById(id),f=n=>(n<0?"−":"")+"₹"+Math.abs(Math.round(n)).toLocaleString("en-IN");
+const T={start:["Start","🏁","start"],up:["Upskill","💡","up"],rnd:["Random Chance","⭐","rnd"],dec:["Decision","🤔","dec"],life:["Life Event","❗","life"],biz:["Small Business","🏪","biz"],fr:["Borrow from a Friend","🤝","life"],ins:["Insurance","🛡️","ins"],med:["Medical Emergency","➕","med"],loan:["Bank Loan","🏦","loan"]};
+const L=["start","up","rnd","dec","life","rnd","biz","fr","life","dec","rnd","dec","ins","life","up","dec","rnd","life","loan","dec","med","dec","life","rnd"];
+const pos=i=>i<=6?[0,i]:i<=12?[i-6,6]:i<=18?[6,18-i]:[24-i,0];
+const board=$("board"),cells=[];
+L.forEach((k,i)=>{const [r,c]=pos(i),d=document.createElement("div");d.className="t "+T[k][2];d.style.gridArea=(r+1)+"/"+(c+1);d.style.background=`var(--${T[k][2]==="start"?"start":T[k][2]})`;d.innerHTML=`<i>${T[k][1]}</i>${T[k][0]}`;board.appendChild(d);cells.push(d)});
+let pawn=document.createElement("div");
+const G={};
+const KEY="pfg-save-v1";
+function save0(){try{if(G.m>G.len)localStorage.removeItem(KEY);else localStorage.setItem(KEY,JSON.stringify({G:{...G,busy:false},log:$("log").innerHTML}))}catch(e){}}
+function load(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}}
+async function init0(){for(const k in bag)delete bag[k];G.busy=true;$("roll").disabled=true;const s=load();
+if(s&&s.G&&s.G.len&&(await ask("Welcome back","var(--up)",`Continue your game? Month ${Math.min(s.G.m,s.G.len)} of ${s.G.len}, cash ${f(s.G.cash)}.`,["Continue game","New game"]))===0){Object.assign(G,s.G);$("log").innerHTML=s.log||"";log("Game resumed.")}
+else{const r=await ask("New game","var(--dec)","How many months do you want to play?",["3 months","6 months","9 months","12 months"]);Object.assign(G,{p:0,m:1,len:[3,6,9,12][r],cash:50000,inv:0,debt:0,sal:30000,ins:false,biz:false});$("log").innerHTML="";log("Game started: "+G.len+" months. You have ₹50,000 and earn ₹30,000 a month.")}
+G.busy=false;$("roll").disabled=false;cells[G.p].appendChild(pawn);ui()}
+function ui(){$("sM").textContent=Math.min(G.m,G.len)+"/"+G.len+(PL.length>1?" "+G.emoji:"");$("sC").textContent=f(G.cash);$("sC").className=G.cash<0?"neg":"";$("sI").textContent=f(G.inv);$("sD").textContent=f(G.debt);$("sS").textContent=f(G.sal);$("sIn").textContent=G.ins?"Active":"None";$("sB").textContent=G.biz?"₹4,000":"None";save()}
+function log(t){const d=document.createElement("div");d.textContent=t;$("log").prepend(d)}
+function ask(title,color,text,opts){return new Promise(res=>{const b=$("box");b.style.setProperty("--c",color);b.innerHTML=`<h2>${title}</h2><p>${text}</p>`;opts.forEach((o,i)=>{const x=document.createElement("button");x.textContent=o;if(i)x.className="alt";x.onclick=()=>{$("modal").classList.remove("on");res(i)};b.appendChild(x)});$("modal").classList.add("on");sfx("pop");b.querySelector("button").focus()})}
+const DEC0=[["A new laptop is on sale. Your old one still works.",["Buy it (−₹40,000)",-40000,0],["Keep the old one",0,0]],
+["Friends plan a weekend trip costing ₹12,000.",["Go (−₹12,000)",-12000,0],["Stay home and save",0,0]],
+["Your bank offers a monthly SIP in an index fund.",["Invest ₹8,000 (grows to ₹8,800)",-8000,8800],["Skip it",0,0]],
+["Your phone screen cracked.",["Repair it (−₹5,000)",-5000,0],["Use it cracked, risk worse damage (−₹12,000 later)",-12000,0]],
+["A festival sale tempts you with ₹15,000 of clothes.",["Shop (−₹15,000)",-15000,0],["Put ₹5,000 in a recurring deposit (₹5,300)",-5000,5300]],
+["You can buy gold for safety.",["Buy ₹10,000 gold (worth ₹10,800)",-10000,10800],["Keep the cash",0,0]]];
+const RND0=[["Tax refund arrives!",9000],["You find an old fixed deposit maturing.",12000],["Stock dividend credited.",4000],["Phone bill overcharge, you pay it.",-2500],["Freelance gig pays well.",15000],["You lost your wallet.",-6000]];
+const LIFE0=[["Wedding gift for a friend.",-6000,0],["Bike breakdown.",-9000,1],["Family function expenses.",-14000,0],["Laptop theft. Repair and replace.",-20000,1],["Performance bonus at work!",18000,0],["Rent hike.",-7000,0]];
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const bag={};const draw=(k,a)=>{if(!bag[k]||!bag[k].length)bag[k]=[...a].sort(()=>Math.random()-.5);return bag[k].pop()};
+const DEC=[...DEC0,
+["A mutual fund SIP is offered through your bank app.",["Start ₹8,000 SIP (mutual fund)",-8000,0,[.7,0,9600,0,7200,"Markets rose. Your SIP is worth ₹9,600.","Markets dipped. Your SIP is worth ₹7,200 for now."]],["Skip it",0,0],"Equity mutual funds can dip in the short term, but long holding periods (5+ years) have historically smoothed returns."],
+["You can start saving for retirement in the National Pension System (NPS).",["Put ₹10,000 in NPS",-10000,11500],["Skip it",0,0],"NPS is locked until retirement, grows with market-linked funds, and gives extra tax deduction under Section 80CCD(1B)."],
+["Government bonds are on offer with steady interest.",["Buy ₹15,000 government bonds",-15000,16050],["Skip it",0,0],"Government bonds are very safe but pay lower returns than shares. They balance risk in a portfolio."],
+["An unregistered chit fund promises to double your money in 6 months.",["Join with ₹10,000",-10000,0,[.2,20000,0,0,0,"Lucky. The chit fund paid out ₹20,000.","The chit fund collapsed. You lost ₹10,000."]],["Decline",0,0],"Promises of guaranteed double returns are a classic warning sign. Check registration before you invest."],
+["A hot IPO opens for subscription.",["Apply with ₹10,000",-10000,0,[.5,0,14000,0,7000,"The IPO listed at a gain. Your shares are worth ₹14,000.","The IPO listed below issue price. Your shares are worth ₹7,000."]],["Skip it",0,0],"IPOs can gain or fall on listing day. Read the prospectus and check the company's earnings first."],
+["A WhatsApp group promises 3x returns on a secret stock tip.",["Invest ₹20,000",-20000,0,[.1,0,30000,0,0,"Rare luck. The shares rose and are worth ₹30,000.","Scam. The group vanished with your ₹20,000."]],["Ignore it and report the group",0,0],"Stock tips from unknown groups are a common fraud. Use only SEBI-registered advisers and brokers."],
+["Your credit card bill of ₹12,000 is due.",["Pay in full",-12000,0],["Pay only ₹2,000 minimum",-2000,0,0,10000],"Paying only the minimum leaves the rest on high-interest debt. Pay the full amount when you can."],
+["A bank offers a 1-year fixed deposit.",["Put ₹10,000 in FD",-10000,10700],["Skip it",0,0],"Fixed deposits are safe and predictable, but returns may not beat inflation over time."],
+["You have no emergency fund.",["Save ₹6,000 in a liquid fund",-6000,6300],["Skip it",0,0],"Aim for 3 to 6 months of expenses set aside for emergencies before taking market risk."],
+["A well-known blue-chip company looks good to you.",["Buy ₹15,000 of shares",-15000,0,[.6,0,18000,0,12000,"Shares rose. Your holding is worth ₹18,000.","Shares fell. Your holding is worth ₹12,000."]],["Skip it",0,0],"Even strong companies fall at times. Spread money across many investments."],
+["A caller says you won a prize and asks for your UPI PIN.",["Share the PIN",-15000,0],["Hang up and report it",0,0],"Never share your UPI PIN or OTP. A PIN is only for sending money, never for receiving it. Report fraud on 1930 or cybercrime.gov.in."],
+["The tax-saving deadline is near.",["Invest ₹12,000 in ELSS",-12000,0,[.7,0,14500,0,10500,"The ELSS fund grew. It is worth ₹14,500.","The ELSS fund dipped. It is worth ₹10,500 for now."]],["Skip it",0,0],"ELSS funds save tax under Section 80C and have a 3-year lock-in, but their value moves with the market."],
+["Term life insurance is offered at a low premium while you are young.",["Pay ₹6,000 premium",-6000,0],["Skip it",0,0],"Term insurance is cheap when you are young and protects your family. It pays only on death, so it is not an investment."],
+["A friend offers you a small plot of land with a ₹40,000 down payment.",["Buy the plot",-40000,0,[.5,0,55000,0,38000,"Land prices rose. Your plot is worth ₹55,000.","Prices stayed flat and fees applied. Your plot is worth ₹38,000."]],["Skip it",0,0],"Real estate is hard to sell quickly and needs large money. Check the title and registration first."],
+["A friend urges you to put ₹10,000 into a new crypto coin.",["Invest ₹10,000",-10000,0,[.35,0,18000,0,3000,"The coin jumped. It is worth ₹18,000.","The coin crashed. It is worth ₹3,000."]],["Skip it",0,0],"Crypto prices swing wildly and are not regulated like shares. Only risk what you can afford to lose."],
+["A new phone is offered on a 'no-cost EMI'.",["Buy it on EMI",-3000,0,0,12000],["Skip it",0,0],"No-cost EMI often hides fees or removes discounts. EMIs add debt, which reduces your monthly savings."],
+["You can learn a freelance skill in your free time.",["Spend ₹5,000 on a course",-5000,0,[.6,12000,0,0,0,"You landed paid work and earned ₹12,000.","No clients yet, but you gained a skill."]],["Skip it",0,0],"Extra income is one of the fastest ways to build wealth. Skills pay off over time."],
+["Your salary just rose and a new bike costs ₹30,000.",["Buy the bike",-30000,0],["Keep your old one",0,0],"Lifestyle inflation means spending more every time you earn more. Save part of every raise."]];
+const RND=[...RND0,["Strong quarterly earnings lift the stock market.",0,0,.1],["Weak earnings cause a market correction.",0,0,-.08],["Stock market crash. Panic selling hits portfolios.",0,0,-.15],["Budget announcement boosts markets.",0,0,.06],["Fraud: a listed company faked its accounts and its shares collapse.",0,0,-.12],["A fake trading app steals ₹10,000 from your account.",-10000],["Your debit card is skimmed at an ATM.",-8000],["Annual debit card fee is charged.",-1500],["Your chit fund company shuts down. You lose your ₹8,000 deposit.",-8000],["Bond interest credited to your account.",3000],["Mutual fund dividend payout.",5000],["Cashback and rewards credited.",1500],["Electricity bill spike this month.",-3000],["You pay for a fake online order that never arrives.",-4500],["Late payment fee on your credit card.",-1800],["Gift money from relatives.",5000],["Interest rate cut lifts bond prices.",0,0,.04],["Bull run: the market hits a new high.",0,0,.12],["The rupee falls and markets turn volatile.",0,0,-.05],["An insider trading scandal hits a famous stock.",0,0,-.1]];
+const LIFE=[...LIFE0,["Festival bonus from your employer!",12000,0],["Car repair bill.",-11000,1],["Doctor visit and medical tests.",-4000,1],["Side gig pays off.",8000,0],["Property tax due.",-6000,0],["Wedding in the family. Travel and gifts.",-10000,0],["A home appliance breaks down.",-6500,1],["A health checkup finds a problem. Treatment costs money.",-12000,1],["Promotion with a salary bonus!",15000,0],["Rent deposit increase.",-5000,0],["Insurance refund for overpaid premium.",3500,0],["Festival shopping and gifts.",-9000,0]];
+async function land(i){const k=L[i];
+if(k==="dec"){const c=draw("d",DEC),r=await ask("Decision Card","var(--dec)",c[0],[c[1][0],c[2][0]]),o=c[r+1];G.cash+=o[1];G.inv+=o[2];let m=o[0].split(" (")[0],win=0;if(o[3]){const g=o[3];win=Math.random()<g[0];G.cash+=win?g[1]:g[3];G.inv+=win?g[2]:g[4];m=win?g[5]:g[6]}if(o[4])G.debt+=o[4];log(c[0]+" → "+m);if(c[3])await ask(o[3]?(win?"Good result":"Bad result"):"What to know",o[3]?(win?"var(--up)":"var(--med)"):"var(--dec)",(o[3]?m+"<br><br>":"")+"💡 "+c[3],["OK"])}
+else if(k==="rnd"){const c=draw("r",RND),pc=c[3]||0,d=G.inv*pc,v=pc?d:c[1];await ask("Random Chance","var(--rnd)",`${c[0]} <span class="${v>=0?"pos":"neg"}">${pc&&G.inv<=0?"No investments yet, so no impact.":f(v)+(pc?" on your investments":"")}</span>`,["OK"]);G.cash+=c[1];G.inv+=d;log(c[0]+" "+f(v))}
+else if(k==="life"){const c=draw("l",LIFE);let a=c[1];if(a<0&&c[2]&&G.ins)a*=.2;await ask("Life Event","var(--life)",`${c[0]} <span class="${a>0?"pos":"neg"}">${f(a)}</span>${c[2]&&G.ins&&c[1]<0?"<br>Insurance covered 80%.":""}`,["OK"]);G.cash+=a;log(c[0]+" "+f(a))}
+else if(k==="med"){let a=-25000;if(G.ins)a=-5000;await ask("Medical Emergency","var(--med)",`Hospital bill: <span class="neg">${f(a)}</span>${G.ins?"<br>Your insurance covered most of it.":"<br>You have no insurance. Cover costs ₹4,000 at the Insurance tile."}`,["Pay"]);G.cash+=a;log("Medical emergency "+f(a))}
+else if(k==="ins"){if(G.ins)await ask("Insurance","var(--ins)","You already have cover. It reduces life event and medical costs.",["OK"]);else if(await ask("Insurance","var(--ins)","Health and property cover for ₹4,000. It cuts emergency costs by 80%.",["Buy cover (−₹4,000)","Skip"])===0){G.cash-=4000;G.ins=true;log("Bought insurance.")}}
+else if(k==="up"){if(await ask("Upskill Opportunity","var(--up)","Take a course for ₹10,000. Your salary rises by ₹4,000 a month.",["Enrol (−₹10,000)","Skip"])===0){G.cash-=10000;G.sal+=4000;log("Upskilled. Salary is now "+f(G.sal))}}
+else if(k==="biz"){if(G.biz)await ask("Small Business","var(--biz)","Your business already earns ₹4,000 every month.",["OK"]);else if(await ask("Small Business Opportunity","var(--biz)","Invest ₹30,000 in a small shop. It earns ₹4,000 every month, and your ₹30,000 counts as an investment.",["Invest (−₹30,000)","Skip"])===0){G.cash-=30000;G.inv+=30000;G.biz=true;log("Started a business.")}}
+else if(k==="fr"){await ask("Borrow from a Friend","var(--life)","Your friend lends you ₹10,000 with no interest. You must repay it as debt.",["Borrow","Skip"]).then(r=>{if(!r){G.cash+=10000;G.debt+=10000;log("Borrowed ₹10,000 from a friend.")}})}
+else if(k==="loan"){const r=await ask("Bank Loan Opportunity","var(--loan)",G.debt>0?"Repay up to ₹20,000 of your debt now, or take a new ₹20,000 loan at 10% interest per month.":"Take a ₹20,000 loan at 10% interest per month.",G.debt>0?["Repay ₹20,000 or all debt","Take loan (+₹20,000)","Skip"]:["Take loan (+₹20,000)","Skip"]);
+if(G.debt>0){if(r===0){const p=Math.min(20000,G.debt);G.cash-=p;G.debt-=p;log("Repaid "+f(p))}else if(r===1){G.cash+=20000;G.debt+=20000;log("Took ₹20,000 loan.")}}else if(r===0){G.cash+=20000;G.debt+=20000;log("Took ₹20,000 loan.")}}
+ui()}
+async function payday(){const int=G.debt*.1,inc=G.sal+(G.biz?4000:0);G.cash+=inc-18000-int;G.m++;log(`Month ${G.m-1} done: income ${f(inc)}, expenses −₹18,000${int?", interest "+f(-int):""}.`);if(G.cash<0){const od=-G.cash*.05;G.cash-=od;log("Overdraft fee "+f(-od))}ui()}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let PL=[],cur=0,AC,muted=false;const PW=[];
+function sfx(t){if(muted)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain(),F={tick:[300,.04],step:[520,.05],pop:[660,.12],coin:[880,.25]}[t];o.frequency.value=F[0];o.type="triangle";g.gain.value=.08;o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+F[1])}catch(e){}}
+$("mute").onclick=()=>{muted=!muted;$("mute").textContent=muted?"🔇 Sound off":"🔊 Sound on"};
+const syncP=()=>{if(PL[cur])Object.assign(PL[cur],G)};
+function save(){try{syncP();if(PL.every(p=>p.done))localStorage.removeItem(KEY);else localStorage.setItem(KEY,JSON.stringify({PL,cur,log:$("log").innerHTML}))}catch(e){}}
+function mkPawns(){PW.forEach(w=>w.remove());PW.length=0;PL.forEach((p,i)=>{const w=document.createElement("div");w.className="pawn";w.textContent=p.emoji;w.style.background=["#111","#e53935","#1e88e5","#43a047"][i];w.style.left=(4+i*22)+"%";PW.push(w)})}
+function nextTurn(){syncP();if(PL.every(p=>p.done))return end();let i=cur;do{i=(i+1)%PL.length}while(PL[i].done);cur=i;for(const k in G)delete G[k];Object.assign(G,PL[cur]);G.busy=false;pawn=PW[cur];$("roll").disabled=false;$("roll").textContent=PL.length>1?"Roll dice: "+G.name:"Roll dice";if(PL.length>1)log(G.name+"'s turn.");ui()}
+async function fin(){G.done=true;if(PL.length>1)await ask(G.name+" finished","var(--up)",`${G.emoji} ${G.name} played all ${G.len} months. Net worth ${f(G.cash+G.inv-G.debt)}.`,["OK"]);nextTurn()}
+async function end(){syncP();const rate=p=>{const nw=p.cash+p.inv-p.debt,gain=nw-50000,k=p.len/12;return[nw,gain>=200000*k?"Wealth Wizard 🏆":gain>=100000*k?"Smart Saver 👍":gain>=0?"Getting There 🙂":"Needs a Budget 📉"]};const rows=PL.map(p=>[p,...rate(p)]).sort((a,b)=>b[1]-a[1]);
+rows.forEach((r,i)=>{const p=r[0];MG.finish(p.mgId,r[2].replace(/[^A-Za-z ]/g,"").trim(),Math.round(r[1]),{rank:i+1,players:rows.length,months:p.len,cash:Math.round(p.cash),invested:Math.round(p.inv),debt:Math.round(p.debt),salary:p.sal,insurance:p.ins?"Yes":"No",business:p.biz?"Yes":"No"})});await ask("Game complete","var(--up)",rows.map((r,i)=>`${i?"":"🥇 "}<b>${r[0].emoji} ${r[0].name}</b>: <span class="${r[1]<0?"neg":"pos"}">${f(r[1])}</span> · ${r[2]}`).join("<br>")+"<br><br>Net worth = cash + investments − debt.",["Play again"]);try{localStorage.removeItem(KEY)}catch(e){}init()}
+async function init(){for(const k in bag)delete bag[k];$("roll").disabled=true;const s=load();
+if(s&&s.PL&&s.PL.length&&(await ask("Welcome back","var(--up)",`Continue your game? ${s.PL.length>1?s.PL.length+" players":"Month "+Math.min(s.PL[0].m,s.PL[0].len)+" of "+s.PL[0].len}.`,["Continue game","New game"]))===0){PL=s.PL;cur=s.cur;$("log").innerHTML=s.log||"";mkPawns();log("Game resumed.")}
+else{const len=[3,6,9,12][await ask("New game","var(--dec)","How many months do you want to play?",["3 months","6 months","9 months","12 months"])],n=1+await ask("Players","var(--biz)","How many players? You take turns on this phone.",["1 player","2 players","3 players","4 players"]);const regs=await MG.registerForm({game:"finance",players:n,cancel:false,intro:"Each player registers once with a mobile number."});
+PL=[];for(let i=0;i<n;i++)PL.push({p:0,m:1,len,cash:50000,inv:0,debt:0,sal:30000,ins:false,biz:false,done:false,name:regs[i].name.split(" ")[0].slice(0,14),mgId:regs[i].id,emoji:["🙂","😎","🤓","🤠"][i]});cur=0;mkPawns();$("log").innerHTML="";log("Game started: "+len+" months, "+n+" player(s). Each starts with ₹50,000 and earns ₹30,000 a month.")}
+for(const k in G)delete G[k];Object.assign(G,PL[cur]);G.busy=false;pawn=PW[cur];PW.forEach((w,i)=>cells[PL[i].p].appendChild(w));$("roll").disabled=false;$("roll").textContent=PL.length>1?"Roll dice: "+G.name:"Roll dice";ui()}
+$("newg").onclick=()=>{if(G.busy)return;try{localStorage.removeItem(KEY)}catch(e){}init()};
+$("roll").onclick=async()=>{if(G.busy)return;G.busy=true;$("roll").disabled=true;
+let n;for(let i=0;i<8;i++){n=1+Math.floor(Math.random()*6);$("die").textContent="⚀⚁⚂⚃⚄⚅"[n-1];sfx("tick");await sleep(70)}
+for(let s=0;s<n;s++){G.p=(G.p+1)%24;cells[G.p].appendChild(pawn);sfx("step");if(G.p===0){sfx("coin");await payday()}await sleep(180)}
+if(G.m>G.len)return fin();
+await land(G.p);if(G.m>G.len)return fin();nextTurn()};
+async function end0(){const nw=G.cash+G.inv-G.debt,gain=nw-50000,k=G.len/12,r=gain>=200000*k?"Wealth Wizard 🏆":gain>=100000*k?"Smart Saver 👍":gain>=0?"Getting There 🙂":"Needs a Budget 📉";
+const x=await ask("Game complete",`var(--up)`,`Net worth: <b class="${nw<0?"neg":"pos"}">${f(nw)}</b><br>Cash ${f(G.cash)} + investments ${f(G.inv)} − debt ${f(G.debt)}<br><br>Your rating: <b>${r}</b>`,["Play again"]);init()}
+init();
+</script></body></html>

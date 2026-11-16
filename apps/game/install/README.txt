@@ -1,4 +1,4 @@
-INVESTMENT BUSINESS by Mcube Academy - DOWNLOADS
+MCUBE GAMES by Mcube Academy - DOWNLOADS
 ================================================
 
 Open the folder for your device:
@@ -10,6 +10,5 @@ Open the folder for your device:
 
 Each folder has a HOW-TO-INSTALL.txt with the steps.
 
-Staff: leads are saved on the device where the game is played.
-Open "Staff login" (PIN set in the admin portal, Feature Controls) and tap
-"Download CSV" on each device.
+Players and results from every device are collected in the
+Mcube Game Admin site (Head Incharge), with Excel / CSV export.

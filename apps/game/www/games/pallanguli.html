@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pallanguli Investment Game · Mcube Games</title>
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" type="image/png" href="../icons/icon-192.png">
+<link rel="stylesheet" href="../shared/mcube.css">
+<script src="../shared/mcube.js"></script>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: a wooden Pallanguli board framed by a market-ticker strip; one stage visible at a time (language, register, board, round 2, invest, result). */
+:root{color-scheme:light;--bg:#ffffff;--card:#ffffff;--ink:#2b1e15;--mut:#6d5a49;--line:#dccfbc;--acc:#7a2e1c;--onacc:#ffffff;--gold:#b97f0e;--good:#1c7d49;--bad:#b23a2c;--wood1:#c99a62;--wood2:#b07f48;--wline:#7d5630;--pit1:#a8763f;--pit2:#8a5c2e}
+*,*::before,*::after{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Hind Madurai","Noto Sans Tamil","Latha","Nirmala UI","Tamil Sangam MN",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.5}
+main{max-width:560px;margin:0 auto;padding-block:16px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.hide{display:none!important}
+header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.hd{flex:1;min-width:0}
+.logo{flex:none;width:44px;height:44px;border-radius:50%;background:var(--acc);color:var(--onacc);display:grid;place-items:center;font-weight:700;font-size:1.3rem;user-select:none}
+h1{font-size:1.3rem;line-height:1.2;margin:0;text-wrap:balance}
+h2{font-size:1.1rem;margin:0 0 8px;text-wrap:balance}
+h3{font-size:1rem;margin:12px 0 4px}
+p{margin:0 0 8px}
+.mut{color:var(--mut);font-size:.9rem}
+.s{font-size:.85rem}
+.mkt{display:block;width:100%;height:46px;margin-bottom:12px;border-radius:12px;background:var(--card);border:1px solid var(--line)}
+.mkt .up{fill:var(--good);stroke:var(--good)}.mkt .dn{fill:var(--bad);stroke:var(--bad)}
+.mkt .tr{fill:none;stroke:var(--gold);stroke-width:2;stroke-linejoin:round}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card.win{border:2px solid var(--gold)}
+label{display:block;font-size:.88rem;margin-top:8px}
+input[type=text],input[type=tel],input[type=email],input[type=number],input[type=password]{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px;width:100%}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--acc);flex:none}
+button{font:inherit;font-weight:700;border:0;border-radius:10px;padding:12px 18px;background:var(--acc);color:var(--onacc);cursor:pointer}
+button.main{width:100%;margin-top:8px}
+button.alt{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+button.mini{padding:6px 12px;font-size:.85rem}
+button:disabled{cursor:default}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.two>div{min-width:0}
+.chk{display:flex;gap:8px;align-items:center;font-size:1rem;margin-top:8px}
+.as{display:grid;grid-template-columns:1.5fr 1fr;gap:8px;align-items:center;margin-top:6px}
+.as .chk{margin:0}
+.as input[type=number]{min-width:0}
+.left{font-weight:600;margin:8px 0}
+.ok{color:var(--good)}.no{color:var(--bad)}
+.stat{display:flex;justify-content:space-between;gap:8px;align-items:center;font-weight:600;margin-bottom:8px}
+.turn{padding:2px 10px;border-radius:999px;background:var(--acc);color:var(--onacc);white-space:nowrap}
+.who{display:flex;justify-content:space-between;font-weight:600;margin:6px 2px}
+.board{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:7px;padding:12px;border-radius:16px;background:linear-gradient(135deg,var(--wood1),var(--wood2));border:3px solid var(--wline);box-shadow:inset 0 0 0 2px #d9b27c}
+.board::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:.24;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpolyline points='0,88 18,70 34,76 52,44 70,54 100,10' fill='none' stroke='%23fff3dc' stroke-width='2.4' vector-effect='non-scaling-stroke'/%3E%3Cg fill='%23fff3dc'%3E%3Crect x='10' y='72' width='3' height='14'/%3E%3Crect x='28' y='60' width='3' height='16'/%3E%3Crect x='46' y='46' width='3' height='18'/%3E%3Crect x='64' y='38' width='3' height='18'/%3E%3Crect x='82' y='22' width='3' height='20'/%3E%3C/g%3E%3C/svg%3E") center/100% 100% no-repeat}
+.hinge{grid-row:3;grid-column:1/-1;height:6px;border-radius:3px;background:var(--wline)}
+.pit{aspect-ratio:1;border-radius:50%;border:0;padding:3px;position:relative;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:2px;background:radial-gradient(circle at 40% 35%,var(--pit1),var(--pit2));box-shadow:inset 0 3px 6px rgba(0,0,0,.45);cursor:default;color:#fff}
+.pit.can{cursor:pointer;outline:3px solid var(--gold);outline-offset:1px}
+.pit.sealed{background:radial-gradient(circle at 40% 35%,#5d4733,#3b2b1e);box-shadow:inset 0 5px 9px rgba(0,0,0,.65)}
+.pit.bank{outline:2px dashed var(--gold);outline-offset:1px}
+.lbl{position:absolute;bottom:3px;left:0;right:0;text-align:center;font-size:.62rem;font-weight:700;color:#ffe9b8}
+.oval{border-radius:40px;aspect-ratio:auto;height:100%;grid-column:2/5;flex-direction:column;align-items:center;justify-content:center;gap:0;text-align:center;font-weight:700}
+.oval small{font-weight:400;font-size:.7rem}
+.oval b{font-size:1.25rem;line-height:1}
+.pile{display:flex;flex-wrap:wrap;justify-content:center;gap:1px;max-height:46px;overflow:hidden;padding:0 10px;margin-bottom:2px}
+.pile .seed{width:7px;height:9px}
+.seed{width:9px;height:12px;border-radius:50% 50% 45% 45%;background:radial-gradient(circle at 35% 30%,#8a3a28,#42150d)}
+.cnt{position:absolute;top:1px;right:5px;font-size:.7rem;font-weight:700}
+.hand{position:absolute;left:0;top:0;width:38px;height:38px;border-radius:50%;background:#e9c9a0;border:2px solid var(--wline);display:flex;align-items:center;justify-content:center;font-size:1.1rem;pointer-events:none;z-index:5;opacity:0;transition:transform .3s ease,opacity .2s;box-shadow:0 3px 8px rgba(0,0,0,.4)}
+.hand b{position:absolute;right:-6px;top:-8px;min-width:20px;height:20px;border-radius:10px;background:var(--acc);color:var(--onacc);font-size:.8rem;display:grid;place-items:center;padding:0 4px}
+#msg{min-height:1.5em;margin:10px 0;font-weight:600}
+.big{font-size:1.5rem;font-weight:700}
+.prize{background:var(--gold);color:#2b1e15;border-radius:12px;padding:12px;font-weight:700}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.9rem}
+td,th{padding:5px 4px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top}
+td:first-child,th:first-child{text-align:left}
+.lg{display:flex;gap:14px;flex-wrap:wrap;font-size:.9rem;margin-top:6px}
+.sw{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.sw0{background:var(--acc)}.sw1{background:var(--gold)}
+.gl{stroke:var(--line);stroke-width:1}
+.ax{fill:var(--mut);font-size:9px}
+.ln0{fill:none;stroke:var(--acc);stroke-width:2.5;stroke-linejoin:round}
+.ln1{fill:none;stroke:var(--gold);stroke-width:2.5;stroke-linejoin:round}
+.dt0{fill:var(--acc)}.dt1{fill:var(--gold)}
+.chart{width:100%;height:auto;display:block}
+.lang{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+ul.bl{margin:6px 0 8px;padding-left:1.2rem}
+.cap{margin:16px 0;padding:12px 14px;border-left:4px solid var(--gold);background:var(--bg);border-radius:8px;display:grid;gap:4px}
+.tot{margin-top:22px;padding:16px;border:2px solid var(--acc);border-radius:14px}
+.tot .lab{margin-top:14px;color:var(--mut);font-size:.9rem}
+.tot .val{font-size:1.25rem;font-weight:700}
+.hl{font-size:2.2rem;line-height:1.1;font-weight:700;color:var(--acc)}
+.gap{margin-top:22px}
+.at th,.at td{padding:7px 3px;font-size:.8rem}
+.at td:first-child{min-width:5.5em}
+ul.bl li{margin-bottom:5px}
+ol.rl{margin:0;padding-left:1.2rem}
+ol.rl li{margin-bottom:6px}
+.pb{margin-top:10px;padding-top:6px;border-top:1px solid var(--line)}
+.pb:first-of-type{border-top:0;margin-top:0;padding-top:0}
+@media (prefers-reduced-motion:reduce){.hand{transition:none}}
+/* Mcube Games: layout for every screen size */
+.card{box-shadow:0 1px 3px rgba(16,24,40,.06)}
+#s2 .board{max-width:calc((100dvh - 290px)*.92);min-width:min(100%,290px);margin:0 auto}
+@media (min-width:900px){main{max-width:820px}#s1 .pb{display:inline-block;width:calc(50% - 12px);vertical-align:top;border-top:0!important;margin:0 4px}#s5{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}#s5>.card:first-child,#s5>.card:nth-child(2),#s5>button,#s5>p{grid-column:1/-1}#s5 .card{margin:0}}
+</style>
+
+<script>MG.topbar("Pallanguli Investment Game")</script>
+<main>
+<header>
+<div class="logo" id="logo" role="img" aria-label="Mcube Academy">M</div>
+<div class="hd"><h1 id="ttl">Pallanguli Investment Game</h1><div class="mut">Mcube Academy</div></div>
+<button id="admBtn" class="mini alt hide" type="button">Admin</button>
+</header>
+<svg class="mkt" viewBox="0 0 320 46" preserveAspectRatio="none" aria-hidden="true">
+<g class="dn"><line x1="20" x2="20" y1="12" y2="38"/><rect x="15" y="20" width="10" height="10"/></g>
+<g class="up"><line x1="48" x2="48" y1="8" y2="36"/><rect x="43" y="14" width="10" height="14"/></g>
+<g class="dn"><line x1="76" x2="76" y1="14" y2="40"/><rect x="71" y="22" width="10" height="10"/></g>
+<g class="up"><line x1="104" x2="104" y1="6" y2="34"/><rect x="99" y="12" width="10" height="16"/></g>
+<g class="up"><line x1="132" x2="132" y1="10" y2="38"/><rect x="127" y="18" width="10" height="12"/></g>
+<g class="dn"><line x1="160" x2="160" y1="16" y2="42"/><rect x="155" y="24" width="10" height="10"/></g>
+<g class="up"><line x1="188" x2="188" y1="8" y2="34"/><rect x="183" y="12" width="10" height="14"/></g>
+<g class="up"><line x1="216" x2="216" y1="4" y2="30"/><rect x="211" y="8" width="10" height="14"/></g>
+<g class="dn"><line x1="244" x2="244" y1="10" y2="36"/><rect x="239" y="16" width="10" height="10"/></g>
+<g class="up"><line x1="272" x2="272" y1="4" y2="26"/><rect x="267" y="6" width="10" height="14"/></g>
+<g class="up"><line x1="300" x2="300" y1="2" y2="22"/><rect x="295" y="4" width="10" height="12"/></g>
+<polyline class="tr" points="10,38 48,32 76,34 104,24 132,26 160,30 188,20 216,14 244,18 272,10 310,5"/>
+</svg>
+
+<section id="sl" class="card">
+<h2>Choose your language · மொழியைத் தேர்ந்தெடுங்கள்</h2>
+<div class="lang"><button class="main" type="button" data-l="en">English</button><button class="main" type="button" data-l="ta">தமிழ்</button></div>
+</section>
+<section id="s1" class="card hide"></section>
+<section id="s2" class="hide">
+<div class="mut" id="rl"></div>
+<div class="stat"><span id="t1"></span><span class="turn" id="turn"></span></div>
+<div class="who"><span id="w2"></span><span class="mut" id="top"></span></div>
+<div class="board" id="board"></div>
+<div class="who"><span id="w1"></span><span class="mut" id="bot"></span></div>
+<p id="msg" role="status"></p>
+</section>
+<section id="s3" class="hide"></section>
+<section id="s4" class="hide"></section>
+<section id="s5" class="hide"></section>
+<section id="gate" class="card hide">
+<h2>Organizer</h2>
+<label for="pin">PIN</label><input id="pin" type="password" autocomplete="off">
+<p id="pinErr" class="no s"></p>
+<button class="main" id="pinGo" type="button">Open</button>
+</section>
+<section id="adm" class="hide"></section>
+<section id="rules" class="card hide"></section>
+</main>
+
+<script>
+var $=function(i){return document.getElementById(i)};
+var f=function(x){return (Math.round(x*100)/100).toFixed(2)};
+var esc=function(x){return String(x).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+/* Optional: URL of a Google Apps Script web app that appends each record to a Google Sheet. Leave empty to keep records on this device (and in Claude when opened there). */
+var ENDPOINT='';
+/* ENDPOINT: paste the Web app URL of the Mcube Google Apps Script here. Then registrations from every phone go to one Google Sheet, duplicates are blocked across phones, and the organizer panel reads that Sheet. */
+/* Organizer PIN for the hidden admin panel (tap the M logo 5 times). Change it before the event. */
+var ADMIN_PIN='2026';
+
+var T={en:{
+title:`Pallanguli Investment Game`,regTitle:`Register to play`,player:`Player {0}`,pTop:`Top side`,pBot:`Bottom side`,
+lName:`Name`,lPhone:`Phone number (10 digits)`,lEmail:`Email`,regNote:`Each phone number and email can play only once.`,start:`Start the game`,
+eName:`Player {0}: enter a name.`,ePhone:`Player {0}: enter a 10-digit phone number.`,eEmail:`Player {0}: enter a valid email.`,eSame:`The two players need different phone numbers and different emails.`,eDup:`Player {0}: this phone number or email has already played.`,checking:`Checking...`,
+round:`Round {0}`,turnOf:`{0}'s turn`,seedsLine:`Seeds: {0} {1} · {2} {3}`,seedsWord:`seeds`,vault:`{0}'s Savings Vault`,bank:`Bank`,
+pasu:`Pasu: 4 seeds go to {0}'s Savings Vault.`,takes:`{0} takes {1} seeds beside the empty pit.`,none:`No seeds taken this turn.`,wait:`Waiting for {0} to tap a pit.`,
+stuck:`No seeds were taken for many turns, so the round ends here.`,
+roundOver:`Round {0} is over`,oneSide:`All seeds are now on one side. Seeds left on a side go to its owner's Savings Vault.`,vaultNow:`{0}: {1} seeds in the Savings Vault`,
+r2Title:`Play round 2?`,r2Text:`If both players say yes, 5 seeds from each Savings Vault go into each pit on your side. Extra seeds stay in the vault. A pit that gets fewer than 5 becomes a Bank: only you can add seeds to it and nobody can play from it. Empty pits are sealed.`,
+r2Yes:`Yes, I will play round 2`,r2Need:`Needs at least 5 seeds.`,r2Note:`Round 2 starts only if both players say yes.`,cont:`Continue`,
+invTitle:`Where will you invest {0} lakh?`,invHelp:`Tick the assets you choose and enter how many lakh go into each.`,yearsQ:`How many years will you stay invested?`,
+placed:`All ₹{0} lakh placed`,toPlace:`₹{0} lakh still to place`,tooMuch:`₹{0} lakh too much`,lakh:`₹ lakh`,seeResult:`See my result`,noSeeds:`No seeds were saved, so there is nothing to invest.`,
+eInv:`{0}: place exactly ₹{1} lakh in the assets you ticked.`,eYears:`{0}: years must be between 1 and 50.`,
+aCash:`Bank (FD / savings)`,aFd:`Fixed Deposit (FD)`,aGold:`Gold`,aRe:`Real estate`,aEq:`Stocks`,
+resTitle:`Results`,win:`🏆 {0} wins!`,noWin:`No seeds were won in round 2, so there is no winner this time.`,tieMsg:`It is a tie.`,
+growthLine:`{0} grows to {1} in {2} years`,cagrLine:`{0}% a year (annualised return)`,divOk:`Well diversified`,divNo:`Not diversified enough: use 3 or more assets and keep each below half of your money.`,
+colAsset:`Asset`,colIn:`Monthly SIP`,colTo:`Grows to`,chartT:`How your money grows`,yearsAx:`years`,
+typeT:`What kind of investor are you?`,tSafe:`Safety-first saver`,tBal:`Balanced investor`,tGrow:`Growth-seeking investor`,
+dSafe:`Most of your money sits in bank deposits. It is safe, but it grows slowly and inflation can eat into it.`,
+dBal:`You mix safe assets with growth assets. This spreads the risk and still gives your money a chance to grow.`,
+dGrow:`Most of your money is in stocks and mutual funds. They can grow the most over time, but they also move up and down the most.`,
+hShort:`You stay invested for {0} years, which is a short time. Compounding has little time to work, so growth assets may not shine yet.`,
+hMid:`{0} years is a medium period. Compounding is starting to work for you.`,
+hLong:`{0} years is a long period. Compounding works best over long periods, which is why long-term investors gain the most.`,
+pri:`You gave the most priority to {0} ({1}% of your money).`,sprOk:`You spread your money across {0} assets, which helps when one asset falls.`,sprNo:`Try using at least 3 assets and keep any one below half of your money.`,
+whyT:`Why spread your money?`,whyP:`When money sits in many assets, one fall does not wipe out everything. If one asset is weak, another can hold up.`,
+riskT:`What is risk?`,riskP:`Risk is the chance that an investment loses value or earns less than you expected.`,
+riskP2:`Stocks carry the most risk, mutual funds a little less, NPS medium (it mixes equity and debt), bonds low and bank deposits the least. More risk can bring more return, but also bigger losses.`,
+mcube:`Mcube Academy helps you learn Mutual Funds, SIF, PMS, AIF and BFSI skills: NISM 5A, 5D, 8, 15 and 21, and an investment banking course.`,
+note:`Mutual fund investments are subject to market risks. Read all scheme related documents carefully. Returns shown are illustrative averages, not guaranteed, and past performance may or may not be sustained in the future.`,again:`New players`,
+lAge:`Age`,eAge:`Player {0}: enter an age between 10 and 90.`,ageLine:`You are {0}. Your monthly SIPs run until you are 50, which is {1} years.`,yrsLine:`Your monthly SIPs run for {0} years.`,earlyLine:`If you had started 10 years earlier, the same monthly SIPs would have grown to {0} instead of {1}.`,mailNote:`A copy of your result is being sent to {0}.`,seedsInv:`You won {0} seeds in round 2. They became monthly SIPs, added up by asset in the table.`,repHead:`Your Pallanguli Investment Game result`,mailSub:`Your Pallanguli Investment Game result`,aNps:`NPS (retirement)`,aMf:`Mutual funds`,r2Go:`Round 2 starts now`,r2Start:`Start round 2`,perMonth:`{0} a month`,colPut:`Total put in`,sipGrow:`Monthly SIP {0} for {1} years: you put in {2} and it becomes {3}.`,mixLine:`Small captures went to safer assets and big captures to growth assets, so your play decided your mix.`,bullT:`What happened`,cmpT:`Why your results differ`,cmp1:`{0} stays invested for {1} years and {2} for {3} years. More years give compounding more time, so time makes the biggest difference.`,cmp2:`{0} invests {1} a month and {2} invests {3} a month. A bigger monthly amount builds a bigger total.`,cmp3:`{0} has {1}% in {2} and {3} has {4}% in {5}. More money in growth assets like stocks grows more over long periods but moves up and down more. Bank and NPS are steadier.`,cmp4:`{0} ends with {1} and {2} ends with {3}.`,why1:`If one asset falls, the others can hold up, so one bad year does not wipe you out.`,why2:`Different assets do well at different times. Nobody can guess which one wins next.`,why3:`Safe assets like bank and NPS give stability. Stocks and mutual funds give growth. Together you get both.`,why4:`A steadier journey helps you stay invested, and staying invested is what lets compounding work.`,why5:`Putting everything in one place is a bet. Spreading it is a plan.`,learnT:`What you can take away`,l1:`Start early. Time gives compounding its power.`,l2:`Invest every month through a SIP, even a small amount.`,l3:`Spread your money across bank, NPS, bonds, mutual funds and stocks.`,l4:`Stay invested for the long term and do not stop when markets fall.`,l5:`Ask Mcube Academy how to start investing yourself.`,capH:`Seed capture {0}: {1} seeds in {2}`,capA:`{0} every month for {1} years`,capB:`You put in {0}. It becomes {1}.`,capR:`Average return {0}% a year`,totT:`Your total`,totSip:`Monthly SIP in total: {0}`,putL:`Total you put in`,becL:`It becomes`,gainL:`Your gain`,avgL:`Average return a year, compounded`,contT:`Why continuing matters`,colYrs:`Years`,colVal:`Value`,cont1:`In your first 5 years your money grew by {0}. In the last 5 years it grew by {1}. The longer you continue, the faster it grows.`,cont2:`If you stopped after 10 years you would have {0}. Continuing for {1} years gives you {2}.`,noSips:`You did not win seeds in round 2.`,aBond:`Bonds`,avgNote:`This one number shows the combined compounded growth of all your assets together. Spreading money across several assets balances safety and growth, helping your money earn more over time.`,
+rulesT:`Game rules`,
+r1:`Every pit starts with 5 seeds. 1 seed = ₹1,000. Tap one of your own glowing pits and its seeds drop one by one into the next pits.`,
+r2:`After your last seed, if the next pit has seeds, pick them up and keep sowing.`,
+r3:`If the next pit is empty, take the seeds from the pit beyond it into your Savings Vault and your turn ends. If that pit is empty too, you take nothing.`,
+r4:`A pit that reaches exactly 4 seeds (a pasu) goes to the Savings Vault of the player whose side that pit is on, whoever sowed it.`,
+r5:`The round ends when all seeds are on one side. Seeds left on a side go to its owner. If no seeds are taken for 60 turns in a row, the round also ends.`,
+r6:`Round 2 is always played. 5 seeds from your Savings Vault go into each of your pits. A pit with fewer than 5 is a Bank: only its owner can add seeds to it and nobody can play from it. Empty pits are sealed. Seeds skip sealed pits and the other player's Bank.`,
+r7:`The seeds you win in round 1 fill your pits in round 2. In round 2, every time you take seeds, they are invested for you automatically as a monthly SIP. When the game ends, your result appears at once.`,
+r8:`Your age decides how many years your SIPs run. The player with the better average yearly return wins.`
+},ta:{
+title:`பல்லாங்குழி முதலீட்டு விளையாட்டு`,regTitle:`விளையாட பதிவு செய்யுங்கள்`,player:`வீரர் {0}`,pTop:`மேல் பக்கம்`,pBot:`கீழ் பக்கம்`,
+lName:`பெயர்`,lPhone:`தொலைபேசி எண் (10 இலக்கம்)`,lEmail:`மின்னஞ்சல்`,regNote:`ஒரு தொலைபேசி எண்ணும் ஒரு மின்னஞ்சலும் ஒருமுறை மட்டுமே விளையாடலாம்.`,start:`ஆட்டத்தைத் தொடங்கு`,
+eName:`வீரர் {0}: பெயரை உள்ளிடுங்கள்.`,ePhone:`வீரர் {0}: 10 இலக்க தொலைபேசி எண்ணை உள்ளிடுங்கள்.`,eEmail:`வீரர் {0}: சரியான மின்னஞ்சலை உள்ளிடுங்கள்.`,eSame:`இரு வீரர்களுக்கும் வெவ்வேறு தொலைபேசி எண், வெவ்வேறு மின்னஞ்சல் வேண்டும்.`,eDup:`வீரர் {0}: இந்த தொலைபேசி எண் அல்லது மின்னஞ்சல் ஏற்கனவே விளையாடிவிட்டது.`,checking:`சரிபார்க்கிறது...`,
+round:`சுற்று {0}`,turnOf:`{0}-இன் முறை`,seedsLine:`விதைகள்: {0} {1} · {2} {3}`,seedsWord:`விதைகள்`,vault:`{0}-இன் சேமிப்புப் பெட்டகம்`,bank:`பேங்க்`,
+pasu:`பசு: 4 விதைகள் {0}-இன் சேமிப்புப் பெட்டகத்துக்குச் சென்றன.`,takes:`{0} காலிக் குழிக்கு அடுத்த {1} விதைகளை எடுத்தார்.`,none:`இந்த முறை விதை எதுவும் கிடைக்கவில்லை.`,wait:`{0} ஒரு குழியைத் தொட வேண்டும்.`,
+stuck:`பல முறை விதை எதுவும் எடுக்கப்படவில்லை, எனவே இந்தச் சுற்று இங்கே முடிகிறது.`,
+roundOver:`சுற்று {0} முடிந்தது`,oneSide:`எல்லா விதைகளும் ஒரே பக்கத்துக்கு வந்துவிட்டன. ஒரு பக்கத்தில் மீதமுள்ள விதைகள் அதன் உரிமையாளரின் சேமிப்புப் பெட்டகத்துக்குப் போகும்.`,vaultNow:`{0}: சேமிப்புப் பெட்டகத்தில் {1} விதைகள்`,
+r2Title:`இரண்டாவது சுற்று விளையாடலாமா?`,r2Text:`இருவரும் ஆம் என்றால், ஒவ்வொருவரின் சேமிப்புப் பெட்டகத்திலிருந்தும் உங்கள் பக்கத்தின் ஒவ்வொரு குழியிலும் 5 விதைகள் போடப்படும். மீதம் பெட்டகத்திலேயே இருக்கும். 5-க்கும் குறைவாக விழும் குழி பேங்க் ஆகும்: அதில் நீங்கள் மட்டுமே விதை சேர்க்கலாம், யாரும் அதிலிருந்து விளையாட முடியாது. காலிக் குழிகள் மூடப்படும்.`,
+r2Yes:`ஆம், சுற்று 2 விளையாடுவேன்`,r2Need:`குறைந்தது 5 விதைகள் வேண்டும்.`,r2Note:`இருவரும் ஆம் என்றால் மட்டுமே சுற்று 2 தொடங்கும்.`,cont:`தொடர்க`,
+invTitle:`{0} லட்சத்தை எங்கே முதலீடு செய்வீர்கள்?`,invHelp:`தேர்ந்தெடுக்கும் சொத்துகளைக் குறியிட்டு, ஒவ்வொன்றிலும் எத்தனை லட்சம் என்று உள்ளிடுங்கள்.`,yearsQ:`எத்தனை ஆண்டுகள் முதலீட்டில் இருப்பீர்கள்?`,
+placed:`அனைத்து ₹{0} லட்சமும் ஒதுக்கப்பட்டது`,toPlace:`இன்னும் ₹{0} லட்சம் ஒதுக்க வேண்டும்`,tooMuch:`₹{0} லட்சம் அதிகம்`,lakh:`₹ லட்சம்`,seeResult:`என் முடிவைப் பார்`,noSeeds:`சேமிப்புப் பெட்டகத்தில் விதை இல்லை, முதலீடு செய்ய எதுவும் இல்லை.`,
+eInv:`{0}: நீங்கள் குறியிட்ட சொத்துகளில் சரியாக ₹{1} லட்சத்தை ஒதுக்குங்கள்.`,eYears:`{0}: ஆண்டுகள் 1 முதல் 50 வரை இருக்க வேண்டும்.`,
+aCash:`வங்கி (FD / சேமிப்பு)`,aFd:`நிலையான வைப்பு (FD)`,aGold:`தங்கம்`,aRe:`ரியல் எஸ்டேட் (நிலம், வீடு)`,aEq:`பங்குகள் (பங்குச் சந்தை)`,
+resTitle:`முடிவுகள்`,win:`🏆 {0} வெற்றி பெற்றார்!`,noWin:`சுற்று 2-இல் விதை எதுவும் வெல்லப்படவில்லை, எனவே இம்முறை வெற்றியாளர் இல்லை.`,tieMsg:`இருவரும் சமம்.`,
+growthLine:`{0} என்பது {2} ஆண்டுகளில் {1} ஆக வளர்கிறது`,cagrLine:`ஆண்டுக்கு {0}% (ஆண்டு வருமானம்)`,divOk:`நன்கு பல்வகைப்படுத்தப்பட்டது`,divNo:`போதுமான பல்வகைப்படுத்தல் இல்லை: 3 அல்லது அதற்கு மேற்பட்ட சொத்துகளைப் பயன்படுத்துங்கள், எதிலும் பணத்தின் பாதிக்குமேல் போடாதீர்கள்.`,
+colAsset:`சொத்து`,colIn:`மாதாந்திர SIP`,colTo:`வளர்ந்தது`,chartT:`உங்கள் பணம் எப்படி வளர்கிறது`,yearsAx:`ஆண்டுகள்`,
+typeT:`நீங்கள் எப்படிப்பட்ட முதலீட்டாளர்?`,tSafe:`பாதுகாப்பை விரும்பும் சேமிப்பாளர்`,tBal:`சமநிலை முதலீட்டாளர்`,tGrow:`வளர்ச்சியை நாடும் முதலீட்டாளர்`,
+dSafe:`உங்கள் பணத்தில் பெரும்பகுதி வங்கி வைப்பில் உள்ளது. இது பாதுகாப்பானது, ஆனால் மெதுவாகவே வளரும்; பணவீக்கம் அதன் மதிப்பைக் குறைக்கும்.`,
+dBal:`பாதுகாப்பான சொத்துகளையும் வளர்ச்சி தரும் சொத்துகளையும் கலந்துள்ளீர்கள். இது ரிஸ்க்கைப் பிரிக்கும், பணம் வளரவும் வாய்ப்பு தரும்.`,
+dGrow:`உங்கள் பணத்தில் பெரும்பகுதி பங்குகளிலும் மியூச்சுவல் ஃபண்டிலும் உள்ளது. இவை காலப்போக்கில் அதிகம் வளரலாம், ஆனால் அதிகமாக ஏறி இறங்கவும் செய்யும்.`,
+hShort:`நீங்கள் {0} ஆண்டுகள் முதலீட்டில் இருக்கிறீர்கள், இது குறுகிய காலம். கூட்டு வளர்ச்சிக்கு (compounding) குறைந்த நேரமே உள்ளது, அதனால் வளர்ச்சி சொத்துகள் இன்னும் பிரகாசிக்காது.`,
+hMid:`{0} ஆண்டுகள் நடுத்தர காலம். கூட்டு வளர்ச்சி உங்களுக்காக வேலை செய்யத் தொடங்குகிறது.`,
+hLong:`{0} ஆண்டுகள் நீண்ட காலம். கூட்டு வளர்ச்சி நீண்ட காலத்தில்தான் சிறப்பாக வேலை செய்யும்; அதனால்தான் நீண்டகால முதலீட்டாளர்களுக்கு அதிக பலன் கிடைக்கிறது.`,
+pri:`நீங்கள் அதிக முன்னுரிமை கொடுத்தது {0} ({1}% பணம்).`,sprOk:`உங்கள் பணத்தை {0} சொத்துகளில் பிரித்துள்ளீர்கள்; ஒன்று வீழ்ந்தாலும் இது உங்களுக்குப் பாதுகாப்பு.`,sprNo:`குறைந்தது 3 சொத்துகளைப் பயன்படுத்துங்கள்; எந்த ஒன்றிலும் பணத்தின் பாதிக்குமேல் போடாதீர்கள்.`,
+whyT:`ஏன் பணத்தைப் பிரித்து முதலீடு செய்ய வேண்டும்?`,whyP:`பணம் பல சொத்துகளில் இருந்தால், ஒன்று வீழ்ந்தாலும் எல்லாமும் அழியாது. ஒரு சொத்து பலவீனமாக இருக்கும்போது மற்றொன்று தாங்கிக்கொள்ளும்.`,
+riskT:`ரிஸ்க் என்றால் என்ன?`,riskP:`ரிஸ்க் என்பது முதலீட்டின் மதிப்பு குறையும் அல்லது எதிர்பார்த்த வருமானம் கிடைக்காமல் போகும் வாய்ப்பு.`,
+riskP2:`பங்குகளில் ரிஸ்க் அதிகம், மியூச்சுவல் ஃபண்டில் சற்றுக் குறைவு, NPS-இல் நடுத்தரம் (இது பங்கும் கடனும் கலந்தது), பத்திரங்களில் குறைவு, வங்கி வைப்பில் மிகக் குறைவு. அதிக ரிஸ்க் அதிக வருமானம் தரலாம், ஆனால் பெரிய இழப்பும் வரலாம்.`,
+mcube:`மியூச்சுவல் ஃபண்ட், SIF, PMS, AIF மற்றும் BFSI திறன்களைக் கற்க Mcube Academy உங்களுக்கு உதவும்: NISM 5A, 5D, 8, 15, 21 மற்றும் முதலீட்டு வங்கி (Investment Banking) படிப்பு.`,
+note:`மியூச்சுவல் ஃபண்ட் முதலீடுகள் சந்தை ரிஸ்க்குக்கு உட்பட்டவை. திட்டம் தொடர்பான அனைத்து ஆவணங்களையும் கவனமாகப் படியுங்கள். இங்குள்ள வருமானங்கள் கற்பதற்கான சராசரி மதிப்பீடுகள், உத்தரவாதம் அல்ல; கடந்தகால செயல்பாடு எதிர்காலத்திலும் தொடரலாம் அல்லது தொடராமல் போகலாம்.`,again:`புதிய வீரர்கள்`,
+lAge:`வயது`,eAge:`வீரர் {0}: 10 முதல் 90 வரை வயதை உள்ளிடுங்கள்.`,ageLine:`உங்கள் வயது {0}. உங்கள் மாதாந்திர SIP நீங்கள் 50 வயது ஆகும் வரை, அதாவது {1} ஆண்டுகள், தொடரும்.`,yrsLine:`உங்கள் மாதாந்திர SIP {0} ஆண்டுகள் தொடரும்.`,earlyLine:`10 ஆண்டுகள் முன்பே தொடங்கியிருந்தால், இதே மாதாந்திர SIP {1} அல்ல, {0} ஆக வளர்ந்திருக்கும்.`,mailNote:`உங்கள் முடிவின் நகல் {0} முகவரிக்கு அனுப்பப்படுகிறது.`,seedsInv:`சுற்று 2-இல் நீங்கள் {0} விதைகள் வென்றீர்கள். அவை மாதாந்திர SIP ஆகின; ஒவ்வொரு சொத்துக்கும் கூட்டி அட்டவணையில் காட்டப்பட்டுள்ளது.`,repHead:`உங்கள் பல்லாங்குழி முதலீட்டு விளையாட்டு முடிவு`,mailSub:`உங்கள் பல்லாங்குழி முதலீட்டு விளையாட்டு முடிவு`,aNps:`NPS (ஓய்வூதியம்)`,aMf:`மியூச்சுவல் ஃபண்ட்`,r2Go:`சுற்று 2 இப்போது தொடங்குகிறது`,r2Start:`சுற்று 2-ஐத் தொடங்கு`,perMonth:`மாதம் {0}`,colPut:`மொத்தம் போட்டது`,sipGrow:`மாதம் {0} SIP, {1} ஆண்டுகள்: நீங்கள் போட்டது {2}, அது {3} ஆகும்.`,mixLine:`சிறிய அளவு எடுத்தவை பாதுகாப்பான சொத்துகளுக்கும், பெரிய அளவு எடுத்தவை வளர்ச்சி சொத்துகளுக்கும் சென்றன; அதனால் உங்கள் ஆட்டமே உங்கள் கலவையை முடிவு செய்தது.`,bullT:`என்ன நடந்தது`,cmpT:`உங்கள் இருவரின் முடிவு ஏன் வேறுபடுகிறது`,cmp1:`{0} {1} ஆண்டுகளும், {2} {3} ஆண்டுகளும் முதலீட்டில் இருக்கிறார்கள். ஆண்டுகள் அதிகமானால் கூட்டு வளர்ச்சிக்கு அதிக நேரம் கிடைக்கும்; காலமே மிகப்பெரிய வேறுபாடு.`,cmp2:`{0} மாதம் {1}, {2} மாதம் {3} முதலீடு செய்கிறார்கள். மாதத் தொகை பெரிதானால் மொத்தமும் பெரிதாகும்.`,cmp3:`{0}: {2}-இல் {1}%, {3}: {5}-இல் {4}%. பங்கு போன்ற வளர்ச்சி சொத்துகளில் அதிகம் போட்டால் நீண்ட காலத்தில் அதிகம் வளரும், ஆனால் அதிகம் ஏறி இறங்கும். வங்கி, NPS நிலையானவை.`,cmp4:`{0} இறுதியில் {1}, {2} இறுதியில் {3} பெறுகிறார்கள்.`,why1:`ஒரு சொத்து வீழ்ந்தால் மற்றவை தாங்கிக்கொள்ளும்; ஒரு மோசமான ஆண்டு எல்லாவற்றையும் அழிக்காது.`,why2:`வெவ்வேறு சொத்துகள் வெவ்வேறு காலத்தில் நன்றாகச் செயல்படும். அடுத்து எது வெல்லும் என்று யாராலும் சொல்ல முடியாது.`,why3:`வங்கி, NPS போன்றவை நிலைத்தன்மை தரும். பங்குகளும் மியூச்சுவல் ஃபண்டும் வளர்ச்சி தரும். சேர்த்தால் இரண்டும் கிடைக்கும்.`,why4:`நிலையான பயணம் முதலீட்டில் தொடர உதவும்; தொடர்ந்தால்தான் கூட்டு வளர்ச்சி வேலை செய்யும்.`,why5:`எல்லாவற்றையும் ஒரே இடத்தில் போடுவது சூதாட்டம்; பிரித்துப் போடுவது திட்டம்.`,learnT:`நீங்கள் கற்றுக்கொள்ளக்கூடியவை`,l1:`சீக்கிரம் தொடங்குங்கள். காலமே கூட்டு வளர்ச்சிக்கு சக்தி.`,l2:`ஒவ்வொரு மாதமும் SIP மூலம் முதலீடு செய்யுங்கள், சிறிய தொகையானாலும்.`,l3:`பணத்தை வங்கி, NPS, பத்திரங்கள், மியூச்சுவல் ஃபண்ட், பங்குகளில் பிரித்துப் போடுங்கள்.`,l4:`நீண்ட காலம் முதலீட்டில் இருங்கள்; சந்தை சரிந்தால் நிறுத்த வேண்டாம்.`,l5:`நீங்களே முதலீடு செய்யத் தொடங்குவது எப்படி என்று Mcube Academy-இடம் கேளுங்கள்.`,capH:`விதை எடுப்பு {0}: {2}-இல் {1} விதைகள்`,capA:`ஒவ்வொரு மாதமும் {0}, {1} ஆண்டுகள்`,capB:`நீங்கள் போட்டது {0}. அது {1} ஆகும்.`,capR:`சராசரி வருமானம் ஆண்டுக்கு {0}%`,totT:`உங்கள் மொத்தம்`,totSip:`மொத்த மாதாந்திர SIP: {0}`,putL:`நீங்கள் போட்ட மொத்தம்`,becL:`அது ஆகும்`,gainL:`உங்கள் லாபம்`,avgL:`சராசரி ஆண்டு வருமானம் (கூட்டு வளர்ச்சியுடன்)`,contT:`தொடர்ந்து முதலீடு செய்வதன் பலன்`,colYrs:`ஆண்டுகள்`,colVal:`மதிப்பு`,cont1:`முதல் 5 ஆண்டுகளில் உங்கள் பணம் {0} வளர்ந்தது. கடைசி 5 ஆண்டுகளில் {1} வளர்ந்தது. நீண்ட காலம் தொடர்ந்தால் வளர்ச்சி வேகமாகும்.`,cont2:`10 ஆண்டுகளில் நிறுத்தியிருந்தால் உங்களிடம் {0} இருக்கும். {1} ஆண்டுகள் தொடர்ந்தால் {2} கிடைக்கும்.`,noSips:`சுற்று 2-இல் நீங்கள் விதை வெல்லவில்லை.`,aBond:`பத்திரங்கள் (Bonds)`,avgNote:`இந்த ஒரு எண் உங்கள் எல்லா சொத்துகளின் கூட்டு வளர்ச்சியையும் சேர்த்துக் காட்டுகிறது. பல சொத்துகளில் பிரித்துப் போடுவது பாதுகாப்பையும் வளர்ச்சியையும் சமநிலைப்படுத்தி, காலப்போக்கில் உங்கள் பணம் அதிகம் சம்பாதிக்க உதவும்.`,
+rulesT:`விளையாட்டு விதிகள்`,
+r1:`ஒவ்வொரு குழியிலும் 5 விதைகளுடன் தொடங்குங்கள். 1 விதை = ₹1,000. உங்கள் பக்கத்தின் ஒளிரும் குழிகளில் ஒன்றைத் தொடுங்கள்; அதன் விதைகள் அடுத்தடுத்த குழிகளில் ஒவ்வொன்றாக விழும்.`,
+r2:`கடைசி விதைக்கு அடுத்த குழியில் விதை இருந்தால், அதை எடுத்து தொடர்ந்து போடுங்கள்.`,
+r3:`அடுத்த குழி காலியாக இருந்தால், அதற்கு அடுத்த குழியின் விதைகளை உங்கள் சேமிப்புப் பெட்டகத்தில் எடுத்துக்கொள்ளுங்கள்; உங்கள் முறை முடியும். அதுவும் காலியாக இருந்தால் எதுவும் கிடைக்காது.`,
+r4:`சரியாக 4 விதைகள் வரும் குழி (பசு), யார் போட்டாலும், அந்தக் குழி எந்த வீரரின் பக்கத்தில் உள்ளதோ அவரது சேமிப்புப் பெட்டகத்துக்குப் போகும்.`,
+r5:`எல்லா விதைகளும் ஒரே பக்கத்துக்கு வந்தால் சுற்று முடியும். ஒரு பக்கத்தில் மீதமுள்ள விதைகள் அதன் உரிமையாளருக்கு. தொடர்ந்து 60 முறை விதை எதுவும் எடுக்கப்படாவிட்டாலும் சுற்று முடியும்.`,
+r6:`சுற்று 2 எப்போதும் விளையாடப்படும். உங்கள் சேமிப்புப் பெட்டகத்திலிருந்து உங்கள் ஒவ்வொரு குழியிலும் 5 விதைகள் போடப்படும். 5-க்கும் குறைவான குழி பேங்க்: அதில் அதன் உரிமையாளர் மட்டுமே விதை சேர்க்கலாம், யாரும் அதிலிருந்து விளையாட முடியாது. காலிக் குழிகள் மூடப்படும்; அவற்றிலும், மற்றவரின் பேங்கிலும் விதை விழாது.`,
+r7:`சுற்று 1-இல் நீங்கள் வெல்லும் விதைகள் சுற்று 2-இல் உங்கள் குழிகளை நிரப்பும். சுற்று 2-இல் நீங்கள் விதைகளை எடுக்கும் ஒவ்வொரு முறையும், அவை தானாக உங்களுக்காக மாதாந்திர SIP ஆக முதலீடு செய்யப்படும். ஆட்டம் முடிந்ததும் உங்கள் முடிவு உடனே தெரியும்.`,
+r8:`உங்கள் வயதே உங்கள் SIP எத்தனை ஆண்டுகள் தொடரும் என்பதை முடிவு செய்யும். சிறந்த சராசரி ஆண்டு வருமானம் பெற்றவர் வெற்றியாளர்.`
+}};
+var L='en';
+function t(k){var s=(T[L]&&T[L][k])||T.en[k]||k;for(var i=1;i<arguments.length;i++)s=s.split('{'+(i-1)+'}').join(arguments[i]);return s}
+
+/* ---------- storage ---------- */
+var rows=[],dbRef=null,usrRef=null,isOwner=false,merged=false,regs=[null,null];
+try{rows=JSON.parse(localStorage.getItem('pg2_rows')||'[]')}catch(e){rows=[]}
+function saveLocal(){try{localStorage.setItem('pg2_rows',JSON.stringify(rows))}catch(e){}}
+function saveRows(){saveLocal();if(dbRef&&usrRef){Promise.resolve(usrRef.id()).then(function(uid){return dbRef.collection('players').doc(uid).set({rows:rows})}).catch(function(){})}}
+function sendSheet(o){if(!ENDPOINT)return Promise.resolve();try{return fetch(ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(o)}).catch(function(){})}catch(e){return Promise.resolve()}}
+function post(r){return sendSheet({a:'save',row:r})}
+async function sheetGet(q){var r=await fetch(ENDPOINT+(ENDPOINT.indexOf('?')<0?'?':'&')+q);return r.json()}
+async function hash(x){try{var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(x));return Array.from(new Uint8Array(b)).map(function(v){return v.toString(16).padStart(2,'0')}).join('')}catch(e){var h=5381;for(var i=0;i<x.length;i++)h=((h<<5)+h+x.charCodeAt(i))|0;return 'h'+(h>>>0).toString(16)}}
+async function mergeFromDb(){
+ if(!dbRef||!usrRef||merged)return;merged=true;
+ try{var uid=await usrRef.id(),sn=await dbRef.collection('players').doc(uid).get(),v=sn.data(),ids={};
+  rows.forEach(function(r){ids[r.id]=1});
+  ((v&&v.rows)||[]).forEach(function(r){if(!ids[r.id])rows.push(r)});saveLocal()}catch(e){}
+}
+if(false){
+ claude.use('db').then(function(d){dbRef=d;mergeFromDb()}).catch(function(){});
+ claude.use('user').then(async function(u){usrRef=u;var o=false;try{o=!!(u&&await u.isOwner())}catch(e){}if(o){isOwner=true;$('admBtn').classList.remove('hide')}mergeFromDb()}).catch(function(){});
+}
+async function isUsed(phone,email){
+ if(rows.some(function(r){return r.phone===phone||r.email===email}))return true;
+ if(ENDPOINT){try{var c=await sheetGet('a=chk&p='+encodeURIComponent(phone)+'&e='+encodeURIComponent(email));if(c&&c.used)return true}catch(e){}}
+ if(dbRef){try{var a=await dbRef.doc('registry/p_'+await hash(phone)).get(),b=await dbRef.doc('registry/e_'+await hash(email)).get();if(a.exists||b.exists)return true}catch(e){}}
+ return false;
+}
+async function claim(p){if(!dbRef)return;try{var ts=Date.now();await dbRef.doc('registry/p_'+await hash(p.phone)).set({ts:ts});await dbRef.doc('registry/e_'+await hash(p.email)).set({ts:ts})}catch(e){}}
+
+/* ---------- stages ---------- */
+var STAGES=['sl','s1','s2','s3','s4','s5','adm','gate'],curStage='sl',prevStage='sl';
+function show(id){STAGES.forEach(function(x){$(x).classList.toggle('hide',x!==id)});$('rules').classList.toggle('hide',id==='sl'||id==='adm'||id==='gate');curStage=id;try{window.scrollTo(0,0)}catch(e){}}
+function buildRules(){var h='<h2>'+esc(t('rulesT'))+'</h2><ol class="rl">';for(var i=1;i<=8;i++)h+='<li>'+esc(t('r'+i))+'</li>';$('rules').innerHTML=h+'</ol>'}
+function setLang(l){L=l;document.documentElement.lang=l==='ta'?'ta':'en';$('ttl').textContent=t('title');buildRules();buildReg();show('s1')}
+document.querySelectorAll('[data-l]').forEach(function(b){b.addEventListener('click',function(){setLang(b.getAttribute('data-l'))})});
+
+/* ---------- registration ---------- */
+function fld(lab,id,type,ex){return '<label for="'+id+'">'+esc(lab)+'</label><input id="'+id+'" type="'+type+'" '+(ex||'')+'>'}
+function buildReg(){
+ var h='<h2>'+esc(t('regTitle'))+'</h2>';
+ for(var k=0;k<2;k++){
+  h+='<div class="pb"><h3>'+esc(t('player',k+1))+' · '+esc(k?t('pTop'):t('pBot'))+'</h3>'+fld(t('lName'),'rn'+k,'text','maxlength="30" autocomplete="off"')
+   +fld(t('lAge'),'ra'+k,'number','inputmode="numeric" min="10" max="90" autocomplete="off"')+fld(t('lPhone'),'rp'+k,'tel','inputmode="numeric" maxlength="14" autocomplete="off"')+fld(t('lEmail'),'re'+k,'email','autocomplete="off"')+'</div>';
+ }
+ h+='<p class="mut" style="margin-top:10px">'+esc(t('regNote'))+'</p><p id="rerr" class="no" role="status"></p><button class="main" id="reg" type="button">'+esc(t('start'))+'</button>';
+ $('s1').innerHTML=h;$('reg').onclick=doRegister;
+}
+var regBusy=false;
+async function doRegister(){
+ if(regBusy)return;
+ var P=[0,1].map(function(k){var ph=$('rp'+k).value.replace(/\D/g,'');if(ph.length===12&&ph.indexOf('91')===0)ph=ph.slice(2);return{name:$('rn'+k).value.trim(),age:parseInt($('ra'+k).value,10),phone:ph,email:$('re'+k).value.trim().toLowerCase()}});
+ var err='',k;
+ for(k=0;k<2&&!err;k++){
+  if(!P[k].name)err=t('eName',k+1);
+  else if(!(P[k].age>=10&&P[k].age<=90))err=t('eAge',k+1);
+  else if(!/^[6-9]\d{9}$/.test(P[k].phone))err=t('ePhone',k+1);
+  else if(!/^\S+@\S+\.\S+$/.test(P[k].email))err=t('eEmail',k+1);
+ }
+ if(!err&&(P[0].phone===P[1].phone||P[0].email===P[1].email))err=t('eSame');
+ if(err){$('rerr').textContent=err;return}
+ regBusy=true;$('rerr').textContent=t('checking');
+ for(k=0;k<2&&!err;k++){if(await isUsed(P[k].phone,P[k].email)||await MG.check('pallanguli',P[k].phone))err=t('eDup',k+1)}
+ if(err){regBusy=false;$('rerr').textContent=err;return}
+ var ids=[];for(k=0;k<2&&!err;k++){var rr=await MG.register('pallanguli',{name:P[k].name,mobile:P[k].phone,email:P[k].email,age:P[k].age,lang:L});if(rr.dup)err=t('eDup',k+1);else ids.push(rr.id)}
+ if(err){regBusy=false;$('rerr').textContent=err;return}
+ regs=P.map(function(p,i){return{id:Date.now().toString(36)+i+Math.random().toString(36).slice(2,6),ts:new Date().toISOString(),lang:L,name:p.name,age:p.age,phone:p.phone,email:p.email,status:'registered',seeds:0,years:0,split:'',final:0,cagr:0,div:false,mgId:ids[i]}});
+ regs.forEach(function(r){rows.push(r);post(r)});saveRows();
+ await claim(P[0]);await claim(P[1]);
+ regBusy=false;names=[P[0].name,P[1].name];ages=[P[0].age,P[1].age];startGame();
+}
+
+/* ---------- board engine ---------- */
+var POS=[[5,1],[5,2],[5,3],[5,4],[5,5],[4,5],[2,5],[1,5],[1,4],[1,3],[1,2],[1,1],[2,1],[4,1]];
+var SIDE=[[0,1,2,3,4,5,13],[6,7,8,9,10,11,12]];
+var own=function(i){return (i<=5||i===13)?0:1};
+var s=[],kind=[],store=[0,0],cur=0,busy=false,names=['',''],pits=[],ov=[],hd=null,rnd=1,quiet=0,earned=[0,0];
+var sleep=function(ms){return new Promise(function(r){setTimeout(r,ms)})};
+function el(tag,c){var e=document.createElement(tag);if(c)e.className=c;return e}
+function buildBoard(){
+ var b=$('board');b.innerHTML='';pits=[];
+ POS.forEach(function(p,i){var e=el('button','pit');e.type='button';e.style.gridRow=p[0];e.style.gridColumn=p[1];e.addEventListener('click',function(){tap(i)});b.appendChild(e);pits[i]=e});
+ var o2=el('div','pit oval');o2.style.gridRow=2;var o1=el('div','pit oval');o1.style.gridRow=4;
+ var h=el('div','hinge');b.appendChild(o2);b.appendChild(h);b.appendChild(o1);ov=[o1,o2];
+ hd=el('div','hand');hd.innerHTML='<span aria-hidden="true">✋</span><b>0</b>';b.appendChild(hd);
+}
+function sideSum(k){var x=0;for(var i=0;i<14;i++)if(own(i)===k)x+=s[i];return x}
+function playable(k){var x=0;for(var i=0;i<14;i++)if(own(i)===k&&kind[i]===0)x+=s[i];return x}
+function nextAllowed(p,pl){for(var j=0;j<14;j++){p=(p+1)%14;if(kind[p]===0||(kind[p]===1&&own(p)===pl))return p}return p}
+function render(){
+ for(var i=0;i<14;i++){
+  var e=pits[i],n=s[i],h='';
+  for(var j=0;j<Math.min(n,12);j++)h+='<i class="seed"></i>';
+  e.innerHTML=h+(n?'<span class="cnt">'+n+'</span>':'')+(kind[i]===1?'<span class="lbl">'+esc(t('bank'))+'</span>':'');
+  var can=!busy&&kind[i]===0&&own(i)===cur&&n>0;
+  e.classList.toggle('can',can);e.classList.toggle('bank',kind[i]===1);e.classList.toggle('sealed',kind[i]===2);e.disabled=!can;
+  e.setAttribute('aria-label',n+' '+t('seedsWord'));
+ }
+ for(var k=0;k<2;k++){var ps='';for(var q=0;q<Math.min(store[k],120);q++)ps+='<i class="seed"></i>';ov[k].innerHTML='<div class="pile">'+ps+'</div><small>'+esc(t('vault',names[k]))+'</small><b>'+store[k]+'</b>'}
+ $('turn').textContent=t('turnOf',names[cur]);
+ $('t1').textContent=t('seedsLine',names[0],store[0]+sideSum(0),names[1],store[1]+sideSum(1));
+ $('rl').textContent=t('round',rnd);
+}
+function moveHand(i){var p=pits[i];hd.style.opacity=1;hd.style.transform='translate('+(p.offsetLeft+p.offsetWidth/2-19)+'px,'+(p.offsetTop+p.offsetHeight/2-19)+'px)'}
+function setHand(n){hd.querySelector('b').textContent=n}
+function hideHand(){hd.style.opacity=0}
+function startGame(){
+ s=[];kind=[];for(var i=0;i<14;i++){s.push(5);kind.push(0)}
+ store=[0,0];sips=[[],[]];cur=0;busy=false;rnd=1;quiet=0;
+ buildBoard();$('w1').textContent='🐻 '+names[0];$('w2').textContent='🐂 '+names[1];$('top').textContent=t('pTop');$('bot').textContent=t('pBot');
+ $('msg').textContent='';show('s2');render();
+}
+async function tap(i){
+ if(busy||kind[i]!==0||own(i)!==cur||!s[i])return;
+ busy=true;$('msg').textContent='';
+ var hand=s[i],pos=i,note=[],guard=0,before=store[0]+store[1];s[i]=0;render();
+ hd.style.transition='opacity .2s';moveHand(i);setHand(hand);await sleep(60);hd.style.transition='transform .3s ease,opacity .2s';await sleep(500);
+ while(true){
+  while(hand>0){pos=nextAllowed(pos,cur);moveHand(pos);await sleep(340);s[pos]++;hand--;setHand(hand);render();await sleep(220);
+   if(kind[pos]===0&&s[pos]===4){var po=own(pos);store[po]+=4;credit(po,4);s[pos]=0;note.push(t('pasu',names[po]));render();await sleep(450)}}
+  var n=nextAllowed(pos,cur);
+  if(kind[n]===0&&s[n]>0&&++guard<200){moveHand(n);await sleep(340);hand=s[n];s[n]=0;setHand(hand);render();await sleep(400);pos=n;continue}
+  if(kind[n]===0){var c=nextAllowed(n,cur);
+   if(kind[c]===0&&s[c]>0){moveHand(c);await sleep(450);var g=s[c];store[cur]+=g;credit(cur,g);s[c]=0;render();note.push(t('takes',names[cur],g))}
+   else note.push(t('none'))}
+  else note.push(t('none'));
+  break;
+ }
+ hideHand();
+ if(store[0]+store[1]===before)quiet++;else quiet=0;
+ var stuck=quiet>=60;
+ if(stuck||playable(0)===0||playable(1)===0){busy=false;return endRound(stuck)}
+ cur=1-cur;busy=false;render();
+ $('msg').textContent=(note.join(' ')+' '+t('wait',names[cur])).trim();
+}
+function endRound(stuck){
+ var left=[0,0];for(var i=0;i<14;i++){if(s[i]>0){left[own(i)]+=s[i];s[i]=0}}
+ for(var q=0;q<2;q++){store[q]+=left[q]}
+ render();
+ if(rnd===1){busy=true;render();$('msg').textContent=t('r2Go');setTimeout(function(){startRound2();if(rnd===2&&curStage==='s2')$('msg').textContent=t('r2Go')},1500);return}
+ toInvest();
+}
+function startRound2(){
+ rnd=2;quiet=0;sips=[[],[]];
+ for(var i=0;i<14;i++){s[i]=0;kind[i]=2}
+ for(var k=0;k<2;k++){
+  var n=store[k],ord=SIDE[k],full=Math.min(7,Math.floor(n/5)),used=0,j;
+  for(j=0;j<full;j++){s[ord[j]]=5;kind[ord[j]]=0;used+=5}
+  if(full<7){var r=n-used;if(r>0){s[ord[full]]=r;kind[ord[full]]=1;used+=r}}
+  store[k]=n-used;
+ }
+ cur=1;busy=false;buildBoard();$('w1').textContent='🐻 '+names[0];$('w2').textContent='🐂 '+names[1];$('top').textContent=t('pTop');$('bot').textContent=t('pBot');
+ $('msg').textContent='';show('s2');render();
+ if(playable(0)===0||playable(1)===0)endRound(false);
+}
+
+/* ---------- automatic investing (monthly SIP, round 2 only) and results ---------- */
+/* Only seeds taken in round 2 are invested, each capture as its own monthly SIP of 1,000 per seed: 1-3 seeds -> Bank, 4 (and every pasu) -> NPS, 5-6 -> Mutual funds, 7 or more -> Stocks. */
+var ASSETS=['aCash','aNps','aMf','aEq','aBond'],ASSET_EN=['Bank','NPS','Mutual funds','Stocks','Bonds'],RISK=[0,1,2,3,0.5],SEED=1000,ages=[0,0],sips=[[],[]];
+/* Illustrative average yearly returns. */
+var RATE=[6.25,8,11,12.5,7.25];
+var inr=function(x){return '₹'+Math.round(x).toLocaleString('en-IN')};
+function yearsFor(a){return a<50?50-a:10}
+function assetOf(n){return n<=2?0:n===3?1:n===4?2:n<=6?3:4}
+function credit(k,n){if(rnd!==2||n<=0)return;sips[k].push(n)}
+function toInvest(){results()}
+function fv(P,R,Y){var i=R/1200,m=Math.round(12*Y);return P<=0?0:P*((Math.pow(1+i,m)-1)/i)*(1+i)}
+function growAll(P,Y){var x=0;for(var j=0;j<5;j++)x+=fv(P[j],RATE[j],Y);return x}
+function annual(sumP,fin,Y){var m=Math.round(12*Y),lo=0,hi=0.05,i;for(var q=0;q<60;q++){i=(lo+hi)/2;var v=sumP*((Math.pow(1+i,m)-1)/i)*(1+i);if(v<fin)lo=i;else hi=i}return ((lo+hi)/2)*1200}
+function calc(k){
+ var Y=yearsFor(ages[k]),P=[0,0,0,0,0],sip=0,seeds=0,mx=0,top=0,rk=0,series=[],j,tt;
+ var caps=sips[k].map(function(n){var a=assetOf(n),m=n*SEED;P[a]+=m;sip+=m;seeds+=n;rk+=m*RISK[a];return{n:n,a:a,m:m,put:m*12*Y,fin:fv(m,RATE[a],Y)}});
+ for(j=0;j<5;j++)if(P[j]>mx){mx=P[j];top=j}
+ for(tt=0;tt<=Y;tt++)series.push(growAll(P,tt));
+ var fin=series[Y],put=sip*12*Y,ms=[];
+ for(tt=5;tt<Y;tt+=5)ms.push(tt);ms.push(Y);
+ return{k:k,name:names[k],age:ages[k],seeds:seeds,caps:caps,sip:sip,put:put,Y:Y,P:P,mx:mx,top:top,risk:rk/sip,fin:fin,early:growAll(P,Y+10),cagr:annual(sip,fin,Y),series:series,ms:ms};
+}
+function kinds(p){return{ty:p.risk<1.2?'Safe':p.risk<=2?'Bal':'Grow',hz:p.Y<=3?'hShort':p.Y<=7?'hMid':'hLong'}}
+function bullets(p){
+ var kd=kinds(p);
+ return [t('seedsInv',p.seeds),p.age<50?t('ageLine',p.age,p.Y):t('yrsLine',p.Y),t('mixLine'),t('pri',t(ASSETS[p.top]),Math.round(p.mx/p.sip*100)),t('d'+kd.ty),t(kd.hz,p.Y)];
+}
+function compare(a,b){
+ if(!a||!b)return [];
+ var c=[];
+ if(a.Y!==b.Y)c.push(t('cmp1',a.name,a.Y,b.name,b.Y));
+ if(Math.round(a.sip)!==Math.round(b.sip))c.push(t('cmp2',a.name,inr(a.sip),b.name,inr(b.sip)));
+ if(a.top!==b.top||Math.abs(a.mx/a.sip-b.mx/b.sip)>0.1)c.push(t('cmp3',a.name,Math.round(a.mx/a.sip*100),t(ASSETS[a.top]),b.name,Math.round(b.mx/b.sip*100),t(ASSETS[b.top])));
+ c.push(t('cmp4',a.name,inr(a.fin),b.name,inr(b.fin)));
+ return c;
+}
+function ulist(arr){return '<ul class="bl">'+arr.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul>'}
+function whyList(){return [1,2,3,4,5].map(function(i){return t('why'+i)})}
+function learnList(){return [1,2,3,4,5].map(function(i){return t('l'+i)})}
+function contPoints(p){
+ var out=[];
+ if(p.Y>=10){
+  var f5=p.series[5]-p.sip*60,l5=(p.series[p.Y]-p.series[p.Y-5])-p.sip*60;
+  out.push(t('cont1',inr(f5),inr(l5)));
+  if(p.Y>10)out.push(t('cont2',inr(p.series[10]),p.Y,inr(p.fin)));
+ }
+ return out;
+}
+function report(p){
+ var l=[t('repHead'),'',p.name+' ('+p.age+')',t('seedsInv',p.seeds),p.age<50?t('ageLine',p.age,p.Y):t('yrsLine',p.Y),''];
+ [0,1,2,3,4].forEach(function(j){if(p.P[j]>0)l.push(t(ASSETS[j]),'  '+t('capA',inr(p.P[j]),p.Y),'  '+t('capB',inr(p.P[j]*12*p.Y),inr(fv(p.P[j],RATE[j],p.Y))),'')});
+ l.push(t('totT'),t('totSip',inr(p.sip)),t('putL')+': '+inr(p.put),t('becL')+': '+inr(p.fin),t('gainL')+': '+inr(p.fin-p.put),t('avgL')+': '+f(p.cagr)+'%','',t('note'));
+ return l.join('\n');
+}
+function chart(list){
+ var W=320,H=170,pl=44,pr=12,pt=12,pb=26,maxX=1,maxY=0,g='';
+ list.forEach(function(p){maxX=Math.max(maxX,p.series.length-1);p.series.forEach(function(v){maxY=Math.max(maxY,v)})});maxY*=1.08;
+ var X=function(i){return pl+(W-pl-pr)*i/maxX},Y=function(v){return H-pb-(H-pt-pb)*v/maxY};
+ var fm=function(v){return v>=10000000?(v/10000000).toFixed(1)+'Cr':v>=100000?(v/100000).toFixed(1)+'L':Math.round(v/1000)+'k'};
+ for(var q=0;q<=3;q++){var v=maxY*q/3,y=Y(v);g+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y.toFixed(1)+'" y2="'+y.toFixed(1)+'" class="gl"/><text x="'+(pl-4)+'" y="'+(y+3).toFixed(1)+'" class="ax" text-anchor="end">'+fm(v)+'</text>'}
+ g+='<text x="'+pl+'" y="'+(H-8)+'" class="ax">0</text><text x="'+(W-pr)+'" y="'+(H-8)+'" class="ax" text-anchor="end">'+maxX+' '+esc(t('yearsAx'))+'</text>';
+ list.forEach(function(p){var pts=p.series.map(function(v,i){return X(i).toFixed(1)+','+Y(v).toFixed(1)}).join(' ');var last=p.series.length-1;g+='<polyline points="'+pts+'" class="ln'+p.k+'"/><circle cx="'+X(last).toFixed(1)+'" cy="'+Y(p.series[last]).toFixed(1)+'" r="3.5" class="dt'+p.k+'"/>'});
+ return '<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(t('chartT'))+'">'+g+'</svg><div class="lg">'+list.map(function(p){return '<span><i class="sw sw'+p.k+'"></i>'+esc(p.name)+'</span>'}).join('')+'</div>';
+}
+function results(){
+ var P=[null,null],k;
+ for(k=0;k<2;k++)if(sips[k].length)P[k]=calc(k);
+ var live=P.filter(Boolean),w=null;
+ if(live.length===1)w=live[0];
+ else if(live.length===2&&Math.round(live[0].cagr*100)!==Math.round(live[1].cagr*100))w=live[0].cagr>live[1].cagr?live[0]:live[1];
+ var top=w?'<div class="prize">'+esc(t('win',w.name))+'</div>':'<p>'+esc(live.length===2?t('tieMsg'):t('noWin'))+'</p>';
+ var h='<div class="card"><h2>'+esc(t('resTitle'))+'</h2>'+top+'</div>';
+ if(live.length)h+='<div class="card"><h2>'+esc(t('chartT'))+'</h2>'+chart(live)+'</div>';
+ for(k=0;k<2;k++){
+  var p=P[k];
+  if(!p){h+='<section class="card"><h2>'+esc(names[k])+'</h2><p>'+esc(t('noSips'))+'</p></section>';continue}
+  h+='<section class="card'+(w===p?' win':'')+'"><h2>'+esc(p.name)+'</h2><p class="mut">'+esc(t('seedsInv',p.seeds))+'</p><p>'+esc(p.age<50?t('ageLine',p.age,p.Y):t('yrsLine',p.Y))+'</p>';
+  h+='<div class="tw gap"><table class="at"><tr><th>'+esc(t('colAsset'))+'</th><th>'+esc(t('colIn'))+'</th><th>'+esc(t('colPut'))+'</th><th>'+esc(t('colTo'))+'</th></tr>'+[0,1,2,3,4].filter(function(j){return p.P[j]>0}).map(function(j){return '<tr><td>'+esc(t(ASSETS[j]))+'</td><td>'+inr(p.P[j])+'</td><td>'+inr(p.P[j]*12*p.Y)+'</td><td>'+inr(fv(p.P[j],RATE[j],p.Y))+'</td></tr>'}).join('')+'</table></div>';
+  h+='<div class="tot"><b>'+esc(t('totT'))+'</b><div>'+esc(t('totSip',inr(p.sip)))+'</div>'
+   +'<div class="lab">'+esc(t('putL'))+'</div><div class="val">'+inr(p.put)+'</div>'
+   +'<div class="lab">'+esc(t('becL'))+'</div><div class="big">'+inr(p.fin)+'</div>'
+   +'<div class="lab">'+esc(t('gainL'))+'</div><div class="val ok">'+inr(p.fin-p.put)+'</div>'
+   +'<div class="lab">'+esc(t('avgL'))+'</div><div class="hl">'+f(p.cagr)+'%</div></div>'
+   +(ENDPOINT&&regs[k]?'<p class="mut s gap">'+esc(t('mailNote',regs[k].email))+'</p>':'')+'</section>';
+ }
+ h+='<button class="main" id="again" type="button">'+esc(t('again'))+'</button><p class="mut s gap">'+esc(t('note'))+'</p>';
+ $('s5').innerHTML=h;show('s5');
+ $('again').onclick=function(){buildReg();show('s1')};
+ live.forEach(function(p){
+  var r=regs[p.k];if(!r)return;
+  var sp={};ASSET_EN.forEach(function(a,j){if(p.P[j]>0.5)sp[a]=Math.round(p.P[j])});
+  r.status='played';r.lang=L;r.age=p.age;r.seeds=p.seeds;r.years=p.Y;r.split=JSON.stringify(sp);r.final=Math.round(p.fin);r.cagr=Math.round(p.cagr*100)/100;r.div=false;r.report=report(p);post(r);
+  MG.finish(r.mgId,w===p?'WIN':(w?'LOSE':'TIE'),r.final,{seeds:p.seeds,sipYears:p.Y,monthlySip:Math.round(p.sip),invested:Math.round(p.put),avgReturnPct:r.cagr,split:sp,language:L==='ta'?'Tamil':'English'});
+ });
+ [0,1].forEach(function(k){if(!P[k]&&regs[k])MG.finish(regs[k].mgId,'No investment',0,{seeds:0,language:L==='ta'?'Tamil':'English'})});
+ saveRows();
+}
+
+/* ---------- organizer panel (hidden from customers) ---------- */
+var tapN=0,tapT=0,adminCache=[],delAllArm=false;
+/* Organizer records are in the Mcube Game Admin site now. */
+$('admBtn').addEventListener('click',function(){showAdmin()});
+function openGate(){if(isOwner)return showAdmin();prevStage=curStage==='gate'||curStage==='adm'?prevStage:curStage;show('gate');$('pin').value='';$('pinErr').textContent=''}
+var sheetPin='';
+$('pinGo').addEventListener('click',async function(){var v=$('pin').value;if(ENDPOINT){try{var d=await sheetGet('a=list&pin='+encodeURIComponent(v));if(d&&d.ok){sheetPin=v;showAdmin()}else $('pinErr').textContent='Wrong PIN.'}catch(e){$('pinErr').textContent='Could not reach the Google Sheet.'}}else if(v===ADMIN_PIN)showAdmin();else $('pinErr').textContent='Wrong PIN.'});
+
+async function adminList(){
+ var out=[],seen={};
+ if(dbRef&&isOwner){try{var q=await dbRef.collection('players').get();q.docs.forEach(function(d){var v=d.data();((v&&v.rows)||[]).forEach(function(r){seen[r.id]=1;out.push({r:r,uid:d.id})})})}catch(e){}}
+ if(ENDPOINT&&sheetPin){try{var d=await sheetGet('a=list&pin='+encodeURIComponent(sheetPin));((d&&d.rows)||[]).forEach(function(r){if(!seen[r.id]){seen[r.id]=1;out.push({r:r,uid:null})}})}catch(e){}}
+ rows.forEach(function(r){if(!seen[r.id])out.push({r:r,uid:null})});
+ return out;
+}
+async function showAdmin(){
+ if(curStage!=='adm'&&curStage!=='gate')prevStage=curStage;
+ adminCache=await adminList();delAllArm=false;
+ adminCache.sort(function(a,b){return (b.r.cagr||0)-(a.r.cagr||0)});
+ var lead=adminCache.filter(function(x){return x.r.status==='played'})[0];
+ var h='<div class="card"><h2>Saved players ('+adminCache.length+')</h2>'
+  +(lead?'<p><b>Prize leader: '+esc(lead.r.name)+' · '+lead.r.cagr+'% a year</b></p>':'<p class="mut">No player has finished yet.</p>')
+  +'<div class="tw"><table><tr><th>Name</th><th>Age</th><th>Phone</th><th>Email</th><th>Status</th><th>Years</th><th>Round 2 monthly SIP split (₹)</th><th>Avg return %</th><th></th></tr>';
+ adminCache.forEach(function(x,i){var r=x.r;h+='<tr><td>'+esc(r.name)+'</td><td>'+esc(r.age||'')+'</td><td>'+esc(r.phone)+'</td><td>'+esc(r.email)+'</td><td>'+esc(r.status)+'</td><td>'+(r.years||'')+'</td><td>'+esc(r.split||'')+'</td><td>'+(r.status==='played'?r.cagr:'')+'</td><td><button class="mini alt" type="button" data-a="del" data-i="'+i+'">Delete</button></td></tr>'});
+ h+='</table></div><button class="main" type="button" data-a="csv">Download list (CSV)</button><button class="main alt" type="button" data-a="all" id="delAll">Delete all records</button><button class="main alt" type="button" data-a="close">Close</button></div>';
+ $('adm').innerHTML=h;show('adm');
+}
+async function delEntry(x){
+ var r=x.r;rows=rows.filter(function(y){return y.id!==r.id});saveRows();
+ if(ENDPOINT)await sendSheet({a:'del',pin:sheetPin,id:r.id});
+ if(dbRef){try{
+  if(x.uid){var ref=dbRef.collection('players').doc(x.uid),sn=await ref.get(),v=sn.data();await ref.set({rows:((v&&v.rows)||[]).filter(function(y){return y.id!==r.id})})}
+  await dbRef.doc('registry/p_'+await hash(r.phone)).delete();await dbRef.doc('registry/e_'+await hash(r.email)).delete();
+ }catch(e){}}
+}
+async function delAll(){
+ rows=[];saveLocal();
+ if(ENDPOINT)await sendSheet({a:'delall',pin:sheetPin});
+ if(dbRef){try{
+  var q=await dbRef.collection('players').get();for(var i=0;i<q.docs.length;i++)await dbRef.collection('players').doc(q.docs[i].id).delete();
+  var g=await dbRef.collection('registry').get();for(var j=0;j<g.docs.length;j++)await dbRef.collection('registry').doc(g.docs[j].id).delete();
+ }catch(e){}}
+}
+async function saveFile(name,text){
+ try{if(window.claude&&claude.use){var d=await claude.use('downloads');if(d){await d.save({filename:name,data:text});return}}}catch(e){}
+ try{var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/csv'}));a.download=name;document.body.appendChild(a);a.click();a.remove()}catch(e){}
+}
+$('adm').addEventListener('click',async function(e){
+ var b=e.target.closest('button');if(!b)return;var a=b.getAttribute('data-a');
+ if(a==='close'){show(prevStage==='adm'||prevStage==='gate'?'s1':prevStage)}
+ else if(a==='del'){await delEntry(adminCache[parseInt(b.getAttribute('data-i'),10)]);showAdmin()}
+ else if(a==='all'){if(!delAllArm){delAllArm=true;b.textContent='Tap again to delete everything'}else{await delAll();showAdmin()}}
+ else if(a==='csv'){
+  var q=function(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'};
+  var c='Name,Age,Phone,Email,Status,Seeds,Years,Monthly SIP split Rs,Final Rs,Avg return %,Language,Time\n'+adminCache.map(function(x){var r=x.r;return [r.name,r.age,r.phone,r.email,r.status,r.seeds,r.years,r.split,r.final,r.cagr,r.lang,r.ts].map(q).join(',')}).join('\n');
+  saveFile('pallanguli-players.csv',c);
+ }
+});
+</script>
+
+</html>

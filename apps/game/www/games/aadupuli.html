@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bull vs Bear – ஆடு புலி ஆட்டம் · Mcube Games</title>
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" type="image/png" href="../icons/icon-192.png">
+<link rel="stylesheet" href="../shared/mcube.css">
+<script src="../shared/mcube.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;600;800&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+<!--
+  ====== ORGANIZER NOTES (Karthi) ======
+  1. Admin page: open the page with #admin at the end of the link, or tap the Mcube logo 5 times. PIN is CONFIG.ADMIN_PIN below.
+  2. Records are kept in the browser of the device the game is played on (best for one stall tablet/laptop).
+  3. To collect every player from every phone into ONE Google Sheet, paste a Google Apps Script web-app URL in CONFIG.SHEET_URL.
+     Apps Script (Extensions > Apps Script in your Google Sheet, then Deploy > Web app, access: Anyone):
+       function doPost(e){
+         var s=SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+         var d=JSON.parse(e.postData.contents);
+         if(s.getLastRow()==0) s.appendRow(Object.keys(d));
+         s.appendRow(Object.keys(d).map(function(k){return d[k];}));
+         return ContentService.createTextOutput("ok");
+       }
+     (Sheet saving works when the page is hosted on your own site; the claude.ai preview blocks outside connections.)
+-->
+<style>
+:root{
+  --bg:#0b1a2b; --card:#ffffff; --ink:#132033; --muted:#5b6b80;
+  --bull:#16a34a; --bear:#dc2626; --gold:#f5b301; --brand:#0f3d91; --brand2:#1d6fe0;
+  --bank:#2563eb; --fd:#7c3aed; --goldc:#d4a017; --mf:#0d9488; --stocks:#ea580c;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{font-family:'Poppins','Noto Sans Tamil','Latha','Nirmala UI',sans-serif;background:radial-gradient(1200px 600px at 10% -10%,#14532d 0%,transparent 60%),radial-gradient(1000px 600px at 110% 10%,#7f1d1d 0%,transparent 55%),var(--bg);color:var(--ink);-webkit-tap-highlight-color:transparent}
+html[lang="ta"] body{font-family:'Noto Sans Tamil','Latha','Nirmala UI','Poppins',sans-serif}
+.wrap{max-width:560px;margin:0 auto;padding:14px 12px 40px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#fff;margin-bottom:10px}
+.logo{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.logo-mark{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--brand2),var(--brand));display:grid;place-items:center;font-weight:800;font-size:20px;color:#fff;box-shadow:0 4px 14px rgba(29,111,224,.45)}
+.logo-mark sup{font-size:10px;vertical-align:super;line-height:0}
+.logo-txt{line-height:1.05}
+.logo-txt b{display:block;white-space:nowrap;font-size:16px;letter-spacing:.3px}
+.logo-txt span{font-size:11px;opacity:.8;letter-spacing:1.5px}
+.ticker{flex:1;font-size:11px;color:#cfe;white-space:nowrap;overflow:hidden;max-width:46%}
+.ticker span{display:inline-block;animation:tick 14s linear infinite;padding-left:100%}
+@keyframes tick{to{transform:translateX(-100%)}}
+.up{color:#4ade80}.dn{color:#f87171}
+.card{background:var(--card);border-radius:18px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);margin-bottom:14px}
+h1.title{color:#fff;text-align:center;font-size:24px;line-height:1.25;margin:8px 0 4px}
+h1.title .b{color:#4ade80}h1.title .r{color:#f87171}
+.sub{color:#dbe7f5;text-align:center;font-size:14px;margin-bottom:16px}
+.hero{display:flex;justify-content:center;gap:18px;font-size:46px;margin:6px 0 10px}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:14px 16px;font:inherit;font-weight:700;font-size:16px;cursor:pointer;color:#fff;background:linear-gradient(135deg,var(--bull),#15803d);box-shadow:0 6px 16px rgba(22,163,74,.35)}
+.btn:active{transform:translateY(1px)}
+.btn.alt{background:linear-gradient(135deg,var(--brand2),var(--brand));box-shadow:0 6px 16px rgba(29,111,224,.35)}
+.btn.ghost{background:#eef2f7;color:var(--ink);box-shadow:none}
+.btn.red{background:linear-gradient(135deg,#ef4444,#b91c1c);box-shadow:none}
+.btn+.btn{margin-top:10px}
+label{display:block;font-weight:600;font-size:14px;margin:12px 0 6px}
+input{width:100%;padding:13px 14px;border:2px solid #dbe3ee;border-radius:12px;font:inherit;font-size:16px;outline:none}
+input:focus{border-color:var(--brand2)}
+.err{color:var(--bear);font-size:13px;margin-top:10px;min-height:18px;font-weight:600}
+.hidden{display:none!important}
+/* game */
+.tigers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.tcard{background:#fff1f1;border:2px solid #fecaca;border-radius:12px;padding:6px 4px;text-align:center;font-size:12px;font-weight:600;line-height:1.25;transition:.3s}
+.tcard .em{font-size:20px;display:block}
+.tcard.trap{background:#ecfdf5;border-color:#86efac;color:#166534}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.stat{background:#f3f6fb;border-radius:12px;padding:8px 6px;text-align:center}
+.stat b{display:block;font-size:20px}
+.stat span{font-size:11px;color:var(--muted)}
+.stat.loss b{color:var(--bear)}
+.msg{border-radius:12px;padding:10px 12px;font-size:14px;font-weight:600;margin-bottom:10px;background:#eef6ff;color:#0f3d91;min-height:44px;display:flex;align-items:center;gap:8px;transition:background .3s}
+.msg.bad{background:#fff1f1;color:#b91c1c}
+.msg.good{background:#ecfdf5;color:#166534}
+.boardbox{position:relative;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,#dcfce7 0%,#f8fafc 48%,#fee2e2 100%);border:3px solid #0f3d91}
+svg#board{display:block;width:100%;height:auto;touch-action:manipulation}
+.next{display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;margin-top:10px;font-weight:600}
+.dot{width:16px;height:16px;border-radius:50%;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1px #0002}
+.legend{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 12px;margin-top:8px;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.rules h3{font-size:16px;margin-bottom:8px}
+.rules ol{padding-left:20px;font-size:14px;line-height:1.6}
+.rules li{margin-bottom:4px}
+/* result */
+.big{text-align:center}
+.big .emoji{font-size:56px}
+.big h2{font-size:22px;margin:4px 0}
+.big p{color:var(--muted);font-size:14px}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.kpi{background:#f3f6fb;border-radius:14px;padding:12px;text-align:center}
+.kpi span{font-size:12px;color:var(--muted);display:block}
+.kpi b{font-size:20px}
+.kpi.hl{grid-column:1/-1;background:linear-gradient(135deg,#ecfdf5,#dcfce7);border:2px solid #86efac}
+.kpi.hl b{font-size:40px;color:#15803d}
+.kpi.mat b{font-size:28px;color:var(--brand)}
+.sec-t{font-size:17px;font-weight:800;margin-bottom:10px}
+.arow{display:grid;grid-template-columns:110px 1fr auto;align-items:center;gap:8px;font-size:13px;margin-bottom:8px}
+.bar{height:14px;background:#e5e7eb;border-radius:8px;overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th,.tbl td{padding:8px 6px;border-bottom:1px solid #edf1f6;text-align:right}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl tfoot td{font-weight:800}
+.points{list-style:none}
+.points li{position:relative;padding:8px 0 8px 30px;font-size:14px;line-height:1.55;border-bottom:1px dashed #e5eaf1}
+.points li:last-child{border-bottom:0}
+.points li::before{content:attr(data-n);position:absolute;left:0;top:9px;width:22px;height:22px;border-radius:50%;background:var(--brand2);color:#fff;font-size:12px;display:grid;place-items:center;font-weight:700}
+.early{background:#fff8e6;border:2px dashed var(--gold);border-radius:14px;padding:12px;font-size:14px;line-height:1.55;margin-top:12px}
+.mcube{background:linear-gradient(135deg,#0f3d91,#1d6fe0);color:#fff}
+.mcube .sec-t{color:#fff}
+.mcube ul{padding-left:18px;font-size:14px;line-height:1.7}
+.mcube .contact{margin-top:10px;font-size:14px}
+.mcube a{color:#ffe08a}
+.disc{font-size:11.5px;color:#cbd5e1;text-align:center;line-height:1.5;padding:4px 10px 14px}
+/* overlay */
+.ov{position:fixed;inset:0;background:rgba(5,12,24,.7);display:grid;place-items:center;z-index:50;padding:20px}
+.ov .card{max-width:380px;width:100%;text-align:center}
+.pop{animation:pop .35s ease}
+@keyframes pop{0%{transform:scale(.85);opacity:0}100%{transform:scale(1);opacity:1}}
+/* admin */
+.adm-tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.adm-tools .btn{width:auto;flex:1;min-width:120px;font-size:14px;padding:10px}
+.adm-tools .btn+.btn{margin-top:0}
+.admtbl{width:100%;border-collapse:collapse;font-size:12px}
+.admtbl th,.admtbl td{border-bottom:1px solid #edf1f6;padding:6px 4px;text-align:left;vertical-align:top}
+.admtbl th{background:#f3f6fb;position:sticky;top:0}
+.scroll{overflow:auto;max-height:65vh}
+.x{border:0;background:#fee2e2;color:#b91c1c;border-radius:8px;padding:4px 8px;font-weight:700;cursor:pointer}
+textarea{width:100%;min-height:120px;font-size:11px;border:1px solid #dbe3ee;border-radius:10px;padding:8px;margin-top:8px}
+/* Mcube Games: light theme and layout for every screen size */
+body{background:#f6f8fb!important;color-scheme:light}
+h1.title{color:var(--ink)}h1.title .b{color:#15803d}h1.title .r{color:#b91c1c}
+.sub{color:var(--muted)}.top{color:var(--ink)}.ticker{color:#334155}.ticker .up{color:#15803d}.ticker .dn{color:#b91c1c}
+.disc{color:var(--muted)}
+.card{box-shadow:0 1px 3px rgba(16,24,40,.08);border:1px solid #e5e7eb}
+.btn{border-radius:10px;box-shadow:none;font-weight:600}
+.btn.alt{background:#4F3CC9}.btn:not(.alt):not(.ghost):not(.red){background:#15803d}
+.logo{cursor:default}
+.boardbox{max-width:calc((100dvh - 330px)*1.217);min-width:min(100%,300px);margin:0 auto}
+@media (min-width:1000px){.wrap{max-width:1120px}
+ #sGame{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,1fr);gap:16px;align-items:start}
+ #sGame>.card{margin-bottom:0}.boardbox{max-width:calc((100dvh - 430px)*1.217)}
+ #sLang,#sReg,#sRes{max-width:640px;margin:0 auto}}
+</style>
+</head>
+<body>
+<script>MG.topbar("Bull vs Bear – Aadu Puli")</script>
+<div class="wrap">
+  <div class="top">
+    <div class="logo" id="logo"><div class="logo-mark">M<sup>3</sup></div><div class="logo-txt"><b>Mcube Academy</b><span>LEARN · INVEST · GROW</span></div></div>
+    <div class="ticker"><span>NIFTY <b class="up">▲</b> &nbsp; SENSEX <b class="up">▲</b> &nbsp; BANK NIFTY <b class="dn">▼</b> &nbsp; GOLD <b class="up">▲</b> &nbsp; SIP = DISCIPLINE &nbsp;</span></div>
+  </div>
+
+  <!-- 1. Language -->
+  <section id="sLang">
+    <h1 class="title">Bull <span class="b">🐂</span> vs Bear <span class="r">🐯</span><br>ஆடு புலி ஆட்டம்</h1>
+    <p class="sub">Choose language · மொழியைத் தேர்ந்தெடுக்கவும்</p>
+    <div class="card">
+      <div class="hero">🐐🐐🐐 <span>🐯</span></div>
+      <button class="btn alt" data-lang="en">English</button>
+      <button class="btn" data-lang="ta">தமிழ்</button>
+    </div>
+  </section>
+
+  <!-- 2. Register -->
+  <section id="sReg" class="hidden">
+    <h1 class="title" data-t="title"></h1>
+    <p class="sub" data-t="tagline"></p>
+    <form class="card" id="regForm" novalidate>
+      <label for="fName" data-t="name"></label>
+      <input id="fName" autocomplete="name" maxlength="40">
+      <label for="fMob" data-t="mobile"></label>
+      <input id="fMob" inputmode="numeric" maxlength="10" autocomplete="tel">
+      <label for="fAge" data-t="age"></label>
+      <input id="fAge" inputmode="numeric" maxlength="3">
+      <div class="err" id="regErr"></div>
+      <button class="btn" type="submit" data-t="start"></button>
+      <button class="btn ghost" type="button" id="backLang" data-t="changeLang"></button>
+    </form>
+  </section>
+
+  <!-- 3. Game -->
+  <section id="sGame" class="hidden">
+    <div class="card" style="padding:12px">
+      <div class="tigers" id="tigerCards"></div>
+      <div class="stats">
+        <div class="stat"><b id="stHand">15</b><span data-t="inHand"></span></div>
+        <div class="stat loss"><b id="stLost">0</b><span data-t="lostLbl"></span></div>
+        <div class="stat"><b id="stMoves">0/60</b><span data-t="movesLbl"></span></div>
+      </div>
+      <div class="msg" id="msg"></div>
+      <div class="boardbox"><svg id="board" viewBox="0 0 420 345" aria-label="board"></svg></div>
+      <div class="next" id="nextGoat"></div>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div class="card rules"><h3 data-t="rulesT"></h3><ol id="rulesList"></ol></div>
+  </section>
+
+  <!-- 4. Result -->
+  <section id="sRes" class="hidden"></section>
+
+  <!-- 5. Admin -->
+  <section id="sAdmin" class="hidden">
+    <div class="card" id="admLogin">
+      <div class="sec-t">Organizer login</div>
+      <input id="admPin" type="password" inputmode="numeric" placeholder="PIN">
+      <div class="err" id="admErr"></div>
+      <button class="btn alt" id="admGo">Open records</button>
+      <button class="btn ghost" id="admExit1">Back to game</button>
+    </div>
+    <div class="card hidden" id="admPanel">
+      <div class="sec-t">Player records (<span id="admCount">0</span>)</div>
+      <div class="adm-tools">
+        <button class="btn alt" id="admCsv">Download CSV</button>
+        <button class="btn ghost" id="admCopy">Copy CSV</button>
+        <button class="btn red" id="admClear">Delete all</button>
+        <button class="btn ghost" id="admExit">Back to game</button>
+      </div>
+      <div class="err" id="admNote" style="color:#0f3d91"></div>
+      <div class="scroll"><table class="admtbl" id="admTbl"></table></div>
+      <textarea id="admCsvBox" class="hidden" readonly></textarea>
+    </div>
+  </section>
+</div>
+
+<div class="ov hidden" id="ov"><div class="card pop" id="ovCard"></div></div>
+
+<script>
+/* ================= CONFIG – edit these ================= */
+const CONFIG = {
+  ADMIN_PIN: '2580',          // organizer PIN for the records page
+  SHEET_URL: '',              // optional Google Apps Script web-app URL (see notes at top)
+  MCUBE_WEBSITE: '',          // e.g. 'https://www.mcubeacademy.com'
+  MCUBE_PHONE: '',            // e.g. '+91 98xxxxxxxx'
+  MCUBE_ADDRESS: '',          // e.g. 'Chennai'
+  MAX_LOST: 6,                // tigers win after this many goats lost
+  MAX_GOAT_MOVES: 60,         // tigers win if not trapped within these goat moves
+  GOAL_AGE: 50,               // SIP projection till this age
+  OVER_AGE_YEARS: 10          // years used silently when age >= GOAL_AGE
+};
+const RATES = {bank:6.25, fd:6.5, gold:8, mf:11, stocks:12.5}; // % per year
+const ASSETS = ['bank','fd','gold','mf','stocks'];
+const ACOL = {bank:'#2563eb', fd:'#7c3aed', gold:'#d4a017', mf:'#0d9488', stocks:'#ea580c'};
+
+/* ================= TEXT ================= */
+const T = {
+ en:{
+  title:'Bull vs Bear – ஆடு புலி ஆட்டம்',
+  tagline:'Protect your investments (goats) from market risks (tigers)!',
+  name:'Your name', mobile:'Mobile number', age:'Age', start:'Start the game', changeLang:'Change language',
+  eName:'Please enter your name.', eMob:'Please enter a valid 10-digit mobile number.', eAge:'Please enter a valid age.',
+  eDup:'This mobile number has already played. One game per mobile number.',
+  inHand:'Goats in hand', lostLbl:'Goats lost', movesLbl:'Moves',
+  rulesT:'Game rules',
+  assets:{bank:'Bank Savings', fd:'Fixed Deposit', gold:'Gold', mf:'Mutual Fund', stocks:'Stocks'},
+  tigers:['Panic Selling','Fake Tips','High Debt'],
+  trapped:'Trapped ✔', active:'Hunting',
+  place:'Your turn: tap an empty point to place a goat.',
+  move:'Your turn: tap a goat, then tap an empty point next to it.',
+  pick:'Now tap a glowing point to move this goat.',
+  noMoveGoat:'This goat cannot move. Pick another goat.',
+  think:'🐯 Tiger is thinking…',
+  nextGoat:'Next goat:',
+  exposed:'⚠ Red-ringed goats are exposed – a tiger can jump them!',
+  capture:(t,a)=>`🐯 ${t} took your ₹1,000 ${a}! Alone and exposed – spread your money, don't leave it unprotected.`,
+  group:'🛡 Standing together = diversification. Risk cannot jump in!',
+  trapMsg:t=>`🔒 ${t} is trapped! You controlled a risk with discipline!`,
+  rules:[
+   'You are the goats: 15 goats = ₹15,000 of investments (3 each in Bank, FD, Gold, Mutual Fund, Stocks).',
+   'The computer plays 3 tigers = market risks: Panic Selling, Fake Tips, High Debt.',
+   'Placing: tap any empty point to place one goat. Then one tiger moves.',
+   'Moving: after all 15 goats are placed, tap a goat and move it one step along a line to an empty point.',
+   'A tiger moves one step, or jumps over one goat in a straight line to the empty point just beyond. That goat (₹1,000) is lost.',
+   'Goats cannot jump. Keep goats together and fill the landing points so tigers cannot jump.',
+   'You WIN when all 3 tigers are trapped and cannot move.',
+   'Tigers win if they take 6 goats, or if they are not trapped within 60 goat moves.',
+   'Each mobile number can play only once.'
+  ],
+  winH:n=>`Congratulations, ${n}! You trapped the market risks!`,
+  loseH:n=>`${n}, the tigers won this time`,
+  loseWhyLost:'The tigers took 6 goats.', loseWhyMoves:'60 moves finished before the tigers were trapped.', loseWhyStuck:'Your goats had no moves left.',
+  saved:'Money saved', of:'of ₹15,000', goatsLeft:n=>`${n} of 15 goats safe`,
+  survT:'Which investments survived',
+  sipT:'What if you invest this every month?',
+  sipLine:(m,y,till)=>`You saved ₹${m}. If you put ₹${m} every month as a SIP in the same mix for ${y} years${till?' (till age 50)':''}:`,
+  invested:'Total you invest', becomes:'It can become', avg:'Average yearly return (compounded)',
+  thA:'Asset', thM:'Monthly SIP', thV:'Value after', total:'Total',
+  yrs:'yrs',
+  early:(y,v,x)=>`⏰ <b>Start early:</b> if the same SIP had started 5 years earlier (${y} years), it could be <b>₹${v}</b> – that is <b>₹${x}</b> more, just for starting earlier.`,
+  steady:'💡 The power of staying invested: you never stopped your monthly SIP, so every month\'s money kept growing and the growth itself earned more growth (compounding). Stopping or withdrawing breaks this chain.',
+  lessT:'What this game teaches',
+  lessons:[
+   'Don\'t keep all your money in one place – one risk can hit it all. Spread it across Bank, FD, Gold, Mutual Funds and Stocks.',
+   'Goats standing together blocked the tigers. Diversified investments protect each other.',
+   'Discipline beats risk: plan your move, don\'t react in panic.',
+   'Start early: time is the biggest multiplier in compounding.',
+   'Keep investing every month – small SIPs grow big over the years.'
+  ],
+  riskT:'The 3 tigers in real life',
+  risks:[
+   'Selling good investments in fear when the market falls – the loss becomes permanent.',
+   'Buying on WhatsApp/Telegram tips or "sure-shot" calls without research.',
+   'Borrowing or taking high-interest loans to invest – losses get multiplied.'
+  ],
+  mcT:'Learn investing the right way with Mcube Academy',
+  mcList:['Mutual Funds, SIF, PMS & AIF education','NISM certifications: 5A, 5D, 8, 15, 21','Investment Banking course','BFSI career growth programmes'],
+  web:'Website', phone:'Phone',
+  disc:'Mutual fund and market investments are subject to market risks. Read all scheme related documents carefully. Returns shown are illustrative assumptions, not guaranteed. Past performance does not guarantee future returns.',
+  newPlayer:'Next player',
+  ok:'OK'
+ },
+ ta:{
+  title:'Bull vs Bear – ஆடு புலி ஆட்டம்',
+  tagline:'உங்கள் முதலீடுகளை (ஆடுகள்) சந்தை அபாயங்களிடமிருந்து (புலிகள்) காப்பாற்றுங்கள்!',
+  name:'உங்கள் பெயர்', mobile:'மொபைல் எண்', age:'வயது', start:'விளையாடத் தொடங்கு', changeLang:'மொழியை மாற்று',
+  eName:'உங்கள் பெயரை உள்ளிடவும்.', eMob:'சரியான 10 இலக்க மொபைல் எண்ணை உள்ளிடவும்.', eAge:'சரியான வயதை உள்ளிடவும்.',
+  eDup:'இந்த மொபைல் எண்ணில் ஏற்கனவே விளையாடப்பட்டுள்ளது. ஒரு எண்ணுக்கு ஒரு முறை மட்டுமே.',
+  inHand:'கையில் ஆடுகள்', lostLbl:'இழந்த ஆடுகள்', movesLbl:'நகர்வுகள்',
+  rulesT:'விளையாட்டு விதிகள்',
+  assets:{bank:'வங்கி சேமிப்பு', fd:'நிலை வைப்பு (FD)', gold:'தங்கம்', mf:'மியூச்சுவல் ஃபண்ட்', stocks:'பங்குகள்'},
+  tigers:['பயத்தில் விற்பது','போலி டிப்ஸ்','அதிக கடன்'],
+  trapped:'அடைக்கப்பட்டது ✔', active:'வேட்டையில்',
+  place:'உங்கள் முறை: ஆட்டை வைக்க ஒரு காலிப் புள்ளியைத் தொடவும்.',
+  move:'உங்கள் முறை: ஒரு ஆட்டைத் தொட்டு, அருகிலுள்ள காலிப் புள்ளியைத் தொடவும்.',
+  pick:'இப்போது ஒளிரும் புள்ளியைத் தொட்டு ஆட்டை நகர்த்தவும்.',
+  noMoveGoat:'இந்த ஆடு நகர முடியாது. வேறு ஆட்டைத் தேர்ந்தெடுக்கவும்.',
+  think:'🐯 புலி யோசிக்கிறது…',
+  nextGoat:'அடுத்த ஆடு:',
+  exposed:'⚠ சிவப்பு வளையம் உள்ள ஆடுகள் ஆபத்தில் – புலி தாண்டிப் பிடிக்கலாம்!',
+  capture:(t,a)=>`🐯 ${t} உங்கள் ₹1,000 ${a}-ஐ எடுத்துவிட்டது! தனியாக நின்றால் ஆபத்து – பணத்தைப் பிரித்து, பாதுகாப்பாக வையுங்கள்.`,
+  group:'🛡 ஒன்றாக நிற்பது = பன்முகப்படுத்தல் (Diversification). அபாயம் உள்ளே குதிக்க முடியாது!',
+  trapMsg:t=>`🔒 ${t} அடைக்கப்பட்டது! ஒழுக்கத்துடன் ஒரு அபாயத்தைக் கட்டுப்படுத்தினீர்கள்!`,
+  rules:[
+   'நீங்கள் ஆடுகள்: 15 ஆடுகள் = ₹15,000 முதலீடு (வங்கி, FD, தங்கம், மியூச்சுவல் ஃபண்ட், பங்குகள் – ஒவ்வொன்றிலும் 3).',
+   'கணினி 3 புலிகளாக விளையாடும் = சந்தை அபாயங்கள்: பயத்தில் விற்பது, போலி டிப்ஸ், அதிக கடன்.',
+   'வைக்கும் கட்டம்: ஏதாவது ஒரு காலிப் புள்ளியைத் தொட்டு ஒரு ஆட்டை வையுங்கள். பிறகு ஒரு புலி நகரும்.',
+   'நகர்த்தும் கட்டம்: 15 ஆடுகளும் வைத்த பிறகு, ஒரு ஆட்டைத் தொட்டு, கோட்டின் வழியே ஒரு படி காலிப் புள்ளிக்கு நகர்த்துங்கள்.',
+   'புலி ஒரு படி நகரும், அல்லது நேர்கோட்டில் ஒரு ஆட்டைத் தாண்டி அடுத்த காலிப் புள்ளியில் குதிக்கும். அந்த ஆடு (₹1,000) இழக்கப்படும்.',
+   'ஆடுகள் தாண்ட முடியாது. ஆடுகளை ஒன்றாக வைத்து, புலி குதிக்கும் இடங்களை நிரப்புங்கள்.',
+   '3 புலிகளும் நகர முடியாமல் அடைக்கப்பட்டால் நீங்கள் வெற்றி பெறுவீர்கள்.',
+   'புலிகள் 6 ஆடுகளைப் பிடித்தாலோ, 60 நகர்வுகளுக்குள் அடைக்கப்படாவிட்டாலோ புலிகள் வெற்றி பெறும்.',
+   'ஒரு மொபைல் எண்ணுக்கு ஒரு முறை மட்டுமே விளையாடலாம்.'
+  ],
+  winH:n=>`வாழ்த்துகள் ${n}! சந்தை அபாயங்களை அடைத்துவிட்டீர்கள்!`,
+  loseH:n=>`${n}, இந்த முறை புலிகள் வென்றன`,
+  loseWhyLost:'புலிகள் 6 ஆடுகளைப் பிடித்துவிட்டன.', loseWhyMoves:'புலிகளை அடைப்பதற்குள் 60 நகர்வுகள் முடிந்துவிட்டன.', loseWhyStuck:'உங்கள் ஆடுகளுக்கு நகர இடமில்லை.',
+  saved:'காப்பாற்றிய பணம்', of:'₹15,000-இல்', goatsLeft:n=>`15-இல் ${n} ஆடுகள் பாதுகாப்பு`,
+  survT:'எந்த முதலீடுகள் தப்பின',
+  sipT:'இதை ஒவ்வொரு மாதமும் முதலீடு செய்தால்?',
+  sipLine:(m,y,till)=>`நீங்கள் ₹${m} காப்பாற்றினீர்கள். இதே கலவையில் ஒவ்வொரு மாதமும் ₹${m} SIP-ஆக ${y} ஆண்டுகள்${till?' (50 வயது வரை)':''} போட்டால்:`,
+  invested:'நீங்கள் முதலீடு செய்யும் மொத்தம்', becomes:'இது வளரக்கூடிய தொகை', avg:'சராசரி ஆண்டு வருமானம் (கூட்டு வட்டி)',
+  thA:'முதலீடு', thM:'மாத SIP', thV:'முதிர்வுத் தொகை', total:'மொத்தம்',
+  yrs:'ஆண்டு',
+  early:(y,v,x)=>`⏰ <b>சீக்கிரம் தொடங்குங்கள்:</b> இதே SIP-ஐ 5 ஆண்டுகள் முன்பே (${y} ஆண்டுகள்) தொடங்கியிருந்தால் <b>₹${v}</b> ஆகியிருக்கும் – சீக்கிரம் தொடங்கியதற்காக மட்டுமே <b>₹${x}</b> கூடுதல்.`,
+  steady:'💡 தொடர்ந்து முதலீடு செய்வதன் சக்தி: மாத SIP-ஐ நிறுத்தாததால், ஒவ்வொரு மாதப் பணமும் வளர்ந்தது; அந்த வளர்ச்சியும் மேலும் வளர்ச்சி தந்தது (கூட்டு வட்டி). இடையில் நிறுத்தினாலோ எடுத்தாலோ இந்தச் சங்கிலி உடையும்.',
+  lessT:'இந்த விளையாட்டு கற்றுத்தருவது',
+  lessons:[
+   'எல்லாப் பணத்தையும் ஒரே இடத்தில் வைக்காதீர்கள் – ஒரு அபாயம் எல்லாவற்றையும் தாக்கலாம். வங்கி, FD, தங்கம், மியூச்சுவல் ஃபண்ட், பங்குகள் எனப் பிரித்து முதலீடு செய்யுங்கள்.',
+   'ஒன்றாக நின்ற ஆடுகள் புலிகளைத் தடுத்தன. பிரித்து வைத்த முதலீடுகள் ஒன்றையொன்று காக்கும்.',
+   'ஒழுக்கமே அபாயத்தை வெல்லும்: பயத்தில் அவசர முடிவு எடுக்காமல், திட்டமிட்டு நகருங்கள்.',
+   'சீக்கிரம் தொடங்குங்கள்: கூட்டு வட்டியில் காலமே மிகப்பெரிய பெருக்கி.',
+   'ஒவ்வொரு மாதமும் தொடர்ந்து முதலீடு செய்யுங்கள் – சிறிய SIP-கள் ஆண்டுகளில் பெரிதாக வளரும்.'
+  ],
+  riskT:'நிஜ வாழ்க்கையில் 3 புலிகள்',
+  risks:[
+   'சந்தை சரியும்போது பயந்து நல்ல முதலீடுகளை விற்பது – நஷ்டம் நிரந்தரமாகிவிடும்.',
+   'ஆராயாமல் WhatsApp/Telegram டிப்ஸ், "நிச்சய லாபம்" அழைப்புகளை நம்பி வாங்குவது.',
+   'கடன் வாங்கி அல்லது அதிக வட்டிக் கடனில் முதலீடு செய்வது – நஷ்டம் பல மடங்காகும்.'
+  ],
+  mcT:'Mcube Academy-யுடன் சரியான முறையில் முதலீடு கற்றுக்கொள்ளுங்கள்',
+  mcList:['மியூச்சுவல் ஃபண்ட், SIF, PMS & AIF கல்வி','NISM சான்றிதழ்கள்: 5A, 5D, 8, 15, 21','இன்வெஸ்ட்மென்ட் பேங்கிங் படிப்பு','BFSI வேலை வளர்ச்சிப் பயிற்சிகள்'],
+  web:'இணையதளம்', phone:'தொலைபேசி',
+  disc:'மியூச்சுவல் ஃபண்ட் மற்றும் சந்தை முதலீடுகள் சந்தை அபாயங்களுக்கு உட்பட்டவை. திட்டம் தொடர்பான அனைத்து ஆவணங்களையும் கவனமாகப் படிக்கவும். காட்டப்படும் வருமானம் உதாரணக் கணக்கு மட்டுமே; உத்தரவாதம் அல்ல. கடந்த கால செயல்பாடு எதிர்கால வருமானத்திற்கு உத்தரவாதம் அல்ல.',
+  newPlayer:'அடுத்த வீரர்',
+  ok:'சரி'
+ }
+};
+let L='en'; const t=k=>T[L][k];
+const fmt=n=>Math.round(n).toLocaleString('en-IN');
+const $=id=>document.getElementById(id);
+
+/* ================= STORAGE ================= */
+const KEY='mcube_aadupuli_records_v1'; let memRecs=[];
+function loadRecs(){try{const v=localStorage.getItem(KEY);return v?JSON.parse(v):memRecs;}catch(e){return memRecs;}}
+function saveRecs(r){memRecs=r;try{localStorage.setItem(KEY,JSON.stringify(r));}catch(e){}}
+function sendSheet(rec){if(!CONFIG.SHEET_URL)return;try{fetch(CONFIG.SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(rec)}).catch(()=>{});}catch(e){}}
+
+/* ================= SCREENS ================= */
+const screens=['sLang','sReg','sGame','sRes','sAdmin'];
+function show(id){screens.forEach(s=>$(s).classList.toggle('hidden',s!==id));window.scrollTo(0,0);}
+function applyLang(){
+  document.documentElement.lang=L;
+  document.querySelectorAll('[data-t]').forEach(el=>{el.textContent=t(el.dataset.t);});
+}
+document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{L=b.dataset.lang;applyLang();show('sReg');});
+$('backLang').onclick=()=>show('sLang');
+
+let player=null;
+$('regForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const name=$('fName').value.trim(), mob=$('fMob').value.replace(/\D/g,''), age=parseInt($('fAge').value,10);
+  const err=$('regErr');
+  if(name.length<2){err.textContent=t('eName');return;}
+  if(!/^[6-9]\d{9}$/.test(mob)){err.textContent=t('eMob');return;}
+  if(!(age>=8&&age<=100)){err.textContent=t('eAge');return;}
+  const recs=loadRecs();
+  if(recs.some(r=>r.mobile===mob)){err.textContent=t('eDup');return;}
+  err.textContent='';const sb=$('regForm').querySelector('[type=submit]');sb.disabled=true;
+  MG.register('aadupuli',{name,mobile:mob,age,lang:L}).then(rr=>{sb.disabled=false;
+    if(rr.dup){err.textContent=t('eDup');return;}
+    player={id:Date.now().toString(36),mgId:rr.id,name,mobile:mob,age,lang:L,date:new Date().toLocaleString('en-IN'),status:'started'};
+    recs.push(player);saveRecs(recs);
+    startGame();
+  });
+});
+
+/* ================= BOARD GEOMETRY (23 points) ================= */
+const P=[]; const addPt=(x,y)=>{P.push({x,y});return P.length-1;};
+const CX=210, RY=[20,112,182,252,320], OFF=[-180,-60,60,180];
+const fac=r=>(RY[r]-RY[0])/(RY[4]-RY[0]);
+const apex=addPt(CX,RY[0]); const rows=[];
+for(let r=1;r<=3;r++){const row=[addPt(24,RY[r])];OFF.forEach(o=>row.push(addPt(CX+o*fac(r),RY[r])));row.push(addPt(396,RY[r]));rows[r]=row;}
+rows[4]=OFF.map(o=>addPt(CX+o,RY[4]));
+const LINES=[];
+for(let j=0;j<4;j++)LINES.push([apex,rows[1][j+1],rows[2][j+1],rows[3][j+1],rows[4][j]]);
+for(let r=1;r<=4;r++)LINES.push(rows[r]);
+LINES.push([rows[1][0],rows[2][0],rows[3][0]]);LINES.push([rows[1][5],rows[2][5],rows[3][5]]);
+const ADJ=P.map(()=>new Set()); const JUMPS=P.map(()=>[]);
+LINES.forEach(Ln=>{for(let k=0;k<Ln.length-1;k++){ADJ[Ln[k]].add(Ln[k+1]);ADJ[Ln[k+1]].add(Ln[k]);}
+  for(let k=0;k<Ln.length-2;k++){JUMPS[Ln[k]].push({over:Ln[k+1],to:Ln[k+2]});JUMPS[Ln[k+2]].push({over:Ln[k+1],to:Ln[k]});}});
+
+/* ================= GAME STATE ================= */
+let G=null;
+function startGame(){
+  G={board:Array(P.length).fill(null),goats:[],tigers:[],phase:'place',placed:0,lost:0,moves:0,busy:false,sel:null,groupShown:0,turn:0,trapSeen:new Set(),end:null};
+  [apex,rows[1][2],rows[1][3]].forEach((p,i)=>{G.tigers.push({pos:p,i});G.board[p]='T'+i;});
+  buildBoard();applyLang();renderRules();show('sGame');update();setMsg(t('place'));
+}
+function renderRules(){$('rulesList').innerHTML=t('rules').map(r=>`<li>${r}</li>`).join('');
+  $('legend').innerHTML=ASSETS.map(a=>`<span><i class="dot" style="background:${ACOL[a]}"></i>${t('assets')[a]}</span>`).join('');}
+
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+let layerHint,layerPieces,pieceEls={};
+function buildBoard(){
+  const svg=$('board');svg.innerHTML='';pieceEls={};
+  // background: candles + bull/bear
+  const bg=el('g',{},svg);
+  for(let i=0;i<14;i++){const x=10+i*29.5,h=10+((i*37)%22),up=(i*7)%3!==0,y=338-h;
+    el('line',{x1:x+4,x2:x+4,y1:y-5,y2:y+h+3,stroke:up?'#16a34a':'#dc2626','stroke-width':1.2,opacity:.35},bg);
+    el('rect',{x,y,width:8,height:h,rx:1.5,fill:up?'#16a34a':'#dc2626',opacity:.28},bg);}
+  const tb=el('text',{x:40,y:70,'font-size':54,opacity:.18,'text-anchor':'middle'},bg);tb.textContent='🐂';
+  const tr=el('text',{x:380,y:70,'font-size':54,opacity:.18,'text-anchor':'middle'},bg);tr.textContent='🐻';
+  const lb1=el('text',{x:40,y:96,'font-size':11,'font-weight':800,fill:'#15803d','text-anchor':'middle',opacity:.6},bg);lb1.textContent='BULL';
+  const lb2=el('text',{x:380,y:96,'font-size':11,'font-weight':800,fill:'#b91c1c','text-anchor':'middle',opacity:.6},bg);lb2.textContent='BEAR';
+  // lines
+  const lg=el('g',{stroke:'#0f3d91','stroke-width':3,'stroke-linecap':'round',fill:'none'},svg);
+  LINES.forEach(Ln=>{const a=P[Ln[0]],b=P[Ln[Ln.length-1]];el('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y},lg);});
+  // points
+  const pg=el('g',{},svg);
+  P.forEach((p,i)=>el('circle',{cx:p.x,cy:p.y,r:7,fill:'#fff',stroke:'#0f3d91','stroke-width':2.5},pg));
+  layerHint=el('g',{},svg);
+  layerPieces=el('g',{},svg);
+  svg.onclick=onBoardClick;
+}
+function piecePos(e,p){e.style.transform=`translate(${P[p].x}px,${P[p].y}px)`;}
+function makeGoatEl(gi){
+  const g=G.goats[gi];const e=el('g',{class:'pc'},layerPieces);
+  e.style.transition='transform .45s ease, opacity .5s';
+  el('circle',{r:15,fill:ACOL[g.asset],stroke:'#fff','stroke-width':3},e);
+  const tx=el('text',{y:6,'font-size':16,'text-anchor':'middle'},e);tx.textContent='🐐';
+  pieceEls['g'+gi]=e;piecePos(e,g.pos);
+  e.animate([{transform:`translate(${P[g.pos].x}px,${P[g.pos].y}px) scale(.2)`},{transform:`translate(${P[g.pos].x}px,${P[g.pos].y}px) scale(1)`}],{duration:250});
+}
+function makeTigerEl(ti){
+  const e=el('g',{},layerPieces);e.style.transition='transform .5s ease';
+  el('circle',{r:17,fill:'#f97316',stroke:'#7c2d12','stroke-width':3},e);
+  const tx=el('text',{y:6,'font-size':18,'text-anchor':'middle'},e);tx.textContent='🐯';
+  const badge=el('g',{},e);el('circle',{cx:13,cy:-13,r:7.5,fill:'#7c2d12'},badge);
+  const n=el('text',{x:13,y:-9.5,'font-size':10,'font-weight':800,fill:'#fff','text-anchor':'middle'},badge);n.textContent=ti+1;
+  pieceEls['t'+ti]=e;piecePos(e,G.tigers[ti].pos);
+}
+
+/* ================= RULE ENGINE ================= */
+const isGoat=v=>typeof v==='number';
+function tigerMovesOf(ti){const pos=G.tigers[ti].pos,res=[];
+  ADJ[pos].forEach(n=>{if(G.board[n]===null)res.push({ti,from:pos,to:n});});
+  JUMPS[pos].forEach(j=>{if(isGoat(G.board[j.over])&&G.board[j.to]===null)res.push({ti,from:pos,to:j.to,cap:j.over});});
+  return res;}
+const allTigerMoves=()=>G.tigers.flatMap((_,i)=>tigerMovesOf(i));
+function goatMovesFrom(p){return [...ADJ[p]].filter(n=>G.board[n]===null);}
+function anyGoatMove(){return G.goats.some(g=>!g.lost&&goatMovesFrom(g.pos).length);}
+
+/* ================= UI UPDATE ================= */
+function update(){
+  $('tigerCards').innerHTML=G.tigers.map((tg,i)=>{const trapped=tigerMovesOf(i).length===0;
+    return `<div class="tcard ${trapped?'trap':''}"><span class="em">${trapped?'🔒':'🐯'} ${i+1}</span>${t('tigers')[i]}<br><small>${trapped?t('trapped'):t('active')}</small></div>`;}).join('');
+  $('stHand').textContent=15-G.placed;$('stLost').textContent=G.lost;
+  $('stMoves').textContent=`${G.moves}/${CONFIG.MAX_GOAT_MOVES}`;
+  if(!pieceEls.t0)G.tigers.forEach((_,i)=>makeTigerEl(i));
+  if(G.phase==='place'){const a=ASSETS[G.placed%5];$('nextGoat').innerHTML=`${t('nextGoat')} <i class="dot" style="background:${ACOL[a]}"></i> ${t('assets')[a]} (₹1,000)`;}
+  else $('nextGoat').innerHTML='';
+  drawHints();
+}
+function drawHints(){
+  layerHint.innerHTML='';if(!G||G.phase==='over')return;
+  // exposed goats
+  const caps=allTigerMoves().filter(m=>m.cap!==undefined);
+  caps.forEach(m=>el('circle',{cx:P[m.cap].x,cy:P[m.cap].y,r:21,fill:'none',stroke:'#dc2626','stroke-width':3,'stroke-dasharray':'4 3'},layerHint));
+  if(G.sel!==null){
+    el('circle',{cx:P[G.sel].x,cy:P[G.sel].y,r:21,fill:'none',stroke:'#f5b301','stroke-width':4},layerHint);
+    goatMovesFrom(G.sel).forEach(n=>{const c=el('circle',{cx:P[n].x,cy:P[n].y,r:13,fill:'#f5b301',opacity:.75},layerHint);
+      c.animate([{opacity:.35},{opacity:.9}],{duration:700,iterations:Infinity,direction:'alternate'});});
+  }
+}
+function setMsg(text,kind){const m=$('msg');m.textContent=text;m.className='msg'+(kind?' '+kind:'');}
+function yourTurnMsg(){
+  const exposed=allTigerMoves().some(m=>m.cap!==undefined);
+  setMsg((G.phase==='place'?t('place'):t('move'))+(exposed?' '+t('exposed'):''),exposed?'bad':'');
+}
+
+/* ================= INPUT ================= */
+function onBoardClick(ev){
+  if(!G||G.busy||G.phase==='over')return;
+  const svg=$('board');const pt=svg.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;
+  const sp=pt.matrixTransform(svg.getScreenCTM().inverse());
+  let best=-1,bd=30;P.forEach((p,i)=>{const d=Math.hypot(p.x-sp.x,p.y-sp.y);if(d<bd){bd=d;best=i;}});
+  if(best<0)return;
+  if(G.phase==='place'){
+    if(G.board[best]!==null)return;
+    const gi=G.goats.length;G.goats.push({asset:ASSETS[gi%5],pos:best,lost:false});
+    G.board[best]=gi;G.placed++;makeGoatEl(gi);
+    if(G.placed===15)G.phase='move';
+    afterGoat();
+  }else{
+    const v=G.board[best];
+    if(isGoat(v)){ if(!goatMovesFrom(best).length){G.sel=null;setMsg(t('noMoveGoat'),'bad');drawHints();return;}
+      G.sel=best;setMsg(t('pick'));drawHints();return;}
+    if(v===null&&G.sel!==null&&ADJ[G.sel].has(best)){
+      const gi=G.board[G.sel];G.board[G.sel]=null;G.board[best]=gi;G.goats[gi].pos=best;piecePos(pieceEls['g'+gi],best);
+      G.sel=null;G.moves++;afterGoat();
+    }
+  }
+}
+function afterGoat(){
+  G.turn++;update();
+  const tm=allTigerMoves();
+  let special=null;
+  // newly trapped tigers
+  G.tigers.forEach((_,i)=>{const tr=tigerMovesOf(i).length===0;if(tr&&!G.trapSeen.has(i)){G.trapSeen.add(i);special=t('trapMsg')(t('tigers')[i]);}if(!tr)G.trapSeen.delete(i);});
+  if(!tm.length){return finish('win');}
+  // diversification message: a tiger next to a goat that is protected (landing blocked)
+  const protectedNow=G.tigers.some(tg=>JUMPS[tg.pos].some(j=>isGoat(G.board[j.over])&&G.board[j.to]!==null));
+  const anyCap=tm.some(m=>m.cap!==undefined);
+  if(!special&&protectedNow&&!anyCap&&G.turn-G.groupShown>=5){G.groupShown=G.turn;special=t('group');}
+  G.busy=true;
+  if(special)setMsg(special,'good');else setMsg(t('think'));
+  setTimeout(tigerTurn,special?1600:650);
+}
+function tigerTurn(){
+  const tm=allTigerMoves();if(!tm.length){G.busy=false;return finish('win');}
+  const caps=tm.filter(m=>m.cap!==undefined);
+  // EASY mode: capture when possible, otherwise a random move
+  const mv=caps.length?caps[Math.floor(Math.random()*caps.length)]:tm[Math.floor(Math.random()*tm.length)];
+  const tg=G.tigers[mv.ti];G.board[mv.from]=null;G.board[mv.to]='T'+mv.ti;tg.pos=mv.to;piecePos(pieceEls['t'+mv.ti],mv.to);
+  let captured=false;
+  if(mv.cap!==undefined){const gi=G.board[mv.cap];G.board[mv.cap]=null;G.goats[gi].lost=true;G.lost++;captured=true;
+    const e=pieceEls['g'+gi];e.style.opacity='0';setTimeout(()=>e.remove(),500);
+    setMsg(t('capture')(t('tigers')[mv.ti],t('assets')[G.goats[gi].asset]),'bad');
+    flashLoss(P[mv.cap]);}
+  G.tigers.forEach((_,i)=>{if(tigerMovesOf(i).length)G.trapSeen.delete(i);});
+  update();
+  setTimeout(()=>{
+    G.busy=false;
+    if(G.lost>=CONFIG.MAX_LOST)return finish('lose','lost');
+    if(!allTigerMoves().length)return finish('win');
+    if(G.phase==='move'&&G.moves>=CONFIG.MAX_GOAT_MOVES)return finish('lose','moves');
+    if(G.phase==='move'&&!anyGoatMove())return finish('lose','stuck');
+    if(!captured)yourTurnMsg();
+  },captured?1300:500);
+}
+function flashLoss(p){const g=el('g',{},layerPieces);const tx=el('text',{x:p.x,y:p.y-22,'font-size':14,'font-weight':800,fill:'#dc2626','text-anchor':'middle'},g);tx.textContent='-₹1,000';
+  g.animate([{transform:'translateY(0)',opacity:1},{transform:'translateY(-20px)',opacity:0}],{duration:1300,fill:'forwards'});setTimeout(()=>g.remove(),1350);}
+
+/* ================= RESULT ================= */
+function sipFV(m,ratePct,yrs){const i=ratePct/1200,n=yrs*12;if(i===0)return m*n;return m*((Math.pow(1+i,n)-1)/i)*(1+i);}
+function solveRate(m,yrs,target){let lo=0,hi=40;for(let k=0;k<80;k++){const mid=(lo+hi)/2;if(sipFV(m,mid,yrs)<target)lo=mid;else hi=mid;}return (lo+hi)/2;}
+function finish(res,why){
+  if(G.phase==='over')return;G.phase='over';G.end={res,why};G.sel=null;drawHints();update();
+  setMsg(res==='win'?'🏆':'🐯',res==='win'?'good':'bad');
+  setTimeout(()=>showResult(res,why),1100);
+}
+function showResult(res,why){
+  const alive=G.goats.filter(g=>!g.lost); const notPlaced=15-G.goats.length; // goats never placed are still safe money
+  const cnt={};ASSETS.forEach(a=>cnt[a]=alive.filter(g=>g.asset===a).length);
+  for(let k=0;k<notPlaced;k++)cnt[ASSETS[(G.goats.length+k)%5]]++;
+  const left=15-G.lost, saved=left*1000;
+  const till=player.age<CONFIG.GOAL_AGE; const yrs=till?CONFIG.GOAL_AGE-player.age:CONFIG.OVER_AGE_YEARS;
+  let mat=0;const rowsH=ASSETS.filter(a=>cnt[a]).map(a=>{const m=cnt[a]*1000,v=sipFV(m,RATES[a],yrs);mat+=v;
+    return `<tr><td><i class="dot" style="background:${ACOL[a]}"></i> ${t('assets')[a]}</td><td>₹${fmt(m)}</td><td>₹${fmt(v)}</td></tr>`;}).join('');
+  const invested=saved*12*yrs, avg=solveRate(saved,yrs,mat);
+  let matE=0;ASSETS.forEach(a=>{if(cnt[a])matE+=sipFV(cnt[a]*1000,RATES[a],yrs+5);});
+  const head=res==='win'?t('winH')(esc(player.name)):t('loseH')(esc(player.name));
+  const whyTxt=res==='win'?'':({lost:t('loseWhyLost'),moves:t('loseWhyMoves'),stuck:t('loseWhyStuck')}[why]||'');
+  const bars=ASSETS.map(a=>`<div class="arow"><span><i class="dot" style="background:${ACOL[a]}"></i> ${t('assets')[a]}</span><div class="bar"><i style="width:${cnt[a]/3*100}%;background:${ACOL[a]}"></i><i style="width:${(3-cnt[a])/3*100}%;background:#fca5a5"></i></div><b>${cnt[a]}/3</b></div>`).join('');
+  const contact=(CONFIG.MCUBE_WEBSITE?`<div>${t('web')}: <a href="${CONFIG.MCUBE_WEBSITE}" target="_blank" rel="noopener">${CONFIG.MCUBE_WEBSITE}</a></div>`:'')+(CONFIG.MCUBE_PHONE?`<div>${t('phone')}: <a href="tel:${CONFIG.MCUBE_PHONE.replace(/\s/g,'')}">${CONFIG.MCUBE_PHONE}</a> (${CONFIG.MCUBE_PHONE})</div>`:'')+(CONFIG.MCUBE_ADDRESS?`<div>📍 ${CONFIG.MCUBE_ADDRESS}</div>`:'');
+  $('sRes').innerHTML=`
+   <div class="card big pop"><div class="emoji">${res==='win'?'🏆':'🐯'}</div><h2>${head}</h2><p>${whyTxt}</p>
+     <div class="kpis"><div class="kpi"><span>${t('saved')}</span><b style="color:#15803d">₹${fmt(saved)}</b><span>${t('of')}</span></div>
+     <div class="kpi"><span>🐐</span><b>${left}/15</b><span>${t('goatsLeft')(left)}</span></div></div></div>
+   <div class="card"><div class="sec-t">${t('survT')}</div>${bars}</div>
+   <div class="card"><div class="sec-t">📈 ${t('sipT')}</div><p style="font-size:14px;line-height:1.55">${t('sipLine')(fmt(saved),yrs,till)}</p>
+     <div class="kpis"><div class="kpi"><span>${t('invested')}</span><b>₹${fmt(invested)}</b></div>
+     <div class="kpi mat"><span>${t('becomes')}</span><b>₹${fmt(mat)}</b></div>
+     <div class="kpi hl"><span>${t('avg')}</span><b>${avg.toFixed(2)}%</b></div></div>
+     <table class="tbl" style="margin-top:14px"><thead><tr><th>${t('thA')}</th><th>${t('thM')}</th><th>${t('thV')} ${yrs} ${t('yrs')}</th></tr></thead><tbody>${rowsH}</tbody>
+     <tfoot><tr><td>${t('total')}</td><td>₹${fmt(saved)}</td><td>₹${fmt(mat)}</td></tr></tfoot></table>
+     <div class="early">${t('steady')}</div>
+     <div class="early">${t('early')(yrs+5,fmt(matE),fmt(matE-mat))}</div></div>
+   <div class="card"><div class="sec-t">🎓 ${t('lessT')}</div><ul class="points">${t('lessons').map((x,i)=>`<li data-n="${i+1}">${x}</li>`).join('')}</ul></div>
+   <div class="card"><div class="sec-t">🐯 ${t('riskT')}</div><ul class="points">${t('risks').map((x,i)=>`<li data-n="${i+1}"><b>${t('tigers')[i]}:</b> ${x}</li>`).join('')}</ul></div>
+   <div class="card mcube"><div class="sec-t">${t('mcT')}</div><ul>${t('mcList').map(x=>`<li>${x}</li>`).join('')}</ul>${contact?`<div class="contact">${contact}</div>`:''}</div>
+   <button class="btn alt" id="btnNext">${t('newPlayer')}</button>
+   <p class="disc" style="margin-top:14px">${t('disc')}</p>`;
+  $('btnNext').onclick=()=>{$('regForm').reset();player=null;G=null;show('sLang');};
+  show('sRes');
+  // save record
+  const recs=loadRecs();const r=recs.find(x=>x.id===player.id)||player;
+  Object.assign(r,{status:'finished',result:res==='win'?'WIN':'LOSE',goatsLeft:left,savedRs:saved,
+    lostAssets:ASSETS.map(a=>`${a}:${3-cnt[a]}`).join(' '),years:yrs,investedRs:Math.round(invested),maturityRs:Math.round(mat),avgReturnPct:avg.toFixed(2),goatMoves:G.moves});
+  if(!recs.includes(r))recs.push(r);saveRecs(recs);sendSheet(r);
+  MG.finish(player.mgId,res==='win'?'WIN':'LOSE',saved,{goatsLeft:left,savedRs:saved,lostAssets:r.lostAssets,sipYears:yrs,maturityRs:Math.round(mat),avgReturnPct:Number(avg.toFixed(2)),goatMoves:G.moves,language:L==='ta'?'Tamil':'English'});
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+/* ================= ADMIN ================= */
+const COLS=['date','name','mobile','age','lang','status','result','goatsLeft','savedRs','lostAssets','years','investedRs','maturityRs','avgReturnPct','goatMoves'];
+let lastScreen='sLang';
+function openAdmin(){lastScreen=screens.find(s=>!$(s).classList.contains('hidden'))||'sLang';if(lastScreen==='sAdmin')lastScreen='sLang';
+  $('admLogin').classList.remove('hidden');$('admPanel').classList.add('hidden');$('admPin').value='';$('admErr').textContent='';show('sAdmin');}
+function closeAdmin(){try{if(location.hash==='#admin')history.replaceState(null,'',location.pathname+location.search);}catch(e){}show(lastScreen);}
+/* Organizer records are in the Mcube Game Admin site now. */
+
+$('admGo').onclick=()=>{if($('admPin').value===CONFIG.ADMIN_PIN){$('admLogin').classList.add('hidden');$('admPanel').classList.remove('hidden');renderAdmin();}else $('admErr').textContent='Wrong PIN';};
+$('admExit').onclick=closeAdmin;$('admExit1').onclick=closeAdmin;
+function csv(){const recs=loadRecs();const q=v=>`"${String(v??'').replace(/"/g,'""')}"`;return [COLS.join(','),...recs.map(r=>COLS.map(c=>q(r[c])).join(','))].join('\n');}
+function renderAdmin(){const recs=loadRecs();$('admCount').textContent=recs.length;$('admNote').textContent='';$('admCsvBox').classList.add('hidden');
+  $('admTbl').innerHTML=`<thead><tr><th></th>${COLS.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${recs.slice().reverse().map(r=>`<tr><td><button class="x" data-del="${r.id}">✕</button></td>${COLS.map(c=>`<td>${esc(r[c]??'')}</td>`).join('')}</tr>`).join('')||`<tr><td colspan="${COLS.length+1}">No players yet.</td></tr>`}</tbody>`;
+  $('admTbl').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>confirmBox('Delete this player record?',()=>{saveRecs(loadRecs().filter(r=>r.id!==b.dataset.del));renderAdmin();}));}
+$('admClear').onclick=()=>confirmBox('Delete ALL player records? This cannot be undone.',()=>{saveRecs([]);renderAdmin();});
+$('admCsv').onclick=()=>{try{const b=new Blob(['﻿'+csv()],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='aadu-puli-players.csv';document.body.appendChild(a);a.click();a.remove();
+  $('admNote').textContent='If no file downloaded (preview mode), use Copy CSV.';}catch(e){$('admNote').textContent='Download blocked here – use Copy CSV.';}};
+$('admCopy').onclick=async()=>{const s=csv();const box=$('admCsvBox');box.value=s;box.classList.remove('hidden');
+  try{await navigator.clipboard.writeText(s);$('admNote').textContent='Copied. Paste into Excel / Google Sheets.';}catch(e){box.select();$('admNote').textContent='Select the text below and copy it.';}};
+function confirmBox(text,yes){$('ovCard').innerHTML=`<p style="font-weight:600;margin-bottom:14px">${text}</p><button class="btn red" id="cY">Delete</button><button class="btn ghost" id="cN">Cancel</button>`;
+  $('ov').classList.remove('hidden');$('cY').onclick=()=>{$('ov').classList.add('hidden');yes();};$('cN').onclick=()=>$('ov').classList.add('hidden');}
+
+/* ================= INIT ================= */
+
+</script>
+</body>
+</html>

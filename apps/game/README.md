@@ -1,17 +1,32 @@
-# Investment Business game: downloads for laptop, Mac, Android and iPhone
+# Mcube Games: website, Windows, Mac, Android and iPhone
 
-The game lives in `www/index.html`. The same file is packaged four ways:
+`www/index.html` is the games hub. Each game is one page in `www/games/` and uses `www/shared/mcube.js` (registration, saving players and results to the online database, offline queue, settings from the Game Admin site) and `www/shared/mcube.css` (the common white look and the "All games" bar).
+
+| Game | Page |
+|---|---|
+| Investment Business | `games/investment.html` |
+| Money Adventure | `games/adventure.html` |
+| ₹1 Lakh → ₹10 Lakh Challenge | `games/challenge.html` |
+| Bull vs Bear – Aadu Puli | `games/aadupuli.html` |
+| Pallanguli Investment Game | `games/pallanguli.html` |
+| Personal Finance Management | `games/finance.html` |
+
+Players' details and results are viewed and exported in the **Mcube Game Admin** site (`apps/game-admin`), where the Head Incharge also switches games on or off, sets their order, one play per mobile, dice or spinning wheel and the staff PIN.
+
+The same pages are packaged four ways:
 
 | Device | What the player gets | How it is made |
 |---|---|---|
-| **Windows laptop** | `Investment-Business-Setup-1.0.0.exe` (installer) and `Investment-Business-Portable-1.0.0.exe` (runs without installing) | Electron (`electron/main.cjs`) |
-| **Mac** | `Investment-Business-1.0.0-mac.dmg` (Intel and Apple chips) | Electron |
-| **Android** | `release-android-test.apk` (install directly), plus a signed `.apk` and Play Store `.aab` when keys are set | Capacitor (`capacitor.config.json`) |
-| **iPhone / iPad** | Install from the web link with **Share > Add to Home Screen**. The build also gives an Xcode project and an unsigned `.ipa` for the App Store | Capacitor + web app (`manifest.webmanifest`, `sw.js`) |
+| **Windows laptop** | `Investment-Business-Windows-Setup.exe` (installer) and `Investment-Business-Windows-Portable.exe` | Electron (`electron/main.cjs`) |
+| **Mac** | `Investment-Business-Mac.dmg` (Intel and Apple chips) | Electron |
+| **Android** | `Investment-Business-Android.apk`, plus a signed `.apk` and Play Store `.aab` when keys are set | Capacitor (`capacitor.config.json`) |
+| **iPhone / iPad** | Install from the web link with **Share > Add to Home Screen**, or TestFlight / App Store (see below) | Capacitor + web app (`manifest.webmanifest`, `sw.js`) |
 
-The screen adapts to the device: on phones (upright) the board is on top with the message and scores below; on laptops, Macs, tablets and phones turned sideways the board fills the screen height with the message, scores and rules beside it.
+The installed app is called **Mcube Games** and opens the games hub.
 
-The game works offline on every device. Leads are saved on the device the game is played on, so staff should open **Staff login** and tap **Download CSV** on each device. The staff PIN is set by Head or Regional Incharge in the admin portal: **Feature Controls > Investment Business game: staff PIN**. Until a PIN is set there, the starting PIN is `2026`. Apps pick up a new PIN the next time they are online and remember it for offline use. On Android and iPhone apps the CSV opens the share menu (WhatsApp, Gmail, Drive, Files).
+The screen adapts to the device: every game fits phones (upright and sideways), tablets, laptops and large screens.
+
+The games work offline on every device; registrations and results made offline are sent to the online database when the device is online again. Investment Business also keeps a copy on the device for its in-game **Staff login** (PIN set in Game Admin > Settings; starting PIN `2026`).
 
 ## Download links for players (no GitHub login)
 
@@ -149,6 +164,6 @@ After changing `www/index.html`, run `npm run sync` for the phone apps, and chan
 |---|---|
 | App name and ID (`com.mcubeacademy.investmentbusiness`) | `package.json` (`build`) and `capacitor.config.json` |
 | App icon | `resources/icon.png` (desktop), `assets/` (phones), `www/icons/` (web) |
-| Dice or spinning wheel | admin portal (Head Incharge only): Feature Controls > Investment Business game: how players move |
-| Staff PIN | admin portal: Feature Controls > Investment Business game: staff PIN |
+| Games shown, order, one play per mobile, dice or spinning wheel | Mcube Game Admin site > Games |
+| Staff PIN | Mcube Game Admin site > Settings |
 | Starting staff PIN (used until one is set in admin), number of laps, starting money | top of the script in `www/index.html` (`PIN`, `LAPS`, `CASH`) |

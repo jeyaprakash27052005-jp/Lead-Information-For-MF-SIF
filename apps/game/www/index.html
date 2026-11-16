@@ -1,363 +1,60 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Investment Business by Mcube Academy</title>
+<title>Mcube Games</title>
+<meta name="description" content="Money and investing games by Mcube Academy: learn by playing.">
 <meta name="theme-color" content="#ffffff">
-<meta name="description" content="A money-habits board game by Mcube Academy.">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Investment Business">
+<meta name="apple-mobile-web-app-title" content="Mcube Games">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="shared/mcube.css">
+<script src="shared/mcube.js"></script>
 <style>
-:root{color-scheme:light;--bg:#ffffff;--fg:#111827;--mut:#6b7280;--bd:#e5e7eb;--bd2:#d1d5db;--card:#ffffff;--soft:#f8fafc;--ac:#4F3CC9;--ach:#3f2fb0;--acs:#f3f1ff;--acfg:#fff;--mid:#ffffff;--sh:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.08);--font:"Segoe UI",-apple-system,BlinkMacSystemFont,"SF Pro Text",Roboto,"Helvetica Neue",Arial,sans-serif;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 var(--font);-webkit-font-smoothing:antialiased}
-#app{max-width:520px;margin:0 auto;padding:16px max(16px,env(safe-area-inset-right,0px)) 28px max(16px,env(safe-area-inset-left,0px))}
-h1{font:700 26px/1.2 var(--font);letter-spacing:-.02em;margin:6px 0 4px}
-h3{font:600 15px var(--font);text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin:22px 0 8px}
-.sub,.foot{color:var(--mut);font-size:14px}
-.board{display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(6,1fr);aspect-ratio:1/1;width:100%;max-width:calc(100vh - 32px);max-width:calc(100dvh - 32px);margin:0 auto;container-type:inline-size;gap:3px;background:#eef0f4;padding:4px;border-radius:14px;border:1px solid var(--bd);box-shadow:var(--sh)}
-.sq{position:relative;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 2px 12px;text-align:center;font-size:10.5px;font-size:clamp(9px,2.35cqi,16px);line-height:1.15;min-width:0;overflow:hidden;background:#fff;border-top:4px solid #94a3b8}
-.sq b{font-weight:700}
-.sq b{color:#111827;font-weight:600}.sq span{font-weight:700}.sq.g{border-top-color:#16a34a;background:linear-gradient(#f0fdf4,#fff 55%)}.sq.g span{color:#15803d}.sq.r{border-top-color:#dc2626;background:linear-gradient(#fef2f2,#fff 55%)}.sq.r span{color:#b91c1c}.sq.c{border-top-color:#d97706;background:linear-gradient(#fffbeb,#fff 55%)}.sq.c span{color:#b45309}.sq.n{border-top-color:#2563eb;background:linear-gradient(#eff6ff,#fff 55%)}.sq.n span{color:#1d4ed8}
-.tk{position:absolute;bottom:2px;left:0;right:0;display:flex;justify-content:center;gap:2px}
-.tk i{width:11px;height:11px;width:clamp(10px,2.6cqi,20px);height:clamp(10px,2.6cqi,20px);border-radius:50%;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.4)}
-.mid{grid-area:2/2/6/6;position:relative;overflow:hidden;background:var(--mid);border-radius:10px;border:1px solid var(--bd);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;padding:4px}
-.mid>*{position:relative;z-index:1}.mid::before,.mid::after{position:absolute;bottom:2px;font-size:58px;line-height:1;opacity:.16;filter:grayscale(1);z-index:0}.mid::before{content:'\1F402';left:3px}.mid::after{content:'\1F43B';right:3px}.logo{display:block;width:120px;height:auto;border-radius:12px;border:1px solid var(--bd)}.mid .logo{width:76px;width:clamp(56px,17cqi,140px)}.mid::before,.mid::after{font-size:clamp(40px,13cqi,110px)}.mid button{font-size:clamp(15px,3cqi,20px);padding:clamp(10px,2cqi,14px) clamp(16px,4cqi,28px)}
-.who{font-weight:700;font-size:14px;font-size:clamp(13px,3.2cqi,22px)}
-.dice{width:46px;height:46px;width:clamp(42px,10cqi,76px);height:clamp(42px,10cqi,76px);font-size:clamp(22px,5.4cqi,40px)!important;border:1.5px solid var(--bd2);border-radius:12px;display:flex;align-items:center;justify-content:center;font:700 24px var(--font);background:#fff;box-shadow:var(--sh)}
-button{font:600 15px var(--font);border:1px solid transparent;border-radius:8px;padding:10px 18px;background:var(--ac);color:var(--acfg);cursor:pointer;min-height:44px;box-shadow:0 1px 2px rgba(16,24,40,.08);transition:background .15s,border-color .15s}
-button:hover:not(:disabled){background:var(--ach)}
-button:disabled{opacity:.45}
-button.alt{background:#fff;color:#344054;border:1px solid var(--bd2)}button.alt:hover:not(:disabled){background:var(--soft)}
-button:focus-visible,input:focus-visible{outline:3px solid rgba(79,60,201,.35);outline-offset:2px}
-.msg{margin-top:12px;border:1px solid var(--bd);border-left:4px solid #2563eb;border-radius:12px;padding:12px 14px;min-height:84px;background:#fff;box-shadow:var(--sh)}
-.msg.g{border-left-color:#16a34a}.msg.r{border-left-color:#dc2626}.msg.c{border-left-color:#d97706}
-.msg{display:flex;gap:12px;align-items:flex-start}.msg .em{font-size:28px;line-height:1;flex:none;width:52px;height:52px;border-radius:12px;background:var(--soft);display:flex;align-items:center;justify-content:center}.msg h2{font:700 18px/1.3 var(--font);margin:0 0 4px}.msg p{margin:0 0 5px;font-size:15px;line-height:1.5;color:#374151}.msg p b{font-weight:700}
-.score{margin-top:12px;display:grid;gap:6px}
-.pl{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--bd);border-radius:10px;font-size:15px;font-weight:600;background:#fff}
-.pl.on{border-color:var(--ac);background:var(--acs);box-shadow:0 0 0 1px var(--ac)}
-.pl i{width:14px;height:14px;border-radius:50%;flex:none}
-.pl span{margin-left:auto;color:var(--mut);font-size:12.5px;font-weight:500;text-align:right}.pl span strong{color:var(--fg);font-size:15px;font-weight:700}
-.pick{display:flex;gap:8px;margin:10px 0 16px}
-.rules{padding-left:20px;font-size:15px}
-.cc{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:13.5px;line-height:1.3}
-.cc div{display:flex;gap:6px}.cc b{flex:none;min-width:58px}
-.p{color:#15803d}.m{color:#b91c1c}.a{color:#b45309}
-label{display:block;font-weight:600;font-size:14px;color:#344054;margin:12px 0 4px}
-input[type=text],input[type=tel],input[type=email],input[type=password]{width:100%;font:16px var(--font);padding:10px 12px;border:1px solid var(--bd2);border-radius:8px;background:#fff;color:var(--fg);box-shadow:0 1px 2px rgba(16,24,40,.05)}
-input:focus{border-color:var(--ac)}
-.ck{display:flex;gap:8px;align-items:flex-start;font-weight:400;font-size:13.5px}
-.ck input{margin-top:3px;width:18px;height:18px;flex:none;accent-color:var(--ac)}
-.err{color:#b91c1c;font-weight:600;font-size:14px;margin:8px 0;min-height:20px}
-.lead{width:100%;border-collapse:collapse;font-size:13.5px;margin:12px 0;background:#fff;border:1px solid var(--bd);border-radius:10px;overflow:hidden}.lead td,.lead th{border-bottom:1px solid var(--bd);padding:8px 10px;text-align:left}.lead th{background:var(--soft);font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut)}
-.no{flex:none;width:20px;height:20px;border-radius:50%;background:var(--acs);color:var(--ac);font:700 11px/20px var(--font);text-align:center;font-style:normal}
-.win{text-align:center;border-radius:14px;padding:20px 16px;margin-top:12px;background:linear-gradient(#fffbeb,#fff);color:#78350f;border:1px solid #fcd34d;box-shadow:var(--sh)}.win .tr{font-size:64px;line-height:1}.win h2{font:700 20px var(--font);margin:4px 0}.win .big{font:800 28px var(--font);letter-spacing:-.02em;margin:0}.win p{margin:4px 0}
-.prod{padding:0;list-style:none;margin:6px 0}.prod li{padding:10px 12px;border:1px solid var(--bd);border-radius:10px;margin-bottom:6px;font-size:15px;background:#fff}
-.slog{border:1px solid var(--bd);border-left:4px solid var(--ac);background:var(--soft);border-radius:10px;padding:6px 14px}.slog p{margin:8px 0;font-size:15px}
-.iostip{margin-top:14px;padding:12px 14px;border:1px solid #c7d2fe;background:#eef2ff;border-radius:12px;font-size:14px;line-height:1.45;display:grid;gap:4px;color:#1e1b4b}.iostip a{color:var(--ac)}
-.tool{display:flex;align-items:center;justify-content:center}
-@container (max-width:520px){.mid.sp .logo{display:none}.mid.sp{gap:3px}}
-.wheel-wrap{position:relative;width:clamp(96px,30cqi,240px);aspect-ratio:1;container-type:inline-size}
-.wheel{position:absolute;inset:0;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px var(--bd2),var(--sh);will-change:transform}
-.wheel span{position:absolute;left:50%;top:50%;width:0;height:0;display:flex;align-items:center;justify-content:center}
-.wheel span b{display:block;color:#fff;font:800 clamp(12px,13cqi,30px)/1 var(--font);text-shadow:0 1px 2px rgba(0,0,0,.35)}
-.ptr{position:absolute;left:50%;top:-6%;transform:translateX(-50%);width:0;height:0;border-left:7cqi solid transparent;border-right:7cqi solid transparent;border-top:13cqi solid #111827;z-index:2;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
-.hub{position:absolute;left:50%;top:50%;width:30cqi;height:30cqi;transform:translate(-50%,-50%);border-radius:50%;background:#fff;border:1px solid var(--bd2);box-shadow:var(--sh);display:flex;align-items:center;justify-content:center;font:800 15cqi/1 var(--font);color:#111827;z-index:1}
-@media (prefers-reduced-motion:reduce){.wheel{transition-duration:.6s!important}}
-a.btn.alt-link{background:#fff;color:#344054;border:1px solid var(--bd2);box-shadow:none;padding:10px 16px;font-size:15px;line-height:22px;vertical-align:middle}a.btn.alt-link:hover{background:var(--soft)}
-a.btn{display:inline-block;background:var(--ac);color:var(--acfg);padding:11px 18px;border-radius:8px;font-weight:600;text-decoration:none}
-/* ---------- Layout that adapts to the device ---------- */
-#app.s-play{max-width:1400px}#app.s-wide{max-width:960px}
-.game{display:grid;gap:14px}.game .msg{margin-top:0}.game .score{margin-top:0}.now{display:grid;gap:12px}
-.tbl{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.card{background:#fff;border:1px solid var(--bd);border-radius:16px;padding:20px;box-shadow:0 4px 16px rgba(16,24,40,.06),0 1px 2px rgba(16,24,40,.04)}
-.home .pick button{flex:1}
-.form h1{margin-top:10px}
-/* Laptop, desktop, tablet landscape, phone landscape: board on the left, game info on the right */
-@media (min-width:900px),(orientation:landscape) and (min-width:600px){
- .game{grid-template-columns:auto minmax(280px,1fr);align-items:start;gap:20px}
- .game .left{position:sticky;top:12px}
- .game .board{width:min(calc(100vh - 32px),calc(100vw - 380px),820px);width:min(calc(100dvh - 32px),calc(100vw - 380px),820px);max-width:none}
- .game .side{min-width:0;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain;padding-right:4px}
- .game .now{position:sticky;top:0;z-index:2;background:var(--bg);padding-bottom:10px;display:grid;gap:10px}
- .side .cc{grid-template-columns:1fr 1fr}
-}
-/* Phone landscape: very little height, so tighten the side panel */
-@media (orientation:landscape) and (max-height:540px){
- #app.s-play{padding-top:8px;padding-bottom:8px}
- .game .left{top:8px}.game .side{max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px)}.now .score{grid-template-columns:1fr 1fr;gap:6px}.game .board{width:min(calc(100vh - 16px),calc(100vw - 340px));width:min(calc(100dvh - 16px),calc(100vw - 340px))}
- .game{grid-template-columns:auto minmax(240px,1fr)}
- .msg{min-height:0;padding:8px 10px}.msg .em{font-size:32px}.msg h2{font-size:17px}.msg p{font-size:14px}
- .pl{padding:6px 8px;font-size:14px}
-}
-/* Laptop and tablet: home screen in two columns */
-@media (min-width:860px){
- #app.s-home{max-width:1040px}
- .home{display:grid;grid-template-columns:1.1fr 1fr;gap:36px;align-items:center;min-height:calc(100vh - 60px);min-height:calc(100dvh - 60px)}
- .home h1{font-size:40px}
- #app.s-form{max-width:560px}.form{margin-top:4vh}
-}
-/* Big screens (classroom projector, large monitor): larger text */
-@media (min-width:1600px) and (min-height:900px){body{font-size:18px}.msg h2{font-size:24px}.msg p{font-size:18px}.pl{font-size:17px}}
+body{margin:0;background:#fff;color:var(--mg-fg);font:16px/1.5 var(--mg-font);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:max(20px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 40px max(16px,env(safe-area-inset-left))}
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+header img{width:56px;height:56px;border-radius:12px;border:1px solid var(--mg-bd)}
+header h1{margin:0;font-size:28px;line-height:1.2;letter-spacing:-.02em}
+header p{margin:2px 0 0;color:var(--mg-mut)}
+header .sp{flex:1}
+a.dl{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border:1px solid var(--mg-bd2);border-radius:10px;color:#344054;text-decoration:none;font-weight:600;background:#fff}
+a.dl:hover{background:var(--mg-soft)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;margin-top:24px}
+.g{display:flex;flex-direction:column;gap:10px;padding:18px;border:1px solid var(--mg-bd);border-radius:16px;background:#fff;box-shadow:0 1px 2px rgba(16,24,40,.05);text-decoration:none;color:inherit;transition:box-shadow .15s,border-color .15s,transform .15s}
+.g:hover{border-color:var(--mg-ac);box-shadow:0 8px 24px rgba(79,60,201,.12);transform:translateY(-2px)}
+.g .ic{font-size:34px;width:60px;height:60px;border-radius:14px;background:var(--mg-acs);display:flex;align-items:center;justify-content:center}
+.g h2{margin:0;font-size:18px;line-height:1.3}
+.g .who{font-size:12.5px;font-weight:600;color:var(--mg-ac);text-transform:uppercase;letter-spacing:.04em}
+.g p{margin:0;color:#4b5563;font-size:14.5px;flex:1}
+.g .play{align-self:flex-start;background:var(--mg-ac);color:#fff;font-weight:600;padding:9px 18px;border-radius:8px}
+.g:hover .play{background:var(--mg-ach)}
+.empty{margin-top:24px;padding:24px;border:1px dashed var(--mg-bd2);border-radius:14px;color:var(--mg-mut);text-align:center}
+.iostip{margin-top:20px;padding:12px 14px;border:1px solid #c7d2fe;background:#eef2ff;border-radius:12px;font-size:14px;color:#1e1b4b}
+.iostip a{color:var(--mg-ac)}
+.foot{margin-top:28px;color:var(--mg-mut);font-size:13px}
+.foot a{color:var(--mg-ac)}
+@media (max-width:520px){header h1{font-size:24px}header .sp{display:none}a.dl{width:100%;justify-content:center}}
 </style></head>
-<body><div id="app"></div>
+<body><div class="wrap">
+<header><img src="icons/icon-192.png" alt="Mcube Academy"><div><h1>Mcube Games</h1><p>Learn money habits and investing by playing.</p></div><span class="sp"></span><span id="dl"></span></header>
+<div id="tip"></div>
+<div class="grid" id="games"></div>
+<p class="foot">Play money only. Investments are subject to market risks. · <a href="https://mcubeacademy.com" target="_blank" rel="noopener">mcubeacademy.com</a></p>
+</div>
 <script>
-var LAPS=2,CASH=100000,COL=["#D85A30","#378ADD","#1D9E75","#7F77DD"],db=null,isEd=false,R={};
-var MEM={},LK="mcube_leads_v1",PIN="2026";
-function ld(){try{return JSON.parse(localStorage.getItem(LK)||"[]")}catch(e){try{return JSON.parse(MEM[LK]||"[]")}catch(x){return[]}}}
-function sv(a){var t=JSON.stringify(a);try{localStorage.setItem(LK,t)}catch(e){}MEM[LK]=t}
-function persist(){try{localStorage.setItem("mc_t","1");localStorage.removeItem("mc_t");return true}catch(e){return false}}
-var LOGO='<img class="logo" alt="Mcube Academy" src="data:image/jpeg;base64,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">';
-var SQA=[
-{n:"START",a:0,t:"n",l:"Each time you pass START you get ₹2,000, like a monthly saving. Saving regularly adds up."},
-{n:"Save monthly",a:5000,t:"g",l:"A SIP means putting a fixed small amount into a mutual fund every month. Start early and stay regular."},
-{n:"Chance A",t:"c",d:"A"},
-{n:"Bank deposit",a:1000,t:"n",l:"A fixed deposit (FD) keeps money safe and earns steady interest, but usually grows less. Good for short-term needs."},
-{n:"Card debt",a:-2000,t:"r",l:"Unpaid credit card bills charge very high interest. Pay the full bill every month."},
-{n:"Market falls",a:-3000,t:"r",l:"Share prices go down at times. Stay calm and stick to your plan."},
-{n:"Gold",a:2000,t:"g",l:"Gold can hold its value when other things fall."},
-{n:"Chance A",t:"c",d:"A"},
-{n:"Costs rise",a:-1500,t:"r",l:"Prices go up every year (inflation), so money lying idle buys less over time."},
-{n:"Health cover",a:1500,t:"g",l:"Health insurance pays big hospital bills, so your savings stay safe."},
-{n:"Rainy day fund",a:500,t:"n",l:"Keep 3 to 6 months of expenses aside for emergencies."},
-{n:"Shares",a:4000,t:"g",l:"Buying shares means owning a small part of a company. They can grow more over many years, but go up and down."},
-{n:"Sold in fear",a:-2000,t:"r",l:"Selling when prices fall turns a temporary loss into a real one. Be patient."},
-{n:"Chance B",t:"c",d:"B"},
-{n:"Save tax",a:1500,t:"g",l:"Some savings schemes reduce the tax you pay, so more money stays with you."},
-{n:"Goal done",a:8000,t:"g",l:"Saving for a clear goal, like a house or education, keeps you going."},
-{n:"Spread it",a:1500,t:"g",l:"Don’t keep all your money in one place. Spreading it (diversification) cushions a fall."},
-{n:"Late start",a:-1000,t:"r",l:"Starting late means less time to grow. The earlier, the better."},
-{n:"Save more",a:2000,t:"g",l:"Raise your monthly saving when your income grows to reach goals faster."},
-{n:"Chance B",t:"c",d:"B"}];
-var XA={"START":["🏁","Every time you pass START you get ₹2,000, like your monthly saving.","Saving a little every month adds up."],
-"Save monthly":["🗓️","You put a fixed amount, like ₹500, into a mutual fund every month. This is called a SIP.","Start early and never skip."],
-"Bank deposit":["🏦","You keep money in the bank for a fixed time and get fixed interest. This is called an FD.","Very safe, but it grows slowly."],
-"Card debt":["💳","You did not pay your credit card bill on time, so the bank charges you extra interest.","Pay the full bill every month."],
-"Market falls":["📉","Share prices went down for a while, so your money is worth less today.","Prices often come back, so stay calm."],
-"Gold":["🪙","You bought gold. Gold often keeps its value when other things fall.","Keep a small part of your money in gold."],
-"Costs rise":["🏷️","Things cost more every year (this is called inflation), so the same money buys less.","Money kept idle slowly loses value."],
-"Health cover":["🏥","You have health insurance, so the insurance company pays big hospital bills.","Insurance protects your savings."],
-"Rainy day fund":["☂️","You keep money aside for emergencies like a job loss or a hospital bill.","Keep 3 to 6 months of expenses ready."],
-"Shares":["📈","You bought a small part of a company. If the company grows, your money can grow too.","Prices go up and down, so give it many years."],
-"Sold in fear":["😨","Prices fell and you sold in a hurry. A small loss became a real loss.","Do not sell just because you are scared."],
-"Save tax":["🧾","You put money in a tax-saving scheme, so you pay less income tax.","Plan your tax early in the year."],
-"Goal done":["🏠","You saved for a goal, like a house or your child’s education, and you reached it.","A clear goal keeps you saving."],
-"Spread it":["🧺","You put your money in different places: shares, gold and bank. This is called diversification.","If one falls, the others protect you."],
-"Late start":["⏳","You started saving late, so your money had less time to grow.","The best time to start is today."],
-"Save more":["🪜","You raised your monthly saving because your salary went up.","Save a bit more each year."]};
-var PROD='<h3>Learn finance with Mcube Academy</h3><p class="sub">Transforming learners into finance professionals</p><ul class="prod"><li>📊 <b>Mutual Fund Distribution</b> (NISM Series V-A)</li><li>📉 <b>Derivatives</b>: trading and risk management (NISM Series VIII)</li><li>🧭 <b>Investment Advisory</b> (NISM Series X-A and X-B)</li><li>🔎 <b>Equity Research</b> (NISM Series XV)</li><li>🏦 <b>Investment Banking</b> and financial services courses</li><li>🎓 <b>Career guidance and mentoring</b></li><li>📚 Also: equity, debt, forex and commodity training, MF, SIF, PMS and AIF learning, NISM 5D and 21</li></ul><p><a class="btn" href="https://mcubeacademy.com" target="_blank" rel="noopener" onclick="return ext(this.href)">Visit mcubeacademy.com</a></p>';
-var MODE="adult",BONUS=2000,LR=1,SQ,X,DK;
-var DKA={A:[
-{t:"Rainy-day money helped",a:2000,e:"☂️",l:"A surprise bill came, but you had savings."},
-{t:"Started saving early",a:3000,e:"🌱",l:"Time is your biggest ally."},
-{t:"Spread your money",a:2500,e:"🧺",l:"One investment fell, the others cushioned it."},
-{t:"Followed a tip blindly",a:-2500,e:"🤫",l:"You invested without checking."},
-{t:"Sold in fear",a:-2000,e:"😨",l:"You turned a temporary loss into a real one."},
-{t:"Review your goals",a:0,e:"🎯",act:"again",l:"Name one goal: house, education or retirement. Roll again!"}],
-B:[
-{t:"Stayed patient",a:3000,e:"🧘",l:"You ignored the noise and held on."},
-{t:"Saved more monthly",a:2000,e:"🪜",l:"You raised your SIP as your income grew."},
-{t:"Insurance helped",a:1500,e:"🏥",l:"A medical bill was covered, so savings stayed safe."},
-{t:"No rainy-day money",a:-2000,e:"💸",l:"You had to break an investment early."},
-{t:"Skipped monthly saving",a:-1000,e:"⏭️",l:"Waiting for the “perfect time” costs you."},
-{t:"Share a tip",a:0,e:"💬",act:"move2",l:"Tell the group one money habit you follow. Move 2 squares ahead."}]};
-var DKK={A:[
-{t:"Grandma’s gift",a:300,e:"🎁",l:"Grandma gave you money. Say thanks and save some!"},
-{t:"Piggy bank saved the day",a:200,e:"🐷",l:"You needed money for a school trip, and you had savings."},
-{t:"Learned about money",a:100,e:"📚",l:"You read a money story. Knowing more helps you choose well."},
-{t:"Spent it all on sweets",a:-200,e:"🍭",l:"The sweets finished in minutes. Think before you spend."},
-{t:"Lost your money",a:-150,e:"😢",l:"You left coins lying around. Keep them safe in a piggy bank."},
-{t:"Share a smile",a:0,e:"💬",act:"again",l:"Tell the group your favourite way to save. Roll again!"}]};
-var SQK=[
-{n:"START",a:0,t:"n"},{n:"Piggy bank",a:300,t:"g"},{n:"Chance",t:"c",d:"A"},{n:"Kids bank",a:100,t:"n"},
-{n:"Too many toys",a:-200,t:"r"},{n:"Lost coins",a:-150,t:"r"},{n:"Birthday gift",a:200,t:"g"},{n:"Chance",t:"c",d:"A"},
-{n:"Candy rush",a:-100,t:"r"},{n:"Chore money",a:200,t:"g"},{n:"Rainy day jar",a:100,t:"n"},{n:"Plant a seed",a:300,t:"g"},
-{n:"Fancy toy",a:-200,t:"r"},{n:"Chance",t:"c",d:"A"},{n:"Save for goal",a:200,t:"g"},{n:"Goal done",a:500,t:"g"},
-{n:"Two jars",a:150,t:"g"},{n:"Broken toy",a:-150,t:"r"},{n:"Weekly saving",a:250,t:"g"},{n:"Chance",t:"c",d:"A"}];
-var XK={"START":["🏁","Every time you pass START you get ₹200 pocket money.","Pocket money is yours to save and spend wisely."],
-"Piggy bank":["🐷","You put coins in your piggy bank. A little each day becomes a lot.","Save first, then spend."],
-"Kids bank":["🏦","A bank keeps your money safe and gives you a little extra, called interest.","A bank is safer than a pocket."],
-"Too many toys":["🧸","You bought a toy you did not need.","Ask: is it a need or a want?"],
-"Lost coins":["😟","Your coins got lost because they were not kept safely.","Keep your money in a piggy bank."],
-"Birthday gift":["🎁","You got money as a gift.","Save some, spend some."],
-"Candy rush":["🍬","You spent your pocket money on sweets all at once.","Wait and think before you spend."],
-"Chore money":["🧹","You helped at home and earned money.","Hard work earns money."],
-"Rainy day jar":["☂️","You keep some coins aside for surprises.","A small jar helps in a big need."],
-"Plant a seed":["🌱","Money can grow like a plant if you give it time. This is called investing.","Be patient, like waiting for a mango tree."],
-"Fancy toy":["🎮","You wanted it, but you did not really need it.","Needs first, wants later."],
-"Save for goal":["🚲","You saved a little every week for something you want.","A goal keeps you saving."],
-"Goal done":["🎉","You saved enough and got your dream bicycle!","Patience wins."],
-"Two jars":["🫙","You keep one jar to spend and one to save.","Never keep all your money in one place."],
-"Broken toy":["🔧","A cheap toy broke very quickly.","Pick things that last."],
-"Weekly saving":["📅","You saved a little every week.","Small savings make a big pile."]};
-var PRODK=PROD.replace("Learn finance with Mcube Academy","For parents: learn finance with Mcube Academy");
-function slog(){var k=MODE=="kids";return'<h3>Words to save by</h3><div class="slog"><p><b>Savings slogan:</b> “'+(k?"Save a little every day, dream big!":"Save first, spend later, dream bigger.")+'”</p>'+(k?"":'<p><b>Warren Buffett:</b> “Be fearful when others are greedy, and be greedy only when others are fearful.”</p>')+'<p><b>Warren Buffett:</b> “Someone’s sitting in the shade today because someone planted a tree a long time ago.”</p></div>'}
-function setMode(k){MODE=k?"kids":"adult";$("mg").className=k?"alt":"";$("mk").className=k?"":"alt"}
-
-var P=[],cur=0,busy=false,di=0,deck=[];
-function $(i){return document.getElementById(i)}
-function fmt(n){return(n<0?"-":"+")+"₹"+Math.abs(n).toLocaleString("en-IN")}
-function rup(n){return"₹"+n.toLocaleString("en-IN")}
-function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-function rc(i){if(i<=5)return[5,5-i];if(i<=9)return[10-i,0];if(i==10)return[0,0];if(i<=15)return[0,i-10];return[i-15,5]}
-function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
-function setup(){
-$("app").className="s-home";
-$("app").innerHTML='<div class="home"><div class="intro">'+LOGO+'<h1>Investment Business</h1><p class="sub">A money-habits board game. Learn by playing with play money.</p><p class="sub"><b>Save first, spend later, dream bigger.</b></p>'+
-'<ol class="rules"><li>Register once with your name, mobile and email.</li><li>'+(SPIN?"Spin the wheel":"Roll the dice")+' and move clockwise.</li><li>Read the lesson on each square.</li><li>On a Chance square, take the card with the same number as your '+(SPIN?"spin":"dice")+'.</li><li>Finish '+LAPS+' laps. The most play money wins.</li></ol></div>'+
-'<div class="card"><strong>Who is playing?</strong><div class="pick"><button id="mg" onclick="setMode(0)">Grown-ups</button><button id="mk" class="alt" onclick="setMode(1)">Kids</button></div><strong>How many players?</strong><div class="pick">'+[1,2,3,4].map(function(n){return'<button onclick="begin('+n+')">'+n+'</button>'}).join("")+'</div><div class="err" id="err"></div>'+
-(persist()?"":'<p class="err">This browser is not saving data. Staff must tap Download CSV after every player.</p>')+'<button class="alt" onclick="showLeads()">🔒 Staff login</button>'+(inApp()?"":' <a class="btn alt-link" href="download.html">⬇ Download the app</a>')+
-'<p class="foot">Play money only. Investments are subject to market risks.</p>'+iosTip()+'</div></div>';setMode(MODE=="kids"?1:0)}
-function begin(n){R={n:n,i:0,list:[]};reg()}
-function reg(e){
-$("app").className="s-form";
-$("app").innerHTML='<div class="form card">'+LOGO+'<h1>Player '+(R.i+1)+' of '+R.n+'</h1><p class="sub">Please enter your details to play. Each mobile number and email can play once.</p>'+
-'<label for="nm">'+(MODE=="kids"?"Child’s name":"Name")+'</label><input id="nm" type="text" autocomplete="off">'+
-'<label for="ph">'+(MODE=="kids"?"Parent’s mobile number":"Mobile number")+'</label><input id="ph" type="tel" inputmode="numeric" autocomplete="off" placeholder="10-digit number">'+
-'<label for="em">'+(MODE=="kids"?"Parent’s email ID":"Email ID")+'</label><input id="em" type="email" autocomplete="off">'+
-'<label class="ck"><input id="ck" type="checkbox"><span>'+(MODE=="kids"?"I am the parent or guardian, and I agree that Mcube Academy may contact me about courses and investor education.":"I agree that Mcube Academy may contact me about courses and investor education.")+'</span></label>'+
-'<div class="err" id="err" aria-live="polite">'+(e||"")+'</div><button id="go" onclick="register()">Save and continue</button> <button class="alt" onclick="setup()">Back</button></div>'}
-async function hs(s){if(window.crypto&&crypto.subtle){var b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("mcube|"+s));return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,"0")}).join("").slice(0,32)}var x=5381;for(var i=0;i<s.length;i++)x=((x<<5)+x+s.charCodeAt(i))|0;return"f"+(x>>>0).toString(36)}
-async function register(){
-var nm=$("nm").value.trim(),d=$("ph").value.replace(/\D/g,""),em=$("em").value.trim().toLowerCase(),er=$("err");
-if(d.length==12&&d.slice(0,2)=="91")d=d.slice(2);if(d.length==11&&d[0]=="0")d=d.slice(1);
-if(nm.length<2)return er.textContent="Please enter your name.";
-if(!/^[6-9]\d{9}$/.test(d))return er.textContent="Please enter a valid 10-digit mobile number.";
-if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em))return er.textContent="Please enter a valid email ID.";
-if(!$("ck").checked)return er.textContent="Please tick the box to agree.";
-if(R.list.some(function(p){return p.phone==d||p.email==em}))return er.textContent="This mobile number or email is already used in this game.";
-var L=ld();
-if(L.some(function(l){return l.phone==d||l.email==em}))return er.textContent="This mobile number or email has already played. Each person can play once.";
-L.push({name:nm,phone:d,email:em,consent:true,registeredAt:new Date().toISOString()});sv(L);
-R.list.push({name:nm,phone:d,email:em});R.i++;
-if(R.i<R.n)reg();else start()}
-function start(){
-var K=MODE=="kids";SQ=K?SQK:SQA;X=K?XK:XA;DK=K?DKK:DKA;BONUS=K?200:2000;CASH=K?1000:100000;
-P=R.list.map(function(r,i){return{name:r.name,phone:r.phone,c:COL[i],pos:0,cash:CASH,laps:0,done:false}});
-cur=0;busy=false;
-var cells="";for(var k=0;k<20;k++){var s=SQ[k],p=rc(k);
-cells+='<div class="sq '+s.t+'" style="grid-row:'+(p[0]+1)+';grid-column:'+(p[1]+1)+'"><b>'+s.n+'</b><span>'+(s.t=="c"?"Draw card":(s.a?fmt(s.a):(k?"":(K?"₹1,000":"₹1 lakh"))))+'</span><div class="tk" id="t'+k+'"></div></div>'}
-function rules(){var A=DK.A,B=DK.B,h='<h3>Chance card rules</h3><p class="sub">Land on Chance and take the card with the same number as your '+(SPIN?"spin":"dice roll")+'.</p><div class="cc">';
-if(B)h+='<strong>Chance A</strong><strong>Chance B</strong>';
-for(var i=0;i<6;i++){h+=row(A[i],i)+(B?row(B[i],i):"")}
-return h+'</div>'}
-function row(c,i){return'<div><i class="no">'+(i+1)+'</i><b class="'+(c.a>0?"p":c.a<0?"m":"a")+'">'+(c.a?fmt(c.a):"Action")+'</b><span>'+c.t+(c.act=="again"?(SPIN?": spin again":": roll again"):c.act=="move2"?": move 2 squares":"")+'</span></div>'}
-$("app").className="s-play";
-$("app").innerHTML='<div class="game"><div class="left"><div class="board">'+cells+'<div class="mid'+(SPIN?" sp":"")+'">'+LOGO+'<div class="who" id="who"></div><div class="tool" id="tool">'+(SPIN?wheelHTML():'<div class="dice" id="dice" aria-live="polite">?</div>')+'</div><button id="roll" onclick="roll()">'+(SPIN?"Spin":"Roll dice")+'</button></div></div></div><div class="side"><div class="now">'+
-'<div class="msg n" id="msg" aria-live="polite"></div><div class="score" id="score"></div></div><div id="fin"></div>'+
-rules()+slog()+
-'<p class="foot"><button class="alt" onclick="setup()">New game</button></p><p class="foot">Play money only. Investments are subject to market risks.</p></div></div>';
-say("Welcome",(SPIN?"Spin the wheel":"Roll the dice")+" to begin. Move clockwise and learn from every square.","n",SPIN?"🎡":"👋");render()}
-function say(h,b,t,e,k){var m=$("msg");m.className="msg "+t;m.innerHTML='<div class="em">'+(e||"💬")+'</div><div><h2>'+h+'</h2><p>'+b+'</p>'+(k?'<p><b>Remember:</b> '+k+'</p>':'')+'</div>'}
-function render(){
-for(var k=0;k<20;k++)$("t"+k).innerHTML=P.filter(function(p){return p.pos==k}).map(function(p){return'<i style="background:'+p.c+'"></i>'}).join("");
-var w=$("who");w.textContent=P[cur].name+"’s turn";w.style.color=P[cur].c;$("roll").disabled=busy;
-$("score").innerHTML=P.map(function(p,i){return'<div class="pl'+(i==cur&&!allDone()?" on":"")+'"><i style="background:'+p.c+'"></i>'+esc(p.name)+'<span><strong>'+rup(p.cash)+'</strong><br>'+(p.done?"Finished":"Lap "+Math.min(p.laps+1,LAPS)+" of "+LAPS)+'</span></div>'}).join("")}
-function allDone(){return P.every(function(p){return p.done})}
-function roll(){
-if(busy)return;busy=true;render();
-if(SPIN)return spin();
-var d=$("dice"),n=0,iv=setInterval(function(){d.textContent=1+Math.floor(Math.random()*6);n++;
-if(n>8){clearInterval(iv);var v=1+Math.floor(Math.random()*6);d.textContent=v;LR=v;say(esc(P[cur].name)+" rolled "+v,"Moving "+v+" step"+(v>1?"s":"")+" clockwise…","n","🎲");setTimeout(function(){move(P[cur],v,false)},500)}},70)}
-function move(p,steps,skip){
-var left=steps,iv=setInterval(function(){p.pos=(p.pos+1)%20;if(p.pos==0){p.laps++;p.cash+=BONUS}left--;render();
-if(left<=0){clearInterval(iv);setTimeout(function(){land(p,skip)},250)}},240)}
-function land(p,skip){
-var s=SQ[p.pos];
-if(s.t=="c"){
-if(skip){say("Chance","No second card this turn.","c");return finish(p,false)}
-var c=DK[s.d||"A"][LR-1];p.cash+=c.a;say(c.t+(c.a?" "+fmt(c.a):""),(SPIN?"🎡 You spun ":"🎲 You rolled ")+LR+", so you take card "+LR+". "+(SPIN?c.l.replace("Roll again","Spin again"):c.l),c.a<0?"r":c.a>0?"g":"c",c.e);
-if(c.act=="again")return finish(p,true);
-if(c.act=="move2"){render();return setTimeout(function(){move(p,2,true)},1500)}
-return finish(p,false)}
-p.cash+=s.a||0;var x=X[s.n];say(s.n+(s.a?" "+fmt(s.a):""),x[1],s.t,x[0],x[2]);finish(p,false)}
-function finish(p,again){
-if(p.laps>=LAPS)p.done=true;
-if(allDone()){render();return setTimeout(result,1500)}
-if(!(again&&!p.done)){do{cur=(cur+1)%P.length}while(P[cur].done)}
-busy=false;render()}
-function result(){
-var r=P.slice().sort(function(a,b){return b.cash-a.cash}),w=r[0];
-$("roll").disabled=true;$("who").textContent="Game over";
-say("Game over","Everyone finished "+LAPS+" laps. See the winner below.","g","🏁");
-$("fin").innerHTML='<div class="win"><div class="tr">🏆</div><h2>Winner: '+esc(w.name)+'</h2><p class="big">'+rup(w.cash)+'</p><p>Reward: <b>Mcube Champion Trophy</b></p></div>'+(r.length>1?'<p>'+r.map(function(p,i){return(i+1)+". "+esc(p.name)+": "+rup(p.cash)}).join("<br>")+'</p>':"")+'<p><b>Takeaway:</b> '+(MODE=="kids"?"save a little, think before you spend, and share with others.":"start early, save regularly, spread your money, and don’t panic.")+'</p>'+(MODE=="kids"?PRODK:PROD);
-var nw=document.querySelector(".now");$("fin").style.scrollMarginTop=(nw&&getComputedStyle(nw).position=="sticky"?nw.offsetHeight+8:0)+"px";$("fin").scrollIntoView({behavior:"smooth"});
-var L=ld();P.forEach(function(p){L.forEach(function(l){if(l.phone==p.phone){l.score=p.cash;l.played=true}})});sv(L)}
-function showLeads(ok){
-if(!ok){$("app").className="s-form";$("app").innerHTML='<div class="card">'+LOGO+'<h1>Staff login</h1><p class="sub">For Mcube Academy staff. Enter the staff PIN set in the admin portal (Feature Controls).</p><label for="pn">Staff PIN</label><input id="pn" type="password" inputmode="numeric" autocomplete="current-password" maxlength="8"><div class="err" id="err" aria-live="polite"></div><button id="lg" onclick="chk()">Login</button> <button class="alt" onclick="setup()">Back</button></div>';$("pn").addEventListener("keydown",function(e){if(e.key=="Enter")chk()});$("pn").focus();return}
-var rows=ld();window._rows=rows;
-$("app").className="s-wide";$("app").innerHTML='<h1>Staff: players ('+rows.length+')</h1><div class="tbl"><table class="lead"><tr><th>Name</th><th>Mobile</th><th>Email</th><th>Score</th><th></th></tr>'+rows.map(function(r,i){return"<tr><td>"+esc(r.name)+"</td><td>"+esc(r.phone)+"</td><td>"+esc(r.email)+"</td><td>"+(r.score||"")+'</td><td><button class="alt" id="d'+i+'" style="padding:4px 8px;min-height:32px;font-size:12px" onclick="del('+i+')">Delete</button></td></tr>'}).join("")+'</table></div><button onclick="csv()">Download CSV</button> <button class="alt" onclick="setup()">Log out</button><div class="err" id="err"></div>'}
-var FB={p:"extended-history-5xctm",d:"ai-studio-leadflowmanager-bcefb4c1-411b-40a6-bac1-6db2d10e0822",k:"AIzaSyDYJFZoBMkmXl8f0N1BthmNx3uBrH0u3H8"},PK="mcube_staff_pin_v1",BAD={n:0,until:0};
-function hx(buf){return Array.from(new Uint8Array(buf)).map(function(x){return x.toString(16).padStart(2,"0")}).join("")}
-/* SHA-256: the browser's own when available, otherwise a small built-in copy */
-function sha256(s){var b=new TextEncoder().encode(s);if(window.crypto&&crypto.subtle)return crypto.subtle.digest("SHA-256",b).then(hx);
-var K=[],H=[],i,j,w=[],pr=function(n){for(var f=2;f*f<=n;f++)if(n%f==0)return 0;return 1},fr=function(x){return(x-Math.floor(x))*4294967296|0};
-for(i=2,j=0;j<64;i++)if(pr(i)){if(j<8)H[j]=fr(Math.pow(i,1/2));K[j++]=fr(Math.pow(i,1/3))}
-var l=b.length,m=new Uint8Array(((l+9+63)>>6)<<6);m.set(b);m[l]=128;var bl=l*8;m[m.length-4]=bl>>>24;m[m.length-3]=bl>>>16&255;m[m.length-2]=bl>>>8&255;m[m.length-1]=bl&255;
-var r=function(x,n){return x>>>n|x<<32-n};
-for(var o=0;o<m.length;o+=64){for(i=0;i<16;i++)w[i]=m[o+i*4]<<24|m[o+i*4+1]<<16|m[o+i*4+2]<<8|m[o+i*4+3];
-for(i=16;i<64;i++){var a0=w[i-15],a1=w[i-2];w[i]=(w[i-16]+(r(a0,7)^r(a0,18)^a0>>>3)+w[i-7]+(r(a1,17)^r(a1,19)^a1>>>10))|0}
-var a=H[0],bb=H[1],c=H[2],d=H[3],e=H[4],f=H[5],g=H[6],hh=H[7];
-for(i=0;i<64;i++){var t1=hh+(r(e,6)^r(e,11)^r(e,25))+(e&f^~e&g)+K[i]+w[i]|0,t2=(r(a,2)^r(a,13)^r(a,22))+(a&bb^a&c^bb&c)|0;hh=g;g=f;f=e;e=d+t1|0;d=c;c=bb;bb=a;a=t1+t2|0}
-H=[H[0]+a|0,H[1]+bb|0,H[2]+c|0,H[3]+d|0,H[4]+e|0,H[5]+f|0,H[6]+g|0,H[7]+hh|0]}
-return Promise.resolve(H.map(function(x){return("0000000"+(x>>>0).toString(16)).slice(-8)}).join(""))}
-function pinHash(p){return sha256("mcube-game-staff|"+p)}
-/* The staff PIN is set by Head / Regional Incharge in the admin portal (Feature Controls > game staff PIN).
-   Only a scrambled copy is stored. The last one seen is remembered so Staff login also works offline.
-   Until a PIN is set in the admin portal, the starting PIN is used. */
-function staffHash(){var url="https://firestore.googleapis.com/v1/projects/"+FB.p+"/databases/"+encodeURIComponent(FB.d)+"/documents/settings/gameStaff?key="+FB.k;
-var ctl=window.AbortController?new AbortController():null,tm=setTimeout(function(){if(ctl)ctl.abort()},7000);
-return fetch(url,{signal:ctl&&ctl.signal,cache:"no-store"}).then(function(r){clearTimeout(tm);
-if(r.status==404){try{localStorage.removeItem(PK)}catch(e){}return pinHash(PIN)}
-if(!r.ok)throw 0;return r.json().then(function(j){var v=j&&j.fields&&j.fields.pinHash&&j.fields.pinHash.stringValue;if(!/^[0-9a-f]{64}$/.test(v||""))throw 0;try{localStorage.setItem(PK,v)}catch(e){}return v})})
-.catch(function(){clearTimeout(tm);var c=null;try{c=localStorage.getItem(PK)}catch(e){}return c||pinHash(PIN)})}
-function chk(){var e=$("err"),b=$("lg"),v=$("pn").value.trim();
-if(Date.now()<BAD.until){e.textContent="Too many wrong tries. Please wait "+Math.ceil((BAD.until-Date.now())/1000)+" seconds.";return}
-if(!v){e.textContent="Enter the staff PIN.";return}
-b.disabled=true;b.textContent="Checking…";e.textContent="";
-Promise.all([pinHash(v),staffHash()]).then(function(x){
-if(x[0]==x[1]){BAD.n=0;showLeads(true);return}
-BAD.n++;if(BAD.n>=5){BAD.n=0;BAD.until=Date.now()+30000}
-b.disabled=false;b.textContent="Login";$("pn").value="";$("pn").focus();e.textContent="Wrong PIN."+(BAD.until>Date.now()?" Please wait 30 seconds.":"")})}
-function del(i){var b=$("d"+i);if(b.dataset.s!="1"){b.dataset.s="1";b.textContent="Confirm delete";return}
-var ph=window._rows[i].phone;sv(ld().filter(function(l){return l.phone!=ph}));showLeads(true)}
-function csv(){var q=function(v){return'"'+String(v==null?"":v).replace(/"/g,'""')+'"'};
-var t="\ufeffName,Mobile,Email,Score,Registered\n"+window._rows.map(function(r){return[r.name,r.phone,r.email,r.score,r.registeredAt].map(q).join(",")}).join("\n");
-if(nativeCsv(t))return;
-var b=new Blob([t],{type:"text/csv"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="mcube-leads.csv";document.body.appendChild(a);a.click();a.remove()}
-function isIOS(){var u=navigator.userAgent;return /iPhone|iPad|iPod/.test(u)||(/Mac/.test(navigator.platform)&&navigator.maxTouchPoints>1)}
-function iosTip(){if(!isIOS()||inApp())return"";return'<div class="iostip"><b>📱 Install on your iPhone / iPad</b><span>In Safari tap <b>Share</b> <span aria-hidden="true">⬆</span>, then <b>Add to Home Screen</b>. The game then opens full screen and works offline. <a href="download.html">More options</a></span></div>'}
-function inApp(){try{return !!CAP||/Electron/.test(navigator.userAgent)||matchMedia("(display-mode: standalone)").matches||navigator.standalone===true}catch(e){return false}}
-var CAP=window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform();
-function ext(u){if(CAP){location.href=u;return false}return true}
-function nativeCsv(t){if(!CAP)return false;var C=window.Capacitor.Plugins,FS=C.Filesystem,SH=C.Share,e=$("err");
-if(!FS||!SH){if(e)e.textContent="Saving is not available on this phone.";return true}
-var nm="mcube-leads-"+new Date().toISOString().slice(0,10)+".csv";
-FS.writeFile({path:nm,data:t,directory:"CACHE",encoding:"utf8"}).then(function(r){return SH.share({title:"Mcube leads",files:[r.uri]})}).catch(function(x){if(e&&!/cancel/i.test(String(x&&x.message)))e.textContent="Could not save the file: "+(x&&x.message||x)});return true}
-if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)&&!CAP)addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});
-/* ---- Spinning wheel (chosen by the Head Incharge in the admin portal) ---- */
-var WCOL=["#4F3CC9","#16a34a","#d97706","#2563eb","#dc2626","#0891b2"],WROT=0;
-function wheelHTML(){var g=WCOL.map(function(c,i){return c+" "+(i*60)+"deg "+((i+1)*60)+"deg"}).join(",");
-var n="";for(var i=0;i<6;i++)n+='<span style="transform:rotate('+(i*60+30)+'deg) translateY(-34cqi)"><b style="transform:rotate('+(-(i*60+30))+'deg)">'+(i+1)+'</b></span>';
-return'<div class="wheel-wrap" aria-live="polite" id="wv"><div class="ptr"></div><div class="wheel" id="wheel" style="background:conic-gradient('+g+')">'+n+'</div><div class="hub" id="hub">?</div></div>'}
-function spin(){var v=1+Math.floor(Math.random()*6),w=$("wheel"),hub=$("hub");
-/* segment v is centred at (v-1)*60+30 degrees; turn it to the pointer at the top */
-var target=360-((v-1)*60+30)+(Math.random()*36-18),base=WROT-(WROT%360);WROT=base+360*5+target;
-hub.textContent="";w.style.transition="transform 2.6s cubic-bezier(.17,.67,.21,1)";w.style.transform="rotate("+WROT+"deg)";
-say(esc(P[cur].name)+" is spinning…","Watch where the arrow stops.","n","🎡");
-setTimeout(function(){hub.textContent=v;LR=v;say(esc(P[cur].name)+" spun "+v,"Moving "+v+" step"+(v>1?"s":"")+" clockwise…","n","🎡");setTimeout(function(){move(P[cur],v,false)},500)},2700)}
-/* Game settings from the admin portal (settings/game). Remembered for offline use; dice until the Head chooses. */
-var GK="mcube_game_settings_v1",SPIN=false;
-try{SPIN=(JSON.parse(localStorage.getItem(GK)||"{}").mover=="spinner")}catch(e){}
-function loadGameSettings(){var url="https://firestore.googleapis.com/v1/projects/"+FB.p+"/databases/"+encodeURIComponent(FB.d)+"/documents/settings/game?key="+FB.k;
-return fetch(url,{cache:"no-store"}).then(function(r){if(r.status==404)return{mover:"dice"};if(!r.ok)throw 0;return r.json().then(function(j){var m=j&&j.fields&&j.fields.mover&&j.fields.mover.stringValue;return{mover:m=="spinner"?"spinner":"dice"}})})
-.then(function(s){try{localStorage.setItem(GK,JSON.stringify(s))}catch(e){}var was=SPIN;SPIN=s.mover=="spinner";
-/* update the home screen if it is showing and nothing has started yet */
-if(was!=SPIN&&!P.length&&document.querySelector(".home"))setup()}).catch(function(){})}
-setup();loadGameSettings();
-</script></body></html>
+function draw(s){
+  var list=s.order.map(MG.game).filter(function(g){return g&&MG.isOn(s,g.id)});
+  document.getElementById("games").innerHTML=list.length?list.map(function(g){return'<a class="g" href="'+g.file+'"><span class="ic">'+g.icon+'</span><span class="who">'+MG.esc(g.who)+'</span><h2>'+MG.esc(g.name)+'</h2><p>'+MG.esc(g.desc)+'</p><span class="play">Play</span></a>'}).join(""):'<div class="empty">No games are switched on right now. Please check back soon.</div>';
+}
+draw(MG.cachedSettings());MG.settings().then(draw);
+if(!MG.inApp())document.getElementById("dl").innerHTML='<a class="dl" href="download.html">⬇ Download the app</a>';
+var ios=/iPhone|iPad|iPod/.test(navigator.userAgent)||(/Mac/.test(navigator.platform)&&navigator.maxTouchPoints>1);
+if(ios&&!MG.inApp())document.getElementById("tip").innerHTML='<div class="iostip"><b>📱 Install on your iPhone / iPad:</b> in Safari tap <b>Share</b> ⬆, then <b>Add to Home Screen</b>. <a href="download.html">More options</a></div>';
+if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)&&!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform()))addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});
+</script>
+</body></html>

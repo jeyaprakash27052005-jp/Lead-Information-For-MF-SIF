@@ -1,4 +1,4 @@
-INVESTMENT BUSINESS - iPHONE / iPAD
+MCUBE GAMES - iPHONE / iPAD
 ===================================
 
 Apple does not allow installing app files directly on an iPhone.
@@ -8,7 +8,7 @@ Install (takes 30 seconds)
   1. Open the game's web link in Safari.
   2. Tap the Share button (square with an arrow).
   3. Tap "Add to Home Screen", then "Add".
-  4. Open "Investment Business" from the home screen.
+  4. Open "Mcube Games" from the home screen.
 
 Files in this folder (for the App Store only, not for players)
   Investment-Business-ios-xcode-project.zip

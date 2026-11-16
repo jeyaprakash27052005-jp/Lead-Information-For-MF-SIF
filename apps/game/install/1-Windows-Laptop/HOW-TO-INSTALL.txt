@@ -1,4 +1,4 @@
-INVESTMENT BUSINESS - WINDOWS LAPTOP / PC
+MCUBE GAMES - WINDOWS LAPTOP / PC
 =========================================
 
 Files in this folder
@@ -9,12 +9,12 @@ Install
   1. Double-click Investment-Business-Setup-1.0.0.exe
   2. If "Windows protected your PC" appears, click "More info", then "Run anyway".
   3. Click Next, choose the folder if you want, then Install.
-  4. Open "Investment Business" from the desktop shortcut or the Start menu.
+  4. Open "Mcube Games" from the desktop shortcut or the Start menu.
 
 No install
   Double-click Investment-Business-Portable-1.0.0.exe (same warning, same steps).
 
 Remove
-  Settings > Apps > Investment Business > Uninstall.
+  Settings > Apps > Mcube Games > Uninstall.
 
 Works offline. Windows 10 or 11, 64-bit.

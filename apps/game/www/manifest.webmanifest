@@ -1,7 +1,7 @@
 {
-  "name": "Investment Business by Mcube Academy",
-  "short_name": "Investment Business",
-  "description": "A money-habits board game. Learn by playing with play money.",
+  "name": "Mcube Games",
+  "short_name": "Mcube Games",
+  "description": "Money and investing games by Mcube Academy.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

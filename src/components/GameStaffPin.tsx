@@ -50,7 +50,7 @@ export const GameStaffPin: React.FC<Props> = ({ currentUser, onNotify }) => {
         <p className="text-sm font-bold text-slate-900">Investment Business game: staff PIN</p>
       </div>
       <p className="text-[11px] text-slate-500">
-        Staff enter this PIN in <b>Staff login</b> on the game to see and download the players' details. It works on the game website and on the
+        Staff enter this PIN in <b>Staff login</b> inside Investment Business to see the players saved on that device. It works on the game website and on the
         Windows, Mac, Android and iPhone apps (they pick up a new PIN the next time they are online).{' '}
         {info === null
           ? 'Checking…'

@@ -214,15 +214,35 @@ service cloud.firestore {
         || (docId == 'healthCheck'
           && request.resource.data.categories is list && request.resource.data.categories.size() <= 30
           && request.resource.data.questions is list && request.resource.data.questions.size() <= 200)
-        || (docId == 'game'
-          && request.resource.data.mover in ['dice', 'spinner']
-          && request.resource.data.updatedAt is string && request.resource.data.updatedAt.size() <= 40
-          && request.resource.data.updatedBy is string && request.resource.data.updatedBy.size() <= 200)
+        || (docId == 'gameHub'
+          && request.resource.data.enabled is map
+          && request.resource.data.onePlay is map
+          && request.resource.data.order is list && request.resource.data.order.size() <= 30
+          && request.resource.data.mover in ['dice', 'spinner'])
         || (docId == 'gameStaff'
           && request.resource.data.pinHash is string && request.resource.data.pinHash.matches('^[0-9a-f]{64}$')
           && request.resource.data.updatedAt is string && request.resource.data.updatedAt.size() <= 40
           && request.resource.data.updatedBy is string && request.resource.data.updatedBy.size() <= 200);
       allow delete: if false;
+    }
+
+    // Mcube Games: one record per player per game, written by the games site and apps, read by the Game Admin site
+    match /gamePlayers/{playerId} {
+      allow get, list: if true;
+      allow create: if isValidId(playerId)
+        && request.resource.data.game in ['investment', 'adventure', 'challenge', 'aadupuli', 'pallanguli', 'finance']
+        && request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 60
+        && request.resource.data.mobile is string && request.resource.data.mobile.matches('^[6-9][0-9]{9}$')
+        && request.resource.data.email is string && request.resource.data.email.size() <= 120
+        && request.resource.data.consent == true
+        && request.resource.data.status == 'started'
+        && request.resource.data.registeredAt is string && request.resource.data.registeredAt.size() <= 40;
+      // a game adds only its result to a record
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'result', 'score', 'details', 'finishedAt'])
+        && request.resource.data.status == 'finished'
+        && request.resource.data.result is string && request.resource.data.result.size() <= 80
+        && request.resource.data.score is number;
+      allow delete: if isValidId(playerId);
     }
 
     match /test/{docId} {
