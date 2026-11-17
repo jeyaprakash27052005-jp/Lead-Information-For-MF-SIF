@@ -1,6 +1,6 @@
 {
   "appId": "com.mcubeacademy.games",
-  "appName": "Mcube Games",
+  "appName": "Mcube FinFun",
   "webDir": "www",
   "backgroundColor": "#ffffff",
   "android": { "allowMixedContent": false },

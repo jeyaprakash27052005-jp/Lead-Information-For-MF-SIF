@@ -1,4 +1,4 @@
-/* Mcube Games: shared code for every game on the games site and in the apps.
+/* Mcube Academy FinFun: shared code for every game on the games site and in the apps.
    - GAMES: the list of games (the Game Admin site turns them on/off and sets the order)
    - register(): saves a player's registration in the online database (collection gamePlayers)
    - finish():   saves the player's result

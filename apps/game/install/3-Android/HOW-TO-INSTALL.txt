@@ -9,7 +9,7 @@ Install
   2. Tap the file on the phone.
   3. If asked, allow "Install unknown apps" for that app (Files, Chrome or WhatsApp),
      then go back and tap Install.
-  4. Open "Mcube Games" from the home screen.
+  4. Open "Mcube FinFun" from the home screen.
 
 If Play Protect shows a warning, tap "More details" > "Install anyway".
 

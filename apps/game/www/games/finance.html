@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8">
+<html lang="en" data-bg="finance"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Personal Finance Management · Mcube Games</title>
+<title>Personal Finance Management · Mcube Academy FinFun</title>
 <meta name="theme-color" content="#ffffff">
 <link rel="icon" type="image/png" href="../icons/icon-192.png">
 <link rel="stylesheet" href="../shared/mcube.css">
@@ -131,7 +131,7 @@ function ask(title,color,html,opts){return new Promise(res=>{const b=$('box');b.
 /* ---------------- board and screen ---------------- */
 function buildBoard(){cells.forEach(c=>c.remove());cells=[];
   L.forEach((k,i)=>{const [r,c]=pos(i),d=document.createElement('div');d.className='t'+(k==='start'?' start':'');d.style.gridArea=(r+1)+'/'+(c+1);d.style.background=COL[k];d.innerHTML=`<i>${ICON[k]}</i>${t('tiles')[k]}`;$('board').appendChild(d);cells.push(d);});}
-function applyLang(){document.documentElement.lang=LANG;$('ttl').textContent=t('title');const tb=document.querySelector('.mg-top b');if(tb)tb.textContent=t('title');document.title=t('title')+' · Mcube Games';
+function applyLang(){document.documentElement.lang=LANG;$('ttl').textContent=t('title');const tb=document.querySelector('.mg-top b');if(tb)tb.textContent=t('title');document.title=t('title')+' · Mcube Academy FinFun';
   $('howto').textContent=t('howTo');$('pbBtn').textContent=t('passbook');$('newg').textContent=t('newGame');$('mute').textContent=t('sound')[muted?1:0];}
 function mkPawns(){PW.forEach(w=>w.remove());PW.length=0;PL.forEach((p,i)=>{const w=document.createElement('div');w.className='pawn';w.textContent=p.emoji;w.style.background=['#111','#e53935','#1e88e5','#43a047'][i];w.style.left=(4+i*22)+'%';PW.push(w);cells[p.p].appendChild(w);});}
 function ui(){const P=PL[cur];if(!P)return;

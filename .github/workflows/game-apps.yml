@@ -144,7 +144,7 @@ jobs:
         run: |
           P=ios/App/App/Info.plist
           VER=$(node -p "require('./package.json').version")
-          /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName Mcube Games" "$P" 2>/dev/null || /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string Mcube Games" "$P"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName Mcube FinFun" "$P" 2>/dev/null || /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string Mcube FinFun" "$P"
           /usr/libexec/PlistBuddy -c "Delete :ITSAppUsesNonExemptEncryption" "$P" 2>/dev/null || true
           /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" "$P"
           echo "VER=$VER" >> "$GITHUB_ENV"

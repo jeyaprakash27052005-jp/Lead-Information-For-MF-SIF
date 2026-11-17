@@ -1,7 +1,7 @@
 {
-  "name": "Mcube Games",
-  "short_name": "Mcube Games",
-  "description": "Money and investing games by Mcube Academy.",
+  "name": "Mcube Academy FinFun",
+  "short_name": "Mcube FinFun",
+  "description": "Play. Enjoy. Learn investment habits. Money games by Mcube Academy.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

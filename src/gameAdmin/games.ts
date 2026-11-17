@@ -1,4 +1,4 @@
-/** The games on the Mcube Games site (same list as apps/game/www/shared/mcube.js). */
+/** The games on the Mcube Academy FinFun site (same list as apps/game/www/shared/mcube.js). */
 export const GAME_LIST: { id: string; name: string; icon: string; who: string }[] = [
   { id: 'investment', name: 'Investment Business', icon: '🎲', who: 'Grown-ups and kids · 1 to 4 players' },
   { id: 'adventure', name: 'Money Adventure', icon: '🌟', who: 'Kids' },

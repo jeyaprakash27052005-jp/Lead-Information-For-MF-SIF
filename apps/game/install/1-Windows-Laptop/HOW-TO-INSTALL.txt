@@ -9,12 +9,12 @@ Install
   1. Double-click Investment-Business-Setup-1.0.0.exe
   2. If "Windows protected your PC" appears, click "More info", then "Run anyway".
   3. Click Next, choose the folder if you want, then Install.
-  4. Open "Mcube Games" from the desktop shortcut or the Start menu.
+  4. Open "Mcube Academy FinFun" from the desktop shortcut or the Start menu.
 
 No install
   Double-click Investment-Business-Portable-1.0.0.exe (same warning, same steps).
 
 Remove
-  Settings > Apps > Mcube Games > Uninstall.
+  Settings > Apps > Mcube Academy FinFun > Uninstall.
 
 Works offline. Windows 10 or 11, 64-bit.

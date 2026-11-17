@@ -11,11 +11,11 @@ One repository, four separate websites that share the same code and the same onl
 
 Shared code lives in `src/` (components, services, utils). Each website has its own `vercel.json`.
 
-## Mcube Games and the Game Admin site
+## Mcube Academy FinFun and the Game Admin site
 
 | Website | Folder | Who uses it |
 |---|---|---|
-| **Mcube Games** | `apps/game` | Anyone: the games hub with 6 games (Investment Business, Money Adventure, ₹1 Lakh → ₹10 Lakh Challenge, Bull vs Bear – Aadu Puli, Pallanguli Investment Game, Personal Finance Management). Also downloadable as Windows, Mac and Android apps and installable on iPhone. Vercel project `mf-nps-game` (Root Directory `apps/game`). |
+| **Mcube Academy FinFun** | `apps/game` | Anyone: the games hub with 6 games (Investment Business, Money Adventure, ₹1 Lakh → ₹10 Lakh Challenge, Bull vs Bear – Aadu Puli, Pallanguli Investment Game, Personal Finance Management). Also downloadable as Windows, Mac and Android apps and installable on iPhone. Vercel project `mf-nps-game` (Root Directory `apps/game`). |
 | **Mcube Game Admin** | `apps/game-admin` | Head Incharge only: game players and results, export to Excel / CSV, games on or off and their order, one play per mobile, dice or spinning wheel, game staff PIN. Create a Vercel project with Root Directory `apps/game-admin` (no environment variables needed). |
 
 The game controls are only in the Game Admin site; the main Admin Portal has none.

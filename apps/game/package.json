@@ -1,6 +1,6 @@
 {
   "name": "investment-business-game",
-  "productName": "Mcube Games",
+  "productName": "Mcube Academy FinFun",
   "version": "1.0.0",
   "description": "Investment Business: a money-habits board game by Mcube Academy",
   "author": "Mcube Academy",
@@ -31,7 +31,7 @@
   },
   "build": {
     "appId": "com.mcubeacademy.games",
-    "productName": "Mcube Games",
+    "productName": "Mcube Academy FinFun",
     "copyright": "Mcube Academy",
     "directories": {
       "output": "release",

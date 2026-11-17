@@ -1,4 +1,4 @@
-# Mcube Games: website, Windows, Mac, Android and iPhone
+# Mcube Academy FinFun: website, Windows, Mac, Android and iPhone
 
 `www/index.html` is the games hub. Each game is one page in `www/games/` and uses `www/shared/mcube.js` (registration, saving players and results to the online database, offline queue, settings from the Game Admin site) and `www/shared/mcube.css` (the common white look and the "All games" bar).
 
@@ -22,7 +22,7 @@ The same pages are packaged four ways:
 | **Android** | `Investment-Business-Android.apk`, plus a signed `.apk` and Play Store `.aab` when keys are set | Capacitor (`capacitor.config.json`) |
 | **iPhone / iPad** | Install from the web link with **Share > Add to Home Screen**, or TestFlight / App Store (see below) | Capacitor + web app (`manifest.webmanifest`, `sw.js`) |
 
-The installed app is called **Mcube Games** and opens the games hub.
+The installed app is called **Mcube Academy FinFun** and opens the games hub.
 
 The screen adapts to the device: every game fits phones (upright and sideways), tablets, laptops and large screens.
 
@@ -119,7 +119,7 @@ iPhones only install apps signed by Apple. There are three ways, from easiest:
 ### One-time setup (TestFlight / App Store)
 
 1. Join the **Apple Developer Program** at developer.apple.com (as Mcube Academy).
-2. In **App Store Connect > Apps > +**, create a new app: name *Mcube Games*, bundle ID `com.mcubeacademy.games` (register it under Certificates, Identifiers & Profiles > Identifiers if it is not offered), SKU e.g. `investment-business`.
+2. In **App Store Connect > Apps > +**, create a new app: name *Mcube Academy FinFun*, bundle ID `com.mcubeacademy.games` (register it under Certificates, Identifiers & Profiles > Identifiers if it is not offered), SKU e.g. `investment-business`.
 3. In **App Store Connect > Users and Access > Integrations > App Store Connect API**, create a key with **Admin** access. Download the `.p8` file (only possible once) and note the **Key ID** and **Issuer ID**.
 4. Note your **Team ID** (developer.apple.com > Account > Membership details).
 5. In GitHub, **Settings > Secrets and variables > Actions > New repository secret**, add:
