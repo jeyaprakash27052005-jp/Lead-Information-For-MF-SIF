@@ -29,7 +29,7 @@
      LIVE is the games website. When an installed app (Windows, Mac, Android, iPhone) opens with internet,
      it switches to LIVE, so every change made to the site shows in the apps too, with no reinstall.
      Without internet the app keeps using the copy built into it. */
-  var LIVE = "https://mf-nps-game.vercel.app";
+  var LIVE = "https://investment-business-game.vercel.app";
   function ss(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) { return null; } }
   (function () {
     var q = location.search, m = /[?&]single=([a-z]+)/.exec(q);

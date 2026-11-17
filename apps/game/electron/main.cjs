@@ -5,7 +5,7 @@ const path = require("path");
 if (!app.requestSingleInstanceLock()) app.quit();
 
 // Same address as LIVE in www/shared/mcube.js
-const LIVE_HOST = "mf-nps-game.vercel.app";
+const LIVE_HOST = "investment-business-game.vercel.app";
 const LOCAL = path.join(__dirname, "..", "www", "index.html");
 
 function createWindow() {

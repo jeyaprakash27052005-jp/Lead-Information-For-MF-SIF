@@ -11,7 +11,7 @@
   },
   "server": {
     "allowNavigation": [
-      "mf-nps-game.vercel.app"
+      "investment-business-game.vercel.app"
     ]
   }
 }
