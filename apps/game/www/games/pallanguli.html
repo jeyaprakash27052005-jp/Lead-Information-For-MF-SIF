@@ -6,7 +6,6 @@
 <link rel="stylesheet" href="../shared/mcube.css">
 <script src="../shared/mcube.js"></script>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link href="https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 /* Layout: a wooden Pallanguli board framed by a market-ticker strip; one stage visible at a time (language, register, board, round 2, invest, result). */
 :root{color-scheme:light;--bg:#ffffff;--card:#ffffff;--ink:#2b1e15;--mut:#6d5a49;--line:#dccfbc;--acc:#7a2e1c;--onacc:#ffffff;--gold:#b97f0e;--good:#1c7d49;--bad:#b23a2c;--wood1:#c99a62;--wood2:#b07f48;--wline:#7d5630;--pit1:#a8763f;--pit2:#8a5c2e}
@@ -287,7 +286,7 @@ function buildReg(){
   h+='<div class="pb"><h3>'+esc(t('player',k+1))+' · '+esc(k?t('pTop'):t('pBot'))+'</h3>'+fld(t('lName'),'rn'+k,'text','maxlength="30" autocomplete="off"')
    +fld(t('lAge'),'ra'+k,'number','inputmode="numeric" min="10" max="90" autocomplete="off"')+fld(t('lPhone'),'rp'+k,'tel','inputmode="numeric" maxlength="14" autocomplete="off"')+fld(t('lEmail'),'re'+k,'email','autocomplete="off"')+'</div>';
  }
- h+='<p class="mut" style="margin-top:10px">'+esc(t('regNote'))+'</p><p id="rerr" class="no" role="status"></p><button class="main" id="reg" type="button">'+esc(t('start'))+'</button>';
+ h+='<p class="mut" style="margin-top:10px">'+esc(t('regNote'))+' <a href="../privacy.html" target="_blank" rel="noopener" style="color:var(--acc)">Privacy policy</a></p><p id="rerr" class="no" role="status"></p><button class="main" id="reg" type="button">'+esc(t('start'))+'</button>';
  $('s1').innerHTML=h;$('reg').onclick=doRegister;
 }
 var regBusy=false;

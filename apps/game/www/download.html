@@ -34,6 +34,7 @@ h3{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)
 .card .links{display:flex;flex-direction:column;gap:6px}
 .card a.btn{justify-content:center;padding:10px 14px;font-size:14px}
 .size{font-size:12px;color:var(--mut)}
+.gls{display:grid;grid-template-columns:1fr 1fr;gap:6px}.gl{display:flex;align-items:center;gap:6px;padding:7px 8px;border:1px solid var(--bd);border-radius:8px;font-size:12.5px;font-weight:600;color:#344054;text-decoration:none}.gl:hover{border-color:var(--ac);background:var(--acs)}.gl span{font-size:16px}
 .card a:not(.btn){color:var(--ac)}
 ol{padding-left:20px;margin:6px 0 0;font-size:14px;color:#374151}ol li{margin:3px 0}
 .note{margin-top:28px;padding:14px 16px;background:var(--soft);border:1px solid var(--bd);border-radius:12px;font-size:13.5px;color:#374151}
@@ -56,7 +57,9 @@ ol{padding-left:20px;margin:6px 0 0;font-size:14px;color:#374151}ol li{margin:3p
     <div class="links"><a class="btn" data-file="Investment-Business-Mac.dmg">Download for Mac (.dmg)</a></div></div>
   <div class="card" id="c-and"><div class="t"><span>🤖</span>Android</div>
     <p>Android 7 or newer, phone or tablet. Tap the downloaded file to install.</p>
-    <div class="links"><a class="btn" data-file="Investment-Business-Android.apk">Download for Android (.apk)</a></div></div>
+    <div class="links"><a class="btn" data-file="Investment-Business-Android.apk">All games in one app (.apk)</a></div>
+    <p class="size" style="margin-top:6px">Or one game only:</p>
+    <div class="gls"><a class="gl" data-file="Game-Investment-Business.apk"><span>🎲</span>Investment Business</a><a class="gl" data-file="Game-Money-Adventure.apk"><span>🌟</span>Money Adventure</a><a class="gl" data-file="Game-Lakh-Challenge.apk"><span>💰</span>Lakh Challenge</a><a class="gl" data-file="Game-Bull-vs-Bear-Aadu-Puli.apk"><span>🐯</span>Bull vs Bear</a><a class="gl" data-file="Game-Pallanguli.apk"><span>🌰</span>Pallanguli</a><a class="gl" data-file="Game-Personal-Finance.apk"><span>🏦</span>Personal Finance</a></div></div>
   <div class="card" id="c-ios"><div class="t"><span>📱</span>iPhone / iPad</div>
     <div class="links" id="ios-links"></div>
     <p id="ios-web">Install from the website, it works offline and opens full screen like an app:</p>
@@ -64,7 +67,7 @@ ol{padding-left:20px;margin:6px 0 0;font-size:14px;color:#374151}ol li{margin:3p
 </div>
 
 
-<p class="foot">Play money only. Investments are subject to market risks. · <a href="./">Play in the browser</a> · <a href="https://mcubeacademy.com" target="_blank" rel="noopener">mcubeacademy.com</a></p>
+<p class="foot">Play money only. Investments are subject to market risks. · <a href="./">Play in the browser</a> · <a href="privacy.html">Privacy policy</a> · <a href="https://mcubeacademy.com" target="_blank" rel="noopener">mcubeacademy.com</a></p>
 </div>
 <script src="app-links.js"></script>
 <script>

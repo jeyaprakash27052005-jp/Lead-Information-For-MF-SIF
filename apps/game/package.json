@@ -30,7 +30,7 @@
     "electron-builder": "^26.18.0"
   },
   "build": {
-    "appId": "com.mcubeacademy.investmentbusiness",
+    "appId": "com.mcubeacademy.games",
     "productName": "Mcube Games",
     "copyright": "Mcube Academy",
     "directories": {

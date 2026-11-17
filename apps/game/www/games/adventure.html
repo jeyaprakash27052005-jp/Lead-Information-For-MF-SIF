@@ -111,7 +111,7 @@ $("yrs").innerHTML=[3,5,10].map(y=>`<button class="chip${y===yrs?" on":""}" data
 $("avs").innerHTML=AV.map((a,i)=>`<button class="tile" data-v="${i}"><span class="e">${a[1]}</span><b>${a[0]}</b><small>${a[4]?"Safe & steady":a[2]<0?"Risky, big swings":"Medium risk"}</small></button>`).join("");
 let reg=null;
 $("heroes").onclick=async e=>{const t=e.target.closest("[data-h]");if(!t)return;
-  if(!reg){try{reg=(await MG.registerForm({game:"adventure",kids:true,intro:"Before the adventure starts, tell us who is playing."}))[0]}catch(x){return}}
+  if(!reg){try{reg=(await MG.registerForm({game:"adventure",parent:true,gate:true,intro:"A parent or guardian registers once before the adventure starts."}))[0]}catch(x){return}}
   hero=+t.dataset.h;$("hi").textContent=H[hero][1]+" "+H[hero][0]+", let’s go!";show(2)};
 function pick(box,key,set){$(box).onclick=e=>{const t=e.target.closest("[data-"+key+"]");if(!t)return;set(+t.dataset[key]);$(box).querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c===t))}}
 pick("amts","a",v=>amt=v);pick("yrs","y",v=>yrs=v);

@@ -231,7 +231,7 @@ $("app").innerHTML='<div class="form card">'+LOGO+'<h1>Player '+(R.i+1)+' of '+R
 '<label for="ph">'+(MODE=="kids"?"Parent’s mobile number":"Mobile number")+'</label><input id="ph" type="tel" inputmode="numeric" autocomplete="off" placeholder="10-digit number">'+
 '<label for="em">'+(MODE=="kids"?"Parent’s email ID":"Email ID")+'</label><input id="em" type="email" autocomplete="off">'+
 '<label class="ck"><input id="ck" type="checkbox"><span>'+(MODE=="kids"?"I am the parent or guardian, and I agree that Mcube Academy may contact me about courses and investor education.":"I agree that Mcube Academy may contact me about courses and investor education.")+'</span></label>'+
-'<div class="err" id="err" aria-live="polite">'+(e||"")+'</div><button id="go" onclick="register()">Save and continue</button> <button class="alt" onclick="setup()">Back</button></div>'}
+'<p class="foot" style="margin:6px 0 0"><a href="../privacy.html" target="_blank" rel="noopener" style="color:var(--ac)">Privacy policy</a></p><div class="err" id="err" aria-live="polite">'+(e||"")+'</div><button id="go" onclick="register()">Save and continue</button> <button class="alt" onclick="setup()">Back</button></div>'}
 async function hs(s){if(window.crypto&&crypto.subtle){var b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("mcube|"+s));return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,"0")}).join("").slice(0,32)}var x=5381;for(var i=0;i<s.length;i++)x=((x<<5)+x+s.charCodeAt(i))|0;return"f"+(x>>>0).toString(36)}
 async function register(){
 var nm=$("nm").value.trim(),d=$("ph").value.replace(/\D/g,""),em=$("em").value.trim().toLowerCase(),er=$("err");

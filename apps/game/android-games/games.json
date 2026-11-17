@@ -1,0 +1,8 @@
+[
+  { "id": "investment", "appId": "com.mcubeacademy.investmentbusiness", "label": "Investment Business", "title": "Investment Business", "icon": "🎲", "bg1": "#4F3CC9", "bg2": "#7C6BE6", "apk": "Investment-Business" },
+  { "id": "adventure",  "appId": "com.mcubeacademy.moneyadventure",     "label": "Money Adventure",     "title": "Money Adventure for Kids", "icon": "🌟", "bg1": "#F59E0B", "bg2": "#FCD34D", "apk": "Money-Adventure" },
+  { "id": "challenge",  "appId": "com.mcubeacademy.lakhchallenge",      "label": "Lakh Challenge",      "title": "₹1 Lakh to ₹10 Lakh Challenge", "icon": "💰", "bg1": "#0F766E", "bg2": "#14B8A6", "apk": "Lakh-Challenge" },
+  { "id": "aadupuli",   "appId": "com.mcubeacademy.aadupuli",           "label": "Bull vs Bear",        "title": "Bull vs Bear – Aadu Puli", "icon": "🐯", "bg1": "#15803D", "bg2": "#DC2626", "apk": "Bull-vs-Bear-Aadu-Puli" },
+  { "id": "pallanguli", "appId": "com.mcubeacademy.pallanguli",         "label": "Pallanguli",          "title": "Pallanguli Investment Game", "icon": "🌰", "bg1": "#7A2E1C", "bg2": "#C99A62", "apk": "Pallanguli" },
+  { "id": "finance",    "appId": "com.mcubeacademy.personalfinance",    "label": "Personal Finance",    "title": "Personal Finance Game", "icon": "🏦", "bg1": "#1E88E5", "bg2": "#43A047", "apk": "Personal-Finance" }
+]

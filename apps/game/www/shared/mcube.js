@@ -142,22 +142,32 @@
     return new Promise(function (resolve, reject) {
       var n = o.players || 1, i = 0, out = [];
       var ov = document.createElement("div"); ov.className = "mg-ov"; document.body.appendChild(ov);
+      /* Grown-ups check before any personal details are asked (children's games) */
+      function gate(err) {
+        var a = 3 + Math.floor(Math.random() * 7), b = 4 + Math.floor(Math.random() * 6);
+        ov.innerHTML = '<form class="mg-card mg-reg" novalidate><div class="mg-reg-h"><span class="mg-ic">🔒</span><div><b>For parents</b><small>Ask a grown-up to continue</small></div></div>' +
+          '<p class="mg-mut">A parent or guardian registers before the game starts.</p><label>What is ' + a + ' × ' + b + '?<input name="g" inputmode="numeric" maxlength="3" autocomplete="off"></label>' +
+          '<p class="mg-err" aria-live="polite">' + esc(err || "") + '</p><div class="mg-row"><button class="mg-btn" type="submit">Continue</button>' + (o.cancel !== false ? '<button class="mg-btn alt" type="button" data-x>Back</button>' : "") + "</div></form>";
+        var f = ov.querySelector("form"); f.g.focus();
+        var x = ov.querySelector("[data-x]"); if (x) x.onclick = function () { ov.remove(); reject(new Error("cancelled")); };
+        f.onsubmit = function (e) { e.preventDefault(); if (parseInt(f.g.value, 10) === a * b) step(); else gate("That is not right. Please ask a grown-up."); };
+      }
       function step(err) {
         ov.innerHTML = '<form class="mg-card mg-reg" novalidate><div class="mg-reg-h"><span class="mg-ic">' + esc((byId[o.game] || {}).icon || "🎮") + '</span><div><b>' + esc(o.title || (byId[o.game] || {}).name || "Register") + '</b><small>' + (n > 1 ? "Player " + (i + 1) + " of " + n : "Register to play") + '</small></div></div>' +
           (o.intro ? '<p class="mg-mut">' + esc(o.intro) + "</p>" : "") +
-          '<label>' + (o.kids ? "Child’s name" : "Name") + '<input name="nm" autocomplete="off" maxlength="60"></label>' +
-          '<label>' + (o.kids ? "Parent’s mobile number" : "Mobile number") + '<input name="ph" type="tel" inputmode="numeric" maxlength="14" placeholder="10-digit number" autocomplete="off"></label>' +
+          '<label>' + (o.parent ? "Parent’s name" : o.kids ? "Child’s name" : "Name") + '<input name="nm" autocomplete="off" maxlength="60"></label>' +
+          '<label>' + (o.kids || o.parent ? "Parent’s mobile number" : "Mobile number") + '<input name="ph" type="tel" inputmode="numeric" maxlength="14" placeholder="10-digit number" autocomplete="off"></label>' +
           (o.email ? '<label>' + (o.kids ? "Parent’s email ID" : "Email ID") + '<input name="em" type="email" autocomplete="off"></label>' : "") +
           (o.age ? '<label>Age<input name="ag" inputmode="numeric" maxlength="3"></label>' : "") +
-          '<label class="mg-ck"><input name="ck" type="checkbox"><span>' + (o.kids ? "I am the parent or guardian, and I agree that Mcube Academy may contact me about courses and investor education." : "I agree that Mcube Academy may contact me about courses and investor education.") + "</span></label>" +
+          '<label class="mg-ck"><input name="ck" type="checkbox"><span>' + (o.kids || o.parent ? "I am the parent or guardian, and I agree that Mcube Academy may contact me about courses and investor education." : "I agree that Mcube Academy may contact me about courses and investor education.") + "</span></label>" +
           '<p class="mg-err" aria-live="polite">' + esc(err || "") + '</p><div class="mg-row"><button class="mg-btn" type="submit">' + (i + 1 < n ? "Next player" : "Start the game") + '</button>' +
           (o.cancel !== false ? '<button class="mg-btn alt" type="button" data-x>Back</button>' : "") + "</div>" +
-          '<p class="mg-mut mg-s">' + (o.onePlayNote === false ? "" : "Each mobile number can play each game once.") + "</p></form>";
+          '<p class="mg-mut mg-s">' + (o.onePlayNote === false ? "" : "Each mobile number can play each game once. ") + '<a href="' + base() + 'privacy.html" target="_blank" rel="noopener">Privacy policy</a></p></form>';
         var f = ov.querySelector("form"); f.nm.focus();
         var x = ov.querySelector("[data-x]"); if (x) x.onclick = function () { ov.remove(); reject(new Error("cancelled")); };
         f.onsubmit = function (e) {
           e.preventDefault(); var er = f.querySelector(".mg-err");
-          var p = { name: f.nm.value.trim(), mobile: cleanMobile(f.ph.value), email: f.em ? f.em.value.trim() : "", age: f.ag ? parseInt(f.ag.value, 10) : 0, mode: o.kids ? "kids" : "" };
+          var p = { name: f.nm.value.trim(), mobile: cleanMobile(f.ph.value), email: f.em ? f.em.value.trim() : "", age: f.ag ? parseInt(f.ag.value, 10) : 0, mode: o.kids || o.parent ? "kids" : "" };
           if (p.name.length < 2) return er.textContent = "Please enter the name.";
           if (!MOB.test(p.mobile)) return er.textContent = "Please enter a valid 10-digit mobile number.";
           if (f.em && !MAIL.test(p.email)) return er.textContent = "Please enter a valid email ID.";
@@ -172,16 +182,26 @@
           });
         };
       }
-      step();
+      if (o.gate) gate(); else step();
     });
   }
 
   /* ---------- top bar with "All games" ---------- */
+  /* In a single-game Android app (made by apps/game/android-games/build.mjs) window.MG_SINGLE is the game id */
+  var SINGLE = window.MG_SINGLE || "";
+  function base() { return /\/games\/[^/]*$/.test(location.pathname) ? "../" : ""; }
   function topbar(title) {
     if (!document.body) { document.addEventListener("DOMContentLoaded", function () { topbar(title); }); return; }
     var b = document.createElement("div"); b.className = "mg-top";
-    b.innerHTML = '<a class="mg-back" href="../index.html" aria-label="All games">‹ <span>All games</span></a><b>' + esc(title) + '</b><img src="../icons/icon-192.png" alt="Mcube Academy">';
+    b.innerHTML = (SINGLE ? '<img src="../icons/icon-192.png" alt="Mcube Academy">' : '<a class="mg-back" href="../index.html" aria-label="All games">‹ <span>All games</span></a>') +
+      '<b>' + esc(title) + '</b>' + (SINGLE ? '<a class="mg-back" href="../privacy.html">Privacy</a>' : '<img src="../icons/icon-192.png" alt="Mcube Academy">');
     document.body.insertBefore(b, document.body.firstChild);
+    if (SINGLE) loadSettings().then(function (s) {
+      if (isOn(s, SINGLE)) return;
+      var ov = document.createElement("div"); ov.className = "mg-ov";
+      ov.innerHTML = '<div class="mg-card"><div class="mg-reg-h"><span class="mg-ic">⏸️</span><div><b>' + esc((byId[SINGLE] || {}).name || "This game") + '</b><small>Paused for now</small></div></div><p class="mg-mut">Mcube Academy has paused this game. Please check again later.</p></div>';
+      document.body.appendChild(ov);
+    });
   }
 
   window.MG = { FB: FB, GAMES: GAMES, game: function (id) { return byId[id]; }, esc: esc, device: device, inApp: inApp,

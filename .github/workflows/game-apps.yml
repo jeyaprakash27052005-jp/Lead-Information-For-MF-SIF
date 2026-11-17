@@ -52,6 +52,8 @@ jobs:
         with: { distribution: temurin, java-version: 21 }
       - run: npm ci
       - run: npm run android:add
+      - name: Version number (Google Play needs a higher one for every upload)
+        run: sed -i "s/versionCode 1$/versionCode $((100 + ${{ github.run_number }}))/; s/versionName \"1.0\"/versionName \"$(node -p "require('./package.json').version")\"/" android/app/build.gradle && grep -n "versionCode\|versionName" android/app/build.gradle
       - name: Build APK (test install)
         run: cd android && ./gradlew assembleDebug && cp app/build/outputs/apk/debug/app-debug.apk ../release-android-test.apk
       - name: Build signed APK and AAB for Play Store (only if the keystore secrets are set)
@@ -71,6 +73,52 @@ jobs:
       - uses: actions/upload-artifact@v4
         with: { name: android, path: "apps/game/release-android*", if-no-files-found: error }
 
+  # One Android app per game (separate Google Play listings). Settings: apps/game/android-games/games.json
+  android-games:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        game: [investment, adventure, challenge, aadupuli, pallanguli, finance]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: apps/game/package-lock.json }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - run: npm ci
+      - name: Make the ${{ matrix.game }} app project
+        run: |
+          node android-games/build.mjs ${{ matrix.game }}
+          cd android-games/out/${{ matrix.game }}
+          CAP=../../../node_modules/@capacitor/cli/bin/capacitor
+          node $CAP add android
+          node ../../../node_modules/@capacitor/assets/bin/capacitor-assets generate --android
+          node $CAP sync android
+          sed -i "s/versionCode 1$/versionCode $((100 + ${{ github.run_number }}))/; s/versionName \"1.0\"/versionName \"$(node -p "require('./package.json').version")\"/" android/app/build.gradle
+          grep -n "applicationId\|versionCode\|versionName" android/app/build.gradle
+          echo "APK=$(node -p "require('../../games.json').find(g=>g.id==='${{ matrix.game }}').apk")" >> "$GITHUB_ENV"
+      - name: Build APK (test install)
+        working-directory: apps/game/android-games/out/${{ matrix.game }}/android
+        run: ./gradlew assembleDebug && mkdir -p ../../../apk && cp app/build/outputs/apk/debug/app-debug.apk "../../../apk/$APK-test.apk"
+      - name: Build signed APK and Play Store AAB (only if the keystore secrets are set)
+        working-directory: apps/game/android-games/out/${{ matrix.game }}
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KS_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        if: env.KS_B64 != ''
+        run: |
+          echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+          CAP=../../../node_modules/@capacitor/cli/bin/capacitor
+          for T in APK AAB; do node $CAP build android --keystorepath "$RUNNER_TEMP/release.keystore" --keystorepass "$KS_PASS" --keystorealias "$KS_ALIAS" --keystorealiaspass "$KEY_PASS" --androidreleasetype $T; done
+          find android/app/build/outputs -name "*release*.apk" -exec cp {} "../../apk/$APK.apk" \;
+          find android/app/build/outputs -name "*release*.aab" -exec cp {} "../../apk/$APK-PlayStore.aab" \;
+          rm "$RUNNER_TEMP/release.keystore"
+      - uses: actions/upload-artifact@v4
+        with: { name: "android-game-${{ matrix.game }}", path: apps/game/android-games/apk/*, if-no-files-found: error }
+
   # iPhone / iPad.
   # Always: an unsigned test build and the Xcode project.
   # With the Apple secrets (see apps/game/README.md, "iPhone app"): Xcode signs the app itself
@@ -85,7 +133,7 @@ jobs:
       ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
       ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
       IOS_DISTRIBUTION: ${{ vars.IOS_DISTRIBUTION || 'testflight' }}
-      BUNDLE_ID: com.mcubeacademy.investmentbusiness
+      BUNDLE_ID: com.mcubeacademy.games
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -158,7 +206,7 @@ jobs:
   # Puts every install file in its own folder with install steps:
   # Investment-Business-Downloads/1-Windows-Laptop, 2-Mac, 3-Android, 4-iPhone-iPad
   downloads:
-    needs: [windows, mac, android, ios]
+    needs: [windows, mac, android, android-games, ios]
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: . } }
     steps:
@@ -182,12 +230,19 @@ jobs:
             cp built/android/release-android-playstore.aab "$D/3-Android/for-Play-Store/Investment-Business-PlayStore.aab"
           fi
           cp built/ios/* "$D/4-iPhone-iPad/"
+          # Separate game apps: signed APK when the keystore is set, otherwise the test APK; Play Store AABs apart
+          mkdir -p "$D/3-Android/separate-games"
+          for d in built/android-game-*; do
+            for f in "$d"/*.apk; do case "$f" in *-test.apk) b=$(basename "$f" -test.apk); [ -f "$d/$b.apk" ] || cp "$f" "$D/3-Android/separate-games/$b.apk";; *) cp "$f" "$D/3-Android/separate-games/";; esac; done
+            for f in "$d"/*.aab; do [ -f "$f" ] && mkdir -p "$D/3-Android/for-Play-Store" && cp "$f" "$D/3-Android/for-Play-Store/"; done
+          done
           # Same file names every time, so the download links on the game website never change
           mkdir direct
           cp built/windows/*Setup*.exe direct/Investment-Business-Windows-Setup.exe
           cp built/windows/*Portable*.exe direct/Investment-Business-Windows-Portable.exe
           cp built/mac/*.dmg direct/Investment-Business-Mac.dmg
           cp "$D/3-Android/Investment-Business-Android.apk" direct/Investment-Business-Android.apk
+          for f in "$D"/3-Android/separate-games/*.apk; do cp "$f" "direct/Game-$(basename "$f")"; done
           cp built/ios/Investment-Business-iPhone.ipa built/ios/Investment-Business-iPhone-manifest.plist direct/ 2>/dev/null || true
           ls -la direct
           mkdir zips

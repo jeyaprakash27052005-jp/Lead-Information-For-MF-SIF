@@ -28,6 +28,10 @@ The screen adapts to the device: every game fits phones (upright and sideways), 
 
 The games work offline on every device; registrations and results made offline are sent to the online database when the device is online again. Investment Business also keeps a copy on the device for its in-game **Staff login** (PIN set in Game Admin > Settings; starting PIN `2026`).
 
+## Separate game apps on Google Play
+
+Each game is also built as its own Android app (6 apps, own package name, icon and listing). Everything needed for Google Play (graphics, screenshots, listing text, privacy policy and a step-by-step Play Console guide) is in `play-store/` – start with `play-store/README.md`.
+
 ## Download links for players (no GitHub login)
 
 Every successful build publishes the installers as public files with fixed links, so the links never change and always give the newest version:
@@ -115,7 +119,7 @@ iPhones only install apps signed by Apple. There are three ways, from easiest:
 ### One-time setup (TestFlight / App Store)
 
 1. Join the **Apple Developer Program** at developer.apple.com (as Mcube Academy).
-2. In **App Store Connect > Apps > +**, create a new app: name *Investment Business*, bundle ID `com.mcubeacademy.investmentbusiness` (register it under Certificates, Identifiers & Profiles > Identifiers if it is not offered), SKU e.g. `investment-business`.
+2. In **App Store Connect > Apps > +**, create a new app: name *Mcube Games*, bundle ID `com.mcubeacademy.games` (register it under Certificates, Identifiers & Profiles > Identifiers if it is not offered), SKU e.g. `investment-business`.
 3. In **App Store Connect > Users and Access > Integrations > App Store Connect API**, create a key with **Admin** access. Download the `.p8` file (only possible once) and note the **Key ID** and **Issuer ID**.
 4. Note your **Team ID** (developer.apple.com > Account > Membership details).
 5. In GitHub, **Settings > Secrets and variables > Actions > New repository secret**, add:
@@ -162,7 +166,7 @@ After changing `www/index.html`, run `npm run sync` for the phone apps, and chan
 
 | Setting | File |
 |---|---|
-| App name and ID (`com.mcubeacademy.investmentbusiness`) | `package.json` (`build`) and `capacitor.config.json` |
+| App name and ID (`com.mcubeacademy.games`) | `package.json` (`build`) and `capacitor.config.json` |
 | App icon | `resources/icon.png` (desktop), `assets/` (phones), `www/icons/` (web) |
 | Games shown, order, one play per mobile, dice or spinning wheel | Mcube Game Admin site > Games |
 | Staff PIN | Mcube Game Admin site > Settings |
