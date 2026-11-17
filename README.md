@@ -15,16 +15,17 @@ Shared code lives in `src/` (components, services, utils). Each website has its 
 
 | Website | Folder | Who uses it |
 |---|---|---|
-| **Mcube Academy FinFun** | `apps/game` | Anyone: the games hub with 6 games (Investment Business, Money Adventure, ₹1 Lakh → ₹10 Lakh Challenge, Bull vs Bear – Aadu Puli, Pallanguli Investment Game, Personal Finance Management). Also downloadable as Windows, Mac and Android apps and installable on iPhone. Vercel project `mf-nps-game` (Root Directory `apps/game`). |
-| **Mcube Game Admin** | `apps/game-admin` | Head Incharge only: game players and results, export to Excel / CSV, games on or off and their order, one play per mobile, dice or spinning wheel, game staff PIN. Create a Vercel project with Root Directory `apps/game-admin` (no environment variables needed). |
+| **Mcube Academy FinFun** | `apps/game` | Anyone: the games hub with 7 games (Investment Business, Money Adventure, ₹1 Lakh → ₹10 Lakh Challenge, Bull vs Bear – Aadu Puli, Pallanguli Investment Game, Personal Finance Management, Unlock Your Future). Also downloadable as Windows, Mac and Android apps and installable on iPhone. Vercel project `mf-nps-game` (Root Directory `apps/game`). |
+| **Mcube Game Admin** | `apps/game-admin` | Head Incharge only: game players and results, export to Excel / CSV, games on or off and their order, one play per mobile, dice or spinning wheel, show or hide the "Download the app" option, game staff PIN. Create a Vercel project with Root Directory `apps/game-admin` (no environment variables needed). |
 
 The game controls are only in the Game Admin site; the main Admin Portal has none.
 
 - **Players and results:** every game asks for name and mobile (some also email or age) with consent, and saves the registration and the result in the Firestore collection `gamePlayers` (one record per player per game). Games played offline are sent when the device is online again.
 - **One play per mobile:** on by default for each game, across all devices; the Head can switch it off per game in Game Admin > Games.
-- **Game settings:** saved in `settings/gameHub` (games shown, order, one play per mobile, dice or spinner); the game staff PIN in `settings/gameStaff`.
+- **Download option:** hidden until the Head switches it on in Game Admin > Games. While hidden there is no Download button or iPhone install tip, and the download page says downloads are not available yet.
+- **Game settings:** saved in `settings/gameHub` (games shown, order, one play per mobile, dice or spinner, downloads shown); the game staff PIN in `settings/gameStaff`.
 - **Sign in:** Game Admin uses the same username and password or login PIN as the Admin Portal, Head Incharge only.
-- Publish `firestore.rules` after this update (it adds `gamePlayers` and `settings/gameHub`).
+- Publish `firestore.rules` after this update (it allows the Unlock Your Future game and the download switch).
 - Optional: set `VITE_GAMES_SITE_URL` in the Game Admin Vercel project to show an "Open the games site" link.
 
 Apps, downloads and iPhone setup: see `apps/game/README.md`.

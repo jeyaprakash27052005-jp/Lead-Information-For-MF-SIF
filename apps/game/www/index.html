@@ -65,10 +65,13 @@ function draw(s){
   document.getElementById("gcount").textContent=list.length+(list.length===1?" game":" games");
   document.getElementById("games").innerHTML=list.length?list.map(function(g){return'<a class="g" href="'+g.file+'"><span class="ic">'+g.icon+'</span><span class="who">'+MG.esc(g.who)+'</span><h2>'+MG.esc(g.name)+'</h2><p>'+MG.esc(g.desc)+'</p><span class="play">Play</span></a>'}).join(""):'<div class="empty">No games are switched on right now. Please check back soon.</div>';
 }
-draw(MG.cachedSettings());MG.settings().then(draw);
-if(!MG.inApp())document.getElementById("dl").innerHTML='<a class="dl" href="download.html">⬇ Download the app</a>';
+/* The Download option shows only when the Head switches it on in Game Admin (settings/gameHub.downloads) */
 var ios=/iPhone|iPad|iPod/.test(navigator.userAgent)||(/Mac/.test(navigator.platform)&&navigator.maxTouchPoints>1);
-if(ios&&!MG.inApp())document.getElementById("tip").innerHTML='<div class="iostip"><b>📱 Install on your iPhone / iPad:</b> in Safari tap <b>Share</b> ⬆, then <b>Add to Home Screen</b>. <a href="download.html">More options</a></div>';
+function dl(s){var on=s.downloads&&!MG.inApp();
+  document.getElementById("dl").innerHTML=on?'<a class="dl" href="download.html">⬇ Download the app</a>':"";
+  document.getElementById("tip").innerHTML=on&&ios?'<div class="iostip"><b>📱 Install on your iPhone / iPad:</b> in Safari tap <b>Share</b> ⬆, then <b>Add to Home Screen</b>. <a href="download.html">More options</a></div>':"";}
+function all(s){draw(s);dl(s)}
+all(MG.cachedSettings());MG.settings().then(all);
 if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)&&!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform()))addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});
 </script>
 </body></html>

@@ -70,9 +70,9 @@
 
   /* ---------- settings set in the Game Admin site (settings/gameHub) ---------- */
   var SK = "mg_settings_v1";
-  var DEFAULTS = { enabled: {}, order: GAMES.map(function (g) { return g.id; }), onePlay: {}, mover: "dice" };
+  var DEFAULTS = { enabled: {}, order: GAMES.map(function (g) { return g.id; }), onePlay: {}, mover: "dice", downloads: false };
   function norm(s) {
-    s = s || {}; var o = { enabled: s.enabled || {}, onePlay: s.onePlay || {}, mover: s.mover === "spinner" ? "spinner" : "dice", order: [] };
+    s = s || {}; var o = { enabled: s.enabled || {}, onePlay: s.onePlay || {}, mover: s.mover === "spinner" ? "spinner" : "dice", downloads: s.downloads === true, order: [] };
     (s.order || []).forEach(function (id) { if (byId[id] && o.order.indexOf(id) < 0) o.order.push(id); });
     GAMES.forEach(function (g) { if (o.order.indexOf(g.id) < 0) o.order.push(g.id); });
     return o;

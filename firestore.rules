@@ -218,7 +218,8 @@ service cloud.firestore {
           && request.resource.data.enabled is map
           && request.resource.data.onePlay is map
           && request.resource.data.order is list && request.resource.data.order.size() <= 30
-          && request.resource.data.mover in ['dice', 'spinner'])
+          && request.resource.data.mover in ['dice', 'spinner']
+          && (!('downloads' in request.resource.data) || request.resource.data.downloads is bool))
         || (docId == 'gameStaff'
           && request.resource.data.pinHash is string && request.resource.data.pinHash.matches('^[0-9a-f]{64}$')
           && request.resource.data.updatedAt is string && request.resource.data.updatedAt.size() <= 40
@@ -230,7 +231,7 @@ service cloud.firestore {
     match /gamePlayers/{playerId} {
       allow get, list: if true;
       allow create: if isValidId(playerId)
-        && request.resource.data.game in ['investment', 'adventure', 'challenge', 'aadupuli', 'pallanguli', 'finance']
+        && request.resource.data.game in ['investment', 'adventure', 'challenge', 'aadupuli', 'pallanguli', 'finance', 'unlock']
         && request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 60
         && request.resource.data.mobile is string && request.resource.data.mobile.matches('^[6-9][0-9]{9}$')
         && request.resource.data.email is string && request.resource.data.email.size() <= 120

@@ -29,6 +29,8 @@ export interface HubSettings {
   onePlay: Record<string, boolean>;
   order: string[];
   mover: 'dice' | 'spinner';
+  /** Show the "Download the app" option on the games site (hidden until the Head switches it on) */
+  downloads: boolean;
   updatedAt?: string;
   updatedBy?: string;
 }
@@ -47,7 +49,7 @@ export function cleanHub(raw: Partial<HubSettings> | undefined): HubSettings {
     if (o && typeof o === 'object') Object.entries(o as Record<string, unknown>).forEach(([k, v]) => ids.includes(k) && typeof v === 'boolean' && (out[k] = v));
     return out;
   };
-  return { enabled: flags(r.enabled), onePlay: flags(r.onePlay), order, mover: r.mover === 'spinner' ? 'spinner' : 'dice', updatedAt: r.updatedAt, updatedBy: r.updatedBy };
+  return { enabled: flags(r.enabled), onePlay: flags(r.onePlay), order, mover: r.mover === 'spinner' ? 'spinner' : 'dice', downloads: r.downloads === true, updatedAt: r.updatedAt, updatedBy: r.updatedBy };
 }
 
 export const gameAdminStore = {

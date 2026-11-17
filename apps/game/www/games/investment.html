@@ -346,7 +346,7 @@ var t="\ufeffName,Mobile,Email,Score,Registered\n"+window._rows.map(function(r){
 if(nativeCsv(t))return;
 var b=new Blob([t],{type:"text/csv"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="mcube-leads.csv";document.body.appendChild(a);a.click();a.remove()}
 function isIOS(){var u=navigator.userAgent;return /iPhone|iPad|iPod/.test(u)||(/Mac/.test(navigator.platform)&&navigator.maxTouchPoints>1)}
-function iosTip(){if(!isIOS()||inApp())return"";return'<div class="iostip"><b>📱 Install on your iPhone / iPad</b><span>In Safari tap <b>Share</b> <span aria-hidden="true">⬆</span>, then <b>Add to Home Screen</b>. The game then opens full screen and works offline. <a href="download.html">More options</a></span></div>'}
+function iosTip(){if(!isIOS()||inApp()||!(window.MG&&MG.cachedSettings().downloads))return"";return'<div class="iostip"><b>📱 Install on your iPhone / iPad</b><span>In Safari tap <b>Share</b> <span aria-hidden="true">⬆</span>, then <b>Add to Home Screen</b>. The game then opens full screen and works offline. <a href="../download.html">More options</a></span></div>'}
 function inApp(){try{return !!CAP||/Electron/.test(navigator.userAgent)||matchMedia("(display-mode: standalone)").matches||navigator.standalone===true}catch(e){return false}}
 var CAP=window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform();
 function ext(u){if(CAP){location.href=u;return false}return true}

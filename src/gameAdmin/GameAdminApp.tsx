@@ -380,7 +380,7 @@ const Games: React.FC<{ hub: HubSettings; head: User; onSaved: (h: HubSettings) 
   const [problem, setProblem] = useState<SaveProblem | null>(null);
   // Only take the stored settings when they really changed (the 60-second refresh must not wipe unsaved edits)
   useEffect(() => setD(hub), [hub.updatedAt]); // eslint-disable-line react-hooks/exhaustive-deps
-  const dirty = JSON.stringify(cleanHub(d)) !== JSON.stringify(cleanHub(hub)) || d.mover !== hub.mover;
+  const dirty = JSON.stringify(cleanHub(d)) !== JSON.stringify(cleanHub(hub)) || d.mover !== hub.mover || d.downloads !== hub.downloads;
   const move = (i: number, by: number) => setD((x) => { const o = [...x.order]; const j = i + by; if (j < 0 || j >= o.length) return x; [o[i], o[j]] = [o[j], o[i]]; return { ...x, order: o }; });
   const flip = (key: 'enabled' | 'onePlay', id: string) => setD((x) => ({ ...x, [key]: { ...x[key], [id]: x[key][id] === false } }));
   const save = async () => {
@@ -416,6 +416,20 @@ const Games: React.FC<{ hub: HubSettings; head: User; onSaved: (h: HubSettings) 
         </button>
       </Card>
       {problem && <SaveErrorNotice problem={problem} />}
+      <Card className={`p-4 flex flex-wrap items-center gap-3 ${d.downloads ? '' : 'bg-slate-50'}`}>
+        <span className="text-2xl w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">⬇️</span>
+        <div className="flex-1 min-w-[200px]">
+          <p className="text-sm font-bold text-slate-900">"Download the app" option on the games site</p>
+          <p className="text-[11px] text-slate-500">
+            {d.downloads
+              ? 'Shown: players see the Download the app button and the download page (Windows, Mac, Android, iPhone).'
+              : 'Hidden: no Download button, and the download page says downloads are not available yet. Players can still play on the website.'}
+          </p>
+        </div>
+        <label className="flex items-center gap-2 text-xs font-semibold text-slate-600">
+          {d.downloads ? 'Shown' : 'Hidden'} <Switch on={d.downloads} label="Show the Download the app option" onClick={() => setD((x) => ({ ...x, downloads: !x.downloads }))} />
+        </label>
+      </Card>
       <Card className="divide-y divide-slate-100">
         {d.order.map((id, i) => {
           const g = GAME_LIST.find((x) => x.id === id)!;
