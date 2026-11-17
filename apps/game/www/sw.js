@@ -1,5 +1,5 @@
 // Offline support for the installed web app. Bump the version when you change the game.
-var V = "mcube-games-v12";
+var V = "mcube-games-v13";
 var FILES = ["./", "index.html", "download.html", "privacy.html", "app-links.js", "manifest.webmanifest", "shared/mcube.js", "shared/mcube.css",
   "games/investment.html", "games/adventure.html", "games/challenge.html", "games/aadupuli.html", "games/pallanguli.html", "games/finance.html", "games/finance-data.js",
   "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-512.png", "icons/apple-touch-icon.png"];
