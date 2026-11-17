@@ -298,6 +298,15 @@ const Players: React.FC<{ rows: GamePlayer[]; head: User; game: string; setGame:
                 <th className="p-3 text-left">Status</th>
                 <th className="p-3 text-left">Result</th>
                 <th className="p-3 text-right">Score</th>
+                {game === 'aadupuli' && (
+                  <>
+                    <th className="p-3 text-left">Difficulty</th>
+                    <th className="p-3 text-left">Assets chosen order</th>
+                    <th className="p-3 text-right">Bonus goats</th>
+                    <th className="p-3 text-left">Emergency fund used</th>
+                    <th className="p-3 text-left">News cards seen</th>
+                  </>
+                )}
                 <th className="p-3 text-left hidden lg:table-cell">Device</th>
               </tr>
             </thead>
@@ -315,12 +324,21 @@ const Players: React.FC<{ rows: GamePlayer[]; head: User; game: string; setGame:
                     <td className="p-3"><StatusPill s={p.status} /></td>
                     <td className="p-3">{p.result}</td>
                     <td className="p-3 text-right font-semibold tabular-nums">{inr(p.score)}</td>
+                    {game === 'aadupuli' && (
+                      <>
+                        <td className="p-3">{String(p.details?.difficulty ?? '')}</td>
+                        <td className="p-3 text-xs min-w-[220px]">{String(p.details?.assetOrder ?? '')}</td>
+                        <td className="p-3 text-right">{String(p.details?.bonusGoats ?? '')}</td>
+                        <td className="p-3">{String(p.details?.emergencyFundUsed ?? '')}</td>
+                        <td className="p-3 text-xs min-w-[220px]">{String(p.details?.newsCards ?? '')}</td>
+                      </>
+                    )}
                     <td className="p-3 text-xs text-slate-500 hidden lg:table-cell whitespace-nowrap">{deviceLabel(p.device)}</td>
                   </tr>
                   {open === p.id && (
                     <tr className="bg-indigo-50/40">
                       <td />
-                      <td colSpan={7} className="p-3 pt-0 text-xs text-slate-600">
+                      <td colSpan={game === 'aadupuli' ? 12 : 7} className="p-3 pt-0 text-xs text-slate-600">
                         <div className="grid sm:grid-cols-3 gap-x-6 gap-y-1">
                           <span><b>Age:</b> {p.age || '-'}</span>
                           <span><b>Language:</b> {p.lang === 'ta' ? 'Tamil' : p.lang === 'en' ? 'English' : p.lang || '-'}</span>
@@ -336,7 +354,7 @@ const Players: React.FC<{ rows: GamePlayer[]; head: User; game: string; setGame:
                 </React.Fragment>
               ))}
               {!shown.length && (
-                <tr><td colSpan={8} className="p-8 text-center text-slate-500">No players match these filters.</td></tr>
+                <tr><td colSpan={game === 'aadupuli' ? 13 : 8} className="p-8 text-center text-slate-500">No players match these filters.</td></tr>
               )}
             </tbody>
           </table>

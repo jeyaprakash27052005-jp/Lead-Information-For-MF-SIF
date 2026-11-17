@@ -3,6 +3,11 @@ import { GAME_LIST, deviceLabel, detailsText } from './games';
 
 const when = (iso?: string) => (iso ? new Date(iso).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '');
 const today = () => new Date().toISOString().slice(0, 10);
+/* one value from the game's details (empty when the game does not save it) */
+const dv = (p: GamePlayer, k: string): string | number => {
+  const v = p.details?.[k];
+  return typeof v === 'number' || typeof v === 'string' ? v : '';
+};
 
 const COLS: { header: string; width: number; get: (p: GamePlayer) => string | number }[] = [
   { header: 'Registered', width: 20, get: (p) => when(p.registeredAt) },
@@ -17,6 +22,12 @@ const COLS: { header: string; width: number; get: (p: GamePlayer) => string | nu
   { header: 'Status', width: 10, get: (p) => (p.status === 'finished' ? 'Finished' : 'Started') },
   { header: 'Result', width: 16, get: (p) => p.result || '' },
   { header: 'Score', width: 12, get: (p) => (typeof p.score === 'number' ? p.score : '') },
+  // Bull vs Bear – Aadu Puli
+  { header: 'Difficulty', width: 11, get: (p) => dv(p, 'difficulty') },
+  { header: 'Assets chosen order', width: 44, get: (p) => dv(p, 'assetOrder') },
+  { header: 'Bonus goats', width: 11, get: (p) => dv(p, 'bonusGoats') },
+  { header: 'Emergency fund used', width: 12, get: (p) => dv(p, 'emergencyFundUsed') },
+  { header: 'News cards seen', width: 44, get: (p) => dv(p, 'newsCards') },
   { header: 'Finished', width: 20, get: (p) => when(p.finishedAt) },
   { header: 'Details', width: 60, get: (p) => detailsText(p.details) },
 ];
@@ -53,9 +64,10 @@ export async function exportExcel(rows: GamePlayer[], filterNote: string) {
     cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4F3CC9' } };
     cell.alignment = { vertical: 'middle' };
   });
-  ws.getColumn(4).numFmt = '@';
-  ws.getColumn(12).numFmt = '#,##,##0';
-  ws.getColumn(14).alignment = { wrapText: true, vertical: 'top' };
+  const col = (h: string) => COLS.findIndex((c) => c.header === h) + 1;
+  ws.getColumn(col('Mobile')).numFmt = '@';
+  ws.getColumn(col('Score')).numFmt = '#,##,##0';
+  ['Details', 'Assets chosen order', 'News cards seen'].forEach((h) => (ws.getColumn(col(h)).alignment = { wrapText: true, vertical: 'top' }));
   ws.views = [{ state: 'frozen', ySplit: 1 }];
   ws.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: COLS.length } };
 

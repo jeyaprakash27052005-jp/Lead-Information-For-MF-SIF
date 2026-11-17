@@ -141,8 +141,36 @@ h1.title{color:var(--ink)}h1.title .b{color:#15803d}h1.title .r{color:#b91c1c}
 .boardbox{max-width:calc((100dvh - 330px)*1.217);min-width:min(100%,300px);margin:0 auto}
 @media (min-width:1000px){.wrap{max-width:1120px}
  #sGame{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,1fr);gap:16px;align-items:start}
- #sGame>.card{margin-bottom:0}.boardbox{max-width:calc((100dvh - 430px)*1.217)}
+ #sGame>.card{margin-bottom:0}.boardbox{max-width:calc((100dvh - 560px)*1.217)}
  #sLang,#sReg,#sRes{max-width:640px;margin:0 auto}}
+/* new: asset choice, risk tags, news, difficulty, leaderboard */
+.assets{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.ab{display:grid;grid-template-columns:auto 1fr auto;grid-template-areas:"d n c" "r r r";align-items:center;gap:2px 6px;text-align:left;border:2px solid #e5e7eb;background:#fff;border-radius:12px;padding:8px 9px;font:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;min-height:56px}
+.ab .dot{grid-area:d}.ab .an{grid-area:n;line-height:1.15}.ab .ac{grid-area:c;font-weight:800}.ab .rk{grid-area:r;justify-self:start}
+.ab.on{border-color:#4F3CC9;background:#f3f1ff;box-shadow:0 0 0 2px rgba(79,60,201,.2)}
+.ab:disabled{opacity:.4;cursor:default}
+.ab.efb{border-style:dashed;border-color:#fda4af}.ab.efb.on{border-color:#e11d48;background:#fff1f2}
+.rk{display:inline-block;font-style:normal;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:999px;text-transform:uppercase;letter-spacing:.03em}
+.rk.high{background:#fee2e2;color:#b91c1c}.rk.medium{background:#fef3c7;color:#92400e}.rk.low{background:#dcfce7;color:#166534}.rk.safe{background:#ffe4e6;color:#be123c}
+.assets.nudge{animation:nudge .4s}@keyframes nudge{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+.streak{margin-top:8px;font-size:12.5px;font-weight:600;color:var(--muted);text-align:center}
+.legend.news{min-height:0;margin-top:6px;font-size:13px;color:#0f3d91;justify-content:center;text-align:center}
+.newsc{border:2px solid #fcd34d;background:#fffbeb;border-radius:14px;padding:14px;margin-bottom:12px;text-align:center}
+.newsc .nk{font-size:12px;font-weight:800;letter-spacing:.06em;color:#92400e;text-transform:uppercase}
+.newsc h3{margin:6px 0 4px;font-size:20px}.newsc p{font-size:15px;color:#334155}
+.diff{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.dbtn{border:2px solid #dbe3ee;background:#fff;border-radius:12px;padding:10px 8px;font:inherit;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:3px;color:var(--ink)}
+.dbtn b{font-size:15px}.dbtn small{font-size:11.5px;color:var(--muted);line-height:1.3}
+.dbtn.on{border-color:#4F3CC9;background:#f3f1ff}
+.lb .lbm{color:var(--muted);font-size:14px;text-align:center;margin:6px 0}
+.lbt td,.lbt th{padding:7px 6px}.lbt td:nth-child(2),.lbt th:nth-child(2){text-align:left}
+.sub2{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.ord{padding-left:22px;margin-bottom:10px}.ord li{margin:3px 0;font-weight:600}.ord .rk{margin-left:4px}
+.gstats{display:grid;grid-template-columns:1fr 1fr;gap:8px}.gstats div{background:#f3f6fb;border-radius:12px;padding:8px 10px}.gstats span{display:block;font-size:12px;color:var(--muted)}.gstats b{font-size:17px}
+.newsl{font-size:13px;color:var(--muted);margin-top:10px}
+.arow .rk{margin-left:2px;font-size:9.5px;padding:0 5px}
+@media (max-width:380px){.assets{grid-template-columns:repeat(2,1fr)}.diff{grid-template-columns:1fr}}
+@media (min-width:1000px){#sLang .lb,#sReg{max-width:640px;margin-left:auto;margin-right:auto}}
 </style>
 </head>
 <body>
@@ -162,6 +190,7 @@ h1.title{color:var(--ink)}h1.title .b{color:#15803d}h1.title .r{color:#b91c1c}
       <button class="btn alt" data-lang="en">English</button>
       <button class="btn" data-lang="ta">தமிழ்</button>
     </div>
+    <div class="card lb" id="lbStart"></div>
   </section>
 
   <!-- 2. Register -->
@@ -175,7 +204,9 @@ h1.title{color:var(--ink)}h1.title .b{color:#15803d}h1.title .r{color:#b91c1c}
       <input id="fMob" inputmode="numeric" maxlength="10" autocomplete="tel">
       <label for="fAge" data-t="age"></label>
       <input id="fAge" inputmode="numeric" maxlength="3">
-      <p style="font-size:12.5px;margin-top:10px"><a href="../privacy.html" target="_blank" rel="noopener" style="color:#4F3CC9">Privacy policy</a></p>
+      <label data-t="diffL"></label>
+      <div class="diff" id="diffBox" role="radiogroup"></div>
+      <p style="font-size:12.5px;margin-top:10px"><a href="../privacy.html" target="_blank" rel="noopener" style="color:#4F3CC9" data-t="privacy"></a></p>
       <div class="err" id="regErr"></div>
       <button class="btn" type="submit" data-t="start"></button>
       <button class="btn ghost" type="button" id="backLang" data-t="changeLang"></button>
@@ -189,12 +220,13 @@ h1.title{color:var(--ink)}h1.title .b{color:#15803d}h1.title .r{color:#b91c1c}
       <div class="stats">
         <div class="stat"><b id="stHand">15</b><span data-t="inHand"></span></div>
         <div class="stat loss"><b id="stLost">0</b><span data-t="lostLbl"></span></div>
-        <div class="stat"><b id="stMoves">0/60</b><span data-t="movesLbl"></span></div>
+        <div class="stat"><b id="stMoves">0/20</b><span data-t="movesLbl"></span></div>
       </div>
       <div class="msg" id="msg"></div>
       <div class="boardbox"><svg id="board" viewBox="0 0 420 345" aria-label="board"></svg></div>
-      <div class="next" id="nextGoat"></div>
-      <div class="legend" id="legend"></div>
+      <div class="assets" id="assetBar"></div>
+      <div class="streak" id="streak"></div>
+      <div class="legend news" id="legend"></div>
     </div>
     <div class="card rules"><h3 data-t="rulesT"></h3><ol id="rulesList"></ol></div>
   </section>
@@ -237,7 +269,7 @@ const CONFIG = {
   MCUBE_PHONE: '',            // e.g. '+91 98xxxxxxxx'
   MCUBE_ADDRESS: '',          // e.g. 'Chennai'
   MAX_LOST: 6,                // tigers win after this many goats lost
-  MAX_GOAT_MOVES: 60,         // tigers win if not trapped within these goat moves
+  MAX_GOAT_MOVES: 20,         // tigers win if not trapped within these goat moves
   GOAL_AGE: 50,               // SIP projection till this age
   OVER_AGE_YEARS: 10          // years used silently when age >= GOAL_AGE
 };
@@ -276,12 +308,12 @@ const T = {
    'A tiger moves one step, or jumps over one goat in a straight line to the empty point just beyond. That goat (₹1,000) is lost.',
    'Goats cannot jump. Keep goats together and fill the landing points so tigers cannot jump.',
    'You WIN when all 3 tigers are trapped and cannot move.',
-   'Tigers win if they take 6 goats, or if they are not trapped within 60 goat moves.',
+   'Tigers win if they take 6 goats, or if they are not trapped within 20 goat moves.',
    'Each mobile number can play only once.'
   ],
   winH:n=>`Congratulations, ${n}! You trapped the market risks!`,
   loseH:n=>`${n}, the tigers won this time`,
-  loseWhyLost:'The tigers took 6 goats.', loseWhyMoves:'60 moves finished before the tigers were trapped.', loseWhyStuck:'Your goats had no moves left.',
+  loseWhyLost:'The tigers took 6 goats.', loseWhyMoves:'20 moves finished before the tigers were trapped.', loseWhyStuck:'Your goats had no moves left.',
   saved:'Money saved', of:'of ₹15,000', goatsLeft:n=>`${n} of 15 goats safe`,
   survT:'Which investments survived',
   sipT:'What if you invest this every month?',
@@ -341,12 +373,12 @@ const T = {
    'புலி ஒரு படி நகரும், அல்லது நேர்கோட்டில் ஒரு ஆட்டைத் தாண்டி அடுத்த காலிப் புள்ளியில் குதிக்கும். அந்த ஆடு (₹1,000) இழக்கப்படும்.',
    'ஆடுகள் தாண்ட முடியாது. ஆடுகளை ஒன்றாக வைத்து, புலி குதிக்கும் இடங்களை நிரப்புங்கள்.',
    '3 புலிகளும் நகர முடியாமல் அடைக்கப்பட்டால் நீங்கள் வெற்றி பெறுவீர்கள்.',
-   'புலிகள் 6 ஆடுகளைப் பிடித்தாலோ, 60 நகர்வுகளுக்குள் அடைக்கப்படாவிட்டாலோ புலிகள் வெற்றி பெறும்.',
+   'புலிகள் 6 ஆடுகளைப் பிடித்தாலோ, 20 நகர்வுகளுக்குள் அடைக்கப்படாவிட்டாலோ புலிகள் வெற்றி பெறும்.',
    'ஒரு மொபைல் எண்ணுக்கு ஒரு முறை மட்டுமே விளையாடலாம்.'
   ],
   winH:n=>`வாழ்த்துகள் ${n}! சந்தை அபாயங்களை அடைத்துவிட்டீர்கள்!`,
   loseH:n=>`${n}, இந்த முறை புலிகள் வென்றன`,
-  loseWhyLost:'புலிகள் 6 ஆடுகளைப் பிடித்துவிட்டன.', loseWhyMoves:'புலிகளை அடைப்பதற்குள் 60 நகர்வுகள் முடிந்துவிட்டன.', loseWhyStuck:'உங்கள் ஆடுகளுக்கு நகர இடமில்லை.',
+  loseWhyLost:'புலிகள் 6 ஆடுகளைப் பிடித்துவிட்டன.', loseWhyMoves:'புலிகளை அடைப்பதற்குள் 20 நகர்வுகள் முடிந்துவிட்டன.', loseWhyStuck:'உங்கள் ஆடுகளுக்கு நகர இடமில்லை.',
   saved:'காப்பாற்றிய பணம்', of:'₹15,000-இல்', goatsLeft:n=>`15-இல் ${n} ஆடுகள் பாதுகாப்பு`,
   survT:'எந்த முதலீடுகள் தப்பின',
   sipT:'இதை ஒவ்வொரு மாதமும் முதலீடு செய்தால்?',
@@ -378,6 +410,100 @@ const T = {
   ok:'சரி'
  }
 };
+/* ================= TEXT: new features (English and Tamil kept separate) ================= */
+(function(){const N=CONFIG.MAX_GOAT_MOVES;
+Object.assign(T.en,{
+  privacy:'Privacy policy',
+  place:'Your turn: choose an asset below the board, then tap an empty point to place that goat.',
+  moveOrPlace:'Your turn: move a goat, or choose Mutual Fund below to place your bonus goat.',
+  pickFirst:'First tap an asset button below the board.',
+  picked:a=>`${a} selected – now tap an empty point.`,
+  risk:{high:'High',medium:'Medium',low:'Low',safe:'Safety'},
+  efName:'Emergency Fund',
+  efStat:(s,used,inHand,lost)=>used?'🛟 Emergency Fund used':lost?'🛟 Emergency Fund lost':inHand?'🛟 Emergency Fund not placed yet':s>=3?'🛟 Emergency Fund ready':`🛟 Emergency Fund safe ${s}/3`,
+  efSaved:a=>`🛟 Emergency Fund to the rescue! Your ${a} goat comes back to your hand.`,
+  sipBonus:'Consistency pays – SIP bonus! +1 Mutual Fund goat.',
+  streakL:(n,b)=>`SIP streak ${n}/5 · Bonus goats ${b}/3`,
+  twice:n=>`🐯 ${n} moves again!`,
+  newsT:'📰 Market News', activeL:'This turn:',
+  news:[
+   {h:'Gold price rises',b:'Gold goats are safe for 1 turn.'},
+   {h:'RBI rate hike',b:'FD goats are safe for 1 turn.'},
+   {h:'Deposit insurance reminder',b:'Bank goats are safe for 1 turn.'},
+   {h:'Strong company results',b:'Stock goats are safe for 1 turn.'},
+   {h:'Record SIP inflows',b:'Mutual Fund goats are safe for 1 turn.'},
+   {h:'Market crash',b:'Panic everywhere – the tigers move twice.'},
+   {h:'Fake tip spreads',b:'The Fake Tips tiger moves twice.'},
+   {h:'Panic selling hits',b:'The Panic Selling tiger moves twice.'},
+   {h:'Loan rates jump',b:'The High Debt tiger moves twice.'},
+   {h:'Investor awareness week',b:'Everyone checks before investing – no goat can be captured for 1 turn.'}],
+  diffL:'Difficulty',
+  diff:{easy:'Easy',medium:'Medium',hard:'Hard'},
+  diffHelp:{easy:'Tigers capture when they can, otherwise move at random.',medium:'Tigers also move to set up captures.',hard:'Tigers think 2 moves ahead.'},
+  lbT:"Today's Top 10", lbCols:['#','Name','Goats saved','Maturity'], lbEmpty:'No games finished today yet. Be the first!', lbLoading:'Loading…',
+  gameT:'Your game', orderT:'Assets you chose to protect first', diffShown:'Difficulty', bonusShown:'Bonus goats (SIP)', efShown:'Emergency Fund used', newsShown:'Market news seen', yes:'Yes', no:'No', none:'None',
+  loseWhyMoves:`${N} moves finished before the tigers were trapped.`,
+  of:n=>`of ₹${n}`, goatsLeft:(n,tot)=>`${n} of ${tot} goats safe`,
+  rules:[
+   'You are the goats: 15 goats = ₹15,000 of investments, 3 each in Bank, FD, Gold, Mutual Fund and Stocks, plus 1 Emergency Fund goat.',
+   'The computer plays 3 tigers = market risks: Panic Selling, Fake Tips, High Debt.',
+   'Placing: tap an asset button below the board, then tap an empty point to place that goat. Then a tiger moves.',
+   'Risk: Stocks give the highest return but the tigers hunt them first. Mutual Fund and Gold are medium. FD and Bank grow slowly but are the safest – the tigers prefer other goats.',
+   'Moving: when all goats are placed, tap a goat and move it one step along a line to an empty point.',
+   'A tiger moves one step, or jumps over one goat in a straight line to the empty point just beyond. That goat (₹1,000) is lost. Goats cannot jump – keep them together.',
+   'Emergency Fund: keep this goat on a point where no tiger can jump it for 3 turns. Once in the game it then brings back a goat the tigers take.',
+   'SIP bonus: 5 turns in a row without losing a goat gives 1 bonus Mutual Fund goat (up to 3).',
+   'Market News: every 5 goat turns a news card changes the next tiger turn.',
+   `You WIN when all 3 tigers are trapped. Tigers win if they take 6 goats, or if they are not trapped within ${N} goat moves.`,
+   'Each mobile number can play only once.'],
+  extraLessons:['High return means high risk: the tigers hunted Stocks first, while FD and Bank stayed safer but grew slowly.','An emergency fund protects your other investments when trouble comes.']
+});
+Object.assign(T.ta,{
+  privacy:'தனியுரிமைக் கொள்கை',
+  place:'உங்கள் முறை: பலகைக்குக் கீழே ஒரு முதலீட்டைத் தேர்ந்தெடுத்து, காலிப் புள்ளியைத் தொட்டு அந்த ஆட்டை வையுங்கள்.',
+  moveOrPlace:'உங்கள் முறை: ஒரு ஆட்டை நகர்த்துங்கள், அல்லது போனஸ் ஆட்டை வைக்க கீழே மியூச்சுவல் ஃபண்டைத் தேர்ந்தெடுங்கள்.',
+  pickFirst:'முதலில் பலகைக்குக் கீழே உள்ள ஒரு முதலீட்டுப் பொத்தானைத் தொடவும்.',
+  picked:a=>`${a} தேர்ந்தெடுக்கப்பட்டது – இப்போது ஒரு காலிப் புள்ளியைத் தொடவும்.`,
+  risk:{high:'அதிகம்',medium:'நடுத்தரம்',low:'குறைவு',safe:'பாதுகாப்பு'},
+  efName:'அவசர நிதி',
+  efStat:(s,used,inHand,lost)=>used?'🛟 அவசர நிதி பயன்பட்டது':lost?'🛟 அவசர நிதி இழக்கப்பட்டது':inHand?'🛟 அவசர நிதி இன்னும் வைக்கப்படவில்லை':s>=3?'🛟 அவசர நிதி தயார்':`🛟 அவசர நிதி பாதுகாப்பு ${s}/3`,
+  efSaved:a=>`🛟 அவசர நிதி காப்பாற்றியது! உங்கள் ${a} ஆடு மீண்டும் கைக்கு வந்தது.`,
+  sipBonus:'தொடர்ச்சிக்கு பலன் – SIP போனஸ்! +1 மியூச்சுவல் ஃபண்ட் ஆடு.',
+  streakL:(n,b)=>`SIP தொடர் ${n}/5 · போனஸ் ஆடுகள் ${b}/3`,
+  twice:n=>`🐯 ${n} மீண்டும் நகர்கிறது!`,
+  newsT:'📰 சந்தைச் செய்தி', activeL:'இந்த முறை:',
+  news:[
+   {h:'தங்கம் விலை உயர்வு',b:'தங்க ஆடுகள் 1 முறை பாதுகாப்பாக இருக்கும்.'},
+   {h:'RBI வட்டி விகித உயர்வு',b:'FD ஆடுகள் 1 முறை பாதுகாப்பாக இருக்கும்.'},
+   {h:'வைப்புத்தொகை காப்பீடு நினைவூட்டல்',b:'வங்கி ஆடுகள் 1 முறை பாதுகாப்பாக இருக்கும்.'},
+   {h:'நிறுவனங்களின் வலுவான முடிவுகள்',b:'பங்கு ஆடுகள் 1 முறை பாதுகாப்பாக இருக்கும்.'},
+   {h:'SIP முதலீடு சாதனை அளவு',b:'மியூச்சுவல் ஃபண்ட் ஆடுகள் 1 முறை பாதுகாப்பாக இருக்கும்.'},
+   {h:'சந்தை சரிவு',b:'எங்கும் பதற்றம் – புலிகள் இரண்டு முறை நகரும்.'},
+   {h:'போலி டிப்ஸ் பரவுகிறது',b:'போலி டிப்ஸ் புலி இரண்டு முறை நகரும்.'},
+   {h:'பயத்தில் விற்பனை',b:'பயத்தில் விற்பது புலி இரண்டு முறை நகரும்.'},
+   {h:'கடன் வட்டி உயர்வு',b:'அதிக கடன் புலி இரண்டு முறை நகரும்.'},
+   {h:'முதலீட்டாளர் விழிப்புணர்வு வாரம்',b:'எல்லோரும் யோசித்து முதலீடு செய்கிறார்கள் – 1 முறை எந்த ஆடும் பிடிபடாது.'}],
+  diffL:'கடின நிலை',
+  diff:{easy:'எளிது',medium:'நடுத்தரம்',hard:'கடினம்'},
+  diffHelp:{easy:'புலிகள் முடிந்தால் பிடிக்கும், இல்லையெனில் தோராயமாக நகரும்.',medium:'புலிகள் பிடிப்பதற்கான வாய்ப்பையும் தயார் செய்யும்.',hard:'புலிகள் 2 நகர்வுகள் முன்கூட்டியே யோசிக்கும்.'},
+  lbT:'இன்றைய முதல் 10', lbCols:['#','பெயர்','காப்பாற்றிய ஆடுகள்','முதிர்வுத் தொகை'], lbEmpty:'இன்று இன்னும் யாரும் முடிக்கவில்லை. முதலில் நீங்கள் விளையாடுங்கள்!', lbLoading:'ஏற்றுகிறது…',
+  gameT:'உங்கள் ஆட்டம்', orderT:'முதலில் பாதுகாக்கத் தேர்ந்தெடுத்த முதலீடுகள்', diffShown:'கடின நிலை', bonusShown:'போனஸ் ஆடுகள் (SIP)', efShown:'அவசர நிதி பயன்பட்டதா', newsShown:'பார்த்த சந்தைச் செய்திகள்', yes:'ஆம்', no:'இல்லை', none:'இல்லை',
+  loseWhyMoves:`புலிகளை அடைப்பதற்குள் ${N} நகர்வுகள் முடிந்துவிட்டன.`,
+  of:n=>`₹${n}-இல்`, goatsLeft:(n,tot)=>`${tot}-இல் ${n} ஆடுகள் பாதுகாப்பு`,
+  rules:[
+   'நீங்கள் ஆடுகள்: 15 ஆடுகள் = ₹15,000 முதலீடு – வங்கி, FD, தங்கம், மியூச்சுவல் ஃபண்ட், பங்குகள் ஒவ்வொன்றிலும் 3, மேலும் 1 அவசர நிதி ஆடு.',
+   'கணினி 3 புலிகளாக விளையாடும் = சந்தை அபாயங்கள்: பயத்தில் விற்பது, போலி டிப்ஸ், அதிக கடன்.',
+   'வைக்கும் கட்டம்: பலகைக்குக் கீழே ஒரு முதலீட்டுப் பொத்தானைத் தொட்டு, பிறகு ஒரு காலிப் புள்ளியைத் தொட்டு அந்த ஆட்டை வையுங்கள். பிறகு ஒரு புலி நகரும்.',
+   'அபாயம்: பங்குகள் அதிக வருமானம் தரும், ஆனால் புலிகள் முதலில் அவற்றையே வேட்டையாடும். மியூச்சுவல் ஃபண்ட், தங்கம் நடுத்தர அபாயம். FD, வங்கி மெதுவாக வளரும், ஆனால் மிகவும் பாதுகாப்பானவை – புலிகள் மற்ற ஆடுகளையே விரும்பும்.',
+   'நகர்த்தும் கட்டம்: எல்லா ஆடுகளும் வைத்த பிறகு, ஒரு ஆட்டைத் தொட்டு, கோட்டின் வழியே ஒரு படி காலிப் புள்ளிக்கு நகர்த்துங்கள்.',
+   'புலி ஒரு படி நகரும், அல்லது நேர்கோட்டில் ஒரு ஆட்டைத் தாண்டி அடுத்த காலிப் புள்ளியில் குதிக்கும். அந்த ஆடு (₹1,000) இழக்கப்படும். ஆடுகள் தாண்ட முடியாது – ஒன்றாக வையுங்கள்.',
+   'அவசர நிதி: இந்த ஆட்டை எந்தப் புலியும் தாண்ட முடியாத புள்ளியில் 3 முறை வைத்திருங்கள். பிறகு ஆட்டத்தில் ஒரு முறை, புலி பிடிக்கும் ஆட்டை அது மீட்டுத் தரும்.',
+   'SIP போனஸ்: தொடர்ந்து 5 முறை ஆடு இழக்காமல் இருந்தால் 1 போனஸ் மியூச்சுவல் ஃபண்ட் ஆடு கிடைக்கும் (அதிகபட்சம் 3).',
+   'சந்தைச் செய்தி: ஒவ்வொரு 5 ஆடு முறைக்கும் ஒரு செய்தி அட்டை அடுத்த புலி முறையை மாற்றும்.',
+   `3 புலிகளும் அடைக்கப்பட்டால் நீங்கள் வெற்றி பெறுவீர்கள். புலிகள் 6 ஆடுகளைப் பிடித்தாலோ, ${N} ஆடு நகர்வுகளுக்குள் அடைக்கப்படாவிட்டாலோ புலிகள் வெற்றி பெறும்.`,
+   'ஒரு மொபைல் எண்ணுக்கு ஒரு முறை மட்டுமே விளையாடலாம்.'],
+  extraLessons:['அதிக வருமானம் = அதிக அபாயம்: புலிகள் முதலில் பங்குகளை வேட்டையாடின; FD, வங்கி பாதுகாப்பாக இருந்தன, ஆனால் மெதுவாக வளர்ந்தன.','அவசர நிதி இருந்தால், சிக்கல் வரும்போது மற்ற முதலீடுகள் பாதுகாக்கப்படும்.']
+});})();
 let L='en'; const t=k=>T[L][k];
 const fmt=n=>Math.round(n).toLocaleString('en-IN');
 const $=id=>document.getElementById(id);
@@ -391,9 +517,13 @@ function sendSheet(rec){if(!CONFIG.SHEET_URL)return;try{fetch(CONFIG.SHEET_URL,{
 /* ================= SCREENS ================= */
 const screens=['sLang','sReg','sGame','sRes','sAdmin'];
 function show(id){screens.forEach(s=>$(s).classList.toggle('hidden',s!==id));window.scrollTo(0,0);}
+function renderDiff(){const b=$('diffBox');if(!b)return;
+  b.innerHTML=['easy','medium','hard'].map(d=>`<button type="button" role="radio" aria-checked="${DIFF===d}" class="dbtn${DIFF===d?' on':''}" data-d="${d}"><b>${t('diff')[d]}</b><small>${t('diffHelp')[d]}</small></button>`).join('');}
+document.getElementById('diffBox').addEventListener('click',e=>{const x=e.target.closest('[data-d]');if(!x)return;DIFF=x.dataset.d;renderDiff();});
 function applyLang(){
   document.documentElement.lang=L;
   document.querySelectorAll('[data-t]').forEach(el=>{el.textContent=t(el.dataset.t);});
+  renderDiff();
 }
 document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{L=b.dataset.lang;applyLang();show('sReg');});
 $('backLang').onclick=()=>show('sLang');
@@ -409,9 +539,9 @@ $('regForm').addEventListener('submit',e=>{
   const recs=loadRecs();
   if(recs.some(r=>r.mobile===mob)){err.textContent=t('eDup');return;}
   err.textContent='';const sb=$('regForm').querySelector('[type=submit]');sb.disabled=true;
-  MG.register('aadupuli',{name,mobile:mob,age,lang:L}).then(rr=>{sb.disabled=false;
+  MG.register('aadupuli',{name,mobile:mob,age,lang:L,mode:DIFF}).then(rr=>{sb.disabled=false;
     if(rr.dup){err.textContent=t('eDup');return;}
-    player={id:Date.now().toString(36),mgId:rr.id,name,mobile:mob,age,lang:L,date:new Date().toLocaleString('en-IN'),status:'started'};
+    player={id:Date.now().toString(36),mgId:rr.id,name,mobile:mob,age,lang:L,difficulty:DIFF,date:new Date().toLocaleString('en-IN'),status:'started'};
     recs.push(player);saveRecs(recs);
     startGame();
   });
@@ -433,21 +563,28 @@ LINES.forEach(Ln=>{for(let k=0;k<Ln.length-1;k++){ADJ[Ln[k]].add(Ln[k+1]);ADJ[Ln
   for(let k=0;k<Ln.length-2;k++){JUMPS[Ln[k]].push({over:Ln[k+1],to:Ln[k+2]});JUMPS[Ln[k+2]].push({over:Ln[k+1],to:Ln[k]});}});
 
 /* ================= GAME STATE ================= */
-let G=null;
+const RISK={stocks:'high',mf:'medium',gold:'medium',fd:'low',bank:'low',ef:'safe'};
+const TVAL={stocks:5,mf:3,gold:3,ef:2,fd:1,bank:1};            // how much the tigers want each goat
+const ACOL2=Object.assign({},ACOL,{ef:'#e11d48'});
+const ALL_A=[...ASSETS,'ef'];
+/* Market news: effect of each card on the next tiger turn (same order as T.en.news / T.ta.news) */
+const NEWS_FX=[{safe:'gold'},{safe:'fd'},{safe:'bank'},{safe:'stocks'},{safe:'mf'},{twice:true},{tiger:1},{tiger:0},{tiger:2},{all:true}];
+let G=null, DIFF='medium';
+const assetName=a=>a==='ef'?t('efName'):t('assets')[a];
+const handTotal=()=>ALL_A.reduce((s,a)=>s+G.hand[a],0);
 function startGame(){
-  G={board:Array(P.length).fill(null),goats:[],tigers:[],phase:'place',placed:0,lost:0,moves:0,busy:false,sel:null,groupShown:0,turn:0,trapSeen:new Set(),end:null};
+  G={board:Array(P.length).fill(null),goats:[],tigers:[],phase:'place',lost:0,moves:0,busy:false,sel:null,pick:null,groupShown:0,turn:0,trapSeen:new Set(),end:null,
+     hand:{bank:3,fd:3,gold:3,mf:3,stocks:3,ef:1},order:[],bonus:0,streak:0,ef:{gi:null,safe:0,used:false,moved:false},news:[],eff:null,diff:DIFF};
   [apex,rows[1][2],rows[1][3]].forEach((p,i)=>{G.tigers.push({pos:p,i});G.board[p]='T'+i;});
-  buildBoard();applyLang();renderRules();show('sGame');update();setMsg(t('place'));
+  buildBoard();applyLang();renderRules();show('sGame');update();yourTurnMsg();
 }
-function renderRules(){$('rulesList').innerHTML=t('rules').map(r=>`<li>${r}</li>`).join('');
-  $('legend').innerHTML=ASSETS.map(a=>`<span><i class="dot" style="background:${ACOL[a]}"></i>${t('assets')[a]}</span>`).join('');}
+function renderRules(){$('rulesList').innerHTML=t('rules').map(r=>`<li>${r}</li>`).join('');$('legend').innerHTML='';}
 
 const NS='http://www.w3.org/2000/svg';
 function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
 let layerHint,layerPieces,pieceEls={};
 function buildBoard(){
   const svg=$('board');svg.innerHTML='';pieceEls={};
-  // background: candles + bull/bear
   const bg=el('g',{},svg);
   for(let i=0;i<14;i++){const x=10+i*29.5,h=10+((i*37)%22),up=(i*7)%3!==0,y=338-h;
     el('line',{x1:x+4,x2:x+4,y1:y-5,y2:y+h+3,stroke:up?'#16a34a':'#dc2626','stroke-width':1.2,opacity:.35},bg);
@@ -456,22 +593,20 @@ function buildBoard(){
   const tr=el('text',{x:380,y:70,'font-size':54,opacity:.18,'text-anchor':'middle'},bg);tr.textContent='🐻';
   const lb1=el('text',{x:40,y:96,'font-size':11,'font-weight':800,fill:'#15803d','text-anchor':'middle',opacity:.6},bg);lb1.textContent='BULL';
   const lb2=el('text',{x:380,y:96,'font-size':11,'font-weight':800,fill:'#b91c1c','text-anchor':'middle',opacity:.6},bg);lb2.textContent='BEAR';
-  // lines
   const lg=el('g',{stroke:'#0f3d91','stroke-width':3,'stroke-linecap':'round',fill:'none'},svg);
   LINES.forEach(Ln=>{const a=P[Ln[0]],b=P[Ln[Ln.length-1]];el('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y},lg);});
-  // points
   const pg=el('g',{},svg);
-  P.forEach((p,i)=>el('circle',{cx:p.x,cy:p.y,r:7,fill:'#fff',stroke:'#0f3d91','stroke-width':2.5},pg));
-  layerHint=el('g',{},svg);
-  layerPieces=el('g',{},svg);
+  P.forEach(p=>el('circle',{cx:p.x,cy:p.y,r:7,fill:'#fff',stroke:'#0f3d91','stroke-width':2.5},pg));
+  layerHint=el('g',{},svg);layerPieces=el('g',{},svg);
   svg.onclick=onBoardClick;
 }
 function piecePos(e,p){e.style.transform=`translate(${P[p].x}px,${P[p].y}px)`;}
 function makeGoatEl(gi){
   const g=G.goats[gi];const e=el('g',{class:'pc'},layerPieces);
   e.style.transition='transform .45s ease, opacity .5s';
-  el('circle',{r:15,fill:ACOL[g.asset],stroke:'#fff','stroke-width':3},e);
-  const tx=el('text',{y:6,'font-size':16,'text-anchor':'middle'},e);tx.textContent='🐐';
+  el('circle',{r:15,fill:ACOL2[g.asset],stroke:g.asset==='ef'?'#fde047':'#fff','stroke-width':3},e);
+  const tx=el('text',{y:6,'font-size':16,'text-anchor':'middle'},e);tx.textContent=g.asset==='ef'?'🛟':'🐐';
+  if(g.bonus){el('circle',{cx:11,cy:-11,r:6,fill:'#16a34a',stroke:'#fff','stroke-width':1.5},e);const s=el('text',{x:11,y:-8,'font-size':8,'font-weight':800,fill:'#fff','text-anchor':'middle'},e);s.textContent='+';}
   pieceEls['g'+gi]=e;piecePos(e,g.pos);
   e.animate([{transform:`translate(${P[g.pos].x}px,${P[g.pos].y}px) scale(.2)`},{transform:`translate(${P[g.pos].x}px,${P[g.pos].y}px) scale(1)`}],{duration:250});
 }
@@ -486,30 +621,62 @@ function makeTigerEl(ti){
 
 /* ================= RULE ENGINE ================= */
 const isGoat=v=>typeof v==='number';
-function tigerMovesOf(ti){const pos=G.tigers[ti].pos,res=[];
-  ADJ[pos].forEach(n=>{if(G.board[n]===null)res.push({ti,from:pos,to:n});});
-  JUMPS[pos].forEach(j=>{if(isGoat(G.board[j.over])&&G.board[j.to]===null)res.push({ti,from:pos,to:j.to,cap:j.over});});
+/* moves of tiger ti on any board (board cells: null, 'T0'.., goat index, or -1 for a goat in a what-if) */
+function tMoves(board,tpos,ti){const pos=tpos[ti],res=[];
+  ADJ[pos].forEach(n=>{if(board[n]===null)res.push({ti,from:pos,to:n});});
+  JUMPS[pos].forEach(j=>{if(isGoat(board[j.over])&&board[j.to]===null)res.push({ti,from:pos,to:j.to,cap:j.over});});
   return res;}
+const tposNow=()=>G.tigers.map(x=>x.pos);
+function tigerMovesOf(ti){return tMoves(G.board,tposNow(),ti);}
 const allTigerMoves=()=>G.tigers.flatMap((_,i)=>tigerMovesOf(i));
 function goatMovesFrom(p){return [...ADJ[p]].filter(n=>G.board[n]===null);}
-function anyGoatMove(){return G.goats.some(g=>!g.lost&&goatMovesFrom(g.pos).length);}
+function anyGoatMove(){return G.goats.some(g=>!g.lost&&!g.gone&&goatMovesFrom(g.pos).length);}
+const gval=(board,cell)=>{const v=board[cell];return v>=0&&G.goats[v]?TVAL[G.goats[v].asset]:1;};
+/* market news can make some goats safe for one tiger turn */
+function capOK(m){if(m.cap===undefined||!G.eff)return true;if(G.eff.all)return false;return !(G.eff.safe&&G.goats[G.board[m.cap]].asset===G.eff.safe);}
+function applyT(board,tpos,m){const b=board.slice(),tp=tpos.slice();b[m.from]=null;b[m.to]='T'+m.ti;tp[m.ti]=m.to;if(m.cap!==undefined)b[m.cap]=null;return [b,tp];}
+function bestCapVal(board,tpos){let v=0;for(let i=0;i<tpos.length;i++)tMoves(board,tpos,i).forEach(m=>{if(m.cap!==undefined)v=Math.max(v,gval(board,m.cap));});return v;}
+function threatOf(board,tpos,ti){let s=0;tMoves(board,tpos,ti).forEach(m=>{if(m.cap!==undefined)s+=gval(board,m.cap);});return s;}
+/* every reply the goats could make (used by Hard tigers) */
+function goatReplies(board){const r=[];
+  if(handTotal()>0)board.forEach((v,i)=>{if(v===null){const b=board.slice();b[i]=-1;r.push(b);}});
+  if(G.phase!=='place')board.forEach((v,i)=>{if(isGoat(v)&&v>=0)ADJ[i].forEach(n=>{if(board[n]===null){const b=board.slice();b[n]=v;b[i]=null;r.push(b);}});});
+  return r.length?r:[board];}
+/* the tigers' choice, by difficulty */
+function pickMove(list){
+  const rnd=a=>a[Math.floor(Math.random()*a.length)];
+  const top=(arr,f)=>{let best=-Infinity,out=[];arr.forEach(m=>{const v=f(m);if(v>best+1e-9){best=v;out=[m];}else if(Math.abs(v-best)<=1e-9)out.push(m);});return rnd(out);};
+  const caps=list.filter(m=>m.cap!==undefined),tp=tposNow();
+  if(G.diff==='easy')return caps.length?top(caps,m=>gval(G.board,m.cap)):rnd(list);
+  if(G.diff==='medium'){if(caps.length)return top(caps,m=>gval(G.board,m.cap));
+    return top(list,m=>{const [b,p]=applyT(G.board,tp,m);return threatOf(b,p,m.ti)+Math.random()*0.5;});}
+  /* hard: look 2 moves ahead – this move, the goats' best reply, then the best capture left */
+  return top(list,m=>{const [b,p]=applyT(G.board,tp,m);const now=m.cap!==undefined?gval(G.board,m.cap)*10:0;
+    let worst=Infinity;for(const rb of goatReplies(b)){const v=bestCapVal(rb,p);if(v<worst)worst=v;if(worst===0)break;}
+    return now+worst*3+threatOf(b,p,m.ti)*0.2+Math.random()*0.3;});
+}
 
 /* ================= UI UPDATE ================= */
 function update(){
   $('tigerCards').innerHTML=G.tigers.map((tg,i)=>{const trapped=tigerMovesOf(i).length===0;
     return `<div class="tcard ${trapped?'trap':''}"><span class="em">${trapped?'🔒':'🐯'} ${i+1}</span>${t('tigers')[i]}<br><small>${trapped?t('trapped'):t('active')}</small></div>`;}).join('');
-  $('stHand').textContent=15-G.placed;$('stLost').textContent=G.lost;
+  $('stHand').textContent=handTotal();$('stLost').textContent=G.lost;
   $('stMoves').textContent=`${G.moves}/${CONFIG.MAX_GOAT_MOVES}`;
   if(!pieceEls.t0)G.tigers.forEach((_,i)=>makeTigerEl(i));
-  if(G.phase==='place'){const a=ASSETS[G.placed%5];$('nextGoat').innerHTML=`${t('nextGoat')} <i class="dot" style="background:${ACOL[a]}"></i> ${t('assets')[a]} (₹1,000)`;}
-  else $('nextGoat').innerHTML='';
+  renderAssets();
+  const efg=G.ef.gi!==null?G.goats[G.ef.gi]:null;
+  $('streak').textContent=`${t('streakL')(G.streak,G.bonus)} · ${t('efStat')(G.ef.safe,G.ef.used,G.hand.ef>0,!!(efg&&efg.lost))}`;
   drawHints();
+}
+function renderAssets(){
+  const canPlace=G.phase!=='over'&&(G.phase==='place'||handTotal()>0);
+  if(G.pick&&!G.hand[G.pick])G.pick=null;
+  $('assetBar').innerHTML=ALL_A.map(a=>{const n=G.hand[a];
+    return `<button type="button" class="ab${G.pick===a?' on':''}${a==='ef'?' efb':''}" data-a="${a}"${(!n||!canPlace)?' disabled':''}><i class="dot" style="background:${ACOL2[a]}"></i><span class="an">${assetName(a)}</span><span class="ac">×${n}</span><span class="rk ${RISK[a]}">${t('risk')[RISK[a]]}</span></button>`;}).join('');
 }
 function drawHints(){
   layerHint.innerHTML='';if(!G||G.phase==='over')return;
-  // exposed goats
-  const caps=allTigerMoves().filter(m=>m.cap!==undefined);
-  caps.forEach(m=>el('circle',{cx:P[m.cap].x,cy:P[m.cap].y,r:21,fill:'none',stroke:'#dc2626','stroke-width':3,'stroke-dasharray':'4 3'},layerHint));
+  allTigerMoves().filter(m=>m.cap!==undefined).forEach(m=>el('circle',{cx:P[m.cap].x,cy:P[m.cap].y,r:21,fill:'none',stroke:'#dc2626','stroke-width':3,'stroke-dasharray':'4 3'},layerHint));
   if(G.sel!==null){
     el('circle',{cx:P[G.sel].x,cy:P[G.sel].y,r:21,fill:'none',stroke:'#f5b301','stroke-width':4},layerHint);
     goatMovesFrom(G.sel).forEach(n=>{const c=el('circle',{cx:P[n].x,cy:P[n].y,r:13,fill:'#f5b301',opacity:.75},layerHint);
@@ -519,58 +686,93 @@ function drawHints(){
 function setMsg(text,kind){const m=$('msg');m.textContent=text;m.className='msg'+(kind?' '+kind:'');}
 function yourTurnMsg(){
   const exposed=allTigerMoves().some(m=>m.cap!==undefined);
-  setMsg((G.phase==='place'?t('place'):t('move'))+(exposed?' '+t('exposed'):''),exposed?'bad':'');
+  setMsg((G.phase==='place'?t('place'):handTotal()>0?t('moveOrPlace'):t('move'))+(exposed?' '+t('exposed'):''),exposed?'bad':'');
 }
 
 /* ================= INPUT ================= */
+$('assetBar').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.disabled||!G||G.busy)return;
+  G.pick=b.dataset.a;G.sel=null;renderAssets();drawHints();setMsg(t('picked')(assetName(G.pick)));});
 function onBoardClick(ev){
   if(!G||G.busy||G.phase==='over')return;
   const svg=$('board');const pt=svg.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;
   const sp=pt.matrixTransform(svg.getScreenCTM().inverse());
   let best=-1,bd=30;P.forEach((p,i)=>{const d=Math.hypot(p.x-sp.x,p.y-sp.y);if(d<bd){bd=d;best=i;}});
   if(best<0)return;
-  if(G.phase==='place'){
-    if(G.board[best]!==null)return;
-    const gi=G.goats.length;G.goats.push({asset:ASSETS[gi%5],pos:best,lost:false});
-    G.board[best]=gi;G.placed++;makeGoatEl(gi);
-    if(G.placed===15)G.phase='move';
-    afterGoat();
-  }else{
-    const v=G.board[best];
-    if(isGoat(v)){ if(!goatMovesFrom(best).length){G.sel=null;setMsg(t('noMoveGoat'),'bad');drawHints();return;}
-      G.sel=best;setMsg(t('pick'));drawHints();return;}
-    if(v===null&&G.sel!==null&&ADJ[G.sel].has(best)){
-      const gi=G.board[G.sel];G.board[G.sel]=null;G.board[best]=gi;G.goats[gi].pos=best;piecePos(pieceEls['g'+gi],best);
-      G.sel=null;G.moves++;afterGoat();
-    }
+  const v=G.board[best];
+  if(v===null&&(G.phase==='place'||(handTotal()>0&&G.sel===null))){
+    if(!G.pick||!G.hand[G.pick]){setMsg(t('pickFirst'),'bad');const bar=$('assetBar');bar.classList.remove('nudge');void bar.offsetWidth;bar.classList.add('nudge');return;}
+    return placeGoat(best);
   }
+  if(G.phase==='place')return;
+  if(isGoat(v)){if(!goatMovesFrom(best).length){G.sel=null;setMsg(t('noMoveGoat'),'bad');drawHints();return;}
+    G.sel=best;G.pick=null;renderAssets();setMsg(t('pick'));drawHints();return;}
+  if(v===null&&G.sel!==null&&ADJ[G.sel].has(best)){
+    const gi=G.board[G.sel];G.board[G.sel]=null;G.board[best]=gi;G.goats[gi].pos=best;piecePos(pieceEls['g'+gi],best);
+    if(G.goats[gi].asset==='ef')G.ef.moved=true;
+    G.sel=null;G.moves++;afterGoat();
+  }
+}
+function placeGoat(p){
+  const a=G.pick,gi=G.goats.length;
+  G.goats.push({asset:a,pos:p,lost:false,bonus:a==='mf'&&G.phase!=='place'});
+  G.board[p]=gi;G.hand[a]--;if(!G.order.includes(a))G.order.push(a);
+  if(a==='ef'){G.ef.gi=gi;G.ef.safe=0;}
+  if(G.phase==='place'){if(!handTotal())G.phase='move';}else G.moves++;
+  makeGoatEl(gi);afterGoat();
 }
 function afterGoat(){
   G.turn++;update();
-  const tm=allTigerMoves();
-  let special=null;
-  // newly trapped tigers
+  const tm=allTigerMoves();let special=null;
   G.tigers.forEach((_,i)=>{const tr=tigerMovesOf(i).length===0;if(tr&&!G.trapSeen.has(i)){G.trapSeen.add(i);special=t('trapMsg')(t('tigers')[i]);}if(!tr)G.trapSeen.delete(i);});
-  if(!tm.length){return finish('win');}
-  // diversification message: a tiger next to a goat that is protected (landing blocked)
+  if(!tm.length)return finish('win');
   const protectedNow=G.tigers.some(tg=>JUMPS[tg.pos].some(j=>isGoat(G.board[j.over])&&G.board[j.to]!==null));
-  const anyCap=tm.some(m=>m.cap!==undefined);
-  if(!special&&protectedNow&&!anyCap&&G.turn-G.groupShown>=5){G.groupShown=G.turn;special=t('group');}
+  if(!special&&protectedNow&&!tm.some(m=>m.cap!==undefined)&&G.turn-G.groupShown>=5){G.groupShown=G.turn;special=t('group');}
   G.busy=true;
-  if(special)setMsg(special,'good');else setMsg(t('think'));
-  setTimeout(tigerTurn,special?1600:650);
+  const go=()=>{if(special)setMsg(special,'good');else setMsg(t('think'));setTimeout(tigerTurn,special?1600:650);};
+  if(G.turn%5===0)showNews(go);else go();
 }
+/* every 5 goat turns: one market news card for the next tiger turn */
+function showNews(cb){
+  let pool=NEWS_FX.map((_,i)=>i).filter(i=>!G.news.includes(i));if(!pool.length)pool=NEWS_FX.map((_,i)=>i);
+  const i=pool[Math.floor(Math.random()*pool.length)];G.news.push(i);G.eff=Object.assign({},NEWS_FX[i]);
+  const n=t('news')[i];$('legend').innerHTML=`<b>${t('activeL')}</b> ${n.h} – ${n.b}`;
+  $('ovCard').innerHTML=`<div class="newsc"><div class="nk">${t('newsT')}</div><h3>${n.h}</h3><p>${n.b}</p></div><button class="btn alt" id="nOk">${t('ok')}</button>`;
+  $('ov').classList.remove('hidden');$('nOk').onclick=()=>{$('ov').classList.add('hidden');cb();};
+}
+function efReady(){return G.ef.gi!==null&&!G.ef.used&&!G.goats[G.ef.gi].lost&&G.ef.safe>=3;}
 function tigerTurn(){
-  const tm=allTigerMoves();if(!tm.length){G.busy=false;return finish('win');}
-  const caps=tm.filter(m=>m.cap!==undefined);
-  // EASY mode: capture when possible, otherwise a random move
-  const mv=caps.length?caps[Math.floor(Math.random()*caps.length)]:tm[Math.floor(Math.random()*tm.length)];
-  const tg=G.tigers[mv.ti];G.board[mv.from]=null;G.board[mv.to]='T'+mv.ti;tg.pos=mv.to;piecePos(pieceEls['t'+mv.ti],mv.to);
-  let captured=false;
-  if(mv.cap!==undefined){const gi=G.board[mv.cap];G.board[mv.cap]=null;G.goats[gi].lost=true;G.lost++;captured=true;
-    const e=pieceEls['g'+gi];e.style.opacity='0';setTimeout(()=>e.remove(),500);
-    setMsg(t('capture')(t('tigers')[mv.ti],t('assets')[G.goats[gi].asset]),'bad');
-    flashLoss(P[mv.cap]);}
+  if(!allTigerMoves().length){G.busy=false;return finish('win');}
+  const steps=[null];if(G.eff&&G.eff.twice)steps.push(null);if(G.eff&&G.eff.tiger!==undefined)steps.push(G.eff.tiger);
+  let captured=false,lostOne=false;
+  const run=k=>{
+    if(k>=steps.length)return endTigerTurn(captured,lostOne);
+    const only=steps[k];
+    const list=(only===null?G.tigers.map((_,i)=>i):[only]).flatMap(i=>tigerMovesOf(i)).filter(capOK);
+    if(!list.length)return run(k+1);
+    const mv=pickMove(list);
+    const tg=G.tigers[mv.ti];G.board[mv.from]=null;G.board[mv.to]='T'+mv.ti;tg.pos=mv.to;piecePos(pieceEls['t'+mv.ti],mv.to);
+    let msg=k>0?t('twice')(t('tigers')[mv.ti]):null,kind='bad';
+    if(mv.cap!==undefined){
+      const gi=G.board[mv.cap],g=G.goats[gi];G.board[mv.cap]=null;captured=true;
+      const e=pieceEls['g'+gi];e.style.opacity='0';setTimeout(()=>e.remove(),500);flashLoss(P[mv.cap]);
+      if(g.asset!=='ef'&&efReady()){G.ef.used=true;g.gone=true;G.hand[g.asset]++;msg=t('efSaved')(assetName(g.asset));kind='good';}
+      else{g.lost=true;G.lost++;lostOne=true;msg=t('capture')(t('tigers')[mv.ti],assetName(g.asset));}
+    }
+    if(msg)setMsg(msg,kind);
+    update();
+    setTimeout(()=>run(k+1),mv.cap!==undefined?1300:(k>0?900:500));
+  };
+  run(0);
+}
+function endTigerTurn(captured,lostOne){
+  G.eff=null;$('legend').innerHTML='';
+  if(G.ef.gi!==null&&!G.ef.used&&!G.goats[G.ef.gi].lost){
+    const exposed=allTigerMoves().some(m=>m.cap===G.goats[G.ef.gi].pos);
+    G.ef.safe=(G.ef.moved||exposed)?0:Math.min(3,G.ef.safe+1);G.ef.moved=false;
+  }
+  let special=null;
+  if(lostOne)G.streak=0;
+  else{G.streak++;if(G.streak>=5){if(G.bonus<3){G.bonus++;G.hand.mf++;special=t('sipBonus');}G.streak=0;}}
   G.tigers.forEach((_,i)=>{if(tigerMovesOf(i).length)G.trapSeen.delete(i);});
   update();
   setTimeout(()=>{
@@ -578,12 +780,39 @@ function tigerTurn(){
     if(G.lost>=CONFIG.MAX_LOST)return finish('lose','lost');
     if(!allTigerMoves().length)return finish('win');
     if(G.phase==='move'&&G.moves>=CONFIG.MAX_GOAT_MOVES)return finish('lose','moves');
-    if(G.phase==='move'&&!anyGoatMove())return finish('lose','stuck');
-    if(!captured)yourTurnMsg();
-  },captured?1300:500);
+    if(G.phase==='move'&&!anyGoatMove()&&!handTotal())return finish('lose','stuck');
+    if(G.phase==='move'&&handTotal()&&!G.pick)G.pick='mf';
+    update();
+    if(special)setMsg(special,'good');else if(!captured)yourTurnMsg();
+  },captured?1300:450);
 }
 function flashLoss(p){const g=el('g',{},layerPieces);const tx=el('text',{x:p.x,y:p.y-22,'font-size':14,'font-weight':800,fill:'#dc2626','text-anchor':'middle'},g);tx.textContent='-₹1,000';
   g.animate([{transform:'translateY(0)',opacity:1},{transform:'translateY(-20px)',opacity:0}],{duration:1300,fill:'forwards'});setTimeout(()=>g.remove(),1350);}
+
+/* ================= LEADERBOARD (today's top 10, first names only) ================= */
+async function fetchBoard(){
+  const d=new Date();d.setHours(0,0,0,0);const since=d.toISOString(),F=MG.FB,rows=[],seen={};
+  try{
+    const r=await fetch(`https://firestore.googleapis.com/v1/projects/${F.p}/databases/${encodeURIComponent(F.d)}/documents:runQuery?key=${F.k}`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({structuredQuery:{from:[{collectionId:'gamePlayers'}],where:{fieldFilter:{field:{fieldPath:'registeredAt'},op:'GREATER_THAN_OR_EQUAL',value:{stringValue:since}}},limit:1000}})});
+    if(r.ok)(await r.json()).forEach(x=>{if(!x.document)return;const f=x.document.fields||{},s=k=>f[k]&&f[k].stringValue;
+      if(s('game')!=='aadupuli'||s('status')!=='finished')return;
+      const dt=(f.details&&f.details.mapValue&&f.details.mapValue.fields)||{},n=k=>dt[k]?Number(dt[k].integerValue??dt[k].doubleValue??0):0;
+      const id=x.document.name.split('/').pop();seen[id]=1;rows.push({name:s('name')||'',saved:n('goatsLeft'),total:n('goatsTotal')||15,mat:n('maturityRs')});});
+  }catch(e){}
+  /* games finished on this device today that are not online yet */
+  loadRecs().forEach(x=>{if(x.status==='finished'&&x.finishedAt>=since&&!(x.mgId&&seen[x.mgId]))rows.push({name:x.name,saved:x.goatsLeft||0,total:x.goatsTotal||15,mat:x.maturityRs||0});});
+  return rows.sort((a,b)=>b.saved-a.saved||b.mat-a.mat).slice(0,10);
+}
+async function renderBoard(id,bilingual){
+  const box=$(id);if(!box)return;const tt=k=>bilingual?`${T.en[k]} · ${T.ta[k]}`:t(k);
+  box.innerHTML=`<div class="sec-t">🏆 ${tt('lbT')}</div><p class="lbm">${bilingual?T.en.lbLoading:t('lbLoading')}</p>`;
+  const rows=await fetchBoard();const c=bilingual?T.en.lbCols:t('lbCols');
+  const first=n=>esc(String(n||'').trim().split(/\s+/)[0].slice(0,14));
+  box.innerHTML=`<div class="sec-t">🏆 ${tt('lbT')}</div>`+(rows.length?`<table class="tbl lbt"><thead><tr><th>${c[0]}</th><th>${c[1]}</th><th>${c[2]}</th><th>${c[3]}</th></tr></thead><tbody>${
+    rows.map((r,i)=>`<tr><td>${i<3?['🥇','🥈','🥉'][i]:i+1}</td><td>${first(r.name)}</td><td>${r.saved}/${r.total}</td><td>₹${fmt(r.mat)}</td></tr>`).join('')}</tbody></table>`
+    :`<p class="lbm">${bilingual?`${T.en.lbEmpty}<br>${T.ta.lbEmpty}`:t('lbEmpty')}</p>`);
+}
 
 /* ================= RESULT ================= */
 function sipFV(m,ratePct,yrs){const i=ratePct/1200,n=yrs*12;if(i===0)return m*n;return m*((Math.pow(1+i,n)-1)/i)*(1+i);}
@@ -594,23 +823,32 @@ function finish(res,why){
   setTimeout(()=>showResult(res,why),1100);
 }
 function showResult(res,why){
-  const alive=G.goats.filter(g=>!g.lost); const notPlaced=15-G.goats.length; // goats never placed are still safe money
-  const cnt={};ASSETS.forEach(a=>cnt[a]=alive.filter(g=>g.asset===a).length);
-  for(let k=0;k<notPlaced;k++)cnt[ASSETS[(G.goats.length+k)%5]]++;
-  const left=15-G.lost, saved=left*1000;
+  /* per asset: goats the player had (placed or still in hand) and goats that survived */
+  const tot={},cnt={};ASSETS.forEach(a=>{
+    tot[a]=G.goats.filter(g=>g.asset===a&&!g.gone).length+G.hand[a];
+    cnt[a]=G.goats.filter(g=>g.asset===a&&!g.gone&&!g.lost).length+G.hand[a];});
+  const total=ASSETS.reduce((s,a)=>s+tot[a],0), left=ASSETS.reduce((s,a)=>s+cnt[a],0), saved=left*1000;
   const till=player.age<CONFIG.GOAL_AGE; const yrs=till?CONFIG.GOAL_AGE-player.age:CONFIG.OVER_AGE_YEARS;
   let mat=0;const rowsH=ASSETS.filter(a=>cnt[a]).map(a=>{const m=cnt[a]*1000,v=sipFV(m,RATES[a],yrs);mat+=v;
     return `<tr><td><i class="dot" style="background:${ACOL[a]}"></i> ${t('assets')[a]}</td><td>₹${fmt(m)}</td><td>₹${fmt(v)}</td></tr>`;}).join('');
-  const invested=saved*12*yrs, avg=solveRate(saved,yrs,mat);
+  const invested=saved*12*yrs, avg=saved?solveRate(saved,yrs,mat):0;
   let matE=0;ASSETS.forEach(a=>{if(cnt[a])matE+=sipFV(cnt[a]*1000,RATES[a],yrs+5);});
   const head=res==='win'?t('winH')(esc(player.name)):t('loseH')(esc(player.name));
   const whyTxt=res==='win'?'':({lost:t('loseWhyLost'),moves:t('loseWhyMoves'),stuck:t('loseWhyStuck')}[why]||'');
-  const bars=ASSETS.map(a=>`<div class="arow"><span><i class="dot" style="background:${ACOL[a]}"></i> ${t('assets')[a]}</span><div class="bar"><i style="width:${cnt[a]/3*100}%;background:${ACOL[a]}"></i><i style="width:${(3-cnt[a])/3*100}%;background:#fca5a5"></i></div><b>${cnt[a]}/3</b></div>`).join('');
+  const bars=ASSETS.map(a=>`<div class="arow"><span><i class="dot" style="background:${ACOL[a]}"></i> ${t('assets')[a]} <em class="rk ${RISK[a]}">${t('risk')[RISK[a]]}</em></span><div class="bar"><i style="width:${tot[a]?cnt[a]/tot[a]*100:0}%;background:${ACOL[a]}"></i><i style="width:${tot[a]?(tot[a]-cnt[a])/tot[a]*100:0}%;background:#fca5a5"></i></div><b>${cnt[a]}/${tot[a]}</b></div>`).join('');
+  const efg=G.ef.gi!==null?G.goats[G.ef.gi]:null;
+  const orderTxt=G.order.length?`<ol class="ord">${G.order.map(a=>`<li><i class="dot" style="background:${ACOL2[a]}"></i> ${assetName(a)} <em class="rk ${RISK[a]}">${t('risk')[RISK[a]]}</em></li>`).join('')}</ol>`:`<p>${t('none')}</p>`;
+  const newsTxt=G.news.length?G.news.map(i=>t('news')[i].h).join(' · '):t('none');
   const contact=(CONFIG.MCUBE_WEBSITE?`<div>${t('web')}: <a href="${CONFIG.MCUBE_WEBSITE}" target="_blank" rel="noopener">${CONFIG.MCUBE_WEBSITE}</a></div>`:'')+(CONFIG.MCUBE_PHONE?`<div>${t('phone')}: <a href="tel:${CONFIG.MCUBE_PHONE.replace(/\s/g,'')}">${CONFIG.MCUBE_PHONE}</a> (${CONFIG.MCUBE_PHONE})</div>`:'')+(CONFIG.MCUBE_ADDRESS?`<div>📍 ${CONFIG.MCUBE_ADDRESS}</div>`:'');
   $('sRes').innerHTML=`
    <div class="card big pop"><div class="emoji">${res==='win'?'🏆':'🐯'}</div><h2>${head}</h2><p>${whyTxt}</p>
-     <div class="kpis"><div class="kpi"><span>${t('saved')}</span><b style="color:#15803d">₹${fmt(saved)}</b><span>${t('of')}</span></div>
-     <div class="kpi"><span>🐐</span><b>${left}/15</b><span>${t('goatsLeft')(left)}</span></div></div></div>
+     <div class="kpis"><div class="kpi"><span>${t('saved')}</span><b style="color:#15803d">₹${fmt(saved)}</b><span>${t('of')(fmt(total*1000))}</span></div>
+     <div class="kpi"><span>🐐</span><b>${left}/${total}</b><span>${t('goatsLeft')(left,total)}</span></div></div></div>
+   <div class="card"><div class="sec-t">🧭 ${t('gameT')}</div>
+     <div class="sub2">${t('orderT')}</div>${orderTxt}
+     <div class="gstats"><div><span>${t('diffShown')}</span><b>${t('diff')[G.diff]}</b></div><div><span>${t('bonusShown')}</span><b>${G.bonus}/3</b></div>
+     <div><span>${t('efShown')}</span><b>${G.ef.used?t('yes'):t('no')}</b></div><div><span>${t('newsShown')}</span><b>${G.news.length}</b></div></div>
+     <p class="newsl">📰 ${newsTxt}</p></div>
    <div class="card"><div class="sec-t">${t('survT')}</div>${bars}</div>
    <div class="card"><div class="sec-t">📈 ${t('sipT')}</div><p style="font-size:14px;line-height:1.55">${t('sipLine')(fmt(saved),yrs,till)}</p>
      <div class="kpis"><div class="kpi"><span>${t('invested')}</span><b>₹${fmt(invested)}</b></div>
@@ -620,24 +858,29 @@ function showResult(res,why){
      <tfoot><tr><td>${t('total')}</td><td>₹${fmt(saved)}</td><td>₹${fmt(mat)}</td></tr></tfoot></table>
      <div class="early">${t('steady')}</div>
      <div class="early">${t('early')(yrs+5,fmt(matE),fmt(matE-mat))}</div></div>
-   <div class="card"><div class="sec-t">🎓 ${t('lessT')}</div><ul class="points">${t('lessons').map((x,i)=>`<li data-n="${i+1}">${x}</li>`).join('')}</ul></div>
+   <div class="card lb" id="lbRes"></div>
+   <div class="card"><div class="sec-t">🎓 ${t('lessT')}</div><ul class="points">${[...t('lessons'),...t('extraLessons')].map((x,i)=>`<li data-n="${i+1}">${x}</li>`).join('')}</ul></div>
    <div class="card"><div class="sec-t">🐯 ${t('riskT')}</div><ul class="points">${t('risks').map((x,i)=>`<li data-n="${i+1}"><b>${t('tigers')[i]}:</b> ${x}</li>`).join('')}</ul></div>
    <div class="card mcube"><div class="sec-t">${t('mcT')}</div><ul>${t('mcList').map(x=>`<li>${x}</li>`).join('')}</ul>${contact?`<div class="contact">${contact}</div>`:''}</div>
    <button class="btn alt" id="btnNext">${t('newPlayer')}</button>
    <p class="disc" style="margin-top:14px">${t('disc')}</p>`;
-  $('btnNext').onclick=()=>{$('regForm').reset();player=null;G=null;show('sLang');};
+  $('btnNext').onclick=()=>{$('regForm').reset();player=null;G=null;show('sLang');renderBoard('lbStart',true);};
   show('sRes');
-  // save record
+  /* save the record (admin columns in English, whatever language was played) */
+  const EN=T.en,aName=a=>a==='ef'?EN.efName:EN.assets[a];
+  const extra={difficulty:EN.diff[G.diff],assetOrder:G.order.map(aName).join(' > '),bonusGoats:G.bonus,emergencyFundUsed:G.ef.used?'Yes':'No',
+    newsCards:G.news.map(i=>EN.news[i].h).join(', '),newsCount:G.news.length};
   const recs=loadRecs();const r=recs.find(x=>x.id===player.id)||player;
-  Object.assign(r,{status:'finished',result:res==='win'?'WIN':'LOSE',goatsLeft:left,savedRs:saved,
-    lostAssets:ASSETS.map(a=>`${a}:${3-cnt[a]}`).join(' '),years:yrs,investedRs:Math.round(invested),maturityRs:Math.round(mat),avgReturnPct:avg.toFixed(2),goatMoves:G.moves});
+  Object.assign(r,{status:'finished',finishedAt:new Date().toISOString(),result:res==='win'?'WIN':'LOSE',goatsLeft:left,goatsTotal:total,savedRs:saved,
+    lostAssets:ASSETS.map(a=>`${a}:${tot[a]-cnt[a]}`).join(' '),years:yrs,investedRs:Math.round(invested),maturityRs:Math.round(mat),avgReturnPct:avg.toFixed(2),goatMoves:G.moves},extra);
   if(!recs.includes(r))recs.push(r);saveRecs(recs);sendSheet(r);
-  MG.finish(player.mgId,res==='win'?'WIN':'LOSE',saved,{goatsLeft:left,savedRs:saved,lostAssets:r.lostAssets,sipYears:yrs,maturityRs:Math.round(mat),avgReturnPct:Number(avg.toFixed(2)),goatMoves:G.moves,language:L==='ta'?'Tamil':'English'});
+  Promise.resolve(MG.finish(player.mgId,res==='win'?'WIN':'LOSE',saved,Object.assign({goatsLeft:left,goatsTotal:total,savedRs:saved,lostAssets:r.lostAssets,sipYears:yrs,maturityRs:Math.round(mat),avgReturnPct:Number(avg.toFixed(2)),goatMoves:G.moves,emergencyFundLost:efg&&efg.lost?'Yes':'No',language:L==='ta'?'Tamil':'English'},extra)))
+    .then(()=>renderBoard('lbRes',false));
 }
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
 /* ================= ADMIN ================= */
-const COLS=['date','name','mobile','age','lang','status','result','goatsLeft','savedRs','lostAssets','years','investedRs','maturityRs','avgReturnPct','goatMoves'];
+const COLS=['date','name','mobile','age','lang','difficulty','status','result','goatsLeft','goatsTotal','savedRs','lostAssets','assetOrder','bonusGoats','emergencyFundUsed','newsCards','years','investedRs','maturityRs','avgReturnPct','goatMoves'];
 let lastScreen='sLang';
 function openAdmin(){lastScreen=screens.find(s=>!$(s).classList.contains('hidden'))||'sLang';if(lastScreen==='sAdmin')lastScreen='sLang';
   $('admLogin').classList.remove('hidden');$('admPanel').classList.add('hidden');$('admPin').value='';$('admErr').textContent='';show('sAdmin');}
@@ -659,6 +902,7 @@ function confirmBox(text,yes){$('ovCard').innerHTML=`<p style="font-weight:600;m
   $('ov').classList.remove('hidden');$('cY').onclick=()=>{$('ov').classList.add('hidden');yes();};$('cN').onclick=()=>$('ov').classList.add('hidden');}
 
 /* ================= INIT ================= */
+renderBoard('lbStart',true);
 
 </script>
 </body>

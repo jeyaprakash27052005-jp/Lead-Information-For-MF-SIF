@@ -72,7 +72,7 @@ Open **Actions › Game apps › Run workflow** (or push any change). When it fi
 | **App access** | *Investment Business:* "All or some functionality is restricted" › add instructions: "Staff login (organisers only, optional): PIN 2026, or the PIN set in Mcube Game Admin". *All other apps:* "All functionality is available without special access". |
 | **Ads** | No, my app does not contain ads. |
 | **Content rating** | Category **Game**. Answer **No** to violence, fear, sexuality, language, controlled substances, crude humour, gambling (dice and spinner use play money, no bets, no prizes), users interacting, sharing location and digital purchases. Expected result: **Everyone / PEGI 3 / 3+** (Aadu Puli may show "mild fantasy" for tigers catching goats). |
-| **Target audience and content** | Ages from `LISTINGS.md`. *Money Adventure:* 6–8 and 9–12, so it joins the **Designed for Families** programme (see 3.2). *Other apps:* 13+ (Personal Finance 16+); answer **No** to "Could your store listing unintentionally appeal to children?" |
+| **Target audience and content** | Ages from `LISTINGS.md`. *Money Adventure:* 6–8 and 9–12, so it joins the **Designed for Families** programme (see 3.2). *Other apps:* 13+; answer **No** to "Could your store listing unintentionally appeal to children?" |
 | **News app** | No |
 | **COVID-19 apps** | No |
 | **Data safety** | See 2.3 |

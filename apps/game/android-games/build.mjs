@@ -27,6 +27,8 @@ fs.cpSync(path.join(src, 'shared'), path.join(www, 'shared'), { recursive: true 
 fs.cpSync(path.join(src, 'icons'), path.join(www, 'icons'), { recursive: true });
 fs.copyFileSync(path.join(src, 'privacy.html'), path.join(www, 'privacy.html'));
 fs.copyFileSync(path.join(src, 'games', `${id}.html`), path.join(www, 'games', `${id}.html`));
+// extra files of the game (for example games/finance-data.js)
+for (const f of fs.readdirSync(path.join(src, 'games'))) if (f.startsWith(`${id}-`)) fs.copyFileSync(path.join(src, 'games', f), path.join(www, 'games', f));
 
 // Single-game mode: no "All games" link, paused screen when the Head hides this game in Game Admin
 const lib = path.join(www, 'shared', 'mcube.js');

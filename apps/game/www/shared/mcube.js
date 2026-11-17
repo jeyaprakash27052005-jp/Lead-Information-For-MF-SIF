@@ -137,46 +137,63 @@
 
   /* ---------- registration form (used by games without their own form) ---------- */
   var MOB = /^[6-9]\d{9}$/, MAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  /* Registration form words, English and Tamil (o.lang = "ta") */
+  var RW = {
+    en: { forParents: "For parents", askGrown: "Ask a grown-up to continue", parentReg: "A parent or guardian registers before the game starts.", whatIs: "What is", cont: "Continue", back: "Back",
+      notRight: "That is not right. Please ask a grown-up.", player: "Player", of: "of", reg: "Register to play", parentName: "Parent’s name", childName: "Child’s name", name: "Name",
+      parentMob: "Parent’s mobile number", mob: "Mobile number", ph10: "10-digit number", parentMail: "Parent’s email ID", mail: "Email ID", age: "Age",
+      agreeP: "I am the parent or guardian, and I agree that Mcube Academy may contact me about courses and investor education.", agree: "I agree that Mcube Academy may contact me about courses and investor education.",
+      next: "Next player", start: "Start the game", once: "Each mobile number can play each game once. ", privacy: "Privacy policy", saving: "Saving…",
+      eName: "Please enter the name.", eMob: "Please enter a valid 10-digit mobile number.", eMail: "Please enter a valid email ID.", eAge: "Please enter a valid age.", eTick: "Please tick the box to agree.",
+      eSame: "Each player needs a different mobile number.", eDup: "This mobile number has already played this game." },
+    ta: { forParents: "பெற்றோருக்கு", askGrown: "தொடர ஒரு பெரியவரைக் கேளுங்கள்", parentReg: "ஆட்டம் தொடங்கும் முன் பெற்றோர் அல்லது பாதுகாவலர் பதிவு செய்ய வேண்டும்.", whatIs: "இதன் விடை என்ன:", cont: "தொடரவும்", back: "பின்செல்",
+      notRight: "அது சரியல்ல. ஒரு பெரியவரைக் கேளுங்கள்.", player: "வீரர்", of: "/", reg: "விளையாடப் பதிவு செய்யவும்", parentName: "பெற்றோர் பெயர்", childName: "குழந்தையின் பெயர்", name: "பெயர்",
+      parentMob: "பெற்றோர் மொபைல் எண்", mob: "மொபைல் எண்", ph10: "10 இலக்க எண்", parentMail: "பெற்றோர் மின்னஞ்சல்", mail: "மின்னஞ்சல்", age: "வயது",
+      agreeP: "நான் பெற்றோர் / பாதுகாவலர். பயிற்சிகள் மற்றும் முதலீட்டாளர் கல்வி பற்றி Mcube Academy என்னைத் தொடர்புகொள்ள ஒப்புக்கொள்கிறேன்.", agree: "பயிற்சிகள் மற்றும் முதலீட்டாளர் கல்வி பற்றி Mcube Academy என்னைத் தொடர்புகொள்ள ஒப்புக்கொள்கிறேன்.",
+      next: "அடுத்த வீரர்", start: "ஆட்டத்தைத் தொடங்கு", once: "ஒவ்வொரு மொபைல் எண்ணும் ஒவ்வொரு ஆட்டத்தையும் ஒரு முறை மட்டுமே விளையாடலாம். ", privacy: "தனியுரிமைக் கொள்கை", saving: "சேமிக்கிறது…",
+      eName: "பெயரை உள்ளிடவும்.", eMob: "சரியான 10 இலக்க மொபைல் எண்ணை உள்ளிடவும்.", eMail: "சரியான மின்னஞ்சலை உள்ளிடவும்.", eAge: "சரியான வயதை உள்ளிடவும்.", eTick: "ஒப்புதல் பெட்டியைத் தேர்வு செய்யவும்.",
+      eSame: "ஒவ்வொரு வீரருக்கும் வேறு மொபைல் எண் வேண்டும்.", eDup: "இந்த மொபைல் எண் ஏற்கனவே இந்த ஆட்டத்தை விளையாடியுள்ளது." }
+  };
   function registerForm(o) {
     /* o: {game, players:1, kids:false, email:false, age:false, title, intro} -> Promise<[{id,name,mobile,...}]> */
     return new Promise(function (resolve, reject) {
-      var n = o.players || 1, i = 0, out = [];
+      var n = o.players || 1, i = 0, out = [], W = RW[o.lang === "ta" ? "ta" : "en"];
       var ov = document.createElement("div"); ov.className = "mg-ov"; document.body.appendChild(ov);
       /* Grown-ups check before any personal details are asked (children's games) */
       function gate(err) {
         var a = 3 + Math.floor(Math.random() * 7), b = 4 + Math.floor(Math.random() * 6);
-        ov.innerHTML = '<form class="mg-card mg-reg" novalidate><div class="mg-reg-h"><span class="mg-ic">🔒</span><div><b>For parents</b><small>Ask a grown-up to continue</small></div></div>' +
-          '<p class="mg-mut">A parent or guardian registers before the game starts.</p><label>What is ' + a + ' × ' + b + '?<input name="g" inputmode="numeric" maxlength="3" autocomplete="off"></label>' +
-          '<p class="mg-err" aria-live="polite">' + esc(err || "") + '</p><div class="mg-row"><button class="mg-btn" type="submit">Continue</button>' + (o.cancel !== false ? '<button class="mg-btn alt" type="button" data-x>Back</button>' : "") + "</div></form>";
+        ov.innerHTML = '<form class="mg-card mg-reg" novalidate><div class="mg-reg-h"><span class="mg-ic">🔒</span><div><b>' + W.forParents + '</b><small>' + W.askGrown + '</small></div></div>' +
+          '<p class="mg-mut">' + W.parentReg + '</p><label>' + W.whatIs + ' ' + a + ' × ' + b + '?<input name="g" inputmode="numeric" maxlength="3" autocomplete="off"></label>' +
+          '<p class="mg-err" aria-live="polite">' + esc(err || "") + '</p><div class="mg-row"><button class="mg-btn" type="submit">' + W.cont + '</button>' + (o.cancel !== false ? '<button class="mg-btn alt" type="button" data-x>' + W.back + '</button>' : "") + "</div></form>";
         var f = ov.querySelector("form"); f.g.focus();
         var x = ov.querySelector("[data-x]"); if (x) x.onclick = function () { ov.remove(); reject(new Error("cancelled")); };
-        f.onsubmit = function (e) { e.preventDefault(); if (parseInt(f.g.value, 10) === a * b) step(); else gate("That is not right. Please ask a grown-up."); };
+        f.onsubmit = function (e) { e.preventDefault(); if (parseInt(f.g.value, 10) === a * b) step(); else gate(W.notRight); };
       }
       function step(err) {
-        ov.innerHTML = '<form class="mg-card mg-reg" novalidate><div class="mg-reg-h"><span class="mg-ic">' + esc((byId[o.game] || {}).icon || "🎮") + '</span><div><b>' + esc(o.title || (byId[o.game] || {}).name || "Register") + '</b><small>' + (n > 1 ? "Player " + (i + 1) + " of " + n : "Register to play") + '</small></div></div>' +
+        ov.innerHTML = '<form class="mg-card mg-reg" novalidate><div class="mg-reg-h"><span class="mg-ic">' + esc((byId[o.game] || {}).icon || "🎮") + '</span><div><b>' + esc(o.title || (byId[o.game] || {}).name || "Register") + '</b><small>' + (n > 1 ? W.player + " " + (i + 1) + " " + W.of + " " + n : W.reg) + '</small></div></div>' +
           (o.intro ? '<p class="mg-mut">' + esc(o.intro) + "</p>" : "") +
-          '<label>' + (o.parent ? "Parent’s name" : o.kids ? "Child’s name" : "Name") + '<input name="nm" autocomplete="off" maxlength="60"></label>' +
-          '<label>' + (o.kids || o.parent ? "Parent’s mobile number" : "Mobile number") + '<input name="ph" type="tel" inputmode="numeric" maxlength="14" placeholder="10-digit number" autocomplete="off"></label>' +
-          (o.email ? '<label>' + (o.kids ? "Parent’s email ID" : "Email ID") + '<input name="em" type="email" autocomplete="off"></label>' : "") +
-          (o.age ? '<label>Age<input name="ag" inputmode="numeric" maxlength="3"></label>' : "") +
-          '<label class="mg-ck"><input name="ck" type="checkbox"><span>' + (o.kids || o.parent ? "I am the parent or guardian, and I agree that Mcube Academy may contact me about courses and investor education." : "I agree that Mcube Academy may contact me about courses and investor education.") + "</span></label>" +
-          '<p class="mg-err" aria-live="polite">' + esc(err || "") + '</p><div class="mg-row"><button class="mg-btn" type="submit">' + (i + 1 < n ? "Next player" : "Start the game") + '</button>' +
-          (o.cancel !== false ? '<button class="mg-btn alt" type="button" data-x>Back</button>' : "") + "</div>" +
-          '<p class="mg-mut mg-s">' + (o.onePlayNote === false ? "" : "Each mobile number can play each game once. ") + '<a href="' + base() + 'privacy.html" target="_blank" rel="noopener">Privacy policy</a></p></form>';
+          '<label>' + (o.parent ? W.parentName : o.kids ? W.childName : W.name) + '<input name="nm" autocomplete="off" maxlength="60"></label>' +
+          '<label>' + (o.kids || o.parent ? W.parentMob : W.mob) + '<input name="ph" type="tel" inputmode="numeric" maxlength="14" placeholder="' + W.ph10 + '" autocomplete="off"></label>' +
+          (o.email ? '<label>' + (o.kids ? W.parentMail : W.mail) + '<input name="em" type="email" autocomplete="off"></label>' : "") +
+          (o.age ? '<label>' + W.age + '<input name="ag" inputmode="numeric" maxlength="3"></label>' : "") +
+          '<label class="mg-ck"><input name="ck" type="checkbox"><span>' + (o.kids || o.parent ? W.agreeP : W.agree) + "</span></label>" +
+          '<p class="mg-err" aria-live="polite">' + esc(err || "") + '</p><div class="mg-row"><button class="mg-btn" type="submit">' + (i + 1 < n ? W.next : W.start) + '</button>' +
+          (o.cancel !== false ? '<button class="mg-btn alt" type="button" data-x>' + W.back + '</button>' : "") + "</div>" +
+          '<p class="mg-mut mg-s">' + (o.onePlayNote === false ? "" : W.once) + '<a href="' + base() + 'privacy.html" target="_blank" rel="noopener">' + W.privacy + '</a></p></form>';
         var f = ov.querySelector("form"); f.nm.focus();
         var x = ov.querySelector("[data-x]"); if (x) x.onclick = function () { ov.remove(); reject(new Error("cancelled")); };
         f.onsubmit = function (e) {
           e.preventDefault(); var er = f.querySelector(".mg-err");
           var p = { name: f.nm.value.trim(), mobile: cleanMobile(f.ph.value), email: f.em ? f.em.value.trim() : "", age: f.ag ? parseInt(f.ag.value, 10) : 0, mode: o.kids || o.parent ? "kids" : "" };
-          if (p.name.length < 2) return er.textContent = "Please enter the name.";
-          if (!MOB.test(p.mobile)) return er.textContent = "Please enter a valid 10-digit mobile number.";
-          if (f.em && !MAIL.test(p.email)) return er.textContent = "Please enter a valid email ID.";
-          if (f.ag && !(p.age >= 4 && p.age <= 110)) return er.textContent = "Please enter a valid age.";
-          if (!f.ck.checked) return er.textContent = "Please tick the box to agree.";
-          if (out.some(function (q) { return q.mobile === p.mobile; })) return er.textContent = "Each player needs a different mobile number.";
-          var b = f.querySelector("[type=submit]"); b.disabled = true; b.textContent = "Saving…";
+          if (p.name.length < 2) return er.textContent = W.eName;
+          if (!MOB.test(p.mobile)) return er.textContent = W.eMob;
+          if (f.em && !MAIL.test(p.email)) return er.textContent = W.eMail;
+          if (f.ag && !(p.age >= 4 && p.age <= 110)) return er.textContent = W.eAge;
+          if (!f.ck.checked) return er.textContent = W.eTick;
+          if (out.some(function (q) { return q.mobile === p.mobile; })) return er.textContent = W.eSame;
+          var b = f.querySelector("[type=submit]"); b.disabled = true; b.textContent = W.saving;
           register(o.game, p).then(function (r) {
-            if (r.dup) { step("This mobile number has already played this game."); return; }
+            if (r.dup) { step(W.eDup); return; }
             p.id = r.id; out.push(p); i++;
             if (i < n) step(); else { ov.remove(); resolve(out); }
           });

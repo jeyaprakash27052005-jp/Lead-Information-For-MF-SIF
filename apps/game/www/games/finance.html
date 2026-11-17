@@ -6,145 +6,314 @@
 <link rel="icon" type="image/png" href="../icons/icon-192.png">
 <link rel="stylesheet" href="../shared/mcube.css">
 <script src="../shared/mcube.js"></script>
+<script src="finance-data.js"></script>
 <style>
-:root{--bg:#fff8e7;--ink:#1d2b3a;--card:#fff;--line:#1d2b3a22;--dec:#1e88e5;--rnd:#e91e8c;--life:#ff8f00;--up:#43a047;--biz:#8e5bd8;--loan:#546e7a;--ins:#00897b;--med:#e53935;--start:#fdd835;--bad:#d32f2f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{--ink:#111827;--mut:#6b7280;--card:#fff;--line:#e5e7eb;--dec:#1e88e5;--rnd:#e91e8c;--life:#ff8f00;--up:#43a047;--biz:#8e5bd8;--loan:#546e7a;--ins:#00897b;--med:#e53935;--start:#fdd835;--cc:#c2185b;--tax:#6d4c41;--bad:#d32f2f;--good:#12a060;--ac:#4F3CC9;color-scheme:light}
 *{box-sizing:border-box}html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;padding:10px}
-h1{font-size:1.15rem;margin:4px 0 8px;letter-spacing:.5px;color:#12a060}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:min(96vw,560px);margin-bottom:8px}
-.stat{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:5px 6px;text-align:center;font-size:.68rem}
-.stat b{display:block;font-size:.88rem}
-.board{position:relative;width:min(96vw,560px);aspect-ratio:1;display:grid;grid-template:repeat(7,1fr)/repeat(7,1fr);gap:3px}
-.t{border-radius:8px;color:#fff;font-size:clamp(.45rem,1.9vw,.68rem);font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.1;padding:2px;position:relative}
-.t i{font-style:normal;font-size:clamp(.9rem,4vw,1.4rem)}
-.t.start,.t.dec2{color:#333}
-.center{grid-area:2/2/7/7;background:var(--card);border-radius:16px;border:2px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px;text-align:center}
-.die{font-size:clamp(2.2rem,12vw,3.6rem);line-height:1}
-button{font:inherit;font-weight:700;border:0;border-radius:999px;padding:10px 20px;background:#12a060;color:#fff;cursor:pointer}
-button:focus-visible{outline:3px solid #ffb300;outline-offset:2px}button:disabled{opacity:.45}
-button.alt{background:var(--ink);color:var(--bg)}
-.log{font-size:clamp(.65rem,2.5vw,.8rem);max-height:34%;overflow:auto;width:100%;opacity:.85}
-.pawn{position:absolute;inset:auto;width:55%;height:55%;max-width:30px;max-height:30px;border-radius:50%;background:#111;border:3px solid #fff;box-shadow:0 2px 6px #0007;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#fff;transition:all .15s;pointer-events:none;z-index:3;top:20%;left:22%}
-.modal{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;padding:16px;z-index:9}
-.modal.on{display:flex}
-.box{background:var(--card);border-radius:18px;max-width:380px;width:100%;padding:18px;border-top:10px solid var(--c,#999);display:flex;flex-direction:column;gap:10px}
-.box h2{margin:0;font-size:1.05rem}.box p{margin:0;line-height:1.4}
-.pos{color:#12a060;font-weight:700}.neg{color:var(--bad);font-weight:700}
-.legend{width:min(96vw,560px);font-size:.72rem;opacity:.8;margin-top:8px;line-height:1.4}
-.board{width:min(96vw,560px,max(300px,calc(100dvh - 200px)))}.stats{width:min(96vw,560px)}.box{max-height:92dvh;overflow:auto;animation:pop .2s}@keyframes pop{from{transform:scale(.85);opacity:0}}
-body{background:#fff;--ink:#111827}h1{font-size:1.5rem;color:#111827;letter-spacing:-.02em}
-.board{background:#fff;padding:5px;border-radius:20px;box-shadow:0 6px 0 #0002}.t{border:3px solid #fff;box-shadow:0 3px 0 #0002;font-size:clamp(.5rem,2.2vw,.75rem)}
-.center{background:#f4fff8;color:#1d2b3a;border-color:#12a06055}.stat{background:#fff;color:#1d2b3a}.legend{color:#1d2b3a}
-.pawn{animation:hop .25s}@keyframes hop{50%{transform:translateY(-9px) scale(1.2)}}
-/* Mcube Games: white theme and layout for every screen size */
-body{font-family:var(--mg-font);padding:0;display:block;color-scheme:light}
+body{background:#fff;color:var(--ink);font-family:var(--mg-font)}
 .pf{display:flex;flex-direction:column;align-items:center;padding:10px max(10px,env(safe-area-inset-right)) 24px max(10px,env(safe-area-inset-left))}
-.board{box-shadow:0 1px 3px rgba(16,24,40,.08);border:1px solid #e5e7eb}.stat{border-width:1px}.center{background:#fafafa;border-width:1px}
-button{border-radius:8px;background:#4F3CC9}button.alt{background:#fff;color:#344054;border:1px solid #d1d5db}
-.box{border-radius:14px}
-@media (min-width:1000px){.pf{display:grid;grid-template-columns:auto minmax(280px,360px);grid-template-areas:"h h" "b s" "b l" "b x";grid-template-rows:auto auto auto 1fr;column-gap:20px;justify-content:center;align-items:start}
- .pf h1{grid-area:h;text-align:center}.pf .board{grid-area:b;width:min(760px,calc(100dvh - 140px))}.pf .stats{grid-area:s;width:100%;grid-template-columns:1fr 1fr}.pf .legend{grid-area:l;width:100%;margin-top:12px}.pf .acts{grid-area:x}}
+h1{font-size:1.45rem;margin:4px 0 8px;letter-spacing:-.02em;text-align:center}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:min(96vw,560px);margin-bottom:8px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px;text-align:center;font-size:.7rem;color:var(--mut)}
+.stat b{display:block;font-size:.95rem;color:var(--ink)}
+.stat.w2{grid-column:span 2}
+.meter{height:7px;border-radius:9px;background:#eef0f4;overflow:hidden;margin-top:4px}.meter i{display:block;height:100%;border-radius:9px}
+.board{position:relative;width:min(96vw,560px,max(300px,calc(100dvh - 230px)));aspect-ratio:1;display:grid;grid-template:repeat(7,1fr)/repeat(7,1fr);gap:3px;background:#fff;padding:5px;border-radius:20px;border:1px solid var(--line);box-shadow:0 1px 3px rgba(16,24,40,.08)}
+.t{border-radius:8px;color:#fff;font-size:clamp(.5rem,2.1vw,.74rem);font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.1;padding:2px;position:relative;border:3px solid #fff;box-shadow:0 3px 0 #0002;overflow:hidden}
+.t i{font-style:normal;font-size:clamp(.9rem,4vw,1.4rem)}
+.t.start{color:#333}
+.center{grid-area:2/2/7/7;background:#fafafa;border-radius:16px;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px;text-align:center;min-width:0}
+.die{font-size:clamp(2.2rem,12vw,3.6rem);line-height:1}
+button{font:inherit;font-weight:700;border:1px solid transparent;border-radius:10px;padding:12px 20px;background:var(--ac);color:#fff;cursor:pointer;min-height:48px;font-size:1rem}
+button:focus-visible{outline:3px solid #ffb300;outline-offset:2px}button:disabled{opacity:.45}
+button.alt{background:#fff;color:#344054;border-color:#d1d5db}
+.log{font-size:clamp(.65rem,2.5vw,.8rem);max-height:34%;overflow:auto;width:100%;color:#4b5563}
+.pawn{position:absolute;width:55%;height:55%;max-width:30px;max-height:30px;border-radius:50%;background:#111;border:3px solid #fff;box-shadow:0 2px 6px #0007;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#fff;pointer-events:none;z-index:3;top:20%;left:22%;animation:hop .25s}
+@keyframes hop{50%{transform:translateY(-9px) scale(1.2)}}
+.legend{width:min(96vw,560px);font-size:.78rem;color:#374151;margin-top:8px;line-height:1.45}
+.acts{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:10px;width:min(96vw,560px)}
+.acts button{flex:1 1 140px}
+.hide{display:none!important}
+.modal{position:fixed;inset:0;background:rgba(17,24,39,.6);display:none;align-items:center;justify-content:center;padding:12px;z-index:30}
+.modal.on{display:flex}
+.box{background:#fff;border-radius:16px;max-width:420px;width:100%;padding:18px;border-top:8px solid var(--c,#999);display:flex;flex-direction:column;gap:10px;max-height:94dvh;overflow:auto;animation:pop .2s}
+.box.wide{max-width:780px;border-top-color:var(--ac)}
+@keyframes pop{from{transform:scale(.92);opacity:0}}
+.box h2{margin:0;font-size:1.12rem}.box p{margin:0;line-height:1.45}
+.box button{width:100%}
+.pos{color:var(--good);font-weight:700}.neg{color:var(--bad);font-weight:700}
+/* budget */
+.brow{display:grid;grid-template-columns:1fr auto;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid var(--line)}
+.brow .lab{font-weight:600;font-size:.92rem}.brow .lab small{display:block;color:var(--mut);font-weight:400;font-size:.76rem}
+.step{display:flex;align-items:center;gap:6px}.step button{width:48px;min-height:48px;padding:0;font-size:1.4rem;border-radius:12px}
+.step b{min-width:84px;text-align:center;font-size:1rem}
+.guide{display:flex;height:16px;border-radius:9px;overflow:hidden;margin:4px 0}.guide i{display:block;height:100%}
+.gl{display:flex;justify-content:space-between;font-size:.76rem;color:var(--mut)}
+.note{font-size:.82rem;padding:8px 10px;border-radius:10px;background:#f8fafc;border:1px solid var(--line)}
+.note.warn{background:#fff7ed;border-color:#fdba74;color:#9a3412;font-weight:600}.note.ok{background:#ecfdf5;border-color:#86efac;color:#166534;font-weight:600}
+.sec{font-size:.78rem;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-top:6px}
+/* passbook */
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}.tabs button{flex:none;width:auto;min-height:40px;padding:8px 12px;font-size:.85rem}
+.tabs button.on{background:var(--ac);color:#fff}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.82rem;font-variant-numeric:tabular-nums}
+th,td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left}
+th{background:#f8fafc;font-size:.72rem;text-transform:uppercase;color:var(--mut)}
+tr.dn td{color:var(--bad)}
+/* results */
+.pcard{border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:6px}
+.pcard h3{margin:0 0 4px;font-size:1.1rem}
+.nw{font-size:1.8rem;font-weight:800;letter-spacing:-.02em}
+.grades{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}
+.grades div{border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center}
+.grades span{display:block;font-size:.72rem;color:var(--mut)}.grades b{font-size:1.5rem}.grades small{display:block;font-size:.72rem;color:#374151}
+.gA{color:#15803d}.gB{color:#2563eb}.gC{color:#b45309}.gD{color:#b91c1c}
+.lesson{background:#f3f1ff;border-left:4px solid var(--ac);border-radius:10px;padding:10px 12px;font-size:.9rem;margin-top:8px}
+.disc{font-size:.74rem;color:var(--mut);line-height:1.45;margin-top:10px}
+@media (max-width:420px){.stats{grid-template-columns:repeat(2,1fr)}.grades{grid-template-columns:repeat(2,1fr)}}
+@media (min-width:1000px){.pf{display:grid;grid-template-columns:auto minmax(300px,380px);grid-template-areas:"h h" "b s" "b x" "b l";grid-template-rows:auto auto auto 1fr;column-gap:20px;justify-content:center;align-items:start}
+ .pf h1{grid-area:h}.pf .board{grid-area:b;width:min(760px,calc(100dvh - 140px))}.pf .stats{grid-area:s;width:100%;grid-template-columns:1fr 1fr}.pf .legend{grid-area:l;width:100%}.pf .acts{grid-area:x;width:100%}}
 </style></head><body>
-<script>MG.topbar("Personal Finance Management")</script><div class="pf">
-<h1>Personal Finance Management</h1>
-<div class="stats">
-<div class="stat">Month<b id="sM">1/12</b></div><div class="stat">Cash<b id="sC"></b></div>
-<div class="stat">Invested<b id="sI"></b></div><div class="stat">Debt<b id="sD"></b></div>
-<div class="stat" style="grid-column:span 2">Monthly salary<b id="sS"></b></div>
-<div class="stat">Insurance<b id="sIn"></b></div><div class="stat">Side income<b id="sB"></b></div>
+<script>MG.topbar("Personal Finance Management")</script>
+<div class="pf">
+<h1 id="ttl">Personal Finance Management</h1>
+<div class="stats" id="stats"></div>
+<div class="board" id="board"><div class="center"><div class="die" id="die">🎲</div><button id="roll" disabled>🎲</button><div class="log" id="log"></div></div></div>
+<div class="acts"><button class="alt" id="pbBtn">📒</button><button class="alt hide" id="repay"></button><button class="alt" id="newg"></button><button class="alt" id="mute"></button></div>
+<div class="legend" id="howto"></div>
 </div>
-<div class="board" id="board">
-<div class="center"><div class="die" id="die">🎲</div><button id="roll">Roll dice</button><div class="log" id="log"></div></div>
-</div>
-<div class="legend">How to play: each lap round the board is one month. Passing Start pays your salary and your living expenses (₹18,000), plus loan interest (10%). At the end of the months you choose, your net worth (cash + investments − debt) decides your rating.</div>
-<div class="acts"><button class="alt" id="newg" style="margin-top:10px">New game</button> <button class="alt" id="mute" style="margin-top:10px">🔊 Sound on</button></div></div>
 <div class="modal" id="modal"><div class="box" id="box"></div></div>
+<div class="modal" id="modal2"><div class="box wide" id="box2"></div></div>
 <script>
-const $=id=>document.getElementById(id),f=n=>(n<0?"−":"")+"₹"+Math.abs(Math.round(n)).toLocaleString("en-IN");
-const T={start:["Start","🏁","start"],up:["Upskill","💡","up"],rnd:["Random Chance","⭐","rnd"],dec:["Decision","🤔","dec"],life:["Life Event","❗","life"],biz:["Small Business","🏪","biz"],fr:["Borrow from a Friend","🤝","life"],ins:["Insurance","🛡️","ins"],med:["Medical Emergency","➕","med"],loan:["Bank Loan","🏦","loan"]};
-const L=["start","up","rnd","dec","life","rnd","biz","fr","life","dec","rnd","dec","ins","life","up","dec","rnd","life","loan","dec","med","dec","life","rnd"];
+const D=PF_DATA;let LANG='en',MODE='adults';
+const t=(k,...a)=>{const v=D.TX[LANG][k];return typeof v==='function'?v(...a):v;};
+const $=id=>document.getElementById(id);
+const f=n=>(n<0?'−':'')+'₹'+Math.abs(Math.round(n)).toLocaleString('en-IN');
+const pct=n=>Math.round(n)+'%';
+const esc=s=>MG.esc(s);
+const KINDS=['sip','stocks','fd','nps','gold'];
+const RATE={sip:11,stocks:12.5,fd:6.5,nps:8,gold:8};
+const KCOL={sip:'#0d9488',stocks:'#ea580c',fd:'#7c3aed',nps:'#2563eb',gold:'#d4a017'};
+/* 24 squares: Random Chance = questions; Credit Card and Tax Saving squares added */
+const L=['start','up','q','dec','life','q','biz','fr','life','cc','q','dec','ins','life','up','tax','q','life','loan','dec','med','dec','life','q'];
+const COL={start:'var(--start)',up:'var(--up)',q:'var(--rnd)',dec:'var(--dec)',life:'var(--life)',biz:'var(--biz)',fr:'var(--life)',ins:'var(--ins)',med:'var(--med)',loan:'var(--loan)',cc:'var(--cc)',tax:'var(--tax)'};
+const ICON={start:'🏁',up:'💡',q:'⭐',dec:'🤔',life:'❗',biz:'🏪',fr:'🤝',ins:'🛡️',med:'➕',loan:'🏦',cc:'💳',tax:'🧾'};
 const pos=i=>i<=6?[0,i]:i<=12?[i-6,6]:i<=18?[6,18-i]:[24-i,0];
-const board=$("board"),cells=[];
-L.forEach((k,i)=>{const [r,c]=pos(i),d=document.createElement("div");d.className="t "+T[k][2];d.style.gridArea=(r+1)+"/"+(c+1);d.style.background=`var(--${T[k][2]==="start"?"start":T[k][2]})`;d.innerHTML=`<i>${T[k][1]}</i>${T[k][0]}`;board.appendChild(d);cells.push(d)});
-let pawn=document.createElement("div");
-const G={};
-const KEY="pfg-save-v1";
-function save0(){try{if(G.m>G.len)localStorage.removeItem(KEY);else localStorage.setItem(KEY,JSON.stringify({G:{...G,busy:false},log:$("log").innerHTML}))}catch(e){}}
-function load(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}}
-async function init0(){for(const k in bag)delete bag[k];G.busy=true;$("roll").disabled=true;const s=load();
-if(s&&s.G&&s.G.len&&(await ask("Welcome back","var(--up)",`Continue your game? Month ${Math.min(s.G.m,s.G.len)} of ${s.G.len}, cash ${f(s.G.cash)}.`,["Continue game","New game"]))===0){Object.assign(G,s.G);$("log").innerHTML=s.log||"";log("Game resumed.")}
-else{const r=await ask("New game","var(--dec)","How many months do you want to play?",["3 months","6 months","9 months","12 months"]);Object.assign(G,{p:0,m:1,len:[3,6,9,12][r],cash:50000,inv:0,debt:0,sal:30000,ins:false,biz:false});$("log").innerHTML="";log("Game started: "+G.len+" months. You have ₹50,000 and earn ₹30,000 a month.")}
-G.busy=false;$("roll").disabled=false;cells[G.p].appendChild(pawn);ui()}
-function ui(){$("sM").textContent=Math.min(G.m,G.len)+"/"+G.len+(PL.length>1?" "+G.emoji:"");$("sC").textContent=f(G.cash);$("sC").className=G.cash<0?"neg":"";$("sI").textContent=f(G.inv);$("sD").textContent=f(G.debt);$("sS").textContent=f(G.sal);$("sIn").textContent=G.ins?"Active":"None";$("sB").textContent=G.biz?"₹4,000":"None";save()}
-function log(t){const d=document.createElement("div");d.textContent=t;$("log").prepend(d)}
-function ask(title,color,text,opts){return new Promise(res=>{const b=$("box");b.style.setProperty("--c",color);b.innerHTML=`<h2>${title}</h2><p>${text}</p>`;opts.forEach((o,i)=>{const x=document.createElement("button");x.textContent=o;if(i)x.className="alt";x.onclick=()=>{$("modal").classList.remove("on");res(i)};b.appendChild(x)});$("modal").classList.add("on");sfx("pop");b.querySelector("button").focus()})}
-const DEC0=[["A new laptop is on sale. Your old one still works.",["Buy it (−₹40,000)",-40000,0],["Keep the old one",0,0]],
-["Friends plan a weekend trip costing ₹12,000.",["Go (−₹12,000)",-12000,0],["Stay home and save",0,0]],
-["Your bank offers a monthly SIP in an index fund.",["Invest ₹8,000 (grows to ₹8,800)",-8000,8800],["Skip it",0,0]],
-["Your phone screen cracked.",["Repair it (−₹5,000)",-5000,0],["Use it cracked, risk worse damage (−₹12,000 later)",-12000,0]],
-["A festival sale tempts you with ₹15,000 of clothes.",["Shop (−₹15,000)",-15000,0],["Put ₹5,000 in a recurring deposit (₹5,300)",-5000,5300]],
-["You can buy gold for safety.",["Buy ₹10,000 gold (worth ₹10,800)",-10000,10800],["Keep the cash",0,0]]];
-const RND0=[["Tax refund arrives!",9000],["You find an old fixed deposit maturing.",12000],["Stock dividend credited.",4000],["Phone bill overcharge, you pay it.",-2500],["Freelance gig pays well.",15000],["You lost your wallet.",-6000]];
-const LIFE0=[["Wedding gift for a friend.",-6000,0],["Bike breakdown.",-9000,1],["Family function expenses.",-14000,0],["Laptop theft. Repair and replace.",-20000,1],["Performance bonus at work!",18000,0],["Rent hike.",-7000,0]];
-const pick=a=>a[Math.floor(Math.random()*a.length)];
-const bag={};const draw=(k,a)=>{if(!bag[k]||!bag[k].length)bag[k]=[...a].sort(()=>Math.random()-.5);return bag[k].pop()};
-const DEC=[...DEC0,
-["A mutual fund SIP is offered through your bank app.",["Start ₹8,000 SIP (mutual fund)",-8000,0,[.7,0,9600,0,7200,"Markets rose. Your SIP is worth ₹9,600.","Markets dipped. Your SIP is worth ₹7,200 for now."]],["Skip it",0,0],"Equity mutual funds can dip in the short term, but long holding periods (5+ years) have historically smoothed returns."],
-["You can start saving for retirement in the National Pension System (NPS).",["Put ₹10,000 in NPS",-10000,11500],["Skip it",0,0],"NPS is locked until retirement, grows with market-linked funds, and gives extra tax deduction under Section 80CCD(1B)."],
-["Government bonds are on offer with steady interest.",["Buy ₹15,000 government bonds",-15000,16050],["Skip it",0,0],"Government bonds are very safe but pay lower returns than shares. They balance risk in a portfolio."],
-["An unregistered chit fund promises to double your money in 6 months.",["Join with ₹10,000",-10000,0,[.2,20000,0,0,0,"Lucky. The chit fund paid out ₹20,000.","The chit fund collapsed. You lost ₹10,000."]],["Decline",0,0],"Promises of guaranteed double returns are a classic warning sign. Check registration before you invest."],
-["A hot IPO opens for subscription.",["Apply with ₹10,000",-10000,0,[.5,0,14000,0,7000,"The IPO listed at a gain. Your shares are worth ₹14,000.","The IPO listed below issue price. Your shares are worth ₹7,000."]],["Skip it",0,0],"IPOs can gain or fall on listing day. Read the prospectus and check the company's earnings first."],
-["A WhatsApp group promises 3x returns on a secret stock tip.",["Invest ₹20,000",-20000,0,[.1,0,30000,0,0,"Rare luck. The shares rose and are worth ₹30,000.","Scam. The group vanished with your ₹20,000."]],["Ignore it and report the group",0,0],"Stock tips from unknown groups are a common fraud. Use only SEBI-registered advisers and brokers."],
-["Your credit card bill of ₹12,000 is due.",["Pay in full",-12000,0],["Pay only ₹2,000 minimum",-2000,0,0,10000],"Paying only the minimum leaves the rest on high-interest debt. Pay the full amount when you can."],
-["A bank offers a 1-year fixed deposit.",["Put ₹10,000 in FD",-10000,10700],["Skip it",0,0],"Fixed deposits are safe and predictable, but returns may not beat inflation over time."],
-["You have no emergency fund.",["Save ₹6,000 in a liquid fund",-6000,6300],["Skip it",0,0],"Aim for 3 to 6 months of expenses set aside for emergencies before taking market risk."],
-["A well-known blue-chip company looks good to you.",["Buy ₹15,000 of shares",-15000,0,[.6,0,18000,0,12000,"Shares rose. Your holding is worth ₹18,000.","Shares fell. Your holding is worth ₹12,000."]],["Skip it",0,0],"Even strong companies fall at times. Spread money across many investments."],
-["A caller says you won a prize and asks for your UPI PIN.",["Share the PIN",-15000,0],["Hang up and report it",0,0],"Never share your UPI PIN or OTP. A PIN is only for sending money, never for receiving it. Report fraud on 1930 or cybercrime.gov.in."],
-["The tax-saving deadline is near.",["Invest ₹12,000 in ELSS",-12000,0,[.7,0,14500,0,10500,"The ELSS fund grew. It is worth ₹14,500.","The ELSS fund dipped. It is worth ₹10,500 for now."]],["Skip it",0,0],"ELSS funds save tax under Section 80C and have a 3-year lock-in, but their value moves with the market."],
-["Term life insurance is offered at a low premium while you are young.",["Pay ₹6,000 premium",-6000,0],["Skip it",0,0],"Term insurance is cheap when you are young and protects your family. It pays only on death, so it is not an investment."],
-["A friend offers you a small plot of land with a ₹40,000 down payment.",["Buy the plot",-40000,0,[.5,0,55000,0,38000,"Land prices rose. Your plot is worth ₹55,000.","Prices stayed flat and fees applied. Your plot is worth ₹38,000."]],["Skip it",0,0],"Real estate is hard to sell quickly and needs large money. Check the title and registration first."],
-["A friend urges you to put ₹10,000 into a new crypto coin.",["Invest ₹10,000",-10000,0,[.35,0,18000,0,3000,"The coin jumped. It is worth ₹18,000.","The coin crashed. It is worth ₹3,000."]],["Skip it",0,0],"Crypto prices swing wildly and are not regulated like shares. Only risk what you can afford to lose."],
-["A new phone is offered on a 'no-cost EMI'.",["Buy it on EMI",-3000,0,0,12000],["Skip it",0,0],"No-cost EMI often hides fees or removes discounts. EMIs add debt, which reduces your monthly savings."],
-["You can learn a freelance skill in your free time.",["Spend ₹5,000 on a course",-5000,0,[.6,12000,0,0,0,"You landed paid work and earned ₹12,000.","No clients yet, but you gained a skill."]],["Skip it",0,0],"Extra income is one of the fastest ways to build wealth. Skills pay off over time."],
-["Your salary just rose and a new bike costs ₹30,000.",["Buy the bike",-30000,0],["Keep your old one",0,0],"Lifestyle inflation means spending more every time you earn more. Save part of every raise."]];
-const RND=[...RND0,["Strong quarterly earnings lift the stock market.",0,0,.1],["Weak earnings cause a market correction.",0,0,-.08],["Stock market crash. Panic selling hits portfolios.",0,0,-.15],["Budget announcement boosts markets.",0,0,.06],["Fraud: a listed company faked its accounts and its shares collapse.",0,0,-.12],["A fake trading app steals ₹10,000 from your account.",-10000],["Your debit card is skimmed at an ATM.",-8000],["Annual debit card fee is charged.",-1500],["Your chit fund company shuts down. You lose your ₹8,000 deposit.",-8000],["Bond interest credited to your account.",3000],["Mutual fund dividend payout.",5000],["Cashback and rewards credited.",1500],["Electricity bill spike this month.",-3000],["You pay for a fake online order that never arrives.",-4500],["Late payment fee on your credit card.",-1800],["Gift money from relatives.",5000],["Interest rate cut lifts bond prices.",0,0,.04],["Bull run: the market hits a new high.",0,0,.12],["The rupee falls and markets turn volatile.",0,0,-.05],["An insider trading scandal hits a famous stock.",0,0,-.1]];
-const LIFE=[...LIFE0,["Festival bonus from your employer!",12000,0],["Car repair bill.",-11000,1],["Doctor visit and medical tests.",-4000,1],["Side gig pays off.",8000,0],["Property tax due.",-6000,0],["Wedding in the family. Travel and gifts.",-10000,0],["A home appliance breaks down.",-6500,1],["A health checkup finds a problem. Treatment costs money.",-12000,1],["Promotion with a salary bonus!",15000,0],["Rent deposit increase.",-5000,0],["Insurance refund for overpaid premium.",3500,0],["Festival shopping and gifts.",-9000,0]];
-async function land(i){const k=L[i];
-if(k==="dec"){const c=draw("d",DEC),r=await ask("Decision Card","var(--dec)",c[0],[c[1][0],c[2][0]]),o=c[r+1];G.cash+=o[1];G.inv+=o[2];let m=o[0].split(" (")[0],win=0;if(o[3]){const g=o[3];win=Math.random()<g[0];G.cash+=win?g[1]:g[3];G.inv+=win?g[2]:g[4];m=win?g[5]:g[6]}if(o[4])G.debt+=o[4];log(c[0]+" → "+m);if(c[3])await ask(o[3]?(win?"Good result":"Bad result"):"What to know",o[3]?(win?"var(--up)":"var(--med)"):"var(--dec)",(o[3]?m+"<br><br>":"")+"💡 "+c[3],["OK"])}
-else if(k==="rnd"){const c=draw("r",RND),pc=c[3]||0,d=G.inv*pc,v=pc?d:c[1];await ask("Random Chance","var(--rnd)",`${c[0]} <span class="${v>=0?"pos":"neg"}">${pc&&G.inv<=0?"No investments yet, so no impact.":f(v)+(pc?" on your investments":"")}</span>`,["OK"]);G.cash+=c[1];G.inv+=d;log(c[0]+" "+f(v))}
-else if(k==="life"){const c=draw("l",LIFE);let a=c[1];if(a<0&&c[2]&&G.ins)a*=.2;await ask("Life Event","var(--life)",`${c[0]} <span class="${a>0?"pos":"neg"}">${f(a)}</span>${c[2]&&G.ins&&c[1]<0?"<br>Insurance covered 80%.":""}`,["OK"]);G.cash+=a;log(c[0]+" "+f(a))}
-else if(k==="med"){let a=-25000;if(G.ins)a=-5000;await ask("Medical Emergency","var(--med)",`Hospital bill: <span class="neg">${f(a)}</span>${G.ins?"<br>Your insurance covered most of it.":"<br>You have no insurance. Cover costs ₹4,000 at the Insurance tile."}`,["Pay"]);G.cash+=a;log("Medical emergency "+f(a))}
-else if(k==="ins"){if(G.ins)await ask("Insurance","var(--ins)","You already have cover. It reduces life event and medical costs.",["OK"]);else if(await ask("Insurance","var(--ins)","Health and property cover for ₹4,000. It cuts emergency costs by 80%.",["Buy cover (−₹4,000)","Skip"])===0){G.cash-=4000;G.ins=true;log("Bought insurance.")}}
-else if(k==="up"){if(await ask("Upskill Opportunity","var(--up)","Take a course for ₹10,000. Your salary rises by ₹4,000 a month.",["Enrol (−₹10,000)","Skip"])===0){G.cash-=10000;G.sal+=4000;log("Upskilled. Salary is now "+f(G.sal))}}
-else if(k==="biz"){if(G.biz)await ask("Small Business","var(--biz)","Your business already earns ₹4,000 every month.",["OK"]);else if(await ask("Small Business Opportunity","var(--biz)","Invest ₹30,000 in a small shop. It earns ₹4,000 every month, and your ₹30,000 counts as an investment.",["Invest (−₹30,000)","Skip"])===0){G.cash-=30000;G.inv+=30000;G.biz=true;log("Started a business.")}}
-else if(k==="fr"){await ask("Borrow from a Friend","var(--life)","Your friend lends you ₹10,000 with no interest. You must repay it as debt.",["Borrow","Skip"]).then(r=>{if(!r){G.cash+=10000;G.debt+=10000;log("Borrowed ₹10,000 from a friend.")}})}
-else if(k==="loan"){const r=await ask("Bank Loan Opportunity","var(--loan)",G.debt>0?"Repay up to ₹20,000 of your debt now, or take a new ₹20,000 loan at 10% interest per month.":"Take a ₹20,000 loan at 10% interest per month.",G.debt>0?["Repay ₹20,000 or all debt","Take loan (+₹20,000)","Skip"]:["Take loan (+₹20,000)","Skip"]);
-if(G.debt>0){if(r===0){const p=Math.min(20000,G.debt);G.cash-=p;G.debt-=p;log("Repaid "+f(p))}else if(r===1){G.cash+=20000;G.debt+=20000;log("Took ₹20,000 loan.")}}else if(r===0){G.cash+=20000;G.debt+=20000;log("Took ₹20,000 loan.")}}
-ui()}
-async function payday(){const int=G.debt*.1,inc=G.sal+(G.biz?4000:0);G.cash+=inc-18000-int;G.m++;log(`Month ${G.m-1} done: income ${f(inc)}, expenses −₹18,000${int?", interest "+f(-int):""}.`);if(G.cash<0){const od=-G.cash*.05;G.cash-=od;log("Overdraft fee "+f(-od))}ui()}
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-let PL=[],cur=0,AC,muted=false;const PW=[];
-function sfx(t){if(muted)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain(),F={tick:[300,.04],step:[520,.05],pop:[660,.12],coin:[880,.25]}[t];o.frequency.value=F[0];o.type="triangle";g.gain.value=.08;o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+F[1])}catch(e){}}
-$("mute").onclick=()=>{muted=!muted;$("mute").textContent=muted?"🔇 Sound off":"🔊 Sound on"};
-const syncP=()=>{if(PL[cur])Object.assign(PL[cur],G)};
-function save(){try{syncP();if(PL.every(p=>p.done))localStorage.removeItem(KEY);else localStorage.setItem(KEY,JSON.stringify({PL,cur,log:$("log").innerHTML}))}catch(e){}}
-function mkPawns(){PW.forEach(w=>w.remove());PW.length=0;PL.forEach((p,i)=>{const w=document.createElement("div");w.className="pawn";w.textContent=p.emoji;w.style.background=["#111","#e53935","#1e88e5","#43a047"][i];w.style.left=(4+i*22)+"%";PW.push(w)})}
-function nextTurn(){syncP();if(PL.every(p=>p.done))return end();let i=cur;do{i=(i+1)%PL.length}while(PL[i].done);cur=i;for(const k in G)delete G[k];Object.assign(G,PL[cur]);G.busy=false;pawn=PW[cur];$("roll").disabled=false;$("roll").textContent=PL.length>1?"Roll dice: "+G.name:"Roll dice";if(PL.length>1)log(G.name+"'s turn.");ui()}
-async function fin(){G.done=true;if(PL.length>1)await ask(G.name+" finished","var(--up)",`${G.emoji} ${G.name} played all ${G.len} months. Net worth ${f(G.cash+G.inv-G.debt)}.`,["OK"]);nextTurn()}
-async function end(){syncP();const rate=p=>{const nw=p.cash+p.inv-p.debt,gain=nw-50000,k=p.len/12;return[nw,gain>=200000*k?"Wealth Wizard 🏆":gain>=100000*k?"Smart Saver 👍":gain>=0?"Getting There 🙂":"Needs a Budget 📉"]};const rows=PL.map(p=>[p,...rate(p)]).sort((a,b)=>b[1]-a[1]);
-rows.forEach((r,i)=>{const p=r[0];MG.finish(p.mgId,r[2].replace(/[^A-Za-z ]/g,"").trim(),Math.round(r[1]),{rank:i+1,players:rows.length,months:p.len,cash:Math.round(p.cash),invested:Math.round(p.inv),debt:Math.round(p.debt),salary:p.sal,insurance:p.ins?"Yes":"No",business:p.biz?"Yes":"No"})});await ask("Game complete","var(--up)",rows.map((r,i)=>`${i?"":"🥇 "}<b>${r[0].emoji} ${r[0].name}</b>: <span class="${r[1]<0?"neg":"pos"}">${f(r[1])}</span> · ${r[2]}`).join("<br>")+"<br><br>Net worth = cash + investments − debt.",["Play again"]);try{localStorage.removeItem(KEY)}catch(e){}init()}
-async function init(){for(const k in bag)delete bag[k];$("roll").disabled=true;const s=load();
-if(s&&s.PL&&s.PL.length&&(await ask("Welcome back","var(--up)",`Continue your game? ${s.PL.length>1?s.PL.length+" players":"Month "+Math.min(s.PL[0].m,s.PL[0].len)+" of "+s.PL[0].len}.`,["Continue game","New game"]))===0){PL=s.PL;cur=s.cur;$("log").innerHTML=s.log||"";mkPawns();log("Game resumed.")}
-else{const len=[3,6,9,12][await ask("New game","var(--dec)","How many months do you want to play?",["3 months","6 months","9 months","12 months"])],n=1+await ask("Players","var(--biz)","How many players? You take turns on this phone.",["1 player","2 players","3 players","4 players"]);const regs=await MG.registerForm({game:"finance",players:n,cancel:false,intro:"Each player registers once with a mobile number."});
-PL=[];for(let i=0;i<n;i++)PL.push({p:0,m:1,len,cash:50000,inv:0,debt:0,sal:30000,ins:false,biz:false,done:false,name:regs[i].name.split(" ")[0].slice(0,14),mgId:regs[i].id,emoji:["🙂","😎","🤓","🤠"][i]});cur=0;mkPawns();$("log").innerHTML="";log("Game started: "+len+" months, "+n+" player(s). Each starts with ₹50,000 and earns ₹30,000 a month.")}
-for(const k in G)delete G[k];Object.assign(G,PL[cur]);G.busy=false;pawn=PW[cur];PW.forEach((w,i)=>cells[PL[i].p].appendChild(w));$("roll").disabled=false;$("roll").textContent=PL.length>1?"Roll dice: "+G.name:"Roll dice";ui()}
-$("newg").onclick=()=>{if(G.busy)return;try{localStorage.removeItem(KEY)}catch(e){}init()};
-$("roll").onclick=async()=>{if(G.busy)return;G.busy=true;$("roll").disabled=true;
-let n;for(let i=0;i<8;i++){n=1+Math.floor(Math.random()*6);$("die").textContent="⚀⚁⚂⚃⚄⚅"[n-1];sfx("tick");await sleep(70)}
-for(let s=0;s<n;s++){G.p=(G.p+1)%24;cells[G.p].appendChild(pawn);sfx("step");if(G.p===0){sfx("coin");await payday()}await sleep(180)}
-if(G.m>G.len)return fin();
-await land(G.p);if(G.m>G.len)return fin();nextTurn()};
-async function end0(){const nw=G.cash+G.inv-G.debt,gain=nw-50000,k=G.len/12,r=gain>=200000*k?"Wealth Wizard 🏆":gain>=100000*k?"Smart Saver 👍":gain>=0?"Getting There 🙂":"Needs a Budget 📉";
-const x=await ask("Game complete",`var(--up)`,`Net worth: <b class="${nw<0?"neg":"pos"}">${f(nw)}</b><br>Cash ${f(G.cash)} + investments ${f(G.inv)} − debt ${f(G.debt)}<br><br>Your rating: <b>${r}</b>`,["Play again"]);init()}
-init();
+const KEY='pfg-save-v2';
+let PL=[],cur=0,LEN=12,busy=true,muted=false,cells=[];const PW=[];
+const bag={};const draw=(k,a)=>{if(!bag[k]||!bag[k].length)bag[k]=a.map((_,i)=>i).sort(()=>Math.random()-.5);return a[bag[k].pop()];};
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+
+/* ---------------- player money helpers ---------------- */
+function newPlayer(r,i,len){return{name:String(r.name).trim().split(/\s+/)[0].slice(0,14),mgId:r.id,emoji:['🙂','😎','🤓','🤠'][i],p:0,m:1,len,done:false,
+  cash:50000,sal:30000,needs:15000,wants:3000,biz:false,ins:false,term:false,ef:0,sip:0,
+  inv:Object.fromEntries(KINDS.map(k=>[k,{inv:0,val:0,add:0,rows:[]}])),other:0,friend:0,loans:[],card:0,loanRows:[],
+  cibil:700,goal:null,goalHit:false,budgets:[],saved:0,income:0,monthsDone:0,qR:0,qN:0,taxSaved:0,interestPaid:0};}
+const invTotal=P=>KINDS.reduce((s,k)=>s+P.inv[k].val,0);
+const bankBal=P=>P.loans.reduce((s,l)=>s+l.bal,0);
+const debtTotal=P=>P.friend+P.card+bankBal(P);
+const netWorth=P=>P.cash+P.ef+invTotal(P)+P.other-debtTotal(P);
+const goalTarget=P=>{const g=D.GOALS.find(x=>x.id===P.goal);return g?Math.round((50000+(g.amt-50000)*P.len/12)/1000)*1000:0;};
+const goalPct=P=>P.goal?Math.max(0,Math.min(100,Math.round(netWorth(P)/goalTarget(P)*100))):0;
+function addInv(P,k,a){if(a<=0)return;const b=P.inv[k];b.inv+=a;b.val+=a;b.add+=a;}
+/* bills are paid from the emergency fund first */
+function pay(P,cost){const fromEf=Math.min(P.ef,cost);P.ef-=fromEf;P.cash-=cost-fromEf;return fromEf;}
+const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+/* ---------------- sound, log, dialogs ---------------- */
+let AC;function sfx(k){if(muted)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain(),F={tick:[300,.04],step:[520,.05],pop:[660,.12],coin:[880,.25]}[k];o.frequency.value=F[0];o.type='triangle';g.gain.value=.08;o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+F[1]);}catch(e){}}
+function log(s){const d=document.createElement('div');d.textContent=s;$('log').prepend(d);}
+function ask(title,color,html,opts){return new Promise(res=>{const b=$('box');b.style.setProperty('--c',color);b.innerHTML=`<h2>${title}</h2>${html?`<p>${html}</p>`:''}`;
+  opts.forEach((o,i)=>{const x=document.createElement('button');x.innerHTML=o;if(i)x.className='alt';x.onclick=()=>{$('modal').classList.remove('on');res(i);};b.appendChild(x);});
+  $('modal').classList.add('on');sfx('pop');const fb=b.querySelector('button');if(fb)fb.focus();});}
+
+/* ---------------- board and screen ---------------- */
+function buildBoard(){cells.forEach(c=>c.remove());cells=[];
+  L.forEach((k,i)=>{const [r,c]=pos(i),d=document.createElement('div');d.className='t'+(k==='start'?' start':'');d.style.gridArea=(r+1)+'/'+(c+1);d.style.background=COL[k];d.innerHTML=`<i>${ICON[k]}</i>${t('tiles')[k]}`;$('board').appendChild(d);cells.push(d);});}
+function applyLang(){document.documentElement.lang=LANG;$('ttl').textContent=t('title');const tb=document.querySelector('.mg-top b');if(tb)tb.textContent=t('title');document.title=t('title')+' · Mcube Games';
+  $('howto').textContent=t('howTo');$('pbBtn').textContent=t('passbook');$('newg').textContent=t('newGame');$('mute').textContent=t('sound')[muted?1:0];}
+function mkPawns(){PW.forEach(w=>w.remove());PW.length=0;PL.forEach((p,i)=>{const w=document.createElement('div');w.className='pawn';w.textContent=p.emoji;w.style.background=['#111','#e53935','#1e88e5','#43a047'][i];w.style.left=(4+i*22)+'%';PW.push(w);cells[p.p].appendChild(w);});}
+function ui(){const P=PL[cur];if(!P)return;
+  const efM=P.needs?P.ef/P.needs:0,cb=P.cibil,cc=cb>=750?'#16a34a':cb>=650?'#d97706':'#dc2626';
+  $('stats').innerHTML=`<div class="stat">${t('month')}<b>${Math.min(P.m,P.len)}/${P.len}${PL.length>1?' '+P.emoji:''}</b></div>
+   <div class="stat">${t('cash')}<b class="${P.cash<0?'neg':''}">${f(P.cash)}</b></div>
+   <div class="stat">${t('invest')}<b>${f(invTotal(P))}</b></div>
+   <div class="stat">${t('loans')}<b class="${debtTotal(P)>0?'neg':''}">${f(debtTotal(P))}</b></div>
+   <div class="stat w2">${t('efund')}<b>${f(P.ef)}</b><small>${t('efMonths',efM.toFixed(1))} · 3–6</small><div class="meter"><i style="width:${cl(efM/6*100,0,100)}%;background:${efM>=3?'#16a34a':'#f59e0b'}"></i></div></div>
+   <div class="stat w2">${t('cibil')}<b style="color:${cc}">${cb}</b><div class="meter"><i style="width:${(cb-300)/6}%;background:${cc}"></i></div></div>
+   <div class="stat">${t('salary')}<b>${f(P.sal+(P.biz?4000:0))}</b></div><div class="stat">${t('sipNow')}<b>${f(P.sip)}</b></div>
+   <div class="stat w2">${t('goal')}: ${P.goal?D.GOALS.find(g=>g.id===P.goal).icon+' '+t('goals')[P.goal]:''}<b>${goalPct(P)}% · ${f(goalTarget(P))}</b><div class="meter"><i style="width:${goalPct(P)}%;background:var(--ac)"></i></div></div>`;
+  $('roll').textContent=PL.length>1?t('rollFor',P.name):t('roll');$('roll').disabled=busy;
+  $('repay').classList.toggle('hide',!(P.friend>0));$('repay').textContent=t('repayFriend',f(P.friend));$('repay').disabled=busy;$('pbBtn').disabled=false;
+  save();}
+
+/* ---------------- monthly budget (every payday, and at the start) ---------------- */
+function budget(P){return new Promise(done=>{
+  const inc=P.sal+(P.biz?4000:0);const S={wants:P.wants,savings:Math.max(0,Math.min(3000,inc-P.needs-P.wants-P.sip)),sip:P.sip,fd:0,nps:0,gold:0,stocks:0};
+  const step=1000;const inv=()=>S.sip+S.fd+S.nps+S.gold+S.stocks;const alloc=()=>P.needs+S.wants+S.savings+inv();
+  const row=(k,lab,sub)=>`<div class="brow"><div class="lab">${lab}${sub?`<small>${sub}</small>`:''}</div><div class="step"><button type="button" class="alt" data-k="${k}" data-d="-1" aria-label="−">−</button><b id="bv_${k}"></b><button type="button" class="alt" data-k="${k}" data-d="1" aria-label="+">+</button></div></div>`;
+  const b=$('box2');
+  b.innerHTML=`<h2>${t('budgetT',P.m)}${PL.length>1?' – '+P.emoji+' '+esc(P.name):''}</h2>
+   <div class="note">${t('income')}: <b>${f(inc)}</b>${P.biz?` (${t('bizIncome')} ₹4,000)`:''} · ${t('cash')}: <b>${f(P.cash)}</b></div>
+   <div class="brow"><div class="lab">${t('needs')}<small>${t('needsFixed')}</small></div><div class="step"><b>${f(P.needs)}</b></div></div>
+   ${row('wants',t('wants'))}${row('savings',t('savings'),t('efMonths',(P.ef/P.needs).toFixed(1))+' · 3–6')}
+   <div class="sec">${t('investT')}</div>
+   ${row('sip',t('sipL'),t('sipCont'))}${row('fd',t('fdL'),t('rate').fd)}${row('nps',t('npsL'),t('rate').nps)}${row('gold',t('goldL'),t('rate').gold)}${row('stocks',t('stocksL'),t('rate').stocks)}
+   <div class="note" id="bLeft"></div>
+   <div class="sec">${t('guide')}</div><div class="guide" id="bBar"></div><div class="gl" id="bPct"></div>
+   <div id="bMsg"></div><p class="note">${t('inflationNote',12-(P.monthsDone%12))}</p>
+   <button id="bSave">${t('saveBudget')}</button>`;
+  const render=()=>{['wants','savings','sip','fd','nps','gold','stocks'].forEach(k=>$('bv_'+k).textContent=f(S[k]));
+    const left=inc-alloc();$('bLeft').innerHTML=left>=0?`${t('left')}: <b>${f(left)}</b>`:`${t('fromCash')}: <b class="neg">${f(-left)}</b>`;
+    const n=P.needs/inc*100,w=S.wants/inc*100,s=(S.savings+inv())/inc*100;
+    $('bBar').innerHTML=`<i style="width:${cl(n,0,100)}%;background:#64748b"></i><i style="width:${cl(w,0,100-n)}%;background:#f59e0b"></i><i style="width:${cl(s,0,100-n-w)}%;background:#16a34a"></i>`;
+    $('bPct').innerHTML=`<span>${t('needs').split(' (')[0]} ${pct(n)}</span><span>${t('wants').split(' (')[0]} ${pct(w)}</span><span>${t('investT')} + ${t('savings').split(' →')[0]} ${pct(s)}</span>`;
+    const close=n<=55&&w<=30&&s>=20;$('bMsg').innerHTML=(w>40?`<p class="note warn">${t('wantsWarn')}</p>`:'')+(close?`<p class="note ok">${t('closeGuide')}</p>`:'');
+    b.querySelectorAll('[data-d="1"]').forEach(x=>x.disabled=inc-alloc()-step< -Math.max(0,P.cash));
+    b.querySelectorAll('[data-d="-1"]').forEach(x=>x.disabled=S[x.dataset.k]<step);};
+  b.onclick=e=>{const x=e.target.closest('[data-k]');if(!x)return;S[x.dataset.k]=Math.max(0,S[x.dataset.k]+step*+x.dataset.d);sfx('tick');render();};
+  $('bSave').onclick=()=>{const left=inc-alloc(),n=P.needs/inc*100,w=S.wants/inc*100,s=(S.savings+inv())/inc*100;
+    P.cash+=left;P.ef+=S.savings;P.sip=S.sip;P.wants=S.wants;KINDS.forEach(k=>addInv(P,k,S[k]));
+    /* points are lost only for needs above 50%, wants above 30% and saving less than 20% */
+    const score=Math.round(cl(100-(Math.max(0,n-50)+Math.max(0,w-30)+Math.max(0,20-s))*3,0,100));P.budgets.push(score);
+    P.saved+=S.savings+inv();P.income+=inc;
+    let msg='';if(n<=55&&w<=30&&s>=20){P.cash+=1000;msg=' '+t('closeGuide');sfx('coin');}
+    log(t('budgetT',P.m)+': '+f(S.savings+inv())+msg);$('modal2').classList.remove('on');b.onclick=null;ui();done();};
+  render();$('modal2').classList.add('on');});}
+
+/* ---------------- passbooks ---------------- */
+function passbook(){const P=PL[cur];if(!P)return;const b=$('box2');const tabs=[...KINDS,'loans','total'];let on='sip';
+  const draw=()=>{let body='';
+    if(KINDS.includes(on)){const r=P.inv[on].rows;const h=P.inv[on];
+      body=`<p class="note">${t('kinds')[on]} · ${t('rate')[on]} · ${t('value')}: <b>${f(h.val)}</b> · ${t('gain')}: <b class="${h.val-h.inv<0?'neg':'pos'}">${f(h.val-h.inv)}</b>${h.add?` · +${f(h.add)} (${t('month')} ${P.m})`:''}</p>`+
+        (r.length?`<div class="tw"><table><thead><tr>${t('cols').map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${r.map((x,i)=>{const prev=i?r[i-1].val+x.add:x.add;return`<tr class="${x.val<prev-1?'dn':''}"><td>${x.m}</td><td>${f(x.add)}</td><td>${f(x.inv)}</td><td>${f(x.val-x.inv)}</td><td>${f(x.val)}</td></tr>`;}).join('')}</tbody></table></div>`:`<p class="note">${t('empty')}</p>`);}
+    else if(on==='loans'){const r=P.loanRows;body=`<p class="note">${t('loans')}: <b>${f(debtTotal(P))}</b> · ${t('kinds').loans}: ${f(P.friend)} / ${f(bankBal(P))} / ${f(P.card)}</p>`+
+        (r.length?`<div class="tw"><table><thead><tr>${t('loanCols').map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${r.map(x=>`<tr><td>${x.m}</td><td>${f(x.friend)}</td><td>${f(x.bank)}</td><td>${f(x.card)}</td><td>${f(x.emi)}</td><td>${f(x.int)}</td></tr>`).join('')}</tbody></table></div>`:`<p class="note">${t('empty')}</p>`);}
+    else{const months=[...new Set(KINDS.flatMap(k=>P.inv[k].rows.map(x=>x.m)))].sort((a,b)=>a-b);
+      body=`<p class="note">${t('invest')}: <b>${f(invTotal(P))}</b> · ${t('gain')}: <b>${f(invTotal(P)-KINDS.reduce((s,k)=>s+P.inv[k].inv,0))}</b> · ${t('networth')}: <b>${f(netWorth(P))}</b></p>`+
+        (months.length?`<div class="tw"><table><thead><tr>${t('cols').map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${months.map(m=>{let a=0,iv=0,v=0;KINDS.forEach(k=>{const x=P.inv[k].rows.find(y=>y.m===m);if(x){a+=x.add;iv+=x.inv;v+=x.val;}});return`<tr><td>${m}</td><td>${f(a)}</td><td>${f(iv)}</td><td>${f(v-iv)}</td><td>${f(v)}</td></tr>`;}).join('')}</tbody></table></div>`:`<p class="note">${t('empty')}</p>`);}
+    b.innerHTML=`<h2>${t('pbOf',esc(P.name))}</h2><div class="tabs">${tabs.map(k=>`<button type="button" class="alt${on===k?' on':''}" data-tab="${k}">${t('kinds')[k]}</button>`).join('')}</div>${body}<button id="pbClose">${t('close')}</button>`;
+    $('pbClose').onclick=()=>{$('modal2').classList.remove('on');b.onclick=null;};};
+  b.onclick=e=>{const x=e.target.closest('[data-tab]');if(x){on=x.dataset.tab;draw();}};draw();$('modal2').classList.add('on');}
+
+/* ---------------- payday ---------------- */
+async function payday(P){const msgs=[];
+  let shock={stocks:0,sip:0};
+  if(Math.random()<0.45){const e=pick(D.MKT);shock=e;
+    await ask(t('marketT'),'var(--rnd)',`${e[LANG]}<br><span class="${e.stocks<0?'neg':'pos'}">${t('kinds').stocks} ${e.stocks>0?'+':''}${e.stocks}%</span> · <span class="${e.sip<0?'neg':'pos'}">${t('kinds').sip} ${e.sip>0?'+':''}${e.sip}%</span>`,[t('ok')]);}
+  KINDS.forEach(k=>{const b=P.inv[k];if(b.val<=0&&b.add<=0)return;let r=RATE[k]/1200;
+    if(k==='stocks')r+=(Math.random()-.5)*0.06+shock.stocks/100;if(k==='sip')r+=(Math.random()-.5)*0.02+shock.sip/100;
+    b.val=Math.max(0,b.val*(1+r));b.rows.push({m:P.m,add:b.add,inv:b.inv,val:b.val});b.add=0;});
+  let emi=0,int=0;P.loans.forEach(l=>{const i=l.bal*0.01,pr=Math.min(l.bal,l.emi-i);l.bal-=pr;l.left--;emi+=l.emi;int+=i;});P.loans=P.loans.filter(l=>l.left>0&&l.bal>1);
+  if(emi){P.cash-=emi;P.cibil+=5;msgs.push(t('emiPaid',f(emi)));}
+  let cardInt=0;
+  if(P.card>0){const mn=Math.max(500,Math.round(P.card*0.05));
+    const r=await ask(t('cardT'),'var(--cc)',t('cardQ',f(P.card),f(mn)),[t('payFull'),t('payMin'),t('payNone')]);
+    if(r===0){P.cash-=P.card;P.card=0;P.cibil+=3;}
+    else{if(r===1){P.cash-=mn;P.card-=mn;P.cibil-=10;}else{P.card+=500;P.cibil-=30;}
+      cardInt=Math.round(P.card*0.035);P.card+=cardInt;msgs.push(`<b class="neg">${t('cardWarn')}</b> +${f(cardInt)}`);}
+    if(P.card>15000){P.cibil-=10;msgs.push(t('cardHigh'));}}
+  P.interestPaid+=int+cardInt;
+  P.loanRows.push({m:P.m,friend:P.friend,bank:bankBal(P),card:P.card,emi:Math.round(emi),int:Math.round(int+cardInt)});
+  if(P.cash<0){const fee=Math.round(-P.cash*0.05);P.cash-=fee;P.cibil-=15;msgs.push(t('overdraft',f(fee)));}
+  P.cibil=cl(Math.round(P.cibil),300,900);
+  P.monthsDone++;if(P.monthsDone%12===0){P.needs=Math.round(P.needs*1.06/100)*100;msgs.push(t('inflationHit',f(P.needs)));}
+  if(P.goal&&!P.goalHit&&netWorth(P)>=goalTarget(P)){P.goalHit=true;P.cash+=5000;msgs.push(t('goalHit',t('goals')[P.goal],f(5000)));sfx('coin');}
+  msgs.unshift(t('grew'));
+  await ask(t('paydayT')+' – '+t('monthDone',P.m),'var(--up)',msgs.join('<br><br>'),[t('ok')]);
+  log(t('monthDone',P.m)+' '+t('networth')+' '+f(netWorth(P)));
+  P.m++;ui();
+  if(P.m<=P.len)await budget(P);}
+
+/* ---------------- squares ---------------- */
+async function land(P,i){const k=L[i];
+  if(k==='q'){const set=MODE==='kids'?D.QK:D.QA,q=draw(MODE,set),Q=q[LANG],bonus=MODE==='kids'?1000:2000;
+    const order=[0,1,2].sort(()=>Math.random()-.5);const r=order[await ask(t('qT'),'var(--rnd)',Q[0],order.map(j=>Q[1][j]))];P.qN++;
+    if(r===q.c){P.qR++;P.cash+=bonus;sfx('coin');await ask('✅','var(--up)',t('right',f(bonus))+'<br><br>💡 '+Q[2],[t('ok')]);log('⭐ +'+f(bonus));}
+    else await ask('❌','var(--med)',t('wrong',Q[1][q.c])+'<br><br>💡 '+Q[2],[t('ok')]);}
+  else if(k==='dec'){const c=draw('dec',D.DEC),r=await ask(t('decT'),'var(--dec)',c[LANG],[c.a[LANG],c.b[LANG]]),o=r?c.b:c.a;
+    if(o.cash)P.cash+=o.cash;if(o.inv)addInv(P,o.inv.k,o.inv.a);if(o.card)P.card+=o.card;if(o.sip)P.sip+=o.sip;if(o.term)P.term=true;
+    let head=t('whatToKnow'),color='var(--dec)',txt='';
+    if(o.gamble){const g=o.gamble,win=Math.random()<g.p,a=win?g.win:g.lose;
+      if(g.k==='cash')P.cash+=a;else{const h=P.inv[g.k];h.val=Math.max(0,h.val+a);}
+      head=win?t('good'):t('bad');color=win?'var(--up)':'var(--med)';txt=(win?g.w:g.l)[LANG]+'<br><br>';}
+    await ask(head,color,txt+'💡 '+c.tip[LANG],[t('ok')]);log(c[LANG]+' → '+o[LANG]);}
+  else if(k==='life'){const c=draw('life',D.LIFE);let a=c.a,extra='';
+    if(a<0){let cost=-a;if(c.ins&&P.ins){cost=Math.round(cost*.2);extra='<br>'+t('insCovered');}const fe=pay(P,cost);if(fe)extra+='<br>'+t('paidFromEf',f(fe));a=-cost;}else P.cash+=a;
+    await ask(t('lifeT'),'var(--life)',`${c[LANG]} <span class="${a>0?'pos':'neg'}">${f(a)}</span>${extra}`,[t('ok')]);log(c[LANG]+' '+f(a));}
+  else if(k==='med'){const cost=P.ins?5000:25000;await ask(t('medT'),'var(--med)',t('medQ',`<span class="neg">${f(-cost)}</span>`,P.ins),[t('pay')]);const fe=pay(P,cost);
+    if(fe)await ask(t('medT'),'var(--med)',t('paidFromEf',f(fe)),[t('ok')]);log(t('medT')+' '+f(-cost));}
+  else if(k==='ins'){if(P.ins)await ask(t('insT'),'var(--ins)',t('insHave'),[t('ok')]);else if(await ask(t('insT'),'var(--ins)',t('insQ'),[t('buyIns'),t('skip')])===0){P.cash-=4000;P.ins=true;log(t('insT'));}}
+  else if(k==='up'){if(await ask(t('upT'),'var(--up)',t('upQ'),[t('enrol'),t('skip')])===0){P.cash-=10000;P.sal+=4000;log(t('upDone',f(P.sal)));}}
+  else if(k==='biz'){if(P.biz)await ask(t('bizT'),'var(--biz)',t('bizHave'),[t('ok')]);else if(await ask(t('bizT'),'var(--biz)',t('bizQ'),[t('bizYes'),t('skip')])===0){P.cash-=30000;P.other+=30000;P.biz=true;log(t('bizT'));}}
+  else if(k==='fr'){if(await ask(t('frT'),'var(--life)',t('frQ'),[t('borrow'),t('skip')])===0){P.cash+=10000;P.friend+=10000;log(t('frT')+' +₹10,000');}}
+  else if(k==='loan'){const opts=[t('takeLoan')];if(P.loans.length)opts.push(t('prepay')+' ('+f(bankBal(P))+')');opts.push(t('skip'));
+    const r=await ask(t('loanT'),'var(--loan)',t('loanQ',f(1777)),opts);
+    if(r===0){P.cash+=20000;P.loans.push({bal:20000,emi:1777,left:12});log(t('loanT')+' +₹20,000');}
+    else if(r===1&&P.loans.length){const b=bankBal(P);P.cash-=b;P.loans=[];log(t('prepay')+' '+f(b));}}
+  else if(k==='cc'){if(await ask(t('ccT'),'var(--cc)',t('ccQ')+'<br><small>'+t('ccNote')+'</small>',[t('spend'),t('skip')])===0){P.card+=8000;log(t('ccT')+' +₹8,000');}}
+  else if(k==='tax'){const r=await ask(t('taxT'),'var(--tax)',t('taxQ'),[t('elss'),t('ppf'),t('npsTax'),t('skip')]);
+    if(r<3){P.cash-=10000;addInv(P,['sip','fd','nps'][r],10000);P.cash+=1000;P.taxSaved+=1000;sfx('coin');await ask(t('taxT'),'var(--up)',t('taxSaved',f(1000)),[t('ok')]);log(t('taxSaved',f(1000)));}}
+  ui();}
+
+/* ---------------- turns ---------------- */
+function save(){try{if(!PL.length||PL.every(p=>p.done))localStorage.removeItem(KEY);else localStorage.setItem(KEY,JSON.stringify({PL,cur,LANG,MODE,LEN,log:$('log').innerHTML}));}catch(e){}}
+function load(){try{return JSON.parse(localStorage.getItem(KEY));}catch(e){return null;}}
+function nextTurn(){if(PL.every(p=>p.done))return end();let i=cur;do{i=(i+1)%PL.length;}while(PL[i].done);cur=i;busy=false;if(PL.length>1)log(t('turn',PL[cur].name));ui();}
+$('roll').onclick=async()=>{if(busy)return;busy=true;ui();const P=PL[cur],pawn=PW[cur];let n;
+  for(let i=0;i<8;i++){n=1+Math.floor(Math.random()*6);$('die').textContent='⚀⚁⚂⚃⚄⚅'[n-1];sfx('tick');await sleep(70);}
+  for(let s=0;s<n;s++){P.p=(P.p+1)%24;cells[P.p].appendChild(pawn);sfx('step');if(P.p===0){sfx('coin');await payday(P);if(P.m>P.len){P.done=true;await ask(t('resultT'),'var(--up)',t('finished',esc(P.name),P.len,f(netWorth(P))),[t('ok')]);return nextTurn();}}await sleep(160);}
+  await land(P,P.p);nextTurn();};
+$('repay').onclick=async()=>{const P=PL[cur];if(busy||!P||!P.friend)return;const a=Math.min(P.friend,Math.max(0,P.cash));if(a<=0)return;P.cash-=a;P.friend-=a;log(t('frRepaid',f(a)));sfx('coin');ui();};
+$('pbBtn').onclick=passbook;
+$('mute').onclick=()=>{muted=!muted;$('mute').textContent=t('sound')[muted?1:0];};
+$('newg').onclick=()=>{if(busy&&PL.length&&!PL.every(p=>p.done))return;try{localStorage.removeItem(KEY);}catch(e){}init(true);};
+
+/* ---------------- results ---------------- */
+function report(P){const bs=P.budgets.length?Math.round(P.budgets.reduce((a,b)=>a+b,0)/P.budgets.length):0,sr=P.income?P.saved/P.income*100:0,efm=P.needs?P.ef/P.needs:0,
+  div=KINDS.filter(k=>P.inv[k].val>0).length,debt=debtTotal(P),dr=debt/P.sal;
+  const g=(v,a,b,c)=>v>=a?'A':v>=b?'B':v>=c?'C':'D';
+  let dg=debt<=0?'A':dr<=1?'B':dr<=3?'C':'D';if(P.card>0&&dg<'C')dg='C';
+  return{bs,sr,efm,div,debt,grades:{budget:g(bs,80,60,40),save:g(sr,20,10,5),ef:g(efm,6,3,1),cibil:g(P.cibil,750,700,650),div:g(div,4,3,2),debt:dg}};}
+function ratingIdx(P){const gain=netWorth(P)-50000,k=P.len/12;return gain>=200000*k?0:gain>=100000*k?1:gain>=0?2:3;}
+function end(){busy=true;ui();const rows=PL.map(P=>({P,nw:netWorth(P),R:report(P)})).sort((a,b)=>b.nw-a.nw);
+  const order=['debt','ef','save','budget','cibil','div'];
+  const html=rows.map(({P,nw,R},i)=>{const worst=order.reduce((w,k)=>R.grades[k]>(w?R.grades[w]:'A')?k:w,null);const lesson=worst&&R.grades[worst]>='C'?worst:'great';
+    return `<div class="pcard"><h3>${i===0&&rows.length>1?'🥇 ':''}${P.emoji} ${esc(P.name)} – ${t('ratings')[ratingIdx(P)]}</h3>
+     <div class="sec">${t('networth')}</div><div class="nw ${nw<0?'neg':'pos'}">${f(nw)}</div><p class="note">${t('nwLine')}: ${f(P.cash)} + ${f(P.ef)} + ${f(invTotal(P))} + ${f(P.other)} − ${f(debtTotal(P))}</p>
+     <div class="sec">${t('report')}</div><div class="grades">
+      <div><span>${t('rc').budget}</span><b class="g${R.grades.budget}">${R.grades.budget}</b><small>${R.bs}/100</small></div>
+      <div><span>${t('rc').save}</span><b class="g${R.grades.save}">${R.grades.save}</b><small>${pct(R.sr)}</small></div>
+      <div><span>${t('rc').ef}</span><b class="g${R.grades.ef}">${R.grades.ef}</b><small>${t('efMonths',R.efm.toFixed(1))}</small></div>
+      <div><span>${t('rc').cibil}</span><b class="g${R.grades.cibil}">${R.grades.cibil}</b><small>${P.cibil}</small></div>
+      <div><span>${t('rc').div}</span><b class="g${R.grades.div}">${R.grades.div}</b><small>${t('types',R.div)}</small></div>
+      <div><span>${t('rc').debt}</span><b class="g${R.grades.debt}">${R.grades.debt}</b><small>${R.debt>0?f(R.debt):t('none')}</small></div></div>
+     <div class="sec">${t('pbSummary')}</div><div class="tw"><table><thead><tr><th></th><th>${t('invested')}</th><th>${t('value')}</th><th>${t('gain')}</th></tr></thead><tbody>
+      ${KINDS.map(k=>{const h=P.inv[k];return`<tr><td>${t('kinds')[k]}</td><td>${f(h.inv)}</td><td>${f(h.val)}</td><td class="${h.val-h.inv<0?'neg':'pos'}">${f(h.val-h.inv)}</td></tr>`;}).join('')}
+      <tr><td>${t('kinds').loans}</td><td colspan="3">${f(P.friend)} · ${f(bankBal(P))} · ${f(P.card)}</td></tr></tbody></table></div>
+     <p class="note">${P.goal?t('goalLine',t('goals')[P.goal],goalPct(P))+(P.goalHit?' 🎯':''):''} · ${t('qScore',P.qR,P.qN)}</p>
+     <div class="lesson"><b>${t('lessonT')}:</b> ${t('lessons')[lesson]}</div></div>`;}).join('');
+  $('box2').innerHTML=`<h2>${t('resultT')}</h2>${html}<p class="disc">${t('disclaimer')}</p><button id="again">${t('playAgain')}</button>`;
+  $('again').onclick=()=>{$('modal2').classList.remove('on');try{localStorage.removeItem(KEY);}catch(e){}init(true);};$('modal2').classList.add('on');
+  const EN=D.TX.en;rows.forEach(({P,nw,R},i)=>MG.finish(P.mgId,EN.ratings[ratingIdx(P)].replace(/[^A-Za-z ]/g,'').trim(),Math.round(nw),{rank:i+1,players:rows.length,months:P.len,mode:MODE==='kids'?'Kids':'Grown-ups',language:LANG==='ta'?'Tamil':'English',
+    cash:Math.round(P.cash),emergencyFund:Math.round(P.ef),investments:Math.round(invTotal(P)),loans:Math.round(debtTotal(P)),cibil:P.cibil,budgetScore:R.bs,savingsRatePct:Math.round(R.sr),efMonths:Number(R.efm.toFixed(1)),
+    diversification:R.div,grades:Object.entries(R.grades).map(([k,v])=>k+' '+v).join(', '),sipPerMonth:P.sip,goal:P.goal?EN.goals[P.goal]:'',goalReached:P.goalHit?'Yes':'No',questions:P.qR+'/'+P.qN,taxSaved:P.taxSaved,interestPaid:Math.round(P.interestPaid)}));
+  try{localStorage.removeItem(KEY);}catch(e){}}
+
+/* ---------------- start ---------------- */
+async function init(fresh){busy=true;for(const k in bag)delete bag[k];$('roll').disabled=true;
+  const s=fresh?null:load();
+  if(s&&s.PL&&s.PL.length&&!s.PL.every(p=>p.done)){LANG=s.LANG||'en';applyLang();
+    if(await ask(t('welcome'),'var(--up)',t('resumeQ',t('m',s.LEN)+', '+t('p',s.PL.length)),[t('cont'),t('newGame')])===0){
+      PL=s.PL;cur=s.cur;MODE=s.MODE;LEN=s.LEN;buildBoard();mkPawns();$('log').innerHTML=s.log||'';busy=false;ui();return;}}
+  LANG=(await ask('Choose language · மொழியைத் தேர்ந்தெடுக்கவும்','var(--dec)','',['English','தமிழ்']))?'ta':'en';applyLang();buildBoard();
+  MODE=(await ask(t('mode'),'var(--biz)','',[t('adults'),t('kids')]))?'kids':'adults';
+  LEN=[3,6,9,12][await ask(t('months'),'var(--dec)','',[3,6,9,12].map(n=>t('m',n)))];
+  const n=1+await ask(t('players'),'var(--biz)','',[1,2,3,4].map(x=>t('p',x)));
+  const regs=await MG.registerForm({game:'finance',players:n,cancel:false,lang:LANG,kids:MODE==='kids',gate:MODE==='kids'});
+  PL=regs.map((r,i)=>newPlayer(r,i,LEN));cur=0;$('log').innerHTML='';mkPawns();
+  for(const P of PL){const gi=await ask(t('goalT'),'var(--ac)',t('goalQ',esc(P.name)),D.GOALS.map(g=>`${g.icon} ${t('goals')[g.id]} (${f(Math.round((50000+(g.amt-50000)*LEN/12)/1000)*1000)})`));P.goal=D.GOALS[gi].id;cur=PL.indexOf(P);ui();await budget(P);}
+  cur=0;log(t('started',LEN,n));busy=false;ui();}
+applyLang();init(false);
 </script></body></html>

@@ -152,23 +152,28 @@ First release of the ₹1 Lakh to ₹10 Lakh Challenge by Mcube Academy.
 **Short description (70/80)**
 
 ```
-The goats-and-tigers game: protect your investments from market risks.
+Goats vs tigers: protect your investments from market risks. 3 levels.
 ```
 
-**Full description (927/4000)**
+**Full description (1399/4000)**
 
 ```
-Bull vs Bear brings the traditional Tamil board game Aadu Puli Attam (goats and tigers) to investing. In English and தமிழ்.
+Bull vs Bear brings the traditional Tamil board game Aadu Puli Attam (goats and tigers) to investing. Play fully in English or fully in தமிழ்.
 
-You play 15 goats – ₹15,000 of investments spread across bank savings, fixed deposits, gold, mutual funds and stocks. The computer plays 3 tigers: Panic Selling, Fake Tips and High Debt. Place your goats, move them along the lines and keep them together so the tigers cannot jump them. Trap all three tigers to win.
+You are the goats: ₹15,000 of investments in Bank, FD, Gold, Mutual Fund and Stocks. Choose which asset to place on every point. The computer plays 3 tigers – Panic Selling, Fake Tips and High Debt. Trap all three within 20 goat moves to win.
+
+WHAT MAKES IT A MONEY LESSON
+• Risk tags: Stocks give the highest return but the tigers hunt them first; Mutual Fund and Gold are medium; FD and Bank are safest
+• Market News every 5 turns: a gold price rise keeps gold goats safe, a market crash lets the tigers move twice, a fake tip sends the Fake Tips tiger twice, and more
+• Emergency Fund goat: keep it safe and it brings back one lost goat
+• SIP bonus: 5 turns without a loss earns a bonus Mutual Fund goat (up to 3)
+• Easy, Medium and Hard tigers – Hard tigers think two moves ahead
 
 AFTER THE GAME
-• See which investments survived
-• Find out what the money you saved could become as a monthly SIP
-• See the difference starting 5 years earlier makes
-• Learn what the three "tigers" look like in real life
+• Which investments survived and which you chose to protect first
+• What the money you saved could grow to as a monthly SIP, and the cost of starting 5 years late
+• Today's Top 10 leaderboard (first names only)
 
-• English and Tamil
 • Register once with your name, mobile number and age
 • Works offline; no ads and no in-app purchases
 
@@ -229,35 +234,41 @@ First release of the Pallanguli Investment Game by Mcube Academy.
 | App name (21/30) | Personal Finance Game |
 | Category | Games › Educational |
 | Tags | Educational, Simulation, Board |
-| Target age groups | 16–17, 18 and over |
+| Target age groups | 13–15, 16–17, 18 and over |
 | Graphics folder | `play-store/finance/` |
 | Upload file | `Personal-Finance-PlayStore.aab` |
 
-**Short description (71/80)**
+**Short description (80/80)**
 
 ```
-Manage salary, expenses, loans and investing month by month on a board.
+Budget, passbooks, loans, CIBIL and quizzes – a month-by-month money board game.
 ```
 
-**Full description (1097/4000)**
+**Full description (1474/4000)**
 
 ```
-Personal Finance is a board game from Mcube Academy about everyday money decisions.
+Personal Finance is a board game from Mcube Academy about everyday money decisions. Play fully in English or fully in தமிழ், in Grown-ups or Kids mode, for 3, 6, 9 or 12 months with 1 to 4 players.
 
-Every lap round the board is one month. Passing Start pays your ₹30,000 salary and takes your ₹18,000 living expenses and any loan interest. On the way you land on:
-• Decision cards – a laptop sale, a hot IPO, a WhatsApp stock tip, a credit card bill, ELSS before the tax deadline
-• Life events – a bonus, a rent hike, a bike repair, a wedding in the family
-• Random chance – market rallies and crashes, fraud alerts, cashback
-• Insurance, upskilling, a small business, a friend's loan and the bank loan desk
+EVERY PAYDAY
+• Plan the month in the Budget screen: needs, wants, savings and investments, with the 50-30-20 guide (and a bonus when you stay close to it)
+• Start or raise a SIP that continues every month; add FD/PPF, NPS, gold or stocks
+• Bank loan EMIs and the credit card bill are paid – unpaid card bills cost 3.5% a month
+• Prices rise 6% every 12 months (inflation)
 
-After each decision a short "What to know" note explains the idea – for example why you should never share your UPI PIN, or why minimum credit card payments cost more.
+ON THE BOARD
+• Random Chance questions: tax saving (80C, 80D), term insurance, emergency funds, CIBIL, EMIs, inflation, SIP vs lump sum, fraud, NPS, PPF and more – or kid-friendly money questions in Kids mode
+• Decision cards, life events, insurance, upskilling, a small business, a friend's loan, a bank loan, a credit card and a tax-saving square
 
-Choose 3, 6, 9 or 12 months and 1 to 4 players. At the end your net worth (cash + investments − debt) gives your rating: Wealth Wizard, Smart Saver, Getting There or Needs a Budget.
+TRACK YOUR MONEY
+• 📒 Passbooks for SIP, stocks, FD/PPF, NPS, gold and loans, with a row every month
+• Emergency fund meter, CIBIL score meter and a progress bar for your goal (bike, education, wedding or home)
+
+AT THE END: your net worth and a report card – budget score, savings rate, emergency fund, CIBIL, diversification and debt – with your main lesson.
 
 • Register once with your name and mobile number
 • Works offline; no ads and no in-app purchases
 
-Play money only. For learning; not financial advice.
+Play money only. For learning; not investment advice. Investments are subject to market risks.
 ```
 
 **Release notes**
