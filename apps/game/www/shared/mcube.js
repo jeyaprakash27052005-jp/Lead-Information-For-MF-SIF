@@ -19,19 +19,33 @@
     { id: "pallanguli", name: "Pallanguli Investment Game", icon: "🌰", file: "games/pallanguli.html", who: "2 players · English / தமிழ்",
       desc: "Play the traditional pits game, then invest the seeds you saved." },
     { id: "finance", name: "Personal Finance Management", icon: "🏦", file: "games/finance.html", who: "Grown-ups · 1 to 4 players",
-      desc: "Salary, expenses, loans, insurance and investing, month by month on a board." }
+      desc: "Salary, expenses, loans, insurance and investing, month by month on a board." },
+    { id: "unlock", name: "Unlock Your Future", icon: "🔐", file: "games/unlock.html", who: "Grown-ups · solo or team of 2",
+      desc: "Locked in a bank vault! Beat 4 money challenges in 5 minutes to crack the code before the Scam King takes your money." }
   ];
   var byId = {}; GAMES.forEach(function (g) { byId[g.id] = g; });
+
+  /* ---------- installed apps always show the latest website ----------
+     LIVE is the games website. When an installed app (Windows, Mac, Android, iPhone) opens with internet,
+     it switches to LIVE, so every change made to the site shows in the apps too, with no reinstall.
+     Without internet the app keeps using the copy built into it. */
+  var LIVE = "https://mf-nps-game.vercel.app";
+  function ss(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) { return null; } }
+  (function () {
+    var q = location.search, m = /[?&]single=([a-z]+)/.exec(q);
+    if (m) ss("mg_single", m[1]);
+    if (/[?&]app=1/.test(q)) ss("mg_app", "1");
+  })();
 
   /* ---------- small helpers ---------- */
   function ls(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || "null"); localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return null; } }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function device() {
-    var u = navigator.userAgent || "", app = /Electron/.test(u) || !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+    var u = navigator.userAgent || "", app = /Electron/.test(u) || ss("mg_app") === "1" || !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
     var os = /android/i.test(u) ? "android" : (/iPhone|iPad|iPod/.test(u) || (/Mac/.test(navigator.platform) && navigator.maxTouchPoints > 1)) ? "ios" : /Win/.test(navigator.platform) ? "windows" : /Mac/.test(navigator.platform) ? "mac" : "other";
     return (app ? "app-" : "web-") + os;
   }
-  function inApp() { try { return /Electron/.test(navigator.userAgent) || !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) || matchMedia("(display-mode: standalone)").matches || navigator.standalone === true; } catch (e) { return false; } }
+  function inApp() { try { return /Electron/.test(navigator.userAgent) || ss("mg_app") === "1" || !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) || matchMedia("(display-mode: standalone)").matches || navigator.standalone === true; } catch (e) { return false; } }
 
   /* Firestore REST value encoding */
   function enc(v) {
@@ -205,7 +219,26 @@
 
   /* ---------- top bar with "All games" ---------- */
   /* In a single-game Android app (made by apps/game/android-games/build.mjs) window.MG_SINGLE is the game id */
-  var SINGLE = window.MG_SINGLE || "";
+  var SINGLE = window.MG_SINGLE || ss("mg_single") || "";
+
+  /* The copy built into an app runs from file:// (Windows, Mac) or https://localhost (Android, iPhone) */
+  function bundled() { return location.protocol === "file:" || location.hostname === "localhost" || location.protocol === "capacitor:"; }
+  function goLive() {
+    if (!bundled() || !inApp() || navigator.onLine === false || /[?&]offline=1/.test(location.search)) return;
+    var de = document.documentElement, shown = false;
+    function show() { if (!shown) { shown = true; de.style.visibility = ""; } }
+    de.style.visibility = "hidden"; setTimeout(show, 4500);
+    var m = /((?:games\/)?[a-z-]+\.html)$/.exec(location.pathname), page = m ? m[1] : "index.html";
+    if (SINGLE && page === "index.html") page = "games/" + SINGLE + ".html";
+    fetch(LIVE + "/sw.js?ping=" + Date.now(), { mode: "no-cors", cache: "no-store", signal: timeout(4000) })
+      .then(function () { return flush().catch(function () {}); })
+      .then(function () { location.replace(LIVE + "/" + page + "?app=1" + (SINGLE ? "&single=" + SINGLE : "") + location.hash); })
+      .catch(show);
+  }
+  goLive();
+  /* On the website (and in apps showing it), keep a copy for offline play */
+  if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol) && !bundled())
+    addEventListener("load", function () { navigator.serviceWorker.register(base() + "sw.js").catch(function () {}); });
   function base() { return /\/games\/[^/]*$/.test(location.pathname) ? "../" : ""; }
   function topbar(title) {
     if (!document.body) { document.addEventListener("DOMContentLoaded", function () { topbar(title); }); return; }
@@ -222,6 +255,6 @@
   }
 
   window.MG = { FB: FB, GAMES: GAMES, game: function (id) { return byId[id]; }, esc: esc, device: device, inApp: inApp,
-    settings: loadSettings, cachedSettings: cachedSettings, isOn: isOn, onePlay: onePlay,
+    LIVE: LIVE, settings: loadSettings, cachedSettings: cachedSettings, isOn: isOn, onePlay: onePlay,
     register: register, check: check, finish: finish, flush: flush, registerForm: registerForm, topbar: topbar, cleanMobile: cleanMobile, playedHere: playedHere };
 })();

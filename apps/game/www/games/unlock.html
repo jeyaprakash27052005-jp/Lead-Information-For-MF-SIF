@@ -1,0 +1,700 @@
+<!doctype html>
+<html lang="en" data-bg="unlock">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Unlock Your Future · Mcube Academy FinFun</title>
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" type="image/png" href="../icons/icon-192.png">
+<link rel="stylesheet" href="../shared/mcube.css">
+<script src="../shared/mcube.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Outfit:wght@400;600;700&family=Chakra+Petch:wght@500;700&display=swap">
+<style>
+/* Layout: a bright bank-vault room. HUD strip on top, navy locker door in the middle, four clickable objects around it; mini-games open in a sheet over the room; Mcube contact footer on every screen. Single light look by choice. */
+:root{
+  --bg:#f2f5fa; --panel:#ffffff; --panel2:#edf1f7; --line:#d5dde9;
+  --navy:#17346e; --navy2:#22488f; --gold:#c4870f; --gold-soft:#fbf0d9;
+  --ink:#17202e; --muted:#5b6880;
+  --green:#178a5a; --green-soft:#e1f4ea; --red:#cf3a3f; --red-soft:#fde9e9;
+  --f-display:"Bricolage Grotesque", "Outfit", system-ui, sans-serif;
+  --f-body:"Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-num:"Chakra Petch", ui-monospace, "SF Mono", monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
+  background-image:radial-gradient(circle at 15% 0%, #dfe8f7 0, transparent 45%),radial-gradient(circle at 90% 10%, #fbefd9 0, transparent 40%);}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.wrap{max-width:1040px;margin:0 auto;padding-block:16px 24px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+header.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto}
+.mark{width:42px;height:42px;border-radius:10px;background:var(--navy);color:#fff;display:grid;place-items:center;font-family:var(--f-num);font-weight:700;font-size:20px;overflow:hidden}
+.mark img{width:100%;height:100%;object-fit:contain;background:#fff}
+.brand b{display:block;font-size:17px;line-height:1.1;color:var(--navy)}
+.brand small{color:var(--muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.ghost{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:14px}
+.ghost:hover{border-color:var(--navy)}
+.btn{background:var(--navy);color:#fff;border:0;border-radius:12px;padding:12px 22px;font-weight:700;font-size:17px}
+.btn:hover{background:var(--navy2)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.alt{background:var(--panel);color:var(--ink);border:1px solid var(--line)}
+.btn.alt:hover{border-color:var(--navy)}
+.btn.gold{background:var(--gold);color:#fff}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+.sub{display:block;color:var(--muted);font-family:var(--f-body);font-size:15px;font-weight:400;margin-top:6px}
+
+/* start */
+.intro{display:grid;grid-template-columns:1.1fr .9fr;gap:20px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 1px 2px #17346e0d}
+.hero h1{font-size:clamp(34px,6vw,56px);font-weight:800;color:var(--navy);letter-spacing:-.02em}
+.hero h1 em{font-style:normal;color:var(--gold)}
+.facts{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 0}
+.facts span{background:var(--gold-soft);color:#7a5308;border-radius:999px;padding:4px 12px;font-size:14px;font-weight:600}
+.villain{display:flex;gap:12px;align-items:flex-start;background:var(--red-soft);border:1px solid #cf3a3f40;border-radius:14px;padding:12px 14px;margin:16px 0}
+.villain .face{font-size:30px;line-height:1}
+.villain p{margin:0}
+.steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0 0;padding:0;list-style:none}
+.steps li{background:var(--panel2);border-radius:12px;padding:10px 12px;font-size:15px;display:flex;gap:10px;align-items:center}
+.steps svg{flex:none;width:28px;height:28px;stroke:var(--navy);fill:none;stroke-width:1.6}
+.steps small{display:block;color:var(--muted);font-size:13px}
+.rules{color:var(--muted);font-size:14px;margin:14px 0 0;padding-left:18px}
+.seg{display:flex;background:var(--panel2);border-radius:12px;padding:4px;gap:4px;margin:12px 0 14px}
+.seg button{flex:1;border:0;background:transparent;border-radius:9px;padding:8px}
+.seg button[aria-pressed="true"]{background:var(--navy);color:#fff;font-weight:700}
+label{display:block;font-size:14px;color:var(--muted);margin:10px 0 4px}
+input[type=text],input[type=tel],input[type=number]{width:100%;background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 12px;color:var(--ink);font:inherit;font-size:17px}
+.err{color:var(--red);font-size:14px;min-height:20px;margin-top:6px}
+.mini-board{margin-top:18px}
+.mini-board h3{font-size:17px;margin-bottom:8px}
+
+/* room */
+.hud{display:flex;gap:10px;flex-wrap:wrap;align-items:stretch;margin-bottom:12px}
+.pill{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 14px;display:flex;flex-direction:column;justify-content:center}
+.pill small{color:var(--muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.pill b{font-family:var(--f-num);font-size:22px;font-variant-numeric:tabular-nums}
+.pill.timer b{font-size:28px;color:var(--navy)}
+.pill.who{margin-right:auto;min-width:0}
+.pill.who b{font-family:var(--f-body);font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qbar{height:8px;border-radius:4px;background:var(--line);overflow:hidden;margin-bottom:12px}
+.qbar span{display:block;height:100%;background:var(--green);transition:width .4s}
+body.danger .pill.timer{border-color:var(--red);animation:pulse 1s infinite}
+body.danger .pill.timer b{color:var(--red)}
+body.danger .room{box-shadow:inset 0 0 90px #cf3a3f45}
+@keyframes pulse{50%{background:var(--red-soft)}}
+.taunt{font-size:15px;color:#a3262a;margin:0 0 12px}
+.room{display:grid;grid-template-columns:1fr minmax(0,1.25fr) 1fr;grid-template-areas:"a door b" "c door d";gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:16px;transition:box-shadow .4s}
+.obj{border:2px dashed var(--line);background:var(--panel2);border-radius:16px;padding:14px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:150px;justify-content:center;transition:transform .15s,border-color .15s}
+.obj:hover:not(:disabled){transform:translateY(-3px);border-color:var(--navy)}
+.obj svg{width:56px;height:56px;stroke:var(--navy);fill:none;stroke-width:1.6}
+.obj b{font-size:17px}
+.obj small{color:var(--muted);font-size:13px}
+.obj .qn{font-size:12px;color:var(--gold);font-weight:700}
+.obj.done{border-style:solid;border-color:var(--green);background:var(--green-soft);cursor:default}
+.obj.done svg{stroke:var(--green)}
+.obj .got{font-family:var(--f-num);font-size:22px;color:var(--green)}
+#o-phone{grid-area:a}#o-clock{grid-area:b}#o-file{grid-area:c}#o-diary{grid-area:d}
+.door{grid-area:door;border-radius:18px;background:linear-gradient(150deg,var(--navy2),var(--navy));border:3px solid #0f2552;padding:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff}
+.wheel{width:96px;height:96px;border-radius:50%;border:6px solid #e9b44c;position:relative;transition:transform 1.2s}
+.wheel::before,.wheel::after{content:"";position:absolute;inset:50% 4px auto;height:6px;margin-top:-3px;background:#e9b44c;border-radius:3px}
+.wheel::after{transform:rotate(90deg)}
+.slots{display:flex;gap:8px}
+.slot{width:52px;height:66px;border-radius:10px;background:#fff;border:2px solid #9fb1d6;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--f-num);font-size:30px;font-weight:700;color:var(--navy)}
+.slot svg{width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2}
+.slot.filled{border-color:#e9b44c;background:#fff8e8}
+.door p{margin:0;color:#d6e0f3;font-size:14px;text-align:center}
+.codein{display:flex;gap:8px;width:100%;max-width:300px}
+.codein input{text-align:center;font-family:var(--f-num);font-size:26px;letter-spacing:.3em}
+.door .btn{background:#e9b44c;color:#2a1d02}
+.shake{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+
+/* modal */
+.sheet{position:fixed;inset:0;background:#17202e8c;display:flex;align-items:center;justify-content:center;padding:16px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));z-index:20}
+.sheet-in{width:100%;max-width:620px;max-height:calc(100% - 8px);overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 20px 50px #17346e33}
+.sheet-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.sheet-head h2{font-size:22px;margin-right:auto;color:var(--navy)}
+.sheet-timer{font-family:var(--f-num);font-size:18px;color:var(--navy);background:var(--panel2);border-radius:8px;padding:2px 8px}
+body.danger .sheet-timer{color:#fff;background:var(--red)}
+.dots{display:flex;gap:6px;margin-bottom:14px}
+.dots i{flex:1;height:6px;border-radius:3px;background:var(--line)}
+.dots i.ok{background:var(--green)}.dots i.no{background:var(--red)}.dots i.cur{background:var(--gold)}
+.bubble{background:#dcf5e6;border-radius:4px 16px 16px 16px;padding:12px 14px;font-size:17px;max-width:92%}
+.bubble .from{display:block;font-size:12px;color:#1d7a4d;margin-bottom:4px;font-weight:600}
+.client{display:flex;gap:12px;align-items:center;background:var(--panel2);border-radius:14px;padding:12px}
+.avatar{flex:none;width:48px;height:48px;border-radius:50%;background:var(--gold-soft);border:2px solid var(--gold);display:grid;place-items:center;font-weight:700;color:#7a5308;font-size:20px}
+.age{font-family:var(--f-num);color:var(--gold);font-size:14px;letter-spacing:.08em;text-transform:uppercase}
+.prompt{font-size:18px;margin:10px 0 14px}
+.opts{display:grid;gap:8px}
+.opt{text-align:left;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:16px}
+.opt:hover:not(:disabled){border-color:var(--navy);background:var(--panel2)}
+.opt.ok{background:var(--green-soft);border-color:var(--green)}
+.opt.no{background:var(--red-soft);border-color:var(--red)}
+.opts.two{grid-template-columns:1fr 1fr}
+.opts.two .opt{text-align:center;font-weight:700;font-size:18px}
+.why{margin-top:12px;padding:10px 12px;border-radius:12px;background:var(--panel2);font-size:15px}
+.why b{color:var(--navy)}
+.row{display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+.meter{background:var(--panel2);border-radius:10px;height:18px;overflow:hidden;position:relative;margin:4px 0 12px}
+.meter span{display:block;height:100%;background:linear-gradient(90deg,var(--green),#4cc18c);transition:width .6s}
+.meter em{position:absolute;right:8px;top:0;font-size:12px;font-style:normal;line-height:18px;color:var(--ink);font-family:var(--f-num)}
+.diary{background:#fbf3dc;color:#3b2f1a;border-radius:6px;padding:18px;font-size:18px;box-shadow:inset 6px 0 0 #c9a25e;background-image:repeating-linear-gradient(transparent 0 30px,#d9c79c66 30px 31px)}
+.diary .pg{display:block;font-size:13px;color:#8a6a2f;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+.big-digit{font-family:var(--f-num);font-size:72px;color:var(--green);text-align:center;line-height:1;margin:10px 0}
+.center{text-align:center}
+.note{color:var(--muted);font-size:13px}
+.crash .sheet-in{border:2px solid var(--red);box-shadow:0 0 0 6px #cf3a3f22}
+.crash h2{color:var(--red)}
+.cbar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-bottom:12px}
+.cbar span{display:block;height:100%;background:var(--red);width:100%}
+
+/* end + board */
+.end{text-align:center;max-width:760px;margin:0 auto}
+.chest{font-size:84px;line-height:1;margin:6px 0;animation:pop .8s}
+@keyframes pop{0%{transform:scale(.3) rotate(-10deg)}70%{transform:scale(1.1)}100%{transform:scale(1)}}
+.score-big{font-family:var(--f-num);font-size:56px;color:var(--navy);font-weight:700;line-height:1.1}
+.stats{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:10px 0}
+.stats div{background:var(--panel2);border-radius:12px;padding:8px 14px;font-size:14px;color:var(--muted)}
+.stats b{display:block;font-family:var(--f-num);font-size:20px;color:var(--ink)}
+.offer{margin:20px 0;border-radius:18px;padding:20px;background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;text-align:left;position:relative;overflow:hidden}
+.offer::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;border:18px solid #e9b44c33}
+.offer .tag{display:inline-block;background:#e9b44c;color:#2a1d02;font-weight:700;border-radius:999px;padding:3px 12px;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+.offer h2{font-size:clamp(22px,4vw,30px);margin:10px 0 6px;color:#fff}
+.offer p{margin:0 0 6px;color:#d6e0f3}
+.coupon{display:inline-flex;align-items:center;gap:10px;margin-top:10px;background:#fff;color:var(--navy);border-radius:12px;padding:8px 14px;border:2px dashed #e9b44c}
+.coupon b{font-family:var(--f-num);font-size:22px;letter-spacing:.08em}
+.courses{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0;text-align:left}
+.courses div{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px}
+.courses b{display:block;color:var(--navy);font-size:16px}
+.lessons{text-align:left;margin:14px auto;max-width:560px;padding-left:20px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+td.n{font-family:var(--f-num);text-align:right}
+th.n{text-align:right}
+tr.me td{background:var(--gold-soft)}
+.rank{font-family:var(--f-num);color:var(--gold);font-weight:700}
+.board-big h1{font-size:clamp(28px,5vw,48px);color:var(--navy)}
+.board-big td{font-size:clamp(16px,2.2vw,24px)}
+.tablewrap{overflow-x:auto}
+
+/* consent + site footer */
+.ck{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;color:var(--muted);margin:12px 0 0}
+.ck input{margin-top:3px;width:18px;height:18px;flex:none;accent-color:var(--navy)}
+.ck a{color:var(--navy)}
+.btn[aria-busy="true"]{opacity:.6}
+/* footer */
+footer.contact{margin-top:24px;background:var(--navy);color:#fff}
+footer.contact .in{max-width:1040px;margin:0 auto;padding-block:20px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));display:grid;grid-template-columns:1.2fr 2fr;gap:20px;align-items:center}
+footer.contact h3{font-size:20px;color:#fff}
+footer.contact p{margin:4px 0 0;color:#c9d5ec;font-size:14px}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.cgrid div{background:#ffffff14;border-radius:12px;padding:10px 12px;min-width:0}
+.cgrid small{display:block;color:#aebfe0;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.cgrid b{display:block;font-size:16px;overflow-wrap:anywhere;user-select:all}
+footer.contact .fine{grid-column:1/-1;font-size:12px;color:#aebfe0;margin:0;border-top:1px solid #ffffff22;padding-top:10px}
+
+@media (max-width:760px){
+  .intro{grid-template-columns:1fr}
+  .room{grid-template-columns:1fr 1fr;grid-template-areas:"door door" "a b" "c d"}
+  .obj{min-height:120px}.obj svg{width:44px;height:44px}
+  .courses{grid-template-columns:1fr 1fr}
+  .steps{grid-template-columns:1fr}
+  footer.contact .in{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body class="mg-bars" style="--mg-mw:1040px">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-phone" viewBox="0 0 48 48"><rect x="13" y="4" width="22" height="40" rx="4"/><path d="M21 9h6M22 39h4"/><path d="M18 17h12M18 22h9M18 27h11"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><path d="M24 12v12l8 5"/><path d="M8 8l5 5M40 8l-5 5"/></symbol>
+  <symbol id="i-file" viewBox="0 0 48 48"><rect x="7" y="8" width="34" height="34" rx="3"/><path d="M7 20h34M7 31h34M20 14h8M20 25h8M20 36h8"/></symbol>
+  <symbol id="i-diary" viewBox="0 0 48 48"><path d="M12 6h24a3 3 0 013 3v32a3 3 0 01-3 3H12z"/><path d="M12 6v38M8 12h8M8 20h8M8 28h8M8 36h8"/><path d="M20 16h12M20 22h10"/></symbol>
+</svg>
+
+<div class="wrap">
+  <header class="top">
+    <button class="ghost" id="b-board" type="button" style="margin-left:auto">🏆 Leaderboard</button>
+    <button class="ghost" id="b-sound" type="button" aria-pressed="true">🔊 Sound on</button>
+  </header>
+
+  <!-- START -->
+  <section id="s-start">
+    <div class="intro">
+      <div class="card hero">
+        <h1>Unlock Your <em>Future</em><span class="sub">Crack the vault before the scammer takes your money.</span></h1>
+        <div class="facts"><span>⏱ 5 minutes</span><span>❓ 17 questions</span><span>🎁 Winners get a course offer</span></div>
+        <div class="villain"><div class="face">🦹</div><p><b>The Scam King:</b> "Ha ha! I've locked you inside the bank vault. Crack the 4-digit locker code in 5 minutes, or all your money is mine!"</p></div>
+        <p>There are 4 objects in the room. Each one hides a challenge. Beat it to win one digit of the locker code.</p>
+        <ul class="steps">
+          <li><svg><use href="#i-phone"/></svg><span><b>Phone · Scam Detective</b><small>5 messages: real or scam?</small></span></li>
+          <li><svg><use href="#i-clock"/></svg><span><b>Clock · Money Time Machine</b><small>4 life decisions, age 25 to 55</small></span></li>
+          <li><svg><use href="#i-file"/></svg><span><b>File · Fund Manager</b><small>4 clients, pick their investment</small></span></li>
+          <li><svg><use href="#i-diary"/></svg><span><b>Diary · Money Maths</b><small>3 quick number puzzles</small></span></li>
+        </ul>
+        <ul class="rules">
+          <li>10 points for every correct answer. A hint costs 5 points.</li>
+          <li>Fail a challenge and you lose 15 seconds, then retry with new questions.</li>
+          <li>A surprise Market Crash hits mid-game. You get 10 seconds to decide!</li>
+          <li>5 bonus points for every minute left. Highest score tops today's leaderboard.</li>
+        </ul>
+      </div>
+      <form class="card" id="f-reg" novalidate>
+        <h2>Ready to play?<span class="sub">Register to start the clock.</span></h2>
+        <div class="seg" role="group" aria-label="Mode">
+          <button type="button" id="m-solo" aria-pressed="true">Solo</button>
+          <button type="button" id="m-team" aria-pressed="false">Team of 2</button>
+        </div>
+        <label for="in-name1">Your name</label>
+        <input type="text" id="in-name1" autocomplete="name" maxlength="30" placeholder="e.g. Karthi">
+        <div id="name2-wrap" hidden>
+          <label for="in-name2">Teammate's name</label>
+          <input type="text" id="in-name2" maxlength="30" placeholder="e.g. Priya">
+        </div>
+        <label for="in-mobile">Mobile number</label>
+        <input type="tel" id="in-mobile" inputmode="numeric" maxlength="10" placeholder="10-digit number">
+        <label class="ck"><input type="checkbox" id="in-ck"><span>I agree that Mcube Academy may contact me about courses and investor education. <a href="../privacy.html" target="_blank" rel="noopener">Privacy policy</a></span></label>
+        <div class="err" id="reg-err"></div>
+        <button class="btn" type="submit" style="width:100%">🔓 Start the game</button>
+        <div class="mini-board"><h3>🏆 Today's top 5</h3><div id="mini-board"></div></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ROOM -->
+  <section id="s-room" hidden>
+    <div class="hud">
+      <div class="pill who"><small>Player</small><b id="h-who">—</b></div>
+      <div class="pill"><small>Questions</small><b id="h-q">0/17</b></div>
+      <div class="pill"><small>Score</small><b id="h-score">0</b></div>
+      <div class="pill timer"><small>Time left</small><b id="h-time">5:00</b></div>
+    </div>
+    <div class="qbar"><span id="h-qbar" style="width:0%"></span></div>
+    <p class="taunt" id="taunt">🦹 "Which object will you touch first?"</p>
+    <div class="room">
+      <button class="obj" id="o-phone" type="button"><svg><use href="#i-phone"/></svg><b>Phone</b><small>Scam Detective</small><span class="qn">5 questions</span></button>
+      <button class="obj" id="o-clock" type="button"><svg><use href="#i-clock"/></svg><b>Wall clock</b><small>Money Time Machine</small><span class="qn">4 questions</span></button>
+      <div class="door">
+        <div class="wheel" id="wheel"></div>
+        <div class="slots" id="slots"></div>
+        <p id="door-msg"></p>
+        <form class="codein" id="f-code" hidden>
+          <input type="text" id="in-code" inputmode="numeric" maxlength="4" aria-label="Locker code" placeholder="____">
+          <button class="btn" type="submit">Open</button>
+        </form>
+      </div>
+      <button class="obj" id="o-file" type="button"><svg><use href="#i-file"/></svg><b>File drawer</b><small>Fund Manager Challenge</small><span class="qn">4 questions</span></button>
+      <button class="obj" id="o-diary" type="button"><svg><use href="#i-diary"/></svg><b>Old diary</b><small>Money Maths</small><span class="qn">3 puzzles</span></button>
+    </div>
+  </section>
+
+  <!-- END -->
+  <section id="s-end" hidden><div class="end card" id="end-in"></div></section>
+
+  <!-- BOARD -->
+  <section id="s-board" hidden>
+    <div class="card board-big">
+      <h1>🏆 Today's Top 10<span class="sub">Fastest futures unlocked today</span></h1>
+      <div class="tablewrap" id="big-board" style="margin-top:14px"></div>
+      <div class="row"><button class="btn alt" id="b-back" type="button">← Back to the game</button></div>
+    </div>
+  </section>
+</div>
+
+<footer class="mg-fbar"><p class="foot">Mutual fund investments are subject to market risks. Read all scheme-related documents carefully. This game is for learning only and is not investment advice. · <a href="../privacy.html">Privacy policy</a> · <a href="https://mcubeacademy.com" target="_blank" rel="noopener">mcubeacademy.com</a></p></footer>
+
+<div class="sheet" id="sheet" hidden><div class="sheet-in" id="sheet-in" role="dialog" aria-modal="true"></div></div>
+
+<script>
+(() => {
+/* ================= EDIT YOUR DETAILS HERE ================= */
+const MCUBE = {
+  phone: '',
+  whatsapp: '',
+  email: '',
+  website: '',
+  address: 'Chennai',
+  offerTitle: "Winner's special offer",
+  offerText: 'A special fee discount on any of our courses.',
+  offerHow: 'Show this screen to our team at the stall to claim it.',
+  offerValid: 'Valid for 7 days from today',
+};
+/* ========================================================== */
+
+const $ = s => document.querySelector(s);
+const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today = () => new Date().toLocaleDateString('en-CA', {timeZone:'Asia/Kolkata'});
+const fmt = s => { s = Math.max(0, Math.ceil(s)); return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); };
+const inr = n => n.toLocaleString('en-IN');
+const TOTAL = 300, QTOTAL = 17;
+const DOOR_MSG = 'Find all 4 digits. The code goes in this order: Phone, Clock, File, Diary.';
+
+/* ---------- contact details from the admin site (settings/siteContact) ---------- */
+(function(){ const F = MG.FB;
+  fetch(`https://firestore.googleapis.com/v1/projects/${F.p}/databases/${encodeURIComponent(F.d)}/documents/settings/siteContact?key=${F.k}`, {cache:'no-store'})
+    .then(r => r.ok ? r.json() : null).then(j => { if(!j || !j.fields) return; const v = k => (j.fields[k] && j.fields[k].stringValue || '').trim();
+      if(v('mobile')) MCUBE.phone = v('mobile'); if(v('email')) MCUBE.email = v('email'); if(v('officeAddress')) MCUBE.address = v('officeAddress'); }).catch(()=>{});
+})();
+MG.topbar('Unlock Your Future');
+
+/* ---------- content ---------- */
+const SCAMS = [
+ {t:"Your money will DOUBLE in one month! Send ₹10,000 right now.", from:"+91 9xxxx xxx21", scam:true, why:"Any promise of guaranteed high returns is a scam alarm."},
+ {t:"Mutual fund investments are subject to market risks. Read all scheme-related documents carefully.", from:"AMC advertisement", scam:false, why:"This is the genuine warning SEBI requires on every mutual fund ad."},
+ {t:"Your KYC has expired. Share the OTP on this link to reactivate your account.", from:"VK-KYCUPD", scam:true, why:"Never share an OTP with anyone, even someone claiming to be your bank."},
+ {t:"Join our WhatsApp group for FREE tips on a stock that will jump 300% tomorrow!", from:"Stock Gurus 💰", scam:true, why:"This is a pump-and-dump scam. They push the price up, then sell to you."},
+ {t:"Get paid advice from a SEBI-registered investment adviser. Registration number shown on our website.", from:"RIA office", scam:false, why:"You can check any SEBI registration number on sebi.gov.in."},
+ {t:"Your SIP of ₹5,000 was debited from your bank account today.", from:"AMC alert", scam:false, why:"A routine SIP confirmation. It doesn't ask you to share anything."},
+ {t:"This is your bank manager. Your card will be blocked. Tell me your CVV now.", from:"Call · unknown number", scam:true, why:"Banks never ask for your CVV, PIN or OTP."},
+ {t:"Invest ₹1 lakh in this crypto app and earn a GUARANTEED 5% every day!", from:"Telegram", scam:true, why:"5% a day is over 1,800% a year. That is impossible."},
+ {t:"Your monthly Consolidated Account Statement (CAS) for your demat account is attached.", from:"CDSL", scam:false, why:"The CAS from the depository is genuine and helps you track your holdings."},
+ {t:"Finish this course and earn ₹2 lakh a month from the stock market. 100% guaranteed!", from:"Instagram ad", scam:true, why:"Nobody can guarantee market income. 'Guaranteed' is the giveaway."},
+ {t:"Congratulations! You won a ₹25 lakh lottery. Pay a ₹5,000 processing fee to claim it.", from:"+44 7xxx xxx90", scam:true, why:"You can't win a lottery you never entered. 'Pay a fee first' is the scam."},
+ {t:"New Fund Offer (NFO) launched. The SID and KIM documents are on the AMC website.", from:"AMC email", scam:false, why:"It asks you to read the documents and promises no returns. That's legitimate."},
+ {t:"Update now: download our trading app from this link (APK) or your account will be frozen.", from:"SMS · BX-TRDAPP", scam:true, why:"Install apps only from the official app store. APK links are a common trap."},
+ {t:"New login to your bank app from Chennai. Not you? Call the number printed on the back of your card.", from:"Bank app alert", scam:false, why:"It sends you to your card's own number and asks for nothing. That's a real security alert."},
+ {t:"Pay ₹2,000 to confirm your IPO allotment and get guaranteed listing gains!", from:"+91 8xxxx xxx07", scam:true, why:"IPO applications use ASBA or UPI. There's no fee for allotment and no guaranteed gains."},
+ {t:"Please complete your KYC on our official website or through any KRA-registered intermediary.", from:"AMC email", scam:false, why:"It points to official channels and asks for no OTP or payment."},
+];
+const TIME = [
+ [ {age:25, q:"Your first salary just arrived! What do you do?", o:[["Buy a new phone on EMI",0],["Start a ₹5,000 monthly SIP",1],["Leave it all in a savings account",0]], why:"Starting early gives compounding more years to work for you."},
+   {age:25, q:"You got a ₹50,000 bonus. What comes first?", o:[["A foreign holiday",0],["An emergency fund covering 6 months of expenses",1],["A stock tip from a friend",0]], why:"With an emergency fund, you never have to break your investments in a crisis."},
+   {age:27, q:"A friend says credit card minimum payments are 'free money'.", o:[["Pay only the minimum every month",0],["Pay the full bill every month",1],["Use a second card to pay the first",0]], why:"Unpaid card balances can cost over 35% a year. Always clear the full bill."} ],
+ [ {age:30, q:"You just got married and your family depends on you.", o:[["Stop the SIP and spend more",0],["Buy term insurance and health insurance",1],["Put everything in a chit fund",0]], why:"Protection comes first. Investing comes after."},
+   {age:32, q:"You got a 20% salary hike!", o:[["Raise your spending by 20%",0],["Increase your SIP amount (step-up SIP)",1],["Park it all in a savings account",0]], why:"A step-up SIP grows your investment as your income grows."},
+   {age:33, q:"An agent offers an insurance plan that 'also gives returns'.", o:[["Buy it, it's two in one",0],["Keep insurance and investment separate",1],["Cancel all insurance",0]], why:"Pure term cover plus a separate SIP usually gives more cover and better growth."} ],
+ [ {age:40, q:"The market just fell 30%! What about your SIP?", o:[["Panic and sell everything",0],["Keep the SIP going",1],["Put all your money in a single stock",0]], why:"In a fall, the same amount buys more units. That's rupee cost averaging."},
+   {age:40, q:"Your child goes to college in 10 years.", o:[["Start a separate SIP for that goal",1],["Take a personal loan when the time comes",0],["Dip into your retirement savings",0]], why:"Give every goal its own plan. That's goal-based investing."},
+   {age:42, q:"You have a home loan and some spare money every month.", o:[["Spend it on gadgets",0],["Split it between part-prepaying the loan and investing",1],["Take another loan to invest",0]], why:"Balancing debt reduction and investing keeps you safe and growing."} ],
+ [ {age:50, q:"10 years to retirement.", o:[["Go 100% small cap",0],["Spread across equity, debt and gold to cut risk",1],["Do nothing",0]], why:"As you get older, lower your risk with asset allocation."},
+   {age:55, q:"Retirement is close. What about your equity money?", o:[["Shift it gradually into debt funds",1],["Move it all into small caps",0],["Withdraw everything and keep it at home",0]], why:"Shifting step by step protects you from a crash right before retirement."},
+   {age:52, q:"Your portfolio has drifted to 80% equity from your plan of 50%.", o:[["Rebalance back to your plan",1],["Add even more equity, it's rising",0],["Ignore it",0]], why:"Rebalancing locks in gains and keeps your risk where you planned it."} ],
+];
+const CLIENTS = [
+ {n:"Lakshmi", a:62, d:"Retired teacher. Needs a monthly income and wants no risk.", o:[["Small cap fund",0],["Debt fund / FD / Senior Citizens' Savings Scheme",1],["Crypto",0]], why:"For a retiree, steady income and safety matter most."},
+ {n:"Arun", a:26, d:"IT employee. 20-year goal, happy to take risk.", o:[["Equity / flexi cap SIP",1],["Savings account only",0],["Gold jewellery",0]], why:"Over the long term, equity has the highest growth potential."},
+ {n:"Raja", a:45, d:"Business owner. Investing over ₹1 crore and wants professional management.", o:[["Lottery tickets",0],["PMS / AIF",1],["A friend's chit fund",0]], why:"PMS needs at least ₹50 lakh and AIF ₹1 crore, so they suit large portfolios."},
+ {n:"Priya", a:29, d:"Needs money for her wedding in 6 months.", o:[["Small cap fund",0],["Liquid fund / FD",1],["Buy a plot of land",0]], why:"For short-term needs, safety and quick access matter most."},
+ {n:"Kumar", a:35, d:"Wants to save tax under the old regime. Won't need the money for 3 years.", o:[["ELSS (tax-saving mutual fund)",1],["Crypto",0],["A WhatsApp stock tip",0]], why:"ELSS gets the 80C deduction with just a 3-year lock-in, the shortest of the 80C options."},
+ {n:"Meena", a:40, d:"Looking for a place to keep her emergency fund.", o:[["Sectoral fund",0],["Liquid fund",1],["5-year lock-in tax-saver FD",0]], why:"A liquid fund lets you withdraw quickly when an emergency hits."},
+ {n:"Ravi", a:23, d:"First job. Can only invest ₹1,000 a month for now.", o:[["Wait until his salary is higher",0],["Start a ₹1,000 index fund SIP now",1],["Trade options to grow it fast",0]], why:"Small amounts started early beat big amounts started late."},
+ {n:"Fatima", a:48, d:"Wants a pension after 60 and an extra tax benefit.", o:[["NPS (National Pension System)",1],["Penny stocks",0],["Keep cash at home",0]], why:"NPS is built for retirement income and has its own tax deduction."},
+ {n:"Suresh", a:38, d:"Wants some gold in his portfolio without storage or purity worries.", o:[["Gold ETF or gold fund",1],["A jeweller's scheme promising 30% returns",0],["Jewellery with high making charges",0]], why:"Gold ETFs and gold funds track the gold price with no storage or purity risk."},
+];
+const CRASHES = [
+ {q:"🚨 BREAKING: Sensex crashes 30% in a single day! What should your SIP do?", o:[["Panic and sell everything",0],["Keep the SIP going",1],["Borrow money and buy everything",0]], why:"Selling in panic locks in the loss. Continuing your SIP buys more units at lower prices."},
+ {q:"🚨 BREAKING: One stock just fell 40%! Your friend had 100% of his money in it. What's the lesson?", o:[["Never put everything in one stock, diversify",1],["Borrow more and buy the same stock",0],["Stay away from the market forever",0]], why:"Diversification: don't put all your eggs in one basket."},
+ {q:"🚨 BREAKING: Interest rates jump overnight and markets swing wildly! Your goal is 15 years away.", o:[["Stay invested and stick to your plan",1],["Sell everything and wait for 'the right time'",0],["Move all money into one hot sector",0]], why:"For long goals, time in the market beats timing the market."},
+];
+const NAVS = [50, 100, 125, 200, 250, 500];
+const R72 = {2:36, 3:24, 4:18, 6:12, 8:9, 9:8};
+const PUZZLES = {
+  nav: d => { const nav = pick(NAVS); return {t:`I invested <b>₹${inr(d*nav)}</b> in a mutual fund when the NAV was <b>₹${nav}</b>. How many units did I get?`, h:'NAV is the price of one unit. Units = amount ÷ NAV.'}; },
+  split: d => { const k = pick([2,3,4,5]); return {t:`I split <b>₹${inr(d*k*1000)}</b> equally across <b>${k} funds</b>. How many thousand rupees went into each fund?`, h:`Divide the total by ${k}, then count the thousands.`}; },
+  sip: d => ({t:`My monthly SIP put <b>₹${inr(d*12000)}</b> into a fund over one year. How many thousand rupees was each monthly SIP?`, h:'A year has 12 monthly SIPs. Divide by 12.'}),
+  emergency: d => { const e = pick([10,15,20,25]); return {t:`My monthly expenses are <b>₹${inr(e*1000)}</b>. My emergency fund is <b>₹${inr(d*e*1000)}</b>. How many months will it last?`, h:'Months = emergency fund ÷ monthly expenses.'}; },
+  rule72: d => ({t:`Rule of 72: at <b>${R72[d]}% a year</b>, roughly how many years does money take to double?`, h:`Years to double ≈ 72 ÷ the yearly return (72 ÷ ${R72[d]}).`}),
+};
+const lakh = w => '₹' + (w>=100 ? (w/100).toFixed(2)+' crore' : w+' lakh');
+
+/* ---------- state ---------- */
+let S = null, tick = null, sound = true, ac = null, mode = 'solo';
+const OBJS = ['phone','clock','file','diary'];
+const ICON = {phone:'i-phone',clock:'i-clock',file:'i-file',diary:'i-diary'};
+
+/* ---------- sound ---------- */
+function beep(f=880, d=.08, type='sine', v=.08){
+  if(!sound) return;
+  try{ ac = ac || new (window.AudioContext||window.webkitAudioContext)();
+    const o=ac.createOscillator(), g=ac.createGain(); o.type=type; o.frequency.value=f; g.gain.value=v;
+    o.connect(g); g.connect(ac.destination); o.start(); g.gain.exponentialRampToValueAtTime(.0001, ac.currentTime+d); o.stop(ac.currentTime+d);
+  }catch(e){}
+}
+const chime = () => { beep(660,.12); setTimeout(()=>beep(880,.12),110); setTimeout(()=>beep(1320,.2),220); };
+const buzz = () => beep(140,.3,'sawtooth',.06);
+
+function sortRows(rows){ return rows.filter(r=>r.won).sort((a,b)=> b.score-a.score || a.secs-b.secs); }
+function mergeRows(list){ const seen = new Set(); return list.filter(r => { if(!r || seen.has(r.id)) return false; seen.add(r.id); return true; }); }
+let boardRows = [];
+function renderBoards(){
+  const rows = sortRows(boardRows);
+  const mk = (n, big) => {
+    if(!rows.length) return `<p class="note">Nobody has cracked the vault today yet. Be the first!</p>`;
+    return `<table><thead><tr><th>#</th><th>Name</th><th class="n">Score</th><th class="n">Time</th></tr></thead><tbody>${
+      rows.slice(0,n).map((r,i)=>`<tr class="${S && S.savedId===r.id?'me':''}"><td class="rank">${i+1}</td><td>${esc(r.name)}${r.team?' 👥':''}</td><td class="n">${r.score}</td><td class="n">${fmt(r.secs)}</td></tr>`).join('')
+    }</tbody></table>${STORE.localOnly && big ? '<p class="note">Scores are saved on this device only.</p>':''}`;
+  };
+  $('#mini-board').innerHTML = mk(5);
+  $('#big-board').innerHTML = mk(10, true);
+}
+
+/* STORE-START: results are saved in the Mcube online database (collection gamePlayers, game "unlock") */
+const LS = 'uyf_scores';
+const loadLocal = () => { try{ return JSON.parse(localStorage.getItem(LS) || '[]'); }catch(e){ return []; } };
+const saveLocal = r => { try{ const a = loadLocal(); a.push(r); localStorage.setItem(LS, JSON.stringify(a.slice(-500))); }catch(e){} };
+/* Leaderboard shows first names only */
+const firstNames = n => String(n||'').split('&').map(x => x.trim().split(/\s+/)[0]).filter(Boolean).join(' & ');
+const STORE = { localOnly: false,
+  async refresh(){
+    const remote = [];
+    const d = new Date(); d.setHours(0,0,0,0); const since = d.toISOString(), F = MG.FB;
+    try{
+      const r = await fetch(`https://firestore.googleapis.com/v1/projects/${F.p}/databases/${encodeURIComponent(F.d)}/documents:runQuery?key=${F.k}`, {method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({structuredQuery:{from:[{collectionId:'gamePlayers'}], where:{fieldFilter:{field:{fieldPath:'registeredAt'}, op:'GREATER_THAN_OR_EQUAL', value:{stringValue:since}}}, limit:1000}})});
+      if(r.ok) (await r.json()).forEach(x => { if(!x.document) return; const f = x.document.fields || {}, s = k => f[k] && f[k].stringValue;
+        if(s('game') !== 'unlock' || s('status') !== 'finished') return;
+        const dt = (f.details && f.details.mapValue && f.details.mapValue.fields) || {}, n = k => dt[k] ? Number(dt[k].integerValue ?? dt[k].doubleValue ?? 0) : 0, b = k => !!(dt[k] && dt[k].booleanValue);
+        const sc = f.score ? Number(f.score.integerValue ?? f.score.doubleValue ?? 0) : 0;
+        remote.push({id: x.document.name.split('/').pop(), name: s('name') || '', team: b('team'), score: sc, secs: n('secs'), won: b('won'), day: today()}); });
+    }catch(e){}
+    boardRows = mergeRows([...remote, ...loadLocal().filter(r => r.day === today()), ...boardRows.filter(r => r.day === today())])
+      .map(r => ({...r, name: firstNames(r.name)}));
+    renderBoards();
+  },
+  init(){ this.refresh(); setInterval(() => this.refresh(), 30000); },
+  async score(row){
+    saveLocal(row); boardRows = mergeRows([row, ...boardRows]).map(r => ({...r, name: firstNames(r.name)})); renderBoards();
+    await MG.finish(S.mgId, row.won ? 'UNLOCKED' : 'TIME UP', row.score,
+      {won: row.won, team: row.team, secs: row.secs, timeTaken: fmt(row.secs), correct: row.correct, answered: row.answered, offerCode: row.offerCode || ''});
+    setTimeout(() => this.refresh(), 2500);
+  },
+};
+/* STORE-END */
+STORE.init(); renderBoards();
+
+/* ---------- screens ---------- */
+function show(id){ for(const s of ['s-start','s-room','s-end','s-board']) $('#'+s).hidden = s!==id; window.scrollTo(0,0); }
+function route(){ if(location.hash==='#board'){ show('s-board'); } else if(!S || S.over){ show(S&&S.over?'s-end':'s-start'); } else show('s-room'); }
+window.addEventListener('hashchange', route);
+$('#b-board').onclick = () => { location.hash = 'board'; route(); };
+$('#b-back').onclick = () => { history.replaceState(null,'',location.pathname+location.search); route(); };
+$('#b-sound').onclick = e => { sound=!sound; e.currentTarget.setAttribute('aria-pressed',sound); e.currentTarget.textContent = sound?'🔊 Sound on':'🔇 Sound off'; };
+
+$('#m-solo').onclick = () => setMode('solo'); $('#m-team').onclick = () => setMode('team');
+function setMode(m){ mode=m; $('#m-solo').setAttribute('aria-pressed',m==='solo'); $('#m-team').setAttribute('aria-pressed',m==='team'); $('#name2-wrap').hidden = m!=='team'; }
+
+$('#f-reg').addEventListener('submit', e => {
+  e.preventDefault();
+  const n1 = $('#in-name1').value.trim(), n2 = $('#in-name2').value.trim(), mob = $('#in-mobile').value.replace(/\D/g,'');
+  if(!n1) return $('#reg-err').textContent = 'Please enter your name.';
+  if(mode==='team' && !n2) return $('#reg-err').textContent = "Team mode needs your teammate's name too.";
+  if(!/^[6-9]\d{9}$/.test(mob)) return $('#reg-err').textContent = 'Please enter a valid 10-digit mobile number.';
+  if(!$('#in-ck').checked) return $('#reg-err').textContent = 'Please tick the box to agree.';
+  $('#reg-err').textContent = '';
+  const btn = $('#f-reg [type=submit]'); if(btn.disabled) return; btn.disabled = true; btn.setAttribute('aria-busy','true');
+  const name = mode==='team' ? `${n1} & ${n2}` : n1;
+  MG.register('unlock', {name, mobile: mob, mode: mode}).then(r => {
+    btn.disabled = false; btn.removeAttribute('aria-busy');
+    if(r.dup) return $('#reg-err').textContent = 'This mobile number has already played this game.';
+    start({name, team: mode==='team', mobile: mob, mgId: r.id});
+  });
+});
+
+/* ---------- game ---------- */
+function start(p){
+  const code = OBJS.map(()=> 1+Math.floor(Math.random()*9));
+  const rid = Date.now().toString(36) + Math.random().toString(36).slice(2,6), id = p.mgId || rid;
+  S = {...p, id, rid, code, got:{}, score:0, answered:0, correct:0, left:TOTAL, crashDone:false, crashAt: 90+Math.floor(Math.random()*60), over:false, modal:false, savedId:null};
+  $('#h-who').textContent = p.name + (p.team?' 👥':'');
+  OBJS.forEach(o => { const b=$('#o-'+o); b.classList.remove('done'); b.disabled=false; b.querySelector('.got')?.remove(); b.onclick = () => openGame(o); });
+  $('#f-code').hidden = true; $('#in-code').value=''; $('#wheel').style.transform='';
+  $('#door-msg').textContent = DOOR_MSG;
+  taunt('🦹 "Which object will you touch first?"');
+  drawSlots(); hud(); show('s-room'); history.replaceState(null,'',location.pathname+location.search);
+  beep(523,.1); clearInterval(tick); tick = setInterval(step, 1000);
+}
+function step(){
+  if(!S || S.over) return;
+  S.left -= 1;
+  if(S.left <= 60 && S.left > 0) beep(S.left%2?1000:800,.05,'square',.04);
+  if(!S.crashDone && TOTAL - S.left >= S.crashAt && !S.modal) crash();
+  if(S.left <= 0){ S.left=0; hud(); return finish(false); }
+  hud();
+}
+function hud(){
+  $('#h-time').textContent = fmt(S.left); $('#h-score').textContent = S.score;
+  const q = Math.min(S.answered, QTOTAL); $('#h-q').textContent = q + '/' + QTOTAL; $('#h-qbar').style.width = (q/QTOTAL*100)+'%';
+  const st = $('#sheet-t'); if(st) st.textContent = fmt(S.left);
+  document.body.classList.toggle('danger', S.left<=60 && !S.over);
+}
+function answered(right){ S.answered++; if(right){ S.correct++; S.score+=10; } hud(); }
+function taunt(t){ $('#taunt').textContent = t; }
+function drawSlots(){
+  $('#slots').innerHTML = OBJS.map((o,i) => `<div class="slot ${S.got[o]?'filled':''}">${S.got[o]?S.code[i]:'?'}<svg><use href="#${ICON[o]}"/></svg></div>`).join('');
+}
+function penalty(sec){ S.left = Math.max(1, S.left - sec); hud(); }
+function addTime(sec){ S.left = Math.min(TOTAL, S.left + sec); hud(); }
+
+/* modal */
+const timerChip = () => `<span class="sheet-timer" id="sheet-t">${fmt(S.left)}</span>`;
+function openSheet(html, cls=''){ $('#sheet').className = 'sheet ' + cls; $('#sheet-in').innerHTML = html; $('#sheet').hidden=false; S.modal=true; $('#sheet-in').scrollTop=0; const f=$('#sheet-in').querySelector('input,.opt,button.btn,button'); f && f.focus(); }
+function closeSheet(){ $('#sheet').hidden=true; if(S) S.modal=false; }
+
+function openGame(o){
+  if(S.got[o] || S.over) return;
+  if(o==='phone') quiz({o, title:'📱 Scam Detective', sub:'Spot at least 4 of 5 messages correctly', need:4, two:true,
+    items: () => { let p; do{ p = shuffle(SCAMS).slice(0,5); }while(p.every(x=>x.scam) || p.every(x=>!x.scam));
+      return p.map(x => ({prompt:`<div class="bubble"><span class="from">${esc(x.from)}</span>${esc(x.t)}</div><p class="prompt">Real or scam?</p>`, o:[['✅ Real',!x.scam],['🚫 Scam',x.scam]], why:x.why})); }});
+  if(o==='clock') quiz({o, title:'⏰ Money Time Machine', sub:'Get at least 3 of 4 life decisions right to reach ₹1 crore', need:3, wealth:true,
+    items: () => TIME.map(st => { const x = pick(st);
+      return {prompt:`<div class="age">Age ${x.age}</div><p class="prompt">${esc(x.q)}</p>`, o:shuffle(x.o), why:x.why}; })});
+  if(o==='file') quiz({o, title:'🗂️ Fund Manager Challenge', sub:'Pick the right investment for at least 3 of 4 clients', need:3,
+    items: () => shuffle(CLIENTS).slice(0,4).map(c => ({prompt:`<div class="client"><div class="avatar">${esc(c.n[0])}</div><div><b>${esc(c.n)}</b>, age ${c.a}<br><span style="color:var(--muted)">${esc(c.d)}</span></div></div><p class="prompt">What suits this client best?</p>`, o:shuffle(c.o), why:c.why}))});
+  if(o==='diary') diary();
+}
+
+function quiz(cfg){
+  const items = cfg.items(); let i=0, ok=0, res=[], wealth=0;
+  const render = () => {
+    const it = items[i];
+    openSheet(`<div class="sheet-head"><h2>${cfg.title}</h2>${timerChip()}<button class="ghost" id="q-x" type="button">Close</button></div>
+      <p class="note" style="margin:0 0 10px">${cfg.sub}</p>
+      <div class="dots">${items.map((_,k)=>`<i class="${res[k]===true?'ok':res[k]===false?'no':k===i?'cur':''}"></i>`).join('')}</div>
+      ${cfg.wealth?`<div class="note">Your wealth</div><div class="meter"><span style="width:${Math.min(100,wealth)}%"></span><em>${lakh(wealth)}</em></div>`:''}
+      ${it.prompt}
+      <div class="opts ${cfg.two?'two':''}">${it.o.map((x,k)=>`<button class="opt" type="button" data-k="${k}">${esc(x[0])}</button>`).join('')}</div>
+      <div id="q-why"></div>`);
+    $('#q-x').onclick = closeSheet;
+    $('#sheet-in').querySelectorAll('.opt').forEach(b => b.onclick = () => {
+      const k=+b.dataset.k, right = !!it.o[k][1];
+      $('#sheet-in').querySelectorAll('.opt').forEach((x,j)=>{ x.disabled=true; if(it.o[j][1]) x.classList.add('ok'); });
+      if(!right) b.classList.add('no');
+      res[i]=right; if(right){ ok++; chime(); } else buzz();
+      answered(right);
+      if(cfg.wealth){ wealth += right?32:4; $('#sheet-in .meter span').style.width = Math.min(100,wealth)+'%'; $('#sheet-in .meter em').textContent = lakh(wealth); }
+      $('#q-why').innerHTML = `<div class="why"><b>${right?'Correct!':'Not quite.'}</b> ${esc(it.why)}</div><div class="row"><button class="btn" id="q-n" type="button">${i<items.length-1?'Next →':'See result'}</button></div>`;
+      $('#q-n').focus();
+      $('#q-n').onclick = () => { i++; if(i<items.length) render(); else (ok>=cfg.need ? win(cfg.o) : fail(cfg, ok)); };
+    });
+  };
+  render();
+}
+
+function win(o){
+  S.got[o]=true; const d=S.code[OBJS.indexOf(o)]; drawSlots();
+  const b=$('#o-'+o); b.classList.add('done'); b.disabled=true; b.insertAdjacentHTML('beforeend',`<span class="got">${d}</span>`);
+  openSheet(`<div class="center"><p class="note">You found a digit of the locker code!</p><div class="big-digit">${d}</div>
+    <div class="row" style="justify-content:center"><button class="btn" id="w-ok" type="button">Back to the vault</button></div></div>`);
+  chime(); $('#w-ok').onclick = closeSheet;
+  const n = Object.keys(S.got).length;
+  if(n===4){ $('#f-code').hidden=false; $('#door-msg').textContent='All 4 digits found! Type the code to unlock your future.'; taunt('🦹 "No... this can\'t be happening!"'); setTimeout(()=>$('#in-code').focus(),50); }
+  else taunt(['🦹 "One digit and you think you\'re winning?"','🦹 "Halfway there... and the clock is ticking!"','🦹 "Just one more digit... you\'ll never make it!"'][n-1]);
+}
+function fail(cfg, ok){
+  penalty(15);
+  openSheet(`<div class="center"><div style="font-size:48px">🦹</div><h2>The Scam King is laughing!</h2>
+    <p>You got ${ok} right. You needed ${cfg.need}. That cost you 15 seconds.</p>
+    <div class="row" style="justify-content:center"><button class="btn alt" id="f-room" type="button">Back to the vault</button><button class="btn" id="f-re" type="button">Retry with new questions</button></div></div>`);
+  buzz(); $('#f-room').onclick = closeSheet; $('#f-re').onclick = () => quiz(cfg);
+}
+
+function diary(){
+  const last = S.code[3];
+  const types = shuffle(Object.keys(PUZZLES));
+  const plan = [];
+  for(const t of types){ if(plan.length===2) break; const d = 1+Math.floor(Math.random()*9); if(t==='rule72' && !R72[d]) continue; plan.push({t, d}); }
+  const lastType = types.find(t => !plan.some(p=>p.t===t) && (t!=='rule72' || R72[last])) || 'nav';
+  plan.push({t:lastType, d:last});
+  const pages = plan.map(p => ({...PUZZLES[p.t](p.d), a:p.d}));
+  let i = 0;
+  const render = () => {
+    const pg = pages[i]; let hinted = false, missed = false;
+    openSheet(`<div class="sheet-head"><h2>📔 The Old Diary</h2>${timerChip()}<button class="ghost" id="q-x" type="button">Close</button></div>
+      <div class="dots">${pages.map((_,k)=>`<i class="${k<i?'ok':k===i?'cur':''}"></i>`).join('')}</div>
+      <div class="diary"><span class="pg">Page ${i+1} of 3${i===2?' · this answer is the last digit of the code':''}</span>"${pg.t}"</div>
+      <label for="in-d">Your answer</label>
+      <div class="codein" style="max-width:none"><input type="number" id="in-d" inputmode="numeric" min="0"><button class="btn" id="d-go" type="button">Check</button></div>
+      <div class="err" id="d-err"></div>
+      <div class="row"><button class="btn alt" id="d-h" type="button">💡 Hint (−5 points)</button></div><div id="d-hint"></div>`);
+    $('#q-x').onclick = closeSheet;
+    $('#d-h').onclick = () => { if(hinted) return; hinted=true; S.score=Math.max(0,S.score-5); hud(); $('#d-h').disabled=true;
+      $('#d-hint').innerHTML = `<div class="why"><b>Hint:</b> ${pg.h}</div>`; };
+    const go = () => { const raw = $('#in-d').value; if(raw==='') return; const v = +raw;
+      if(v===pg.a){ if(!missed) answered(true); else hud(); chime(); i++; if(i<3) render(); else win('diary'); }
+      else { if(!missed){ missed=true; answered(false); } buzz(); penalty(5); $('#d-err').textContent='Not right. You lost 5 seconds. Try again.'; const el=$('#in-d'); el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); el.select(); } };
+    $('#d-go').onclick = go; $('#in-d').onkeydown = e => { if(e.key==='Enter') go(); };
+  };
+  render();
+}
+
+function crash(){
+  S.crashDone = true; const c = pick(CRASHES), opts = shuffle(c.o); let left = 10, done=false;
+  openSheet(`<div class="sheet-head"><h2>Market crash!</h2><b id="c-t" style="font-family:var(--f-num);font-size:26px;color:var(--red)">10</b></div>
+    <div class="cbar"><span id="c-bar"></span></div><p class="prompt">${esc(c.q)}</p>
+    <div class="opts">${opts.map((x,k)=>`<button class="opt" type="button" data-k="${k}">${esc(x[0])}</button>`).join('')}</div><div id="c-why"></div>`, 'crash');
+  buzz(); taunt('🦹 "CRASH! What will you do now?"');
+  const bar = $('#c-bar'); bar.style.transition='width 10s linear'; requestAnimationFrame(()=>bar.style.width='0%');
+  const iv = setInterval(()=>{ left--; const el=$('#c-t'); if(el) el.textContent=left; if(left<=0){ clearInterval(iv); resolve(-1); } },1000);
+  const resolve = k => {
+    if(done) return; done=true; clearInterval(iv);
+    const right = k>=0 && !!opts[k][1];
+    $('#sheet-in').querySelectorAll('.opt').forEach((x,j)=>{ x.disabled=true; if(opts[j][1]) x.classList.add('ok'); if(j===k && !right) x.classList.add('no'); });
+    answered(right);
+    if(right){ S.score+=10; addTime(15); chime(); } else { penalty(15); buzz(); }
+    hud(); bar.style.transition='none';
+    $('#c-why').innerHTML = `<div class="why"><b>${right?'Brilliant! +20 points, +15 seconds.':k<0?'Too slow! −15 seconds.':'Wrong call! −15 seconds.'}</b> ${esc(c.why)}</div><div class="row"><button class="btn" id="c-ok" type="button">Continue</button></div>`;
+    $('#c-ok').focus(); $('#c-ok').onclick = closeSheet;
+  };
+  $('#sheet-in').querySelectorAll('.opt').forEach(b => b.onclick = () => resolve(+b.dataset.k));
+}
+
+$('#f-code').addEventListener('submit', e => {
+  e.preventDefault(); if(!S || S.over) return;
+  const v = $('#in-code').value.replace(/\D/g,'');
+  if(v === S.code.join('')){ $('#wheel').style.transform='rotate(540deg)'; chime(); setTimeout(()=>finish(true), 900); }
+  else { buzz(); penalty(10); $('#door-msg').textContent='Wrong code! You lost 10 seconds. Check the order: Phone, Clock, File, Diary.'; const i=$('#in-code'); i.classList.remove('shake'); void i.offsetWidth; i.classList.add('shake'); }
+});
+
+async function finish(won){
+  if(S.over) return; S.over = true; clearInterval(tick); closeSheet(); document.body.classList.remove('danger');
+  const bonus = won ? Math.floor(S.left/60)*5 : 0; S.score += bonus;
+  const secs = TOTAL - S.left;
+  const offerCode = won ? 'MCUBE-' + S.rid.slice(-5).toUpperCase() : '';
+  const row = {id:S.id, name:S.name, team:S.team, score:S.score, secs, won, correct:S.correct, answered:S.answered, day:today(), at:new Date().toISOString(), offerCode};
+  S.savedId = row.id;
+  await STORE.score(row);
+  const rows = sortRows(boardRows); const rank = won ? rows.findIndex(r=>r.id===S.savedId)+1 : 0;
+  const courses = `<div class="courses">
+      <div><b>NISM 5A</b>Mutual Fund Distributors</div>
+      <div><b>NISM 5D</b>Mutual Fund Foundation</div>
+      <div><b>NISM 8</b>Equity Derivatives</div>
+      <div><b>NISM 15</b>Research Analyst</div>
+      <div><b>NISM 21</b>Portfolio Management Services</div>
+      <div><b>Investment Banking</b>Career-growth course</div></div>`;
+  const stats = `<div class="stats"><div><b>${S.correct}/${S.answered}</b>correct answers</div><div><b>${fmt(secs)}</b>time taken</div>${rank?`<div><b>#${rank}</b>today's rank</div>`:''}</div>`;
+  const lessons = `<ul class="lessons"><li>"Guaranteed returns" or anyone asking for your OTP = scam.</li><li>Start early and never stop your SIP in a fall.</li><li>Match investments to age, goal and risk.</li><li>Diversify. Don't put all your eggs in one basket.</li></ul>`;
+  const contactLine = [MCUBE.phone && `📞 ${esc(MCUBE.phone)}`, MCUBE.email && `✉️ ${esc(MCUBE.email)}`].filter(Boolean).join(' &nbsp;·&nbsp; ');
+  $('#end-in').innerHTML = won
+    ? `<div class="chest">💰</div><h1 style="color:var(--navy)">You unlocked your future, ${esc(S.name)}!</h1>
+       <p>You beat the Scam King and cracked the vault. You think like a smart investor!</p>
+       <div class="score-big">${S.score}</div><p class="note" style="margin-top:0">points, including a +${bonus} time bonus</p>${stats}
+       <div class="offer"><span class="tag">🎁 ${esc(MCUBE.offerTitle)}</span>
+         <h2>${esc(MCUBE.offerText)}</h2>
+         <p>${esc(MCUBE.offerHow)}</p><p>${esc(MCUBE.offerValid)}.</p>
+         <div class="coupon"><span>Your code</span><b>${offerCode}</b></div>
+         ${contactLine?`<p style="margin-top:12px">${contactLine}</p>`:''}</div>
+       <h2>Courses you can join</h2>${courses}`
+    : `<div class="chest">🦹</div><h1 style="color:var(--red)">Time's up!</h1>
+       <p>The locker code was <b style="font-family:var(--f-num);color:var(--navy)">${S.code.join('')}</b>. The Scam King won this round. Try again and win the course offer!</p>
+       <div class="score-big">${S.score}</div><p class="note" style="margin-top:0">points</p>${stats}<h2 style="margin-top:14px">What you learned today</h2>${lessons}
+       <h2>Learn it properly with our courses</h2>${courses}`;
+  $('#end-in').insertAdjacentHTML('beforeend', `<div class="row" style="justify-content:center"><button class="btn alt" id="e-board" type="button">🏆 Leaderboard</button><button class="btn" id="e-new" type="button">Next player</button></div>`);
+  $('#e-board').onclick = () => { location.hash='board'; route(); };
+  $('#e-new').onclick = () => { S=null; $('#f-reg').reset(); setMode('solo'); show('s-start'); renderBoards(); $('#in-name1').focus(); };
+  renderBoards(); show('s-end');
+}
+
+route();
+})();
+</script>
+
+</body>
+</html>

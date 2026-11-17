@@ -276,3 +276,50 @@ Play money only. For learning; not investment advice. Investments are subject to
 ```
 First release of the Personal Finance Game by Mcube Academy.
 ```
+
+## 🔐 Unlock Your Future
+| Field | Value |
+|---|---|
+| Package name (app ID) | `com.mcubeacademy.unlockyourfuture` |
+| App name (18/30) | Unlock Your Future |
+| Category | Games › Educational |
+| Tags | Educational, Puzzle, Trivia |
+| Target age groups | 16–17, 18 and over |
+| Graphics folder | `play-store/unlock/` |
+| Upload file | `Unlock-Your-Future-PlayStore.aab` |
+
+**Short description (78/80)**
+
+```
+Escape the bank vault! Beat 4 money challenges in 5 minutes to crack the code.
+```
+
+**Full description (922/4000)**
+
+```
+Unlock Your Future is a 5-minute money escape game from Mcube Academy. The Scam King has locked you inside a bank vault. Crack the 4-digit locker code before time runs out, or he takes all your money!
+
+FOUR OBJECTS, FOUR DIGITS
+• 📱 Phone – Scam Detective: real message or scam?
+• ⏰ Wall clock – Money Time Machine: life decisions from age 25 to 55
+• 🗂️ File drawer – Fund Manager: pick the right investment for each client
+• 📔 Old diary – Money Maths: NAV, SIP, emergency fund and Rule of 72 puzzles
+
+WATCH OUT
+• A surprise Market Crash hits mid-game: 10 seconds to decide!
+• Wrong answers cost time; hints cost points
+• Bonus points for every minute left
+
+Play solo or as a team of 2. Today's Top 10 leaderboard shows first names only.
+
+• Register with your name and mobile number
+• No ads and no in-app purchases
+
+Play money only. For learning; not investment advice. Mutual fund investments are subject to market risks.
+```
+
+**Release notes**
+
+```
+First release of Unlock Your Future by Mcube Academy.
+```

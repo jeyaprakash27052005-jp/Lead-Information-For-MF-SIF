@@ -63,7 +63,7 @@ fs.writeFileSync(
 );
 fs.writeFileSync(
   path.join(out, 'capacitor.config.json'),
-  JSON.stringify({ appId: g.appId, appName: g.label, webDir: 'www', backgroundColor: '#ffffff', android: { allowMixedContent: false } }, null, 2) + '\n',
+  JSON.stringify({ appId: g.appId, appName: g.label, webDir: 'www', backgroundColor: '#ffffff', android: { allowMixedContent: false }, server: { allowNavigation: ['mf-nps-game.vercel.app'] } }, null, 2) + '\n',
 );
 
 // Icons and splash made for this game (apps/game/play-store/<id>/app-assets)

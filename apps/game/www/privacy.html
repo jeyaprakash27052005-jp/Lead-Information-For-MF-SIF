@@ -10,7 +10,7 @@
 <style>
 *{box-sizing:border-box}
 body{background:#fff;color:var(--mg-fg);font:16px/1.65 var(--mg-font);-webkit-font-smoothing:antialiased}
-.wrap{max-width:780px;margin:0 auto;padding:max(24px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) 48px max(18px,env(safe-area-inset-left))}
+.wrap{max-width:780px;margin:20px auto 0;background:#fff;border:1px solid var(--mg-bd);border-radius:18px;box-shadow:0 4px 18px rgba(16,24,40,.07);padding:max(24px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) 48px max(18px,env(safe-area-inset-left))}
 header{display:flex;align-items:center;gap:12px;margin-bottom:6px}
 header img{width:48px;height:48px;border-radius:12px;border:1px solid var(--mg-bd)}
 h1{font-size:28px;line-height:1.2;letter-spacing:-.02em;margin:0}
@@ -23,11 +23,12 @@ th{background:var(--mg-soft);font-size:12.5px;text-transform:uppercase;letter-sp
 .box{border:1px solid var(--mg-bd);border-left:4px solid var(--mg-ac);background:var(--mg-soft);border-radius:12px;padding:14px 16px;margin:12px 0}
 a{color:var(--mg-ac)}
 .tw{overflow-x:auto}
+@media (max-width:820px){.wrap{margin:12px 10px 0;width:auto!important}}
 </style></head>
-<body><div class="wrap">
-<header><img src="icons/icon-192.png" alt="Mcube Academy"><div><h1>Privacy Policy</h1><div class="mut">Mcube Academy FinFun by Mcube Academy · Last updated 17 November 2026</div></div></header>
+<body class="mg-bars" style="--mg-mw:780px"><div class="mg-hbar"><header><img src="icons/icon-192.png" alt="Mcube Academy"><div><h1>Privacy Policy</h1><div class="mut">Mcube Academy FinFun by Mcube Academy · Last updated 17 November 2026</div></div></header></div><div class="wrap">
 
-<p>This policy explains what information the Mcube Academy games collect, why, where it is kept and how to have it deleted. It applies to the games website and to every Mcube Academy game app on Android, iPhone, iPad, Windows and Mac: Investment Business, Money Adventure, ₹1 Lakh → ₹10 Lakh Challenge, Bull vs Bear – Aadu Puli, Pallanguli Investment Game and Personal Finance Management.</p>
+
+<p>This policy explains what information the Mcube Academy games collect, why, where it is kept and how to have it deleted. It applies to the games website and to every Mcube Academy game app on Android, iPhone, iPad, Windows and Mac: Investment Business, Money Adventure, ₹1 Lakh → ₹10 Lakh Challenge, Bull vs Bear – Aadu Puli, Pallanguli Investment Game, Personal Finance Management and Unlock Your Future.</p>
 
 <div class="box">In short: you register with your name and mobile number to play. We save that and your game result. We use it to run the game and, because you agree, to contact you about Mcube Academy courses and investor education. We do not show ads, we do not sell your information, and you can ask us to delete it at any time.</div>
 
@@ -39,7 +40,7 @@ a{color:var(--mg-ac)}
 <tr><td>Mobile number</td><td>All games (in kids games: the parent's number)</td><td>To let each number play once, and to contact you if you agreed</td></tr>
 <tr><td>Email ID</td><td>Investment Business, Pallanguli</td><td>To contact you if you agreed</td></tr>
 <tr><td>Age</td><td>Bull vs Bear – Aadu Puli, Pallanguli</td><td>To work out the investing years shown in your result</td></tr>
-<tr><td>Game result</td><td>All games</td><td>Score, win or lose and similar game details (for example difficulty, budget scores or passbook totals), to show and keep your result, and the first name on the Bull vs Bear daily leaderboard</td></tr>
+<tr><td>Game result</td><td>All games</td><td>Score, win or lose and similar game details (for example difficulty, budget scores, passbook totals or time taken), to show and keep your result, and the first name on the Bull vs Bear daily leaderboard</td></tr>
 <tr><td>Language, game mode and device type</td><td>All games</td><td>For example "Tamil", "kids" or "Android app", to understand how the games are used</td></tr>
 <tr><td>Your agreement (consent)</td><td>All games</td><td>A record that you agreed to be contacted</td></tr>
 </table></div>
@@ -50,7 +51,7 @@ a{color:var(--mg-ac)}
 <li>To run the game: register you, keep each mobile number to one play per game, and show and keep your result.</li>
 <li>To contact you about Mcube Academy courses, events and investor education, only because you ticked the agreement box when you registered. You can ask us to stop at any time.</li>
 <li>To see how many people play each game.</li>
-<li>Bull vs Bear – Aadu Puli shows a <b>daily Top 10 leaderboard</b> to everyone who plays: only the player's <b>first name</b>, goats saved and the result amount. Mobile numbers, email and age are never shown.</li>
+<li>Bull vs Bear – Aadu Puli and Unlock Your Future show a <b>daily Top 10 leaderboard</b> to everyone who plays: only the player's <b>first name</b> (and team-mate's first name) and the score, time or result amount. Mobile numbers, email and age are never shown.</li>
 </ul>
 <p>Games use play money only. Nothing in them is financial advice.</p>
 
@@ -73,8 +74,8 @@ a{color:var(--mg-ac)}
 
 <h2 id="contact">8. Contact</h2>
 <div class="box" id="contact-box"><b>Mcube Academy</b><br>Website: <a href="https://mcubeacademy.com" target="_blank" rel="noopener">mcubeacademy.com</a></div>
-<p class="mut"><a href="index.html">Back to the games</a></p>
 </div>
+<footer class="mg-fbar"><p class="foot">Play money only. Investments are subject to market risks. · <a href="index.html">Back to the games</a> · <a href="https://mcubeacademy.com" target="_blank" rel="noopener">mcubeacademy.com</a></p></footer>
 <script>
 /* Contact details come from the Contact page settings that the admin team keeps up to date (settings/siteContact). */
 (function(){var F=MG.FB,u="https://firestore.googleapis.com/v1/projects/"+F.p+"/databases/"+encodeURIComponent(F.d)+"/documents/settings/siteContact?key="+F.k;

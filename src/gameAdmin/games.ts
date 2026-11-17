@@ -6,6 +6,7 @@ export const GAME_LIST: { id: string; name: string; icon: string; who: string }[
   { id: 'aadupuli', name: 'Bull vs Bear – Aadu Puli', icon: '🐯', who: 'Everyone · English / தமிழ்' },
   { id: 'pallanguli', name: 'Pallanguli Investment Game', icon: '🌰', who: '2 players · English / தமிழ்' },
   { id: 'finance', name: 'Personal Finance Management', icon: '🏦', who: 'Grown-ups · 1 to 4 players' },
+  { id: 'unlock', name: 'Unlock Your Future', icon: '🔐', who: 'Grown-ups · solo or team of 2' },
 ];
 
 export const gameName = (id: string) => GAME_LIST.find((g) => g.id === id)?.name || id;

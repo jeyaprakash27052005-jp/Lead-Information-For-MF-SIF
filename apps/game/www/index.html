@@ -35,6 +35,15 @@ a.dl:hover{background:var(--mg-soft)}
 .g p{margin:0;color:#4b5563;font-size:14.5px;flex:1}
 .g .play{align-self:flex-start;background:var(--mg-ac);color:#fff;font-weight:600;padding:9px 18px;border-radius:8px}
 .g:hover .play{background:var(--mg-ach)}
+.hero{margin-top:4px;display:flex;align-items:center;gap:20px 32px;flex-wrap:wrap;padding:26px 28px;border-radius:22px;background:linear-gradient(120deg,#fff9ef 0%,#ffffff 55%,#f0fdf4 100%);border:1px solid #efe7d6;box-shadow:0 6px 24px rgba(16,24,40,.07)}
+.hero h2{margin:0;font-size:46px;line-height:.98;letter-spacing:-.03em;font-weight:800;color:#0f2552}
+.hero h2 em{font-style:normal;color:#15803d}
+.hero .tx{flex:1 1 360px}
+.hero p{margin:10px 0 0;color:#334155;font-size:17px;max-width:560px}
+.hero .chips{display:flex;gap:10px;flex-wrap:wrap}
+.hero .chip{font-weight:800;color:#fff;padding:10px 18px;border-radius:999px;font-size:16px;white-space:nowrap}
+.hero .chip.g{background:#16a34a}.hero .chip.o{background:#f97316}.hero .chip.n{background:#0f2552}
+@media (max-width:520px){.hero{padding:20px}.hero h2{font-size:36px}}
 .empty{margin-top:24px;padding:24px;border:1px dashed var(--mg-bd2);border-radius:14px;color:var(--mg-mut);text-align:center}
 .iostip{margin-top:20px;padding:12px 14px;border:1px solid #c7d2fe;background:#eef2ff;border-radius:12px;font-size:14px;color:#1e1b4b}
 .iostip a{color:var(--mg-ac)}
@@ -42,15 +51,18 @@ a.dl:hover{background:var(--mg-soft)}
 .foot a{color:var(--mg-ac)}
 @media (max-width:520px){header h1{font-size:24px}header .sp{display:none}a.dl{width:100%;justify-content:center}}
 </style></head>
-<body><div class="wrap">
-<header><img src="icons/icon-192.png" alt="Mcube Academy"><div><h1>Mcube Academy <span class="ff">FinFun</span></h1><p class="slogan"><b>Play.</b> <b>Enjoy.</b> <b>Learn investment habits.</b></p></div><span class="sp"></span><span id="dl"></span></header>
+<body class="mg-bars" style="--mg-mw:1180px"><div class="mg-hbar"><header><img src="icons/icon-192.png" alt="Mcube Academy"><div><h1>Mcube Academy <span class="ff">FinFun</span></h1><p class="slogan"><b>Play.</b> <b>Enjoy.</b> <b>Learn investment habits.</b></p></div><span class="sp"></span><span id="dl"></span></header></div><div class="wrap">
+
+<section class="hero"><div class="tx"><h2>Play Games. <em>Learn Investing.</em></h2><p>Fun money games for kids and adults. Discover SIP, savings, risk, budgeting and scam safety by playing.</p></div>
+<div class="chips"><span class="chip g">Free to play</span><span class="chip n" id="gcount">7 games</span><span class="chip o">Win a course offer</span></div></section>
 <div id="tip"></div>
 <div class="grid" id="games"></div>
-<p class="foot">Play money only. Investments are subject to market risks. · <a href="privacy.html">Privacy policy</a> · <a href="https://mcubeacademy.com" target="_blank" rel="noopener">mcubeacademy.com</a></p>
 </div>
+<footer class="mg-fbar"><p class="foot">Play money only. Investments are subject to market risks. · <a href="privacy.html">Privacy policy</a> · <a href="https://mcubeacademy.com" target="_blank" rel="noopener">mcubeacademy.com</a></p></footer>
 <script>
 function draw(s){
   var list=s.order.map(MG.game).filter(function(g){return g&&MG.isOn(s,g.id)});
+  document.getElementById("gcount").textContent=list.length+(list.length===1?" game":" games");
   document.getElementById("games").innerHTML=list.length?list.map(function(g){return'<a class="g" href="'+g.file+'"><span class="ic">'+g.icon+'</span><span class="who">'+MG.esc(g.who)+'</span><h2>'+MG.esc(g.name)+'</h2><p>'+MG.esc(g.desc)+'</p><span class="play">Play</span></a>'}).join(""):'<div class="empty">No games are switched on right now. Please check back soon.</div>';
 }
 draw(MG.cachedSettings());MG.settings().then(draw);

@@ -3,6 +3,15 @@
   "appName": "Mcube FinFun",
   "webDir": "www",
   "backgroundColor": "#ffffff",
-  "android": { "allowMixedContent": false },
-  "ios": { "contentInset": "never" }
+  "android": {
+    "allowMixedContent": false
+  },
+  "ios": {
+    "contentInset": "never"
+  },
+  "server": {
+    "allowNavigation": [
+      "mf-nps-game.vercel.app"
+    ]
+  }
 }

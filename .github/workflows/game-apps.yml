@@ -79,7 +79,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        game: [investment, adventure, challenge, aadupuli, pallanguli, finance]
+        game: [investment, adventure, challenge, aadupuli, pallanguli, finance, unlock]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

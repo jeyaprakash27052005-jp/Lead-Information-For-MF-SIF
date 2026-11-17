@@ -4,5 +4,6 @@
   { "id": "challenge",  "appId": "com.mcubeacademy.lakhchallenge",      "label": "Lakh Challenge",      "title": "₹1 Lakh to ₹10 Lakh Challenge", "icon": "💰", "bg1": "#0F766E", "bg2": "#14B8A6", "apk": "Lakh-Challenge" },
   { "id": "aadupuli",   "appId": "com.mcubeacademy.aadupuli",           "label": "Bull vs Bear",        "title": "Bull vs Bear – Aadu Puli", "icon": "🐯", "bg1": "#15803D", "bg2": "#DC2626", "apk": "Bull-vs-Bear-Aadu-Puli" },
   { "id": "pallanguli", "appId": "com.mcubeacademy.pallanguli",         "label": "Pallanguli",          "title": "Pallanguli Investment Game", "icon": "🌰", "bg1": "#7A2E1C", "bg2": "#C99A62", "apk": "Pallanguli" },
-  { "id": "finance",    "appId": "com.mcubeacademy.personalfinance",    "label": "Personal Finance",    "title": "Personal Finance Game", "icon": "🏦", "bg1": "#1E88E5", "bg2": "#43A047", "apk": "Personal-Finance" }
+  { "id": "finance",    "appId": "com.mcubeacademy.personalfinance",    "label": "Personal Finance",    "title": "Personal Finance Game", "icon": "🏦", "bg1": "#1E88E5", "bg2": "#43A047", "apk": "Personal-Finance" },
+  { "id": "unlock",     "appId": "com.mcubeacademy.unlockyourfuture",  "label": "Unlock Your Future",  "title": "Unlock Your Future – Money Escape Game", "icon": "🔐", "bg1": "#17346E", "bg2": "#C4870F", "apk": "Unlock-Your-Future" }
 ]
