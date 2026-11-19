@@ -1,7 +1,11 @@
-# FinFun banner (MCUBE Academy)
+# FinFun banners (MCUBE Academy)
 
-- `FinFun-Banner-Print-4800x2400.png`: high resolution, for printing (2:1, for example 6 ft × 3 ft or 8 ft × 4 ft).
-- `FinFun-Banner-Screen-1920x960.png`: for screens, WhatsApp and social media.
-- Featured with large game pictures: Adu Puli Attam (Bull vs Bears) and Pallanguli. The other 5 games are listed below them.
-- The QR code opens the games website (https://investment-business-game.vercel.app/).
-- Edit the banner: `www/banner.html` (open it in a browser; it also shows the phone number from the admin Contact settings). Game pictures: `www/banner-img/`.
+**Poster (3:2), main design**
+- `FinFun-Poster-Print-4608x3072.png`: high resolution, for printing (for example 6 ft × 4 ft).
+- `FinFun-Poster-Screen-1920x1280.png`: for screens, WhatsApp and social media.
+- Edit: `www/banner.html`. To show your own group photo at the top, save it as `www/banner-img/people.png` (transparent background works best) and re-export.
+
+**Wide banner (2:1, dark design)**
+- `FinFun-Banner-Print-4800x2400.png` and `FinFun-Banner-Screen-1920x960.png`. Edit: `www/banner-dark.html`.
+
+The QR codes open the games website (https://investment-business-game.vercel.app/).
