@@ -44,3 +44,13 @@ body.mg-bars>.wrap{flex:1;width:100%;padding-top:20px!important}
 .mg-fbar>.foot,.mg-fbar>p{max-width:var(--mg-mw,1180px);margin:0 auto!important;padding:16px max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))!important;color:#6b7280;font-size:13px;text-align:center}
 .mg-fbar a{color:#4F3CC9}
 .mg-top{background:#fff!important}
+/* Lock (full screen game) and Unlock */
+.mg-lock{flex:none;display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border:1px solid #c7d2fe;border-radius:999px;background:#eef2ff;color:#3730a3;font:700 13px/1 var(--mg-font,system-ui);cursor:pointer}
+.mg-lock:hover{background:#e0e7ff}
+html.mg-locked .mg-top{display:none!important}
+html.mg-locked,html.mg-locked body{overscroll-behavior:none}
+.mg-unlock{position:fixed;z-index:2147483000;left:max(10px,env(safe-area-inset-left));bottom:max(10px,env(safe-area-inset-bottom));display:none;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border:2px solid #fff;border-radius:50%;background:#111827b3;color:#fff;font:700 18px/1 var(--mg-font,system-ui);cursor:pointer;box-shadow:0 4px 14px #0005;touch-action:none;user-select:none;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:.8}
+.mg-unlock span{display:none}.mg-unlock:hover{opacity:1;background:#111827}
+.mg-unlock:hover{background:#111827}
+html.mg-locked .mg-unlock{display:inline-flex}
+@media (max-width:420px){.mg-lock span{display:none}.mg-lock{padding:6px 10px}}

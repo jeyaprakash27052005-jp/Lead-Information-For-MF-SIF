@@ -245,6 +245,9 @@
     var b = document.createElement("div"); b.className = "mg-top";
     b.innerHTML = (SINGLE ? '<img src="../icons/icon-192.png" alt="Mcube Academy">' : '<a class="mg-back" href="../index.html" aria-label="All games">‹ <span>All games</span></a>') +
       '<b>' + esc(title) + '</b>' + (SINGLE ? '<a class="mg-back" href="../privacy.html">Privacy</a>' : '<img src="../icons/icon-192.png" alt="Mcube Academy">');
+    var lk = document.createElement("button"); lk.type = "button"; lk.className = "mg-lock"; lk.innerHTML = "🔒 <span>Lock</span>";
+    lk.title = "Lock: full screen game"; lk.onclick = lock;
+    b.insertBefore(lk, b.lastChild);
     document.body.insertBefore(b, document.body.firstChild);
     if (SINGLE) loadSettings().then(function (s) {
       if (isOn(s, SINGLE)) return;
@@ -254,7 +257,41 @@
     });
   }
 
+  /* ---------- Lock: the game fills the whole screen; Unlock goes back to the normal screen ---------- */
+  var locked = false, unl = null;
+  function fsEl() { return document.fullscreenElement || document.webkitFullscreenElement; }
+  function lock() {
+    if (locked) return; locked = true;
+    document.documentElement.classList.add("mg-locked");
+    if (!unl) {
+      unl = document.createElement("button"); unl.type = "button"; unl.className = "mg-unlock"; unl.innerHTML = "🔓 <span>Unlock</span>";
+      unl.title = "Unlock: back to the normal screen (drag to move)"; unl.setAttribute("aria-label", "Unlock");
+      /* small and movable, so it never hides part of the game: drag it anywhere, tap it to unlock */
+      var sx = 0, sy = 0, ox = 0, oy = 0, moved = false, down = false;
+      unl.addEventListener("pointerdown", function (e) { down = true; moved = false; sx = e.clientX; sy = e.clientY; var r = unl.getBoundingClientRect(); ox = r.left; oy = r.top; try { unl.setPointerCapture(e.pointerId); } catch (x) {} });
+      unl.addEventListener("pointermove", function (e) { if (!down) return; var dx = e.clientX - sx, dy = e.clientY - sy; if (!moved && Math.abs(dx) + Math.abs(dy) < 6) return; moved = true;
+        unl.style.left = Math.max(4, Math.min(innerWidth - unl.offsetWidth - 4, ox + dx)) + "px"; unl.style.top = Math.max(4, Math.min(innerHeight - unl.offsetHeight - 4, oy + dy)) + "px"; unl.style.bottom = "auto"; });
+      unl.addEventListener("pointerup", function () { down = false; });
+      unl.onclick = function () { if (!moved) unlock(); moved = false; };
+      document.body.appendChild(unl);
+    }
+    var d = document.documentElement, r = d.requestFullscreen || d.webkitRequestFullscreen;
+    if (r) { try { var pr = r.call(d, { navigationUI: "hide" }); if (pr && pr.catch) pr.catch(function () {}); } catch (e) {} }
+    /* the phone's Back button does not leave the game while it is locked */
+    try { history.pushState({ mgLock: 1 }, ""); } catch (e) {}
+    window.scrollTo(0, 0);
+  }
+  function unlock() {
+    if (!locked) return; locked = false;
+    document.documentElement.classList.remove("mg-locked");
+    if (fsEl()) { var x = document.exitFullscreen || document.webkitExitFullscreen; try { var pr = x.call(document); if (pr && pr.catch) pr.catch(function () {}); } catch (e) {} }
+    try { if (history.state && history.state.mgLock) history.back(); } catch (e) {}
+  }
+  function fsChange() { if (locked && !fsEl() && document.documentElement.dataset.mgFs === "1") unlock(); document.documentElement.dataset.mgFs = fsEl() ? "1" : ""; }
+  document.addEventListener("fullscreenchange", fsChange); document.addEventListener("webkitfullscreenchange", fsChange);
+  window.addEventListener("popstate", function () { if (locked) { try { history.pushState({ mgLock: 1 }, ""); } catch (e) {} } });
+
   window.MG = { FB: FB, GAMES: GAMES, game: function (id) { return byId[id]; }, esc: esc, device: device, inApp: inApp,
     LIVE: LIVE, settings: loadSettings, cachedSettings: cachedSettings, isOn: isOn, onePlay: onePlay,
-    register: register, check: check, finish: finish, flush: flush, registerForm: registerForm, topbar: topbar, cleanMobile: cleanMobile, playedHere: playedHere };
+    lock: lock, unlock: unlock, register: register, check: check, finish: finish, flush: flush, registerForm: registerForm, topbar: topbar, cleanMobile: cleanMobile, playedHere: playedHere };
 })();
