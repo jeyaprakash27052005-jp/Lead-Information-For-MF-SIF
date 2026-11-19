@@ -1,90 +1,115 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Stall Banner · Mcube Academy FinFun</title>
+<title>FinFun Banner · MCUBE Academy</title>
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Outfit:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Outfit:wght@400;500;600;700;800&display=swap">
 <style>
-/* Printable stall banner for the games (landscape 2:1). Open this page and print, or use the PNG files in apps/game/banner/. */
-:root{--navy:#0f2552;--ink:#16213a;--mut:#4b5568;--green:#15803d;--cream:#fff9ef;
+/* FinFun by MCUBE Academy: stall banner, 2:1 landscape. Print this page, or use the PNGs in apps/game/banner/. */
+:root{--bg1:#0b1638;--bg2:#1b1460;--gold:#fbbf24;--gold2:#f59e0b;--ink:#0f1b3d;
   --fd:"Bricolage Grotesque","Outfit","Segoe UI",system-ui,sans-serif;--fb:"Outfit","Segoe UI",system-ui,sans-serif}
 *{box-sizing:border-box}
-html,body{margin:0;background:#e9e5dc}
-body{display:flex;justify-content:center;padding:20px;font-family:var(--fb);color:var(--ink)}
-.bn{width:1600px;height:800px;flex:none;position:relative;overflow:hidden;background:var(--cream);display:grid;grid-template-rows:auto 1fr auto;box-shadow:0 10px 40px rgba(0,0,0,.15)}
-.bn::before{content:"";position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(circle at 4% 96%,#c4b5fd55 0,transparent 26%),radial-gradient(circle at 34% 6%,#fde68a66 0,transparent 24%),radial-gradient(circle at 99% 30%,#a7f3d055 0,transparent 26%),radial-gradient(circle at 60% 98%,#fbcfe855 0,transparent 24%)}
-.top{position:relative;display:flex;align-items:center;gap:16px;padding:30px 46px 0}
-.top img{width:70px;height:70px;border-radius:16px;background:#fff;border:2px solid #e8e1d3}
-.top b{display:block;font-family:var(--fd);font-weight:800;font-size:40px;line-height:1;color:var(--navy);letter-spacing:-.01em}
-.top b span{background:linear-gradient(90deg,#4F3CC9,#0d9488 55%,#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent}
-.top small{display:block;margin-top:6px;font-size:18px;color:var(--mut);font-weight:500}
+html,body{margin:0;background:#d9dce4}
+body{display:flex;justify-content:center;padding:20px;font-family:var(--fb)}
+.bn{width:1600px;height:800px;flex:none;position:relative;overflow:hidden;color:#fff;display:grid;grid-template-rows:auto 1fr auto;
+  background:radial-gradient(circle at 12% 18%,#3b2fb066 0,transparent 32%),radial-gradient(circle at 88% 8%,#0d948855 0,transparent 30%),radial-gradient(circle at 70% 100%,#db277744 0,transparent 34%),linear-gradient(135deg,var(--bg1),var(--bg2))}
+.bn>.pat{position:absolute;inset:0;opacity:.55;pointer-events:none;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22200%22%20height%3D%22200%22%20viewBox%3D%220%200%20200%20200%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222%22%20opacity%3D%22.09%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2234%22%20r%3D%2214%22%2F%3E%3Cpath%20d%3D%22M110%2070%20l20%20-16%20l16%2010%20l26%20-30%22%2F%3E%3Cpath%20d%3D%22M164%2034%20h8%20v8%22%2F%3E%3Crect%20x%3D%2240%22%20y%3D%22130%22%20width%3D%2226%22%20height%3D%2226%22%20rx%3D%226%22%2F%3E%3Ccircle%20cx%3D%22160%22%20cy%3D%22150%22%20r%3D%2210%22%2F%3E%3Cpath%20d%3D%22M96%20170%20v-24%20M104%20170%20v-34%20M112%20170%20v-18%22%2F%3E%3C%2Fg%3E%3Ctext%20x%3D%2230%22%20y%3D%2240%22%20font-family%3D%22Arial%22%20font-weight%3D%22700%22%20font-size%3D%2216%22%20text-anchor%3D%22middle%22%20fill%3D%22%23fff%22%20opacity%3D%22.1%22%3E%E2%82%B9%3C%2Ftext%3E%3Cg%20fill%3D%22%23fbbf24%22%20opacity%3D%22.22%22%3E%3Ccircle%20cx%3D%2286%22%20cy%3D%2222%22%20r%3D%222%22%2F%3E%3Ccircle%20cx%3D%22180%22%20cy%3D%2296%22%20r%3D%222.5%22%2F%3E%3Ccircle%20cx%3D%2222%22%20cy%3D%2298%22%20r%3D%221.6%22%2F%3E%3Ccircle%20cx%3D%22140%22%20cy%3D%22190%22%20r%3D%222%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E")}
+.bn>*{position:relative}
+/* top */
+.top{display:flex;align-items:center;gap:18px;padding:26px 44px 0}
+.logo{width:78px;height:78px;border-radius:20px;background:#fff;padding:6px;box-shadow:0 6px 20px #0006}
+.logo img{width:100%;height:100%;object-fit:contain}
+.brand .ff{font-family:var(--fd);font-weight:800;font-size:66px;line-height:.9;letter-spacing:-.02em;
+  background:linear-gradient(90deg,#fde68a,#fbbf24 35%,#34d399 70%,#60a5fa);-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand small{display:block;margin-top:4px;font-size:21px;font-weight:600;letter-spacing:.18em;color:#c7d2fe}
+.brand small b{color:#fff}
 .top .sp{flex:1}
-.chip{font-family:var(--fd);font-weight:800;font-size:26px;color:#fff;padding:12px 26px;border-radius:999px}
-.chip.g{background:#16a34a}.chip.o{background:#f97316}
-.mid{position:relative;display:grid;grid-template-columns:520px 1fr;gap:34px;padding:16px 46px 22px;min-height:0}
+.pill{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px;padding:12px 22px;border-radius:999px}
+.pill.g{background:#16a34a}
+.pill.d{background:linear-gradient(90deg,#fbbf24,#f97316);color:#1f1300;box-shadow:0 6px 24px #f59e0b66}
+/* middle */
+.mid{display:grid;grid-template-columns:470px 1fr;gap:30px;padding:18px 44px 20px;min-height:0}
 .hl{display:flex;flex-direction:column;min-height:0}
-.hl h1{margin:0;font-family:var(--fd);font-weight:800;font-size:86px;line-height:.92;letter-spacing:-.035em;color:var(--navy)}
-.hl h1 em{font-style:normal;color:var(--green);display:block}
-.hl p{margin:14px 0 0;font-size:22px;line-height:1.32;color:#334155}
-.scan{margin-top:auto;display:flex;align-items:center;gap:20px;background:#fff;border:2px solid #e8e1d3;border-radius:22px;padding:14px 20px}
-.scan .qr{width:140px;height:140px;flex:none;padding:8px;border:2px dashed #cbd5e1;border-radius:12px}
+.eyebrow{align-self:flex-start;font-size:17px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#a5f3fc;background:#ffffff14;border:1px solid #ffffff26;padding:6px 14px;border-radius:999px}
+.hl h1{margin:12px 0 0;font-family:var(--fd);font-weight:800;font-size:50px;line-height:1;letter-spacing:-.025em}
+.hl h1 span{display:block;background:linear-gradient(90deg,#fde68a,#fbbf24 45%,#fb923c);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hl p{margin:10px 0 0;font-size:18px;line-height:1.38;color:#dbe4ff}
+.disc{margin-top:12px;display:flex;gap:14px;align-items:center;padding:10px 16px;border-radius:18px;background:linear-gradient(135deg,#fbbf2426,#f9731626);border:2px solid #fbbf24}
+.disc .gift{font-size:38px;line-height:1}
+.disc b{display:block;font-family:var(--fd);font-weight:800;font-size:24px;color:#fde68a;line-height:1.1}
+.disc span{display:block;font-size:16px;color:#fef3c7;margin-top:3px}
+.scan{margin-top:auto;display:flex;align-items:center;gap:16px;background:#fff;color:var(--ink);border-radius:18px;padding:12px 16px}
+.scan .qr{width:128px;height:128px;flex:none}
 .scan .qr svg{display:block;width:100%;height:100%}
-.scan b{display:block;font-family:var(--fd);font-weight:800;font-size:40px;color:var(--navy);line-height:1.05}
-.scan span{display:block;font-size:19px;color:var(--mut);margin-top:6px}
+.scan b{display:block;font-family:var(--fd);font-weight:800;font-size:32px;line-height:1}
+.scan span{display:block;font-size:15.5px;color:#475569;margin-top:6px}
 .scan span i{font-style:normal;font-weight:700;color:#4F3CC9}
-.games h2{margin:0 0 12px;font-family:var(--fd);font-weight:800;font-size:34px;color:var(--navy)}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:1fr;gap:14px;height:calc(100% - 52px)}
-.c{border-radius:20px;padding:16px 16px 14px;display:flex;flex-direction:column;gap:6px;min-height:0}
-.c .ic{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:25px;color:#fff;flex:none}
-.c h3{margin:4px 0 0;font-family:var(--fd);font-weight:800;font-size:23px;line-height:1.05;color:var(--navy)}
-.c p{margin:0;font-size:15.5px;line-height:1.3;color:#334155;flex:1}
-.c .l{align-self:flex-start;background:#fff;border-radius:999px;padding:4px 12px;font-size:14px;font-weight:700}
-.k1{background:#ede9fe}.k1 .ic{background:#7c3aed}.k1 .l{color:#6d28d9}
-.k2{background:#fef3c7}.k2 .ic{background:#d97706}.k2 .l{color:#b45309}
-.k3{background:#ccfbf1}.k3 .ic{background:#0d9488}.k3 .l{color:#0f766e}
-.k4{background:#ffe4dc}.k4 .ic{background:#dc4c26}.k4 .l{color:#c2410c}
-.k5{background:#dcfce7}.k5 .ic{background:#15803d}.k5 .l{color:#15803d}
-.k6{background:#dbeafe}.k6 .ic{background:#2563eb}.k6 .l{color:#1d4ed8}
-.k7{background:#e0e7ff}.k7 .ic{background:#17346e}.k7 .l{color:#17346e}
-.k8{background:var(--navy);color:#fff;justify-content:center;text-align:center;align-items:center}
-.k8 .big{font-family:var(--fd);font-weight:800;font-size:64px;line-height:1;color:#fbbf24}
-.k8 b{font-family:var(--fd);font-size:24px;line-height:1.15}
-.k8 small{font-size:15px;color:#c9d5ec;margin-top:4px}
-.bar{position:relative;background:var(--navy);color:#fff;display:flex;align-items:center;gap:24px;padding:18px 46px}
+.games{display:grid;grid-template-rows:1.42fr 1fr;gap:14px;min-height:0}
+.feat{display:grid;grid-template-columns:1fr 1fr;gap:16px;min-height:0}
+.fc{position:relative;border-radius:22px;overflow:hidden;display:flex;flex-direction:column;background:#fff;color:var(--ink);box-shadow:0 10px 30px #0007;border:3px solid var(--gold)}
+.fc .img{flex:1;min-height:0;position:relative;overflow:hidden}
+.fc .img img{width:100%;height:100%;object-fit:cover;object-position:center 30%;display:block}
+.fc .img::after{content:"";position:absolute;inset:auto 0 0 0;height:46%;background:linear-gradient(transparent,#0b1638e6 62%)}
+.fc .rib{position:absolute;top:12px;left:12px;z-index:2;background:linear-gradient(90deg,#fbbf24,#f97316);color:#1f1300;font-weight:800;font-size:15px;padding:6px 12px;border-radius:999px;box-shadow:0 4px 12px #0005}
+.fc .no{position:absolute;top:10px;right:12px;z-index:2;width:40px;height:40px;border-radius:50%;background:var(--ink);color:#fbbf24;font-family:var(--fd);font-weight:800;font-size:22px;display:flex;align-items:center;justify-content:center;border:2px solid #fbbf24}
+.fc .cap{position:absolute;left:16px;bottom:10px;z-index:2;color:#fff;text-shadow:0 2px 8px #000a}
+.fc .cap b{display:block;font-family:var(--fd);font-weight:800;font-size:34px;line-height:1}
+.fc .cap span{display:block;font-size:18px;font-weight:700;color:#fde68a;margin-top:2px}
+.fc .tx{padding:10px 16px 12px;display:flex;align-items:center;gap:10px}
+.fc .tx p{margin:0;flex:1;font-size:15.5px;line-height:1.3;color:#334155}
+.fc .tx .l{flex:none;border-radius:999px;padding:5px 12px;font-size:14px;font-weight:800}
+.ap .tx .l{background:#fee2e2;color:#b91c1c}.pl .tx .l{background:#fef3c7;color:#92400e}
+.row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;min-height:0}
+.c{border-radius:18px;padding:14px 14px 12px;display:flex;flex-direction:column;gap:5px;background:#ffffff12;border:1px solid #ffffff2e;min-height:0;position:relative}
+.c .ic{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;flex:none}
+.c .no{position:absolute;top:12px;right:12px;font-family:var(--fd);font-weight:800;font-size:20px;color:#ffffff55}
+.c b{font-family:var(--fd);font-weight:800;font-size:21px;line-height:1.05;margin-top:4px}
+.c span{font-size:14.5px;font-weight:600;color:#c7d2fe;line-height:1.25}
+.c .l{margin-top:auto;align-self:flex-start;font-size:12.5px;font-weight:800;padding:4px 10px;border-radius:999px;background:#ffffff1f;color:#fde68a}
+.i1{background:#7c3aed}.i2{background:#f59e0b}.i3{background:#0d9488}.i6{background:#2563eb}.i7{background:#db2777}
+/* bottom */
+.bar{display:flex;align-items:center;gap:24px;padding:16px 44px;background:#060c22cc;border-top:2px solid #fbbf2466}
 .bar .cr{flex:1}
-.bar .cr b{display:block;font-family:var(--fd);font-weight:800;font-size:27px;letter-spacing:.01em}
-.bar .cr small{display:block;margin-top:4px;font-size:14.5px;color:#aebfe0}
+.bar .cr b{display:block;font-family:var(--fd);font-weight:800;font-size:24px}
+.bar .cr small{display:block;margin-top:3px;font-size:13.5px;color:#aebfe0}
 .bar .w{text-align:right}
-.bar .w b{display:block;font-family:var(--fd);font-weight:800;font-size:34px}
-.bar .w span{display:block;font-size:19px;color:#fbbf24;font-weight:700;margin-top:2px}
-@media print{@page{size:1600px 800px;margin:0}html,body{background:none;padding:0}.bn{box-shadow:none}}
+.bar .w b{display:block;font-family:var(--fd);font-weight:800;font-size:32px;color:#fff}
+.bar .w span{display:block;font-size:18px;color:#fbbf24;font-weight:700}
+@media print{@page{size:1600px 800px;margin:0}html,body{background:none;padding:0}}
 </style></head>
 <body>
-<div class="bn" id="bn">
+<div class="bn" id="bn"><div class="pat"></div>
   <div class="top">
-    <img src="icons/icon-192.png" alt="Mcube Academy">
-    <div><b>Mcube Academy <span>FinFun</span></b><small>Play. Enjoy. Learn investment habits.</small></div>
-    <span class="sp"></span><span class="chip g">Free to play</span><span class="chip o">Win a course offer</span>
+    <div class="logo"><img src="icons/icon-192.png" alt="MCUBE Academy"></div>
+    <div class="brand"><div class="ff">FinFun</div><small>BY <b>MCUBE ACADEMY</b></small></div>
+    <span class="sp"></span>
+    <span class="pill g">🎮 Free to play</span>
+    <span class="pill d">🎁 Play &amp; get a course discount</span>
   </div>
   <div class="mid">
     <div class="hl">
-      <h1>Play Games. <em>Learn Investing.</em></h1>
-      <p>Fun money games for kids and adults. Discover SIP, savings, risk, budgeting and scam safety by playing.</p>
-      <div class="scan"><div class="qr"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33" shape-rendering="crispEdges"><path d="M0,0h1v1h-1zM1,0h1v1h-1zM2,0h1v1h-1zM3,0h1v1h-1zM4,0h1v1h-1zM5,0h1v1h-1zM6,0h1v1h-1zM13,0h1v1h-1zM16,0h1v1h-1zM17,0h1v1h-1zM19,0h1v1h-1zM20,0h1v1h-1zM22,0h1v1h-1zM23,0h1v1h-1zM26,0h1v1h-1zM27,0h1v1h-1zM28,0h1v1h-1zM29,0h1v1h-1zM30,0h1v1h-1zM31,0h1v1h-1zM32,0h1v1h-1zM0,1h1v1h-1zM6,1h1v1h-1zM11,1h1v1h-1zM12,1h1v1h-1zM13,1h1v1h-1zM14,1h1v1h-1zM15,1h1v1h-1zM16,1h1v1h-1zM17,1h1v1h-1zM20,1h1v1h-1zM22,1h1v1h-1zM26,1h1v1h-1zM32,1h1v1h-1zM0,2h1v1h-1zM2,2h1v1h-1zM3,2h1v1h-1zM4,2h1v1h-1zM6,2h1v1h-1zM8,2h1v1h-1zM12,2h1v1h-1zM13,2h1v1h-1zM16,2h1v1h-1zM17,2h1v1h-1zM18,2h1v1h-1zM20,2h1v1h-1zM23,2h1v1h-1zM24,2h1v1h-1zM26,2h1v1h-1zM28,2h1v1h-1zM29,2h1v1h-1zM30,2h1v1h-1zM32,2h1v1h-1zM0,3h1v1h-1zM2,3h1v1h-1zM3,3h1v1h-1zM4,3h1v1h-1zM6,3h1v1h-1zM8,3h1v1h-1zM10,3h1v1h-1zM12,3h1v1h-1zM14,3h1v1h-1zM15,3h1v1h-1zM16,3h1v1h-1zM20,3h1v1h-1zM21,3h1v1h-1zM22,3h1v1h-1zM24,3h1v1h-1zM26,3h1v1h-1zM28,3h1v1h-1zM29,3h1v1h-1zM30,3h1v1h-1zM32,3h1v1h-1zM0,4h1v1h-1zM2,4h1v1h-1zM3,4h1v1h-1zM4,4h1v1h-1zM6,4h1v1h-1zM8,4h1v1h-1zM9,4h1v1h-1zM10,4h1v1h-1zM11,4h1v1h-1zM15,4h1v1h-1zM18,4h1v1h-1zM21,4h1v1h-1zM24,4h1v1h-1zM26,4h1v1h-1zM28,4h1v1h-1zM29,4h1v1h-1zM30,4h1v1h-1zM32,4h1v1h-1zM0,5h1v1h-1zM6,5h1v1h-1zM8,5h1v1h-1zM11,5h1v1h-1zM12,5h1v1h-1zM15,5h1v1h-1zM16,5h1v1h-1zM17,5h1v1h-1zM18,5h1v1h-1zM20,5h1v1h-1zM21,5h1v1h-1zM22,5h1v1h-1zM26,5h1v1h-1zM32,5h1v1h-1zM0,6h1v1h-1zM1,6h1v1h-1zM2,6h1v1h-1zM3,6h1v1h-1zM4,6h1v1h-1zM5,6h1v1h-1zM6,6h1v1h-1zM8,6h1v1h-1zM10,6h1v1h-1zM12,6h1v1h-1zM14,6h1v1h-1zM16,6h1v1h-1zM18,6h1v1h-1zM20,6h1v1h-1zM22,6h1v1h-1zM24,6h1v1h-1zM26,6h1v1h-1zM27,6h1v1h-1zM28,6h1v1h-1zM29,6h1v1h-1zM30,6h1v1h-1zM31,6h1v1h-1zM32,6h1v1h-1zM8,7h1v1h-1zM10,7h1v1h-1zM12,7h1v1h-1zM14,7h1v1h-1zM15,7h1v1h-1zM21,7h1v1h-1zM23,7h1v1h-1zM0,8h1v1h-1zM2,8h1v1h-1zM3,8h1v1h-1zM4,8h1v1h-1zM5,8h1v1h-1zM6,8h1v1h-1zM13,8h1v1h-1zM14,8h1v1h-1zM15,8h1v1h-1zM17,8h1v1h-1zM20,8h1v1h-1zM22,8h1v1h-1zM23,8h1v1h-1zM26,8h1v1h-1zM27,8h1v1h-1zM28,8h1v1h-1zM29,8h1v1h-1zM30,8h1v1h-1zM1,9h1v1h-1zM2,9h1v1h-1zM4,9h1v1h-1zM5,9h1v1h-1zM7,9h1v1h-1zM9,9h1v1h-1zM16,9h1v1h-1zM18,9h1v1h-1zM19,9h1v1h-1zM20,9h1v1h-1zM21,9h1v1h-1zM23,9h1v1h-1zM26,9h1v1h-1zM27,9h1v1h-1zM29,9h1v1h-1zM30,9h1v1h-1zM31,9h1v1h-1zM32,9h1v1h-1zM1,10h1v1h-1zM2,10h1v1h-1zM4,10h1v1h-1zM6,10h1v1h-1zM10,10h1v1h-1zM12,10h1v1h-1zM15,10h1v1h-1zM16,10h1v1h-1zM18,10h1v1h-1zM21,10h1v1h-1zM25,10h1v1h-1zM26,10h1v1h-1zM28,10h1v1h-1zM30,10h1v1h-1zM31,10h1v1h-1zM0,11h1v1h-1zM9,11h1v1h-1zM10,11h1v1h-1zM11,11h1v1h-1zM14,11h1v1h-1zM15,11h1v1h-1zM16,11h1v1h-1zM19,11h1v1h-1zM21,11h1v1h-1zM22,11h1v1h-1zM28,11h1v1h-1zM29,11h1v1h-1zM30,11h1v1h-1zM32,11h1v1h-1zM0,12h1v1h-1zM3,12h1v1h-1zM4,12h1v1h-1zM6,12h1v1h-1zM10,12h1v1h-1zM12,12h1v1h-1zM18,12h1v1h-1zM21,12h1v1h-1zM24,12h1v1h-1zM27,12h1v1h-1zM28,12h1v1h-1zM29,12h1v1h-1zM31,12h1v1h-1zM32,12h1v1h-1zM2,13h1v1h-1zM3,13h1v1h-1zM4,13h1v1h-1zM7,13h1v1h-1zM8,13h1v1h-1zM10,13h1v1h-1zM13,13h1v1h-1zM14,13h1v1h-1zM15,13h1v1h-1zM16,13h1v1h-1zM17,13h1v1h-1zM20,13h1v1h-1zM22,13h1v1h-1zM23,13h1v1h-1zM24,13h1v1h-1zM26,13h1v1h-1zM29,13h1v1h-1zM30,13h1v1h-1zM31,13h1v1h-1zM32,13h1v1h-1zM0,14h1v1h-1zM5,14h1v1h-1zM6,14h1v1h-1zM8,14h1v1h-1zM13,14h1v1h-1zM18,14h1v1h-1zM19,14h1v1h-1zM21,14h1v1h-1zM22,14h1v1h-1zM24,14h1v1h-1zM25,14h1v1h-1zM26,14h1v1h-1zM31,14h1v1h-1zM0,15h1v1h-1zM1,15h1v1h-1zM2,15h1v1h-1zM3,15h1v1h-1zM5,15h1v1h-1zM7,15h1v1h-1zM8,15h1v1h-1zM9,15h1v1h-1zM10,15h1v1h-1zM11,15h1v1h-1zM13,15h1v1h-1zM16,15h1v1h-1zM19,15h1v1h-1zM20,15h1v1h-1zM21,15h1v1h-1zM22,15h1v1h-1zM24,15h1v1h-1zM25,15h1v1h-1zM26,15h1v1h-1zM29,15h1v1h-1zM30,15h1v1h-1zM0,16h1v1h-1zM1,16h1v1h-1zM2,16h1v1h-1zM5,16h1v1h-1zM6,16h1v1h-1zM7,16h1v1h-1zM8,16h1v1h-1zM9,16h1v1h-1zM11,16h1v1h-1zM13,16h1v1h-1zM17,16h1v1h-1zM19,16h1v1h-1zM22,16h1v1h-1zM24,16h1v1h-1zM25,16h1v1h-1zM27,16h1v1h-1zM28,16h1v1h-1zM32,16h1v1h-1zM1,17h1v1h-1zM2,17h1v1h-1zM4,17h1v1h-1zM9,17h1v1h-1zM12,17h1v1h-1zM13,17h1v1h-1zM17,17h1v1h-1zM18,17h1v1h-1zM19,17h1v1h-1zM20,17h1v1h-1zM23,17h1v1h-1zM26,17h1v1h-1zM27,17h1v1h-1zM29,17h1v1h-1zM30,17h1v1h-1zM32,17h1v1h-1zM2,18h1v1h-1zM5,18h1v1h-1zM6,18h1v1h-1zM7,18h1v1h-1zM8,18h1v1h-1zM9,18h1v1h-1zM13,18h1v1h-1zM14,18h1v1h-1zM15,18h1v1h-1zM16,18h1v1h-1zM17,18h1v1h-1zM20,18h1v1h-1zM22,18h1v1h-1zM24,18h1v1h-1zM25,18h1v1h-1zM26,18h1v1h-1zM27,18h1v1h-1zM28,18h1v1h-1zM30,18h1v1h-1zM0,19h1v1h-1zM1,19h1v1h-1zM5,19h1v1h-1zM7,19h1v1h-1zM8,19h1v1h-1zM9,19h1v1h-1zM10,19h1v1h-1zM12,19h1v1h-1zM17,19h1v1h-1zM18,19h1v1h-1zM20,19h1v1h-1zM23,19h1v1h-1zM26,19h1v1h-1zM27,19h1v1h-1zM28,19h1v1h-1zM29,19h1v1h-1zM30,19h1v1h-1zM31,19h1v1h-1zM0,20h1v1h-1zM2,20h1v1h-1zM3,20h1v1h-1zM6,20h1v1h-1zM7,20h1v1h-1zM8,20h1v1h-1zM9,20h1v1h-1zM13,20h1v1h-1zM15,20h1v1h-1zM16,20h1v1h-1zM19,20h1v1h-1zM20,20h1v1h-1zM21,20h1v1h-1zM22,20h1v1h-1zM25,20h1v1h-1zM27,20h1v1h-1zM28,20h1v1h-1zM29,20h1v1h-1zM31,20h1v1h-1zM0,21h1v1h-1zM1,21h1v1h-1zM2,21h1v1h-1zM3,21h1v1h-1zM4,21h1v1h-1zM5,21h1v1h-1zM8,21h1v1h-1zM11,21h1v1h-1zM12,21h1v1h-1zM13,21h1v1h-1zM14,21h1v1h-1zM15,21h1v1h-1zM17,21h1v1h-1zM18,21h1v1h-1zM21,21h1v1h-1zM23,21h1v1h-1zM26,21h1v1h-1zM29,21h1v1h-1zM30,21h1v1h-1zM32,21h1v1h-1zM0,22h1v1h-1zM3,22h1v1h-1zM6,22h1v1h-1zM8,22h1v1h-1zM11,22h1v1h-1zM12,22h1v1h-1zM15,22h1v1h-1zM16,22h1v1h-1zM17,22h1v1h-1zM20,22h1v1h-1zM21,22h1v1h-1zM22,22h1v1h-1zM24,22h1v1h-1zM26,22h1v1h-1zM28,22h1v1h-1zM29,22h1v1h-1zM30,22h1v1h-1zM31,22h1v1h-1zM0,23h1v1h-1zM3,23h1v1h-1zM4,23h1v1h-1zM5,23h1v1h-1zM9,23h1v1h-1zM10,23h1v1h-1zM11,23h1v1h-1zM13,23h1v1h-1zM14,23h1v1h-1zM15,23h1v1h-1zM18,23h1v1h-1zM21,23h1v1h-1zM22,23h1v1h-1zM24,23h1v1h-1zM25,23h1v1h-1zM27,23h1v1h-1zM29,23h1v1h-1zM30,23h1v1h-1zM0,24h1v1h-1zM2,24h1v1h-1zM4,24h1v1h-1zM5,24h1v1h-1zM6,24h1v1h-1zM8,24h1v1h-1zM9,24h1v1h-1zM13,24h1v1h-1zM14,24h1v1h-1zM15,24h1v1h-1zM16,24h1v1h-1zM17,24h1v1h-1zM22,24h1v1h-1zM24,24h1v1h-1zM25,24h1v1h-1zM26,24h1v1h-1zM27,24h1v1h-1zM28,24h1v1h-1zM29,24h1v1h-1zM31,24h1v1h-1zM32,24h1v1h-1zM8,25h1v1h-1zM9,25h1v1h-1zM10,25h1v1h-1zM11,25h1v1h-1zM12,25h1v1h-1zM14,25h1v1h-1zM16,25h1v1h-1zM18,25h1v1h-1zM19,25h1v1h-1zM21,25h1v1h-1zM23,25h1v1h-1zM24,25h1v1h-1zM28,25h1v1h-1zM30,25h1v1h-1zM32,25h1v1h-1zM0,26h1v1h-1zM1,26h1v1h-1zM2,26h1v1h-1zM3,26h1v1h-1zM4,26h1v1h-1zM5,26h1v1h-1zM6,26h1v1h-1zM9,26h1v1h-1zM10,26h1v1h-1zM11,26h1v1h-1zM12,26h1v1h-1zM13,26h1v1h-1zM14,26h1v1h-1zM15,26h1v1h-1zM16,26h1v1h-1zM18,26h1v1h-1zM21,26h1v1h-1zM23,26h1v1h-1zM24,26h1v1h-1zM26,26h1v1h-1zM28,26h1v1h-1zM30,26h1v1h-1zM31,26h1v1h-1zM0,27h1v1h-1zM6,27h1v1h-1zM8,27h1v1h-1zM9,27h1v1h-1zM10,27h1v1h-1zM11,27h1v1h-1zM13,27h1v1h-1zM14,27h1v1h-1zM20,27h1v1h-1zM21,27h1v1h-1zM22,27h1v1h-1zM23,27h1v1h-1zM24,27h1v1h-1zM28,27h1v1h-1zM29,27h1v1h-1zM30,27h1v1h-1zM31,27h1v1h-1zM0,28h1v1h-1zM2,28h1v1h-1zM3,28h1v1h-1zM4,28h1v1h-1zM6,28h1v1h-1zM8,28h1v1h-1zM9,28h1v1h-1zM12,28h1v1h-1zM14,28h1v1h-1zM15,28h1v1h-1zM18,28h1v1h-1zM21,28h1v1h-1zM24,28h1v1h-1zM25,28h1v1h-1zM26,28h1v1h-1zM27,28h1v1h-1zM28,28h1v1h-1zM29,28h1v1h-1zM31,28h1v1h-1zM32,28h1v1h-1zM0,29h1v1h-1zM2,29h1v1h-1zM3,29h1v1h-1zM4,29h1v1h-1zM6,29h1v1h-1zM8,29h1v1h-1zM9,29h1v1h-1zM10,29h1v1h-1zM12,29h1v1h-1zM14,29h1v1h-1zM15,29h1v1h-1zM16,29h1v1h-1zM20,29h1v1h-1zM22,29h1v1h-1zM25,29h1v1h-1zM28,29h1v1h-1zM30,29h1v1h-1zM32,29h1v1h-1zM0,30h1v1h-1zM2,30h1v1h-1zM3,30h1v1h-1zM4,30h1v1h-1zM6,30h1v1h-1zM8,30h1v1h-1zM10,30h1v1h-1zM11,30h1v1h-1zM12,30h1v1h-1zM14,30h1v1h-1zM19,30h1v1h-1zM22,30h1v1h-1zM23,30h1v1h-1zM26,30h1v1h-1zM27,30h1v1h-1zM0,31h1v1h-1zM6,31h1v1h-1zM9,31h1v1h-1zM10,31h1v1h-1zM13,31h1v1h-1zM16,31h1v1h-1zM19,31h1v1h-1zM20,31h1v1h-1zM21,31h1v1h-1zM23,31h1v1h-1zM28,31h1v1h-1zM29,31h1v1h-1zM30,31h1v1h-1zM0,32h1v1h-1zM1,32h1v1h-1zM2,32h1v1h-1zM3,32h1v1h-1zM4,32h1v1h-1zM5,32h1v1h-1zM6,32h1v1h-1zM8,32h1v1h-1zM10,32h1v1h-1zM13,32h1v1h-1zM14,32h1v1h-1zM16,32h1v1h-1zM17,32h1v1h-1zM19,32h1v1h-1zM20,32h1v1h-1zM22,32h1v1h-1zM23,32h1v1h-1zM24,32h1v1h-1zM25,32h1v1h-1zM27,32h1v1h-1zM31,32h1v1h-1z" fill="#0f2552"/></svg></div><div><b>Scan &amp; play</b><span>On your phone, tablet or laptop<br><i>investment-business-game.vercel.app</i></span></div></div>
+      <span class="eyebrow">7 games · curious about money?</span>
+      <h1>Play, Learn and <span>Start Your Wealth Creation Journey</span></h1>
+      <p>Fancy, fun games that make you curious about financial concepts: saving, SIP, risk, budgeting and scam safety.</p>
+      <div class="disc"><span class="gift">🎁</span><div><b>Players get a course discount</b><span>Join a course at MCUBE Academy at a special price.</span></div></div>
+      <div class="scan"><div class="qr"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33" shape-rendering="crispEdges"><path d="M0,0h1v1h-1zM1,0h1v1h-1zM2,0h1v1h-1zM3,0h1v1h-1zM4,0h1v1h-1zM5,0h1v1h-1zM6,0h1v1h-1zM13,0h1v1h-1zM16,0h1v1h-1zM17,0h1v1h-1zM19,0h1v1h-1zM20,0h1v1h-1zM22,0h1v1h-1zM23,0h1v1h-1zM26,0h1v1h-1zM27,0h1v1h-1zM28,0h1v1h-1zM29,0h1v1h-1zM30,0h1v1h-1zM31,0h1v1h-1zM32,0h1v1h-1zM0,1h1v1h-1zM6,1h1v1h-1zM11,1h1v1h-1zM12,1h1v1h-1zM13,1h1v1h-1zM14,1h1v1h-1zM15,1h1v1h-1zM16,1h1v1h-1zM17,1h1v1h-1zM20,1h1v1h-1zM22,1h1v1h-1zM26,1h1v1h-1zM32,1h1v1h-1zM0,2h1v1h-1zM2,2h1v1h-1zM3,2h1v1h-1zM4,2h1v1h-1zM6,2h1v1h-1zM8,2h1v1h-1zM12,2h1v1h-1zM13,2h1v1h-1zM16,2h1v1h-1zM17,2h1v1h-1zM18,2h1v1h-1zM20,2h1v1h-1zM23,2h1v1h-1zM24,2h1v1h-1zM26,2h1v1h-1zM28,2h1v1h-1zM29,2h1v1h-1zM30,2h1v1h-1zM32,2h1v1h-1zM0,3h1v1h-1zM2,3h1v1h-1zM3,3h1v1h-1zM4,3h1v1h-1zM6,3h1v1h-1zM8,3h1v1h-1zM10,3h1v1h-1zM12,3h1v1h-1zM14,3h1v1h-1zM15,3h1v1h-1zM16,3h1v1h-1zM20,3h1v1h-1zM21,3h1v1h-1zM22,3h1v1h-1zM24,3h1v1h-1zM26,3h1v1h-1zM28,3h1v1h-1zM29,3h1v1h-1zM30,3h1v1h-1zM32,3h1v1h-1zM0,4h1v1h-1zM2,4h1v1h-1zM3,4h1v1h-1zM4,4h1v1h-1zM6,4h1v1h-1zM8,4h1v1h-1zM9,4h1v1h-1zM10,4h1v1h-1zM11,4h1v1h-1zM15,4h1v1h-1zM18,4h1v1h-1zM21,4h1v1h-1zM24,4h1v1h-1zM26,4h1v1h-1zM28,4h1v1h-1zM29,4h1v1h-1zM30,4h1v1h-1zM32,4h1v1h-1zM0,5h1v1h-1zM6,5h1v1h-1zM8,5h1v1h-1zM11,5h1v1h-1zM12,5h1v1h-1zM15,5h1v1h-1zM16,5h1v1h-1zM17,5h1v1h-1zM18,5h1v1h-1zM20,5h1v1h-1zM21,5h1v1h-1zM22,5h1v1h-1zM26,5h1v1h-1zM32,5h1v1h-1zM0,6h1v1h-1zM1,6h1v1h-1zM2,6h1v1h-1zM3,6h1v1h-1zM4,6h1v1h-1zM5,6h1v1h-1zM6,6h1v1h-1zM8,6h1v1h-1zM10,6h1v1h-1zM12,6h1v1h-1zM14,6h1v1h-1zM16,6h1v1h-1zM18,6h1v1h-1zM20,6h1v1h-1zM22,6h1v1h-1zM24,6h1v1h-1zM26,6h1v1h-1zM27,6h1v1h-1zM28,6h1v1h-1zM29,6h1v1h-1zM30,6h1v1h-1zM31,6h1v1h-1zM32,6h1v1h-1zM8,7h1v1h-1zM10,7h1v1h-1zM12,7h1v1h-1zM14,7h1v1h-1zM15,7h1v1h-1zM21,7h1v1h-1zM23,7h1v1h-1zM0,8h1v1h-1zM2,8h1v1h-1zM3,8h1v1h-1zM4,8h1v1h-1zM5,8h1v1h-1zM6,8h1v1h-1zM13,8h1v1h-1zM14,8h1v1h-1zM15,8h1v1h-1zM17,8h1v1h-1zM20,8h1v1h-1zM22,8h1v1h-1zM23,8h1v1h-1zM26,8h1v1h-1zM27,8h1v1h-1zM28,8h1v1h-1zM29,8h1v1h-1zM30,8h1v1h-1zM1,9h1v1h-1zM2,9h1v1h-1zM4,9h1v1h-1zM5,9h1v1h-1zM7,9h1v1h-1zM9,9h1v1h-1zM16,9h1v1h-1zM18,9h1v1h-1zM19,9h1v1h-1zM20,9h1v1h-1zM21,9h1v1h-1zM23,9h1v1h-1zM26,9h1v1h-1zM27,9h1v1h-1zM29,9h1v1h-1zM30,9h1v1h-1zM31,9h1v1h-1zM32,9h1v1h-1zM1,10h1v1h-1zM2,10h1v1h-1zM4,10h1v1h-1zM6,10h1v1h-1zM10,10h1v1h-1zM12,10h1v1h-1zM15,10h1v1h-1zM16,10h1v1h-1zM18,10h1v1h-1zM21,10h1v1h-1zM25,10h1v1h-1zM26,10h1v1h-1zM28,10h1v1h-1zM30,10h1v1h-1zM31,10h1v1h-1zM0,11h1v1h-1zM9,11h1v1h-1zM10,11h1v1h-1zM11,11h1v1h-1zM14,11h1v1h-1zM15,11h1v1h-1zM16,11h1v1h-1zM19,11h1v1h-1zM21,11h1v1h-1zM22,11h1v1h-1zM28,11h1v1h-1zM29,11h1v1h-1zM30,11h1v1h-1zM32,11h1v1h-1zM0,12h1v1h-1zM3,12h1v1h-1zM4,12h1v1h-1zM6,12h1v1h-1zM10,12h1v1h-1zM12,12h1v1h-1zM18,12h1v1h-1zM21,12h1v1h-1zM24,12h1v1h-1zM27,12h1v1h-1zM28,12h1v1h-1zM29,12h1v1h-1zM31,12h1v1h-1zM32,12h1v1h-1zM2,13h1v1h-1zM3,13h1v1h-1zM4,13h1v1h-1zM7,13h1v1h-1zM8,13h1v1h-1zM10,13h1v1h-1zM13,13h1v1h-1zM14,13h1v1h-1zM15,13h1v1h-1zM16,13h1v1h-1zM17,13h1v1h-1zM20,13h1v1h-1zM22,13h1v1h-1zM23,13h1v1h-1zM24,13h1v1h-1zM26,13h1v1h-1zM29,13h1v1h-1zM30,13h1v1h-1zM31,13h1v1h-1zM32,13h1v1h-1zM0,14h1v1h-1zM5,14h1v1h-1zM6,14h1v1h-1zM8,14h1v1h-1zM13,14h1v1h-1zM18,14h1v1h-1zM19,14h1v1h-1zM21,14h1v1h-1zM22,14h1v1h-1zM24,14h1v1h-1zM25,14h1v1h-1zM26,14h1v1h-1zM31,14h1v1h-1zM0,15h1v1h-1zM1,15h1v1h-1zM2,15h1v1h-1zM3,15h1v1h-1zM5,15h1v1h-1zM7,15h1v1h-1zM8,15h1v1h-1zM9,15h1v1h-1zM10,15h1v1h-1zM11,15h1v1h-1zM13,15h1v1h-1zM16,15h1v1h-1zM19,15h1v1h-1zM20,15h1v1h-1zM21,15h1v1h-1zM22,15h1v1h-1zM24,15h1v1h-1zM25,15h1v1h-1zM26,15h1v1h-1zM29,15h1v1h-1zM30,15h1v1h-1zM0,16h1v1h-1zM1,16h1v1h-1zM2,16h1v1h-1zM5,16h1v1h-1zM6,16h1v1h-1zM7,16h1v1h-1zM8,16h1v1h-1zM9,16h1v1h-1zM11,16h1v1h-1zM13,16h1v1h-1zM17,16h1v1h-1zM19,16h1v1h-1zM22,16h1v1h-1zM24,16h1v1h-1zM25,16h1v1h-1zM27,16h1v1h-1zM28,16h1v1h-1zM32,16h1v1h-1zM1,17h1v1h-1zM2,17h1v1h-1zM4,17h1v1h-1zM9,17h1v1h-1zM12,17h1v1h-1zM13,17h1v1h-1zM17,17h1v1h-1zM18,17h1v1h-1zM19,17h1v1h-1zM20,17h1v1h-1zM23,17h1v1h-1zM26,17h1v1h-1zM27,17h1v1h-1zM29,17h1v1h-1zM30,17h1v1h-1zM32,17h1v1h-1zM2,18h1v1h-1zM5,18h1v1h-1zM6,18h1v1h-1zM7,18h1v1h-1zM8,18h1v1h-1zM9,18h1v1h-1zM13,18h1v1h-1zM14,18h1v1h-1zM15,18h1v1h-1zM16,18h1v1h-1zM17,18h1v1h-1zM20,18h1v1h-1zM22,18h1v1h-1zM24,18h1v1h-1zM25,18h1v1h-1zM26,18h1v1h-1zM27,18h1v1h-1zM28,18h1v1h-1zM30,18h1v1h-1zM0,19h1v1h-1zM1,19h1v1h-1zM5,19h1v1h-1zM7,19h1v1h-1zM8,19h1v1h-1zM9,19h1v1h-1zM10,19h1v1h-1zM12,19h1v1h-1zM17,19h1v1h-1zM18,19h1v1h-1zM20,19h1v1h-1zM23,19h1v1h-1zM26,19h1v1h-1zM27,19h1v1h-1zM28,19h1v1h-1zM29,19h1v1h-1zM30,19h1v1h-1zM31,19h1v1h-1zM0,20h1v1h-1zM2,20h1v1h-1zM3,20h1v1h-1zM6,20h1v1h-1zM7,20h1v1h-1zM8,20h1v1h-1zM9,20h1v1h-1zM13,20h1v1h-1zM15,20h1v1h-1zM16,20h1v1h-1zM19,20h1v1h-1zM20,20h1v1h-1zM21,20h1v1h-1zM22,20h1v1h-1zM25,20h1v1h-1zM27,20h1v1h-1zM28,20h1v1h-1zM29,20h1v1h-1zM31,20h1v1h-1zM0,21h1v1h-1zM1,21h1v1h-1zM2,21h1v1h-1zM3,21h1v1h-1zM4,21h1v1h-1zM5,21h1v1h-1zM8,21h1v1h-1zM11,21h1v1h-1zM12,21h1v1h-1zM13,21h1v1h-1zM14,21h1v1h-1zM15,21h1v1h-1zM17,21h1v1h-1zM18,21h1v1h-1zM21,21h1v1h-1zM23,21h1v1h-1zM26,21h1v1h-1zM29,21h1v1h-1zM30,21h1v1h-1zM32,21h1v1h-1zM0,22h1v1h-1zM3,22h1v1h-1zM6,22h1v1h-1zM8,22h1v1h-1zM11,22h1v1h-1zM12,22h1v1h-1zM15,22h1v1h-1zM16,22h1v1h-1zM17,22h1v1h-1zM20,22h1v1h-1zM21,22h1v1h-1zM22,22h1v1h-1zM24,22h1v1h-1zM26,22h1v1h-1zM28,22h1v1h-1zM29,22h1v1h-1zM30,22h1v1h-1zM31,22h1v1h-1zM0,23h1v1h-1zM3,23h1v1h-1zM4,23h1v1h-1zM5,23h1v1h-1zM9,23h1v1h-1zM10,23h1v1h-1zM11,23h1v1h-1zM13,23h1v1h-1zM14,23h1v1h-1zM15,23h1v1h-1zM18,23h1v1h-1zM21,23h1v1h-1zM22,23h1v1h-1zM24,23h1v1h-1zM25,23h1v1h-1zM27,23h1v1h-1zM29,23h1v1h-1zM30,23h1v1h-1zM0,24h1v1h-1zM2,24h1v1h-1zM4,24h1v1h-1zM5,24h1v1h-1zM6,24h1v1h-1zM8,24h1v1h-1zM9,24h1v1h-1zM13,24h1v1h-1zM14,24h1v1h-1zM15,24h1v1h-1zM16,24h1v1h-1zM17,24h1v1h-1zM22,24h1v1h-1zM24,24h1v1h-1zM25,24h1v1h-1zM26,24h1v1h-1zM27,24h1v1h-1zM28,24h1v1h-1zM29,24h1v1h-1zM31,24h1v1h-1zM32,24h1v1h-1zM8,25h1v1h-1zM9,25h1v1h-1zM10,25h1v1h-1zM11,25h1v1h-1zM12,25h1v1h-1zM14,25h1v1h-1zM16,25h1v1h-1zM18,25h1v1h-1zM19,25h1v1h-1zM21,25h1v1h-1zM23,25h1v1h-1zM24,25h1v1h-1zM28,25h1v1h-1zM30,25h1v1h-1zM32,25h1v1h-1zM0,26h1v1h-1zM1,26h1v1h-1zM2,26h1v1h-1zM3,26h1v1h-1zM4,26h1v1h-1zM5,26h1v1h-1zM6,26h1v1h-1zM9,26h1v1h-1zM10,26h1v1h-1zM11,26h1v1h-1zM12,26h1v1h-1zM13,26h1v1h-1zM14,26h1v1h-1zM15,26h1v1h-1zM16,26h1v1h-1zM18,26h1v1h-1zM21,26h1v1h-1zM23,26h1v1h-1zM24,26h1v1h-1zM26,26h1v1h-1zM28,26h1v1h-1zM30,26h1v1h-1zM31,26h1v1h-1zM0,27h1v1h-1zM6,27h1v1h-1zM8,27h1v1h-1zM9,27h1v1h-1zM10,27h1v1h-1zM11,27h1v1h-1zM13,27h1v1h-1zM14,27h1v1h-1zM20,27h1v1h-1zM21,27h1v1h-1zM22,27h1v1h-1zM23,27h1v1h-1zM24,27h1v1h-1zM28,27h1v1h-1zM29,27h1v1h-1zM30,27h1v1h-1zM31,27h1v1h-1zM0,28h1v1h-1zM2,28h1v1h-1zM3,28h1v1h-1zM4,28h1v1h-1zM6,28h1v1h-1zM8,28h1v1h-1zM9,28h1v1h-1zM12,28h1v1h-1zM14,28h1v1h-1zM15,28h1v1h-1zM18,28h1v1h-1zM21,28h1v1h-1zM24,28h1v1h-1zM25,28h1v1h-1zM26,28h1v1h-1zM27,28h1v1h-1zM28,28h1v1h-1zM29,28h1v1h-1zM31,28h1v1h-1zM32,28h1v1h-1zM0,29h1v1h-1zM2,29h1v1h-1zM3,29h1v1h-1zM4,29h1v1h-1zM6,29h1v1h-1zM8,29h1v1h-1zM9,29h1v1h-1zM10,29h1v1h-1zM12,29h1v1h-1zM14,29h1v1h-1zM15,29h1v1h-1zM16,29h1v1h-1zM20,29h1v1h-1zM22,29h1v1h-1zM25,29h1v1h-1zM28,29h1v1h-1zM30,29h1v1h-1zM32,29h1v1h-1zM0,30h1v1h-1zM2,30h1v1h-1zM3,30h1v1h-1zM4,30h1v1h-1zM6,30h1v1h-1zM8,30h1v1h-1zM10,30h1v1h-1zM11,30h1v1h-1zM12,30h1v1h-1zM14,30h1v1h-1zM19,30h1v1h-1zM22,30h1v1h-1zM23,30h1v1h-1zM26,30h1v1h-1zM27,30h1v1h-1zM0,31h1v1h-1zM6,31h1v1h-1zM9,31h1v1h-1zM10,31h1v1h-1zM13,31h1v1h-1zM16,31h1v1h-1zM19,31h1v1h-1zM20,31h1v1h-1zM21,31h1v1h-1zM23,31h1v1h-1zM28,31h1v1h-1zM29,31h1v1h-1zM30,31h1v1h-1zM0,32h1v1h-1zM1,32h1v1h-1zM2,32h1v1h-1zM3,32h1v1h-1zM4,32h1v1h-1zM5,32h1v1h-1zM6,32h1v1h-1zM8,32h1v1h-1zM10,32h1v1h-1zM13,32h1v1h-1zM14,32h1v1h-1zM16,32h1v1h-1zM17,32h1v1h-1zM19,32h1v1h-1zM20,32h1v1h-1zM22,32h1v1h-1zM23,32h1v1h-1zM24,32h1v1h-1zM25,32h1v1h-1zM27,32h1v1h-1zM31,32h1v1h-1z" fill="#0f2552"/></svg></div><div><b>Scan &amp; play</b><span>Phone, tablet or laptop<br><i>investment-business-game.vercel.app</i></span></div></div>
     </div>
     <div class="games">
-      <h2>7 games at our stall</h2>
-      <div class="grid">
-        <div class="c k1"><span class="ic">🎲</span><h3>Investment Business</h3><p>Roll the dice, pick chance cards and grow your money.</p><span class="l">Learn: Saving habits</span></div>
-        <div class="c k2"><span class="ic">🌟</span><h3>Money Adventure</h3><p>Pick a hero and watch your money grow year by year.</p><span class="l">For kids: Investing</span></div>
-        <div class="c k3"><span class="ic">💰</span><h3>₹1 Lakh → ₹10 Lakh</h3><p>Build a portfolio and face 15 years of surprises.</p><span class="l">Learn: Asset allocation</span></div>
-        <div class="c k4"><span class="ic">🐯</span><h3>Bull vs Bear</h3><p>Aadu Puli with a twist: guard your money goats from the market tigers.</p><span class="l">Learn: Risk &amp; safety</span></div>
-        <div class="c k5"><span class="ic">🌰</span><h3>Pallanguli</h3><p>Play the pits game, then invest the seeds you saved.</p><span class="l">Learn: SIP &amp; compounding</span></div>
-        <div class="c k6"><span class="ic">🏦</span><h3>Personal Finance</h3><p>Budget, loans, CIBIL and insurance, month by month.</p><span class="l">Learn: Budgeting</span></div>
-        <div class="c k7"><span class="ic">🔐</span><h3>Unlock Your Future</h3><p>Escape the bank vault and spot the scams in 5 minutes.</p><span class="l">Learn: Fraud alert</span></div>
-        <div class="c k8"><span class="big">7</span><b>money games for kids &amp; adults</b><small>Play at the stall or on the app</small></div>
+      <div class="feat">
+        <div class="fc ap"><div class="img"><img src="banner-img/aadupuli.jpg" alt="Adu Puli Attam game board"><span class="rib">★ Featured game</span><span class="no">5</span>
+          <div class="cap"><b>Adu Puli Attam</b><span>Bull vs Bears 🐂 🐻</span></div></div>
+          <div class="tx"><p>Guard your money goats from the market tigers.</p><span class="l">Learn: Risk &amp; safety</span></div></div>
+        <div class="fc pl"><div class="img"><img src="banner-img/pallanguli.jpg" alt="Pallanguli game board"><span class="rib">★ Featured game</span><span class="no">4</span>
+          <div class="cap"><b>Pallanguli</b><span>Sow seeds, fill your savings vault</span></div></div>
+          <div class="tx"><p>The classic pits game, then invest the seeds you saved.</p><span class="l">Learn: SIP &amp; compounding</span></div></div>
+      </div>
+      <div class="row">
+        <div class="c"><span class="no">1</span><span class="ic i1">🎲</span><b>Business Game</b><span>Investment Business</span><span class="l">Saving habits</span></div>
+        <div class="c"><span class="no">2</span><span class="ic i2">🌟</span><b>Money Adventure</b><span>Investment Journey</span><span class="l">For kids</span></div>
+        <div class="c"><span class="no">3</span><span class="ic i3">💰</span><b>1 Lac to 10 Lac Challenge</b><span>Grow your portfolio</span><span class="l">Asset allocation</span></div>
+        <div class="c"><span class="no">6</span><span class="ic i6">🔐</span><b>Unlock Your Futures</b><span>Escape the bank vault</span><span class="l">Fraud alert</span></div>
+        <div class="c"><span class="no">7</span><span class="ic i7">🏦</span><b>Personal Finance Management</b><span>Month by month</span><span class="l">Budgeting</span></div>
       </div>
     </div>
   </div>
