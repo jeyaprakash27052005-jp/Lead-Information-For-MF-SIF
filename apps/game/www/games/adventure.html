@@ -57,7 +57,7 @@ h1{letter-spacing:-.01em}
 
 <section id="s2" hidden>
 <h1 id="hi"></h1>
-<p class="sub">Step 2: How much money will you invest?</p>
+<p class="sub">Step 2: What is your possible investment amount per month?</p>
 <div class="chips" id="amts"></div>
 <p class="sub">How many years?</p>
 <div class="chips" id="yrs"></div>
@@ -106,7 +106,7 @@ const $=i=>document.getElementById(i),fm=x=>"₹"+Math.round(x).toLocaleString("
 function snd(f,d=.15,t=0){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.type="triangle";o.frequency.value=f;g.gain.setValueAtTime(.15,ac.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+t+d);o.connect(g);g.connect(ac.destination);o.start(ac.currentTime+t);o.stop(ac.currentTime+t+d)}catch(e){}}
 function show(n){["s1","s2","s3","s4"].forEach((s,i)=>$(s).hidden=i+1!==n);window.scrollTo(0,0)}
 $("heroes").innerHTML=H.map((h,i)=>`<button class="tile" data-h="${i}"><span class="e">${h[1]}</span><b>${h[0]}</b></button>`).join("");
-$("amts").innerHTML=[5000,10000,50000].map(a=>`<button class="chip${a===amt?" on":""}" data-a="${a}">${fm(a)}</button>`).join("");
+$("amts").innerHTML=[5000,10000,50000].map(a=>`<button class="chip${a===amt?" on":""}" data-a="${a}">${fm(a)}<small style="font-weight:600;opacity:.75"> /month</small></button>`).join("");
 $("yrs").innerHTML=[3,5,10].map(y=>`<button class="chip${y===yrs?" on":""}" data-y="${y}">${y} years</button>`).join("");
 $("avs").innerHTML=AV.map((a,i)=>`<button class="tile" data-v="${i}"><span class="e">${a[1]}</span><b>${a[0]}</b><small>${a[4]?"Safe & steady":a[2]<0?"Risky, big swings":"Medium risk"}</small></button>`).join("");
 let reg=null;
@@ -124,31 +124,33 @@ const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
 function move(a,b){return new Promise(r=>{const t0=performance.now(),d=yrs>5?900:1400;(function f(t){const p=Math.min((t-t0)/d,1);place(a+(b-a)*ease(p));p<1?requestAnimationFrame(f):r()})(t0)})}
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 function choose(title,a,b){return new Promise(r=>{$("ev").innerHTML=`<b>${title}</b><div class="chips"><button class="chip" id="c0">${a}</button><button class="chip" id="c1">${b}</button></div>`;$("c0").onclick=()=>r(0);$("c1").onclick=()=>r(1)})}
-function chart(h){const w=300,ht=110,mn=Math.min(...h),mx=Math.max(...h),sc=v=>ht-8-(v-mn)/((mx-mn)||1)*(ht-20),px=i=>10+i/(h.length-1)*(w-20);
-  $("chart").innerHTML=`<b>📊 Your money over ${yrs} years</b><svg viewBox="0 0 ${w} ${ht}" style="margin-top:6px"><line x1="10" x2="${w-10}" y1="${sc(h[0])}" y2="${sc(h[0])}" stroke="#999" stroke-dasharray="4 4"/><polyline fill="none" stroke="#7c3aed" stroke-width="4" stroke-linejoin="round" points="${h.map((v,i)=>px(i)+","+sc(v)).join(" ")}"/>${h.map((v,i)=>`<circle cx="${px(i)}" cy="${sc(v)}" r="4" fill="#7c3aed"/>`).join("")}</svg><small>Dashed line = money you started with</small>`}
+function chart(h,inv){const w=300,ht=110,all=h.concat(inv),mn=Math.min(...all),mx=Math.max(...all),sc=v=>ht-8-(v-mn)/((mx-mn)||1)*(ht-20),px=i=>10+i/(h.length-1)*(w-20);
+  $("chart").innerHTML=`<b>📊 Your money over ${yrs} years</b><svg viewBox="0 0 ${w} ${ht}" style="margin-top:6px"><polyline fill="none" stroke="#999" stroke-width="2" stroke-dasharray="4 4" points="${inv.map((v,i)=>px(i)+","+sc(v)).join(" ")}"/><polyline fill="none" stroke="#7c3aed" stroke-width="4" stroke-linejoin="round" points="${h.map((v,i)=>px(i)+","+sc(v)).join(" ")}"/>${h.map((v,i)=>`<circle cx="${px(i)}" cy="${sc(v)}" r="4" fill="#7c3aed"/>`).join("")}</svg><small>Purple = value of your investment · Dashed = money you put in</small>`}
 function quiz(k,done){const q=QZ[k],o=q.slice(1).map((t,i)=>[t,i===0]).sort(()=>Math.random()-.5);
   $("quiz").innerHTML=`<b>🧠 Quiz time!</b><p>${q[0]}</p>`;
   o.forEach(([t,ok])=>{const b=document.createElement("button");b.className="chip";b.textContent=t;b.onclick=()=>{$("quiz").querySelectorAll("button").forEach(x=>x.disabled=true);b.classList.add(ok?"good":"wrong");snd(ok?880:200,.3);const m=document.createElement("p");m.textContent=ok?"⭐ Correct! You earned a star!":"Good try! The right answer was: "+q[1];$("quiz").appendChild(m);done(ok)};$("quiz").appendChild(b)})}
 async function play(){
   if(busy)return;busy=true;snd(660);const A=AV[av],nm=H[hero][0];
-  const c1=Math.ceil(yrs*.4),c2=Math.ceil(yrs*.8);let saver=0,patient=0,h=[amt];
+  const c1=Math.ceil(yrs*.4),c2=Math.ceil(yrs*.8);let saver=0,patient=0,h=[0],ih=[0],inv=0;
+  const flows=[];/* [month, amount] for the yearly return (CAGR / XIRR) */
   pos=Array.from({length:yrs+1},(_,i)=>i/yrs*L);
   $("hv").textContent=H[hero][1];$("who").textContent=H[hero][1]+" "+A[1]+" "+A[0];
   $("stops").innerHTML=pos.map((l,i)=>{const p=pt(l);return `<circle cx="${p.x}" cy="${p.y}" r="${yrs>5?11:15}" fill="#fff" stroke="#7c3aed" stroke-width="4"/><text x="${p.x}" y="${p.y}" font-size="${i==yrs||i==0?18:11}" font-weight="700" text-anchor="middle" dy="${i==yrs||i==0?6:4}" fill="#4c1d95">${i==0?"🏁":i==yrs?"🏆":"Y"+i}</text>`}).join("");
-  let bal=amt;$("bal").textContent="💰 "+fm(bal);place(0);show(3);
-  $("ev").innerHTML=`<b>${nm} starts with ${fm(amt)}!</b><p>Watch the journey and make smart choices. 🚶</p>`;
+  let bal=0;$("bal").textContent="💰 "+fm(bal);place(0);show(3);
+  $("ev").innerHTML=`<b>${nm} invests ${fm(amt)} every month!</b><p>That is a SIP: a little money, every month, for ${yrs} years. Watch it grow and make smart choices. 🚶</p>`;
   await wait(1200);
   for(let y=1;y<=yrs;y++){
     await move(pos[y-1],pos[y]);
-    const r=A[4]?A[2]:A[2]+Math.random()*(A[3]-A[2]);bal*=1+r/100;
+    const r=A[4]?A[2]:A[2]+Math.random()*(A[3]-A[2]),m=Math.pow(1+r/100,1/12)-1;
+    for(let k=0;k<12;k++){flows.push([(y-1)*12+k,amt]);inv+=amt;bal=(bal+amt)*(1+m);}
     $("bal").textContent="💰 "+fm(bal);snd(r<0?220:880,.2);
     const msg=r<0?"⛈️ A storm! The value dipped a little. Stay calm.":r<5?"🐢 Slow and steady this year.":r<12?"☀️ Nice weather! Your money grew.":"🌈 Wow, a super year!";
-    $("ev").innerHTML=`<b>Year ${y}: <span class="${r<0?"down":"up"}">${r>=0?"+":""}${r.toFixed(1)}%</span> → ${fm(bal)}</b><p>${msg}</p>`;
+    $("ev").innerHTML=`<b>Year ${y}: <span class="${r<0?"down":"up"}">${r>=0?"+":""}${r.toFixed(1)}%</span> → ${fm(bal)}</b><p>${msg}</p><p style="font-size:13px;opacity:.8">Money put in so far: ${fm(inv)}</p>`;
     await wait(1500);
     if(y===c1){
-      const f=Math.random()<.5,x=amt*(f?.05:.1);
+      const f=Math.random()<.5,x=amt*(f?.5:1);
       const c=await choose(f?`🪙 ${nm} found ${fm(x)}! What now?`:`🎂 Birthday gift of ${fm(x)}! What now?`,"Invest it 🐷",f?"Buy candy 🍬":"Buy a toy 🧸");
-      if(c===0){bal+=x;saver=1;snd(988);$("ev").innerHTML=`<b>Smart saver! 🐷</b><p>You added ${fm(x)} to your investment.</p>`}else $("ev").innerHTML=`<b>Yum! 😋</b><p>Fun now, but that money can’t grow.</p>`;
+      if(c===0){bal+=x;inv+=x;flows.push([y*12,x]);saver=1;snd(988);$("ev").innerHTML=`<b>Smart saver! 🐷</b><p>You added ${fm(x)} to your investment.</p>`}else $("ev").innerHTML=`<b>Yum! 😋</b><p>Fun now, but that money can’t grow.</p>`;
       $("bal").textContent="💰 "+fm(bal);await wait(1700);
     }
     if(y===c2){
@@ -156,13 +158,17 @@ async function play(){
       if(c===0){patient=1;snd(988);$("ev").innerHTML=`<b>Patient Panda! 🐼</b><p>Waiting is how investors win.</p>`}else{bal*=.97;snd(200,.3);$("ev").innerHTML=`<b>Oops! 😬</b><p>Leaving early cost 3%. Patience pays.</p>`}
       $("bal").textContent="💰 "+fm(bal);await wait(1700);
     }
-    h.push(bal);
+    h.push(bal);ih.push(inv);
   }
-  const g=bal-amt;
-  $("res").innerHTML=`<p>${H[hero][1]} <b>${nm}</b> invested in ${A[1]} <b>${A[0]}</b>.</p><p>Started with: <b>${fm(amt)}</b></p><p>After ${yrs} years: <b class="${g>=0?"up":"down"}">${fm(bal)}</b></p><p>${g>=0?"Gained":"Lost"}: <b class="${g>=0?"up":"down"}">${fm(Math.abs(g))}</b></p><p>💡 ${A[5]}</p>`;
-  chart(h);$("badges").textContent="";
+  const g=bal-inv,roi=inv?g/inv*100:0,T=yrs*12;
+  /* yearly return (CAGR for a monthly SIP, the same as XIRR): the rate that grows every payment to the final value */
+  const fv=R=>flows.reduce((s,[t,c])=>s+c*Math.pow(1+R,(T-t)/12),0);
+  let lo=-0.99,hi=1;for(let i=0;i<80;i++){const md=(lo+hi)/2;fv(md)>bal?hi=md:lo=md}
+  const cagr=(lo+hi)/2*100,pc=v=>(v>=0?"+":"")+v.toFixed(1)+"%";
+  $("res").innerHTML=`<p>${H[hero][1]} <b>${nm}</b> invested in ${A[1]} <b>${A[0]}</b>.</p><p>Invested every month: <b>${fm(amt)}</b> for ${yrs} years (${T} months)</p><p>Total money put in: <b>${fm(inv)}</b></p><p>Value after ${yrs} years: <b class="${g>=0?"up":"down"}">${fm(bal)}</b></p><p>${g>=0?"Gained":"Lost"}: <b class="${g>=0?"up":"down"}">${fm(Math.abs(g))}</b></p><p>Return on investment: <b class="${g>=0?"up":"down"}">${pc(roi)}</b></p><p>CAGR (yearly return): <b class="${cagr>=0?"up":"down"}">${pc(cagr)} a year</b></p><p>💡 ${A[5]}</p>`;
+  chart(h,ih);$("badges").textContent="";
   const bd=[];if(patient)bd.push("🐼 Patient Panda");if(saver)bd.push("🐷 Super Saver");if(A[4])bd.push("🏦 Safe Saver");
-  const det={hero:H[hero][0],avenue:A[0],amount:amt,years:yrs,final:Math.round(bal),gain:Math.round(g),badges:bd.join(", ")};
+  const det={hero:H[hero][0],avenue:A[0],monthly:amt,years:yrs,invested:Math.round(inv),final:Math.round(bal),gain:Math.round(g),roiPct:+roi.toFixed(1),cagrPct:+cagr.toFixed(1),badges:bd.join(", ")};
   MG.finish(reg&&reg.id,g>=0?"Gained":"Lost",Math.round(bal),det);
   quiz(av,ok=>{if(ok)bd.push("⭐ Quiz Star");$("badges").textContent=bd.length?"🏅 Badges: "+bd.join("  "):"";det.quiz=ok?"Correct":"Wrong";det.badges=bd.join(", ");MG.finish(reg&&reg.id,g>=0?"Gained":"Lost",Math.round(bal),det);});
   $("badges").textContent=bd.length?"🏅 Badges: "+bd.join("  "):"";
