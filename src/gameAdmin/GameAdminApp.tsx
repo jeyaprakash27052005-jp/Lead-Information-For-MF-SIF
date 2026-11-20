@@ -241,6 +241,10 @@ const Players: React.FC<{ rows: GamePlayer[]; head: User; game: string; setGame:
             <select value={game} onChange={(e) => setGame(e.target.value)} className={`${input} w-full mt-1`}>
               <option value="">All games</option>
               {GAME_LIST.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+              {/* any other game found in the player records, so a newly added game always shows here */}
+              {[...new Set(rows.map((p) => p.game))].filter((id) => id && !GAME_LIST.some((g) => g.id === id)).map((id) => (
+                <option key={id} value={id}>{rows.find((p) => p.game === id)?.gameName || id}</option>
+              ))}
             </select>
           </label>
           <label className="text-xs font-bold text-slate-600">
