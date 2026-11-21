@@ -41,8 +41,6 @@ button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
 .opt:hover{border-color:var(--acc);background:#f8f7ff}
 .bar i{background:linear-gradient(90deg,#4F3CC9,#b7791f)}
 @media (min-width:820px){.w{max-width:760px}#s2 #rows{display:grid;grid-template-columns:1fr 1fr;column-gap:24px}#s2 .row:nth-of-type(2){border-top:0}#opts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}#opts .opt{margin:0}}
-.hz{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.hz .opt{margin:0;text-align:center;padding:12px 6px}.hz .opt.on{border-color:var(--acc);background:#eef2ff;color:#3730a3;box-shadow:inset 0 0 0 1px var(--acc)}
-.habit .opt{text-align:center}
 </style>
 </head>
 <body><script>MG.topbar("₹1 Lakh → ₹10 Lakh Challenge")</script><div class="w">
@@ -50,9 +48,12 @@ button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
 <section id="s1">
 <h1>💰 ₹1 Lakh → ₹10 Lakh</h1>
 <p class="sub">Can you turn ₹1,00,000 into ₹10,00,000 through smart investment decisions?</p>
-<div class="card"><b>Choose your challenge</b><p class="mut" style="margin:4px 0 10px;font-size:.9rem">How long will your money stay invested?</p>
-<div class="hz" id="hz"><button class="opt" data-h="d">📅 100 Days</button><button class="opt on" data-h="w">🗓️ 100 Weeks</button><button class="opt" data-h="m">📆 100 Months</button></div></div>
-<div class="card"><b>How to play</b><ol id="how"></ol></div>
+<div class="card"><b>How to play</b><ol>
+<li>You receive an imaginary ₹1,00,000.</li>
+<li>Choose your investment avenues.</li>
+<li>Face 3 surprise financial situations. After each one, 5 years pass.</li>
+<li>Decide using risk and returns.</li>
+<li>After 15 years, see your final portfolio value.</li></ol></div>
 <button class="btn" id="start">Start the challenge</button>
 </section>
 
@@ -70,7 +71,7 @@ button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
 <div id="opts"></div>
 <div class="card" id="out" hidden></div>
 <div id="yrs"></div>
-<button class="btn" id="ff" hidden>⏩ Fast-forward</button>
+<button class="btn" id="ff" hidden>⏩ Fast-forward 5 years</button>
 <button class="btn" id="nx" hidden>Next</button>
 </section>
 
@@ -79,7 +80,6 @@ button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
 <div class="card" id="ch"></div>
 <div class="card" id="hold"></div>
 <div class="card" id="les"></div>
-<div class="card habit" id="habit"></div>
 <button class="btn" id="again">🔁 Play again</button>
 </section>
 
@@ -93,16 +93,7 @@ const $=i=>document.getElementById(i);
 const fm=x=>"₹"+Math.round(x).toLocaleString("en-IN");
 const risk=sd=>sd<=3?"Low":sd<=10?"Medium":"High";
 function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
-let b,u,hist,lessons,pick,si,mods,cur,flows,t0;
-/* the challenge length: 100 days, 100 weeks or 100 months; surprises after every 30 */
-const HZ={d:{n:"Days",one:"Day",yr:1/365},w:{n:"Weeks",one:"Week",yr:1/52},m:{n:"Months",one:"Month",yr:1/12}};
-let hz="w",step=0;const LEN=100,GAP=30;
-function howTo(){const h=HZ[hz],l=h.n.toLowerCase();$("how").innerHTML=[
- `Choose your challenge: 100 days, 100 weeks or 100 months. You chose <b>100 ${l}</b>.`,
- "You receive an imaginary ₹1,00,000.","Choose your investment avenues.",
- `Face 3 surprise financial situations, after each 30 ${l}.`,"Decide using risk and returns.",
- `After 100 ${l}, see your financial portfolio value.`].map(x=>"<li>"+x+"</li>").join("")}
-$("hz").onclick=e=>{const t=e.target.closest("[data-h]");if(!t)return;hz=t.dataset.h;$("hz").querySelectorAll(".opt").forEach(x=>x.classList.toggle("on",x===t));howTo()};howTo();
+let b,u,hist,lessons,pick,si,mods,cur,flows=[],step=0;
 const tot=()=>b.reduce((a,c)=>a+c,0);
 const sum=g=>g.reduce((a,i)=>a+b[i],0);
 const sc=(g,f)=>g.forEach(i=>b[i]*=f);
@@ -171,77 +162,56 @@ function pickSurprises(){let seen=[];try{seen=JSON.parse(localStorage.getItem("c
 function show(n){["s1","s2","s3","s4"].forEach((s,i)=>$(s).hidden=i+1!==n);window.scrollTo(0,0)}
 function head(){const t=tot();$("pv").textContent="💼 "+fm(t);$("pb").style.width=Math.min(100,t/TARGET*100)+"%"}
 let reg=null;
-$("start").onclick=async()=>{if(!reg){try{reg=(await MG.registerForm({game:"challenge"}))[0]}catch(x){return}}b=Array(11).fill(0);u=Array(10).fill(0);hist=[1e5];lessons=[];si=0;mods={};step=0;flows=[[0,1e5]];
-  pick=pickSurprises();bet=null;renderAlloc();show(2)};
+$("start").onclick=async()=>{if(!reg){try{reg=(await MG.registerForm({game:"challenge"}))[0]}catch(x){return}}b=Array(11).fill(0);u=Array(10).fill(0);hist=[1e5];lessons=[];si=0;mods={};
+  pick=pickSurprises();bet=null;flows=[[0,1e5]];step=0;renderAlloc();show(2)};
 function renderAlloc(){
   const used=u.reduce((a,c)=>a+c,0);
   $("rows").innerHTML=A.map((a,i)=>`<div class="row"><div class="n">${a[1]} ${a[0]}<small>avg ${a[2]}% · risk ${risk(a[3])}</small></div><div class="st"><button data-i="${i}" data-d="-1" aria-label="less ${a[0]}">−</button><span>${fm(u[i]*1e4)}</span><button data-i="${i}" data-d="1" aria-label="more ${a[0]}">+</button></div></div>`).join("");
   $("left").textContent="Left to invest: "+fm((10-used)*1e4);$("left").className=used===10?"ok":"";$("lock").disabled=used!==10}
 $("rows").onclick=e=>{const t=e.target.closest("[data-i]");if(!t)return;const i=+t.dataset.i,d=+t.dataset.d,used=u.reduce((a,c)=>a+c,0);
   if(d>0&&used>=10)return;u[i]=Math.max(0,u[i]+d);renderAlloc()};
-$("lock").onclick=()=>{A.forEach((_,i)=>b[i]=u[i]*1e4);mods={};show(3);
-  $("sit").innerHTML=`<b>🚀 Your portfolio is ready!</b><p style="margin:6px 0 0">Your ₹1,00,000 is invested. Let ${GAP} ${HZ[hz].n.toLowerCase()} pass to see what happens.</p>`;
-  $("opts").hidden=true;$("out").hidden=true;$("nx").hidden=true;$("yrs").innerHTML="";cur=null;head();
-  $("yr").textContent=HZ[hz].one+" 0 of "+LEN;$("ff").textContent=`⏩ Fast-forward ${GAP} ${HZ[hz].n.toLowerCase()}`;$("ff").hidden=false};
+$("lock").onclick=()=>{A.forEach((_,i)=>b[i]=u[i]*1e4);newSurprise();show(3)};
 function newSurprise(){
   cur=S[pick[si]];if(cur.on)cur.on(cur);mods=cur.mods||{};head();
-  $("yr").textContent=HZ[hz].one+" "+step+" of "+LEN;
-  $("sit").innerHTML=`<b>${cur.ic} Surprise ${si+1} of 3 (${HZ[hz].one.toLowerCase()} ${step}): ${cur.n}</b><p style="margin:6px 0 0">${cur.tx(cur)}</p><p class="mut" style="margin:8px 0 0;font-size:.85rem">Your portfolio is now ${fm(tot())}. What will you do?</p>`;
+  step=si*5;$("yr").textContent="Year "+(si*5)+" of 15";
+  $("sit").innerHTML=`<b>${cur.ic} Surprise ${si+1} of 3: ${cur.n}</b><p style="margin:6px 0 0">${cur.tx(cur)}</p><p class="mut" style="margin:8px 0 0;font-size:.85rem">Your portfolio is now ${fm(tot())}. What will you do?</p>`;
   $("opts").innerHTML=cur.o.map((o,k)=>`<button class="opt" data-k="${k}">${o[0]}</button>`).join("");
   $("opts").hidden=false;["out","ff","nx"].forEach(x=>$(x).hidden=true);$("yrs").innerHTML="";}
 $("opts").onclick=e=>{const t=e.target.closest("[data-k]");if(!t)return;const o=cur.o[+t.dataset.k];
   $("opts").hidden=true;const msg=o[1](cur);lessons.push(o[2]);head();
-  $("out").hidden=false;$("out").innerHTML=`<b>Your decision</b><p style="margin:6px 0 0">${msg}</p><p class="mut" style="margin:6px 0 0">Portfolio now: ${fm(tot())}</p>`;
-  const n=si<2?GAP:LEN-step;$("ff").textContent=`⏩ Fast-forward ${n} ${HZ[hz].n.toLowerCase()}`;$("ff").hidden=false};
+  $("out").hidden=false;$("out").innerHTML=`<b>Your decision</b><p style="margin:6px 0 0">${msg}</p><p class="mut" style="margin:6px 0 0">Portfolio now: ${fm(tot())}</p>`;$("ff").hidden=false};
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 $("ff").onclick=async()=>{
   $("ff").hidden=true;const before=b.slice(),start=tot();let m10="";
-  const n=cur===null?GAP:(si<2?GAP:LEN-step),dt=HZ[hz].yr,from=step;$("opts").hidden=true;
-  for(let y=1;y<=n;y++){
-    step++;
-    for(let i=0;i<10;i++){const md=mods[i]||[0,0],mu=Math.log(1+(A[i][2]+md[0])/100),sd=(A[i][3]+md[1])/100;
-      b[i]*=Math.max(.4,Math.exp((mu-sd*sd/2)*dt+sd*Math.sqrt(dt)*gauss()))}
-    if(y%10&&y!==n)continue;
-    if(y===n&&b[10]>0){const bt=bet||{ic:"🎲",n:"Your bet",d:[[1,1]]},x=Math.random(),mu=bt.d.find(d=>x<=d[0])[1],s0=b[10];b[10]*=mu;
+  for(let y=1;y<=5;y++){
+    for(let i=0;i<10;i++){const md=mods[i]||[0,0],r=Math.max(-.6,(A[i][2]+md[0]+(A[i][3]+md[1])*gauss())/100);b[i]*=1+r}
+    if(y===5&&b[10]>0){const bt=bet||{ic:"🎲",n:"Your bet",d:[[1,1]]},x=Math.random(),mu=bt.d.find(d=>x<=d[0])[1],s0=b[10];b[10]*=mu;
       m10=bt.ic+" "+bt.n+": "+fm(s0)+" became "+fm(b[10])+(mu>=1?" (+"+Math.round((mu-1)*100)+"%).":" ("+Math.round((mu-1)*100)+"%).");b[2]+=b[10];b[10]=0;bet=null}
-    hist.push(tot());head();$("yr").textContent=HZ[hz].one+" "+step+" of "+LEN;
+    hist.push(tot());head();$("yr").textContent="Year "+(si*5+y)+" of 15";
     const p=hist[hist.length-2],c=hist[hist.length-1];
-    $("yrs").insertAdjacentHTML("beforeend",`<div class="kv"><span>${HZ[hz].one} ${step}</span><b class="${c>=p?"ok":"bad"}">${fm(c)} (${c>=p?"+":""}${((c/p-1)*100).toFixed(1)}%)</b></div>`);
-    await wait(450)}
+    $("yrs").insertAdjacentHTML("beforeend",`<div class="kv"><span>Year ${si*5+y}</span><b class="${c>=p?"ok":"bad"}">${fm(c)} (${c>=p?"+":""}${((c/p-1)*100).toFixed(1)}%)</b></div>`);
+    await wait(650)}
   let best=null,worst=null;ALL.forEach(i=>{if(before[i]>1){const g=b[i]/before[i];if(!best||g>best[1])best=[i,g];if(!worst||g<worst[1])worst=[i,g]}});
-  $("out").hidden=false;$("out").innerHTML=`<b>${n} ${HZ[hz].n.toLowerCase()} later (${HZ[hz].one.toLowerCase()} ${step})</b><p style="margin:6px 0 0">${fm(start)} → <b class="${tot()>=start?"ok":"bad"}">${fm(tot())}</b></p>`+(best?`<p class="mut" style="margin:6px 0 0">Best: ${A[best[0]][1]} ${A[best[0]][0]} (${best[1].toFixed(2)}x). Weakest: ${A[worst[0]][1]} ${A[worst[0]][0]} (${worst[1].toFixed(2)}x).</p>`:"")+(m10?`<p style="margin:6px 0 0">${m10}</p>`:"");
-  $("nx").hidden=false;$("nx").textContent=step<LEN?"Next surprise ➡️":"See my final result 🏁"};
-$("nx").onclick=()=>{if(step>=LEN){final();return}if(cur!==null)si++;newSurprise();window.scrollTo(0,0)};
+  $("out").hidden=false;$("out").innerHTML=`<b>5 years later</b><p style="margin:6px 0 0">${fm(start)} → <b class="${tot()>=start?"ok":"bad"}">${fm(tot())}</b></p>`+(best?`<p class="mut" style="margin:6px 0 0">Best: ${A[best[0]][1]} ${A[best[0]][0]} (${best[1].toFixed(2)}x). Weakest: ${A[worst[0]][1]} ${A[worst[0]][0]} (${worst[1].toFixed(2)}x).</p>`:"")+(m10?`<p style="margin:6px 0 0">${m10}</p>`:"");
+  $("nx").hidden=false;$("nx").textContent=si<2?"Next surprise ➡️":"See my final result 🏁"};
+$("nx").onclick=()=>{si++;if(si<3){newSurprise();window.scrollTo(0,0)}else final()};
 function final(){
-  const t=tot(),h=HZ[hz],l=h.n.toLowerCase(),Tyr=LEN*h.yr;
-  const putIn=flows.filter(f=>f[1]>0).reduce((a,f)=>a+f[1],0),taken=-flows.filter(f=>f[1]<0).reduce((a,f)=>a+f[1],0);
-  const gain=t+taken-putIn,roi=gain/putIn*100,cg=MG.cagr(flows.map(f=>[f[0]*h.yr,f[1]]),Tyr,t);
-  $("fv").textContent=fm(t);$("fv").className="big "+(gain>=0?"ok":"bad");
-  $("tier").textContent=t>=TARGET?"🏆 Legend! You turned ₹1 lakh into ₹10 lakh!":cg>=15?"🧙 Wealth Wizard! A super yearly return.":cg>=10?"🎯 Smart Investor! Strong, steady growth.":cg>=5?"🐢 Safe Saver. You grew your money steadily.":"📚 Keep learning. Try a different mix next time.";
-  $("tier").insertAdjacentHTML("afterend",`<div style="margin-top:10px"><div class="kv"><span>Challenge</span><b>100 ${l}</b></div>
-    <div class="kv"><span>Money put in</span><b>${fm(putIn)}</b></div>${taken>0?`<div class="kv"><span>Money taken out (emergency)</span><b>${fm(taken)}</b></div>`:""}
-    <div class="kv"><span>Portfolio value after 100 ${l}</span><b>${fm(t)}</b></div>
+  const t=tot(),putIn=flows.filter(x=>x[1]>0).reduce((a,x)=>a+x[1],0),taken=-flows.filter(x=>x[1]<0).reduce((a,x)=>a+x[1],0),
+    gain=t+taken-putIn,roi=gain/putIn*100,cg=MG.cagr(flows,15,t);$("fv").textContent=fm(t);$("fv").className="big "+(t>=TARGET?"ok":"");
+  $("tier").textContent=t>=TARGET?"🏆 Legend! You turned ₹1 lakh into ₹10 lakh!":t>=5e5?"🧙 Wealth Wizard! More than 5x your money.":t>=2.5e5?"🎯 Smart Investor! You more than doubled your money.":t>=1.2e5?"🐢 Safe Saver. You grew your money steadily.":"📚 Keep learning. Try a different mix next time.";
+  document.querySelector(".res2")&&document.querySelector(".res2").remove();
+  $("tier").insertAdjacentHTML("afterend",`<div class="res2" style="margin-top:10px"><div class="kv"><span>Money put in</span><b>${fm(putIn)}</b></div>${taken>0?`<div class="kv"><span>Money taken out (emergency)</span><b>${fm(taken)}</b></div>`:""}
+    <div class="kv"><span>Portfolio value after 15 years</span><b>${fm(t)}</b></div>
     <div class="kv"><span>${gain>=0?"Gained":"Lost"}</span><b class="${gain>=0?"ok":"bad"}">${fm(Math.abs(gain))}</b></div>
     <div class="kv"><span>Return on investment</span><b class="${roi>=0?"ok":"bad"}">${MG.pct(roi)}</b></div>
-    <div class="kv"><span>CAGR (yearly return)</span><b class="${cg>=0?"ok":"bad"}">${MG.pct(cg)} a year</b></div>${Tyr<1?`<p class="mut" style="font-size:.8rem;margin:4px 0">100 days is less than a year: CAGR stretches the return to a full year, so it can look very big or very small.</p>`:""}
-    <div class="kv"><span>Progress to ₹10,00,000</span><b>${Math.min(100,t/TARGET*100).toFixed(1)}%</b></div></div>`);
-  $("tier").nextElementSibling.nextElementSibling&&$("tier").nextElementSibling.nextElementSibling.classList.contains("res2")&&$("tier").nextElementSibling.nextElementSibling.remove();
-  $("tier").nextElementSibling.classList.add("res2");
-  const W=320,H=140,mn=Math.min(1e5,...hist)*.95,mx=Math.max(1e5,...hist)*1.05,X=i=>12+i/(hist.length-1)*(W-24),Y=v=>H-16-(v-mn)/(mx-mn)*(H-30);
-  $("ch").innerHTML=`<b>Your journey over 100 ${l}</b><svg viewBox="0 0 ${W} ${H}"><line x1="12" x2="${W-12}" y1="${Y(1e5)}" y2="${Y(1e5)}" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="5 5"/><text x="14" y="${Y(1e5)-5}" font-size="10" fill="#6b7280">Start ₹1,00,000</text><polyline fill="none" stroke="#0f8aa3" stroke-width="3.5" stroke-linejoin="round" points="${hist.map((v,i)=>X(i)+","+Y(v)).join(" ")}"/>${[30,60,90].map(k=>`<line x1="${X(k/10)}" x2="${X(k/10)}" y1="10" y2="${H-14}" stroke="#f59e0b" stroke-width="1" stroke-dasharray="2 4"/><text x="${X(k/10)}" y="${H-3}" font-size="9" text-anchor="middle" fill="#b45309">⚡${k}</text>`).join("")}</svg><small class="mut">⚡ = surprise at ${h.one.toLowerCase()} 30, 60 and 90</small>`;
+    <div class="kv"><span>CAGR (yearly return)</span><b class="${cg>=0?"ok":"bad"}">${MG.pct(cg)} a year</b></div></div>`);
+  const W=320,H=140,mx=Math.max(TARGET,...hist)*1.05,X=i=>12+i/15*(W-24),Y=v=>H-16-v/mx*(H-30);
+  $("ch").innerHTML=`<b>Your journey over 15 years</b><svg viewBox="0 0 ${W} ${H}"><line x1="12" x2="${W-12}" y1="${Y(TARGET)}" y2="${Y(TARGET)}" stroke="#b7791f" stroke-width="2" stroke-dasharray="6 5"/><text x="14" y="${Y(TARGET)-5}" font-size="10" fill="#b7791f">Target ₹10,00,000</text><polyline fill="none" stroke="#0f8aa3" stroke-width="3.5" stroke-linejoin="round" points="${hist.map((v,i)=>X(i)+","+Y(v)).join(" ")}"/></svg>`;
   $("hold").innerHTML="<b>What you hold now</b>"+ALL.filter(i=>b[i]>1).sort((x,y)=>b[y]-b[x]).map(i=>`<div class="kv"><span>${A[i][1]} ${A[i][0]}</span><b>${fm(b[i])}</b></div>`).join("");
   $("les").innerHTML="<b>💡 What you learned from your decisions</b><ul style='margin:8px 0 0;padding-left:20px;line-height:1.5'>"+lessons.map(l=>"<li>"+l+"</li>").join("")+"</ul>";
-  const tierShort=t>=TARGET?"Legend":cg>=15?"Wealth Wizard":cg>=10?"Smart Investor":cg>=5?"Safe Saver":"Keep learning";
+  const tierShort=t>=TARGET?"Legend":t>=5e5?"Wealth Wizard":t>=2.5e5?"Smart Investor":t>=1.2e5?"Safe Saver":"Keep learning";
   const hold={};ALL.forEach(i=>{if(b[i]>1)hold[A[i][0]]=Math.round(b[i])});
-  const det={challenge:"100 "+l,start:"Rs 1,00,000",target:"Rs 10,00,000",reached:t>=TARGET?"Yes":"No",putIn:Math.round(putIn),takenOut:Math.round(taken),final:Math.round(t),gain:Math.round(gain),roiPct:+roi.toFixed(1),cagrPct:+cg.toFixed(1),surprises:pick.map(i=>S[i].n).join(", "),holdings:hold};
-  MG.finish(reg&&reg.id,tierShort,Math.round(t),det);
-  /* last question: interest in a 100 days / weeks / months challenge habit */
-  $("habit").innerHTML=`<b>🌱 Are you interested in the 100 days, 100 weeks or 100 months challenge habit?</b><p class="mut" style="margin:4px 0 10px;font-size:.88rem">Build a money habit: save and invest a little, regularly, for 100 days, weeks or months.</p>
-    <div class="hz"><button class="opt" data-x="100 days">📅 100 Days</button><button class="opt" data-x="100 weeks">🗓️ 100 Weeks</button><button class="opt" data-x="100 months">📆 100 Months</button></div>
-    <button class="opt" data-x="Not now" style="margin-top:8px;text-align:center">Not now</button><p id="hmsg" class="ok" style="margin:6px 0 0;font-weight:700"></p>`;
-  $("habit").onclick=e=>{const x=e.target.closest("[data-x]");if(!x)return;$("habit").querySelectorAll("[data-x]").forEach(y=>y.classList.toggle("on",y===x));
-    det.habitInterest=x.dataset.x;MG.finish(reg&&reg.id,tierShort,Math.round(t),det);
-    $("hmsg").textContent=x.dataset.x==="Not now"?"No problem. You can start a habit any time!":`Great choice! Mcube Academy will help you start your ${x.dataset.x} challenge habit.`};
+  MG.finish(reg&&reg.id,tierShort,Math.round(t),{putIn:Math.round(putIn),takenOut:Math.round(taken),gain:Math.round(gain),roiPct:+roi.toFixed(1),cagrPct:+cg.toFixed(1),start:"Rs 1,00,000",target:"Rs 10,00,000",reached:t>=TARGET?"Yes":"No",surprises:pick.map(i=>S[i].n).join(", "),holdings:hold});
   show(4)}
 $("again").onclick=()=>{reg=null;show(1)};
 </script>

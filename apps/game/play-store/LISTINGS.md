@@ -62,23 +62,24 @@ First release of Investment Business by Mcube Academy.
 | Graphics folder | `play-store/adventure/` |
 | Upload file | `Money-Adventure-PlayStore.aab` |
 
-**Short description (66/80)**
+**Short description (73/80)**
 
 ```
-Kids pick a hero, choose where to invest and watch the money grow.
+Kids take a 100 days, weeks or months SIP challenge and watch money grow.
 ```
 
-**Full description (1013/4000)**
+**Full description (1175/4000)**
 
 ```
 Money Adventure is a colourful learning game from Mcube Academy that shows children how money can grow over time.
 
-Pick a hero – Bolt Boy, Zippy Bot, Tara Tiger, Luna Fairy, Chintu Monkey or Gajju Elephant – choose an amount and a number of years, then decide where to invest: mutual funds, a fixed deposit, gold, PPF, the stock market and more. Watch your hero walk along the road year by year while the money goes up and down.
+Pick a hero – Bolt Boy, Zippy Bot, Tara Tiger, Luna Fairy, Chintu Monkey or Gajju Elephant – choose a 100 days, 100 weeks or 100 months challenge and a SIP amount for every day, week or month, then decide where to invest: mutual funds, a fixed deposit, gold, PPF, the stock market and more. Watch your hero walk along the road while the SIP money goes up and down, and play Toy Pop on the way.
 
 ON THE WAY
 • Found some money or got a birthday gift? Save it or spend it
 • A friend says "Take your money out now!" – will you wait patiently?
-• See your money on a simple chart at the end
+• A big toy sale – keep your SIP going or stop it?
+• See your money, return on investment and CAGR on a simple chart at the end
 • Answer a quiz question and collect badges: Patient Panda, Super Saver, Quiz Star
 
 FOR PARENTS
@@ -107,23 +108,21 @@ First release of Money Adventure for Kids by Mcube Academy.
 | Graphics folder | `play-store/challenge/` |
 | Upload file | `Lakh-Challenge-PlayStore.aab` |
 
-**Short description (73/80)**
+**Short description (68/80)**
 
 ```
-Pick 100 days, weeks or months, face 3 surprises and grow your portfolio.
+Build a portfolio, face 3 surprises and see where 15 years take you.
 ```
 
-**Full description (1329/4000)**
+**Full description (1170/4000)**
 
 ```
 Can you turn ₹1,00,000 into ₹10,00,000 through smart decisions? Take the challenge from Mcube Academy.
 
-1. Choose your challenge: 100 days, 100 weeks or 100 months.
-2. Split your imaginary ₹1 lakh across 10 choices: mutual funds, stocks, fixed deposit, gold, real estate, PPF, NPS, government bonds, silver and ETFs. Each shows its average return and its risk.
-3. Face 3 surprise events, after each 30 days, weeks or months, about bank deposits, RD, FD, mutual funds, shares, derivatives (F&O) and the stock market – a market crash, an FD rate rise, a hot IPO, a share tip, a medical emergency and more – and decide what to do. The next player gets different surprises.
-4. Fast-forward and watch your portfolio rise and fall.
-5. After 100 days, weeks or months, see your portfolio value, return on investment, CAGR (yearly return), a chart of your journey and what your choices taught you.
-6. Tell us if you'd like to build a 100 days, 100 weeks or 100 months money habit.
+1. Split your imaginary ₹1 lakh across 10 choices: mutual funds, stocks, fixed deposit, gold, real estate, PPF, NPS, government bonds, silver and ETFs. Each shows its average return and its risk.
+2. Face 3 surprise events about bank deposits, RD, FD, mutual funds, shares, derivatives (F&O) and the stock market – a market crash, an FD rate rise, a hot IPO, a share tip, a medical emergency and more – and decide what to do. The next player gets different surprises.
+3. Fast-forward 5 years after each decision and watch every year's gain or loss.
+4. After 15 years, see your final portfolio, return on investment, CAGR (yearly return), your holdings, a chart of your journey and what your choices taught you.
 
 Your result ranks you as Legend, Wealth Wizard, Smart Investor, Safe Saver or Keep Learning. Play again with a different mix.
 
