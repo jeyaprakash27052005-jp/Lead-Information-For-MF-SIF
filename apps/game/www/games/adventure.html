@@ -53,6 +53,13 @@ h1{letter-spacing:-.01em}
 .bp canvas{width:100%;height:auto;display:block;border-radius:16px;background:linear-gradient(#e0f2fe,#f5f3ff);touch-action:none;cursor:crosshair}
 .bp .ft{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-weight:700;font-size:.9rem;color:#4c1d95}
 .bp .won{font-size:1.2rem;font-weight:800;color:#16a34a;min-height:1.4em}
+.score{font-size:2.6rem;font-weight:800;color:#7c3aed;line-height:1}.stars{font-size:1.5rem;letter-spacing:2px}
+.saved{font-size:2rem;font-weight:800;color:#16a34a}
+.invs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}.invs .tile{padding:10px 6px}.invs .tile.on{border-color:#7c3aed;background:#f5f3ff;box-shadow:inset 0 0 0 2px #7c3aed}
+.invs .tile.def{cursor:default}.tag{display:inline-block;font-size:.7rem;font-weight:700;background:#dcfce7;color:#166534;border-radius:999px;padding:2px 8px;margin-top:4px}
+.ctab{width:100%;border-collapse:collapse;margin-top:8px;font-size:.92rem}.ctab th,.ctab td{padding:7px 6px;border-bottom:1px solid #e5e7eb;text-align:right}.ctab th:first-child,.ctab td:first-child{text-align:left}
+.ctab thead th{font-size:.78rem;color:#6b7280}.ctab .win{color:#16a34a;font-weight:800}
+.qz .chip{display:block;width:100%;margin:6px 0;text-align:left}
 </style>
 </head>
 <body><script>MG.topbar("Money Adventure")</script><div class="wrap">
@@ -69,8 +76,8 @@ h1{letter-spacing:-.01em}
 <div class="chips" id="hzs"></div>
 <p class="sub" id="amtQ">Step 3: What is your possible investment amount per month?</p>
 <div class="chips" id="amts"></div>
-<p class="sub">Step 4: Pick where to invest. Tap one!</p>
-<div class="grid" id="avs"></div>
+<button class="btn" id="go" style="max-width:420px;margin:14px auto 0;display:block">🚶 Start my money adventure</button>
+<p class="sub" style="margin-top:10px;font-size:.85rem">On the way, your hero will ask you 10 easy money questions!</p>
 </section>
 
 <div class="bp" id="bp" hidden><div class="in"><h3 id="bpT">🧸 Toy Pop!</h3><p id="bpS"></p>
@@ -90,9 +97,11 @@ h1{letter-spacing:-.01em}
 
 <section id="s4" hidden class="center">
 <div class="big">🏆🎉</div>
-<h1>Maturity reached!</h1>
-<div class="card" id="res" style="text-align:left"></div>
-<div class="card" id="chart"></div><div class="card quiz" id="quiz"></div><div class="badges" id="badges"></div>
+<h1>Adventure complete!</h1>
+<div class="card" id="res"></div>
+<div class="card" id="pickInv"></div>
+<div class="card" id="cmp" hidden></div>
+<div class="card" id="chart" hidden></div><div class="badges" id="badges"></div>
 <div class="card" id="habit" style="text-align:center"></div>
 <button class="btn" id="again">Play again 🔁</button>
 </section>
@@ -126,14 +135,14 @@ function amts(){const H2=HZ[hz];if(H2.amts.indexOf(amt)<0)amt=H2.amts[1];$("amtQ
   $("amts").innerHTML=H2.amts.map(a=>`<button class="chip${a===amt?" on":""}" data-a="${a}">${fm(a)}<small style="font-weight:600;opacity:.75"> /${H2.per}</small></button>`).join("")}
 amts();
 $("hzs").onclick=e=>{const t=e.target.closest("[data-z]");if(!t)return;hz=t.dataset.z;$("hzs").querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c===t));amts()};
-$("avs").innerHTML=AV.map((a,i)=>`<button class="tile" data-v="${i}"><span class="e">${a[1]}</span><b>${a[0]}</b><small>${a[4]?"Safe & steady":a[2]<0?"Risky, big swings":"Medium risk"}</small></button>`).join("");
+if(0)$("avs").innerHTML=AV.map((a,i)=>`<button class="tile" data-v="${i}"><span class="e">${a[1]}</span><b>${a[0]}</b><small>${a[4]?"Safe & steady":a[2]<0?"Risky, big swings":"Medium risk"}</small></button>`).join("");
 let reg=null;
 $("heroes").onclick=async e=>{const t=e.target.closest("[data-h]");if(!t)return;
   if(!reg){try{reg=(await MG.registerForm({game:"adventure",parent:true,gate:true,intro:"A parent or guardian registers once before the adventure starts."}))[0]}catch(x){return}}
   hero=+t.dataset.h;$("hi").textContent=H[hero][1]+" "+H[hero][0]+", let’s go!";show(2)};
 function pick(box,key,set){$(box).onclick=e=>{const t=e.target.closest("[data-"+key+"]");if(!t)return;set(+t.dataset[key]);$(box).querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c===t))}}
 pick("amts","a",v=>amt=v);
-$("avs").onclick=e=>{const t=e.target.closest("[data-v]");if(!t)return;av=+t.dataset.v;play()};
+$("go").onclick=()=>play();
 $("again").onclick=()=>{reg=null;show(1)};
 const road=$("road"),L=road.getTotalLength();let pos=[];
 const pt=l=>road.getPointAtLength(l);
@@ -205,67 +214,104 @@ function bubble(year){return new Promise(done=>{
   window.__bpState=()=>({g:g.map(r=>r.slice()),cur,busy:!!ball||popAnim.length>0,over,shots});
   frame()})}
 
+
+/* 10 very simple money questions for kids, one at every stop (answer first) */
+const KQ=[
+["Where is a safe place to keep money?","🏦 In a bank","🛏️ Under the bed","🕳️ In a pocket with a hole"],
+["What is saving?","🐷 Keeping some money for later","🛍️ Spending all your money","🗑️ Throwing money away"],
+["You have ₹10 and spend ₹4. How much is left?","₹6","₹14","₹4"],
+["Which one is a NEED?","🍎 Food","🧸 A new toy","🍭 Candy"],
+["Which one is a WANT?","🎮 A video game","💧 Drinking water","📚 School books"],
+["What does a bank give you for keeping your money?","➕ A little extra money (interest)","❌ Nothing","🎈 Balloons"],
+["Should you tell your bank PIN to a friend?","🙅 No, never","👍 Yes, always","🤷 Only if they ask"],
+["Two ₹5 coins make…","₹10","₹5","₹25"],
+["Before buying something, you should…","🤔 Think: do I really need it?","🏃 Buy it fast","😭 Cry for it"],
+["How does money grow?","🌱 Save it and invest it","🙈 Hide it and forget it","💸 Spend it all"],
+["Which coin is worth the most?","₹10","₹2","₹1"],
+["Money you get by working is called…","💼 Income","🎁 A gift","🍬 A treat"],
+["You save ₹10 every day for 3 days. How much do you have?","₹30","₹13","₹10"],
+["Who should you ask before buying something online?","👨‍👩‍👧 Mum or Dad","🙈 Nobody","👤 A stranger"],
+["A plan for how to use your money is called…","📝 A budget","🎲 A game","🚗 A car"],
+["When you borrow money, you must…","🔁 Give it back","🎉 Keep it","🙈 Forget it"],
+["A stranger says: “You won a prize! Send money first.” What do you do?","🙅 Say no and tell a grown-up","💸 Send the money","🔑 Share your password"],
+["What is better?","🐷 Save first, then spend","🛍️ Spend first, save nothing","🤷 Never think about money"],
+["You want a bicycle. What helps you get it?","🪙 Save a little every week","💸 Spend all your pocket money","🎲 Hope for luck"],
+["Saving a little money again and again is…","⭐ A good habit","😴 A waste of time","😟 Bad luck"],
+["A toy costs ₹50. You have ₹30. How much more do you need?","₹20","₹80","₹30"],
+["Where should you keep your pocket money at home?","🐷 In a piggy bank","🛋️ Under the sofa","🚮 In the bin"]];
+const BANK=5.5,INV={mf:["Mutual Fund","🧺",12],st:["Stocks","📈",15]};
+/* the value of a SIP: the same amount every day/week/month, growing at a yearly rate */
+function sipValue(a,n,rate,dt){const g=Math.pow(1+rate/100,dt)-1;let v=0;const h=[0];for(let k=1;k<=n;k++){v=(v+a)*(1+g);if(k%10===0)h.push(v)}return{v,h}}
 function choose(title,a,b){return new Promise(r=>{$("ev").innerHTML=`<b>${title}</b><div class="chips"><button class="chip" id="c0">${a}</button><button class="chip" id="c1">${b}</button></div>`;$("c0").onclick=()=>r(0);$("c1").onclick=()=>r(1)})}
 function chart(h,inv){const w=300,ht=110,all=h.concat(inv),mn=Math.min(...all),mx=Math.max(...all),sc=v=>ht-8-(v-mn)/((mx-mn)||1)*(ht-20),px=i=>10+i/(h.length-1)*(w-20);
   $("chart").innerHTML=`<b>📊 Your money over 100 ${HZ[hz].n.toLowerCase()}</b><svg viewBox="0 0 ${w} ${ht}" style="margin-top:6px"><polyline fill="none" stroke="#999" stroke-width="2" stroke-dasharray="4 4" points="${inv.map((v,i)=>px(i)+","+sc(v)).join(" ")}"/><polyline fill="none" stroke="#7c3aed" stroke-width="4" stroke-linejoin="round" points="${h.map((v,i)=>px(i)+","+sc(v)).join(" ")}"/>${h.map((v,i)=>`<circle cx="${px(i)}" cy="${sc(v)}" r="4" fill="#7c3aed"/>`).join("")}</svg><small>Purple = value of your investment · Dashed = money you put in</small>`}
 function quiz(k,done){const q=QZ[k],o=q.slice(1).map((t,i)=>[t,i===0]).sort(()=>Math.random()-.5);
   $("quiz").innerHTML=`<b>🧠 Quiz time!</b><p>${q[0]}</p>`;
   o.forEach(([t,ok])=>{const b=document.createElement("button");b.className="chip";b.textContent=t;b.onclick=()=>{$("quiz").querySelectorAll("button").forEach(x=>x.disabled=true);b.classList.add(ok?"good":"wrong");snd(ok?880:200,.3);const m=document.createElement("p");m.textContent=ok?"⭐ Correct! You earned a star!":"Good try! The right answer was: "+q[1];$("quiz").appendChild(m);done(ok)};$("quiz").appendChild(b)})}
+function ask(nm,em,q,k){return new Promise(r=>{const o=q.slice(1).map((t,i)=>[t,i===0]).sort(()=>Math.random()-.5);
+  $("ev").innerHTML=`<div class="qz"><b>${em} ${nm} asks (question ${k} of 10):</b><p style="font-size:1.05rem;font-weight:700;margin:6px 0">${q[0]}</p>${o.map((x,i)=>`<button class="chip" data-i="${i}">${x[0]}</button>`).join("")}</div>`;
+  $("ev").onclick=e=>{const t=e.target.closest("[data-i]");if(!t)return;$("ev").onclick=null;const ok=o[+t.dataset.i][1];
+    $("ev").querySelectorAll("[data-i]").forEach((b,i)=>{b.disabled=true;if(o[i][1])b.style.cssText="border-color:#16a34a;background:#dcfce7"});
+    if(!ok)t.style.cssText="border-color:#dc2626;background:#fee2e2";snd(ok?988:220,.2);
+    $("ev").insertAdjacentHTML("beforeend",`<p style="font-weight:800;margin:6px 0 0" class="${ok?"up":"down"}">${ok?"⭐ Correct! Well done!":"Good try! The answer is: "+q[1]}</p>`);
+    setTimeout(()=>r(ok),ok?1300:2200)}})}
 async function play(){
-  if(busy)return;busy=true;snd(660);const A=AV[av],nm=H[hero][0],Z=HZ[hz],l=Z.n.toLowerCase(),U=LEN/STOPS;
-  let saver=0,patient=0,steady=0,paused=false,h=[0],ih=[0],inv=0,unit=0;
-  const flows=[];/* [years from start, amount]: every SIP payment, for the CAGR */
+  if(busy)return;busy=true;snd(660);const nm=H[hero][0],em=H[hero][1],Z=HZ[hz],l=Z.n.toLowerCase(),U=LEN/STOPS;
+  let saved=0,unit=0,score=0;const qs=KQ.map(q=>[Math.random(),q]).sort((a,b)=>a[0]-b[0]).slice(0,10).map(x=>x[1]);
   pos=Array.from({length:STOPS+1},(_,i)=>i/STOPS*L);
-  $("hv").textContent=H[hero][1];$("who").textContent=H[hero][1]+" "+A[1]+" "+A[0];
+  $("hv").textContent=em;$("who").textContent=em+" "+nm+" · 100 "+l;
   $("stops").innerHTML=pos.map((q,i)=>{const p=pt(q);return `<circle cx="${p.x}" cy="${p.y}" r="12" fill="#fff" stroke="#7c3aed" stroke-width="4"/><text x="${p.x}" y="${p.y}" font-size="${i==STOPS||i==0?18:10}" font-weight="700" text-anchor="middle" dy="${i==STOPS||i==0?6:4}" fill="#4c1d95">${i==0?"🏁":i==STOPS?"🏆":i*U}</text>`}).join("");
-  let bal=0;$("bal").textContent="💰 "+fm(bal);place(0);show(3);
-  $("ev").innerHTML=`<b>${nm} invests ${fm(amt)} every ${Z.per} for 100 ${l}!</b><p>That is a SIP: the same small amount, again and again. Watch it grow and make smart choices. 🚶</p>`;
+  $("bal").textContent="🐷 Saved "+fm(0);place(0);show(3);
+  $("ev").innerHTML=`<b>${nm} saves ${fm(amt)} every ${Z.per} for 100 ${l}!</b><p>At every stop, ${nm} will ask you an easy money question. 🚶</p>`;
   await bubble(1);/* Toy Pop once, at the start of the journey */
   await wait(600);
   for(let y=1;y<=STOPS;y++){
     await move(pos[y-1],pos[y]);
-    const r=A[4]?A[2]:A[2]+Math.random()*(A[3]-A[2]),g1=Math.pow(1+r/100,Z.yr)-1;
-    for(let k=0;k<U;k++){if(!paused){flows.push([unit*Z.yr,amt]);inv+=amt;bal+=amt}bal*=1+g1;unit++}
-    paused=false;
-    $("bal").textContent="💰 "+fm(bal);snd(r<0?220:880,.2);
-    const msg=r<0?"⛈️ A storm! The value dipped a little. Stay calm.":r<5?"🐢 Slow and steady.":r<12?"☀️ Nice weather! Your money grew.":"🌈 Wow, a super run!";
-    $("ev").innerHTML=`<b>${Z.one} ${unit}: growing at <span class="${r<0?"down":"up"}">${r>=0?"+":""}${r.toFixed(1)}% a year</span> → ${fm(bal)}</b><p>${msg}</p><p style="font-size:13px;opacity:.8">Money put in so far: ${fm(inv)}</p>`;
-    await wait(1300);
-    if(unit===30){/* surprise 1: found money or a gift */
-      const f=Math.random()<.5,x=Math.round(amt*Z.gift[f?0:1]);
-      const c=await choose(f?`🪙 ${nm} found ${fm(x)}! What now?`:`🎂 Birthday gift of ${fm(x)}! What now?`,"Invest it 🐷",f?"Buy candy 🍬":"Buy a toy 🧸");
-      if(c===0){bal+=x;inv+=x;flows.push([unit*Z.yr,x]);saver=1;snd(988);$("ev").innerHTML=`<b>Smart saver! 🐷</b><p>You added ${fm(x)} to your investment.</p>`}else $("ev").innerHTML=`<b>Yum! 😋</b><p>Fun now, but that money can’t grow.</p>`;
-      $("bal").textContent="💰 "+fm(bal);await wait(1600);
-    }
-    if(unit===60){/* surprise 2: take the money out? */
-      const c=await choose("😟 A friend says: “Take your money out now!”","Wait patiently 🐼","Take it out early 😬");
-      if(c===0){patient=1;snd(988);$("ev").innerHTML=`<b>Patient Panda! 🐼</b><p>Waiting is how investors win.</p>`}else{bal*=.97;snd(200,.3);$("ev").innerHTML=`<b>Oops! 😬</b><p>Leaving early cost 3%. Patience pays.</p>`}
-      $("bal").textContent="💰 "+fm(bal);await wait(1600);
-    }
-    if(unit===90){/* surprise 3: stop the SIP for a while? */
-      const c=await choose(`🛍️ Big toy sale! Stop your SIP for the next 10 ${l} to buy toys?`,"Keep my SIP going 💪","Stop the SIP for a while 🧸");
-      if(c===0){steady=1;snd(988);$("ev").innerHTML=`<b>Steady SIP! 💪</b><p>Never stopping is the secret of a SIP.</p>`}else{paused=true;$("ev").innerHTML=`<b>SIP paused ⏸️</b><p>No money goes in for the next 10 ${l}. A gap in a SIP slows your growth.</p>`}
-      await wait(1600);
-    }
-    h.push(bal);ih.push(inv);
+    unit+=U;saved+=amt*U;$("bal").textContent="🐷 Saved "+fm(saved);snd(880,.15);
+    if(await ask(nm,em,qs[y-1],y))score++;
   }
-  const g=bal-inv,roi=inv?g/inv*100:0,Tyr=LEN*Z.yr,cagr=MG.cagr(flows,Tyr,bal),pc=MG.pct;
-  $("res").innerHTML=`<p>${H[hero][1]} <b>${nm}</b> invested in ${A[1]} <b>${A[0]}</b>.</p><p>Challenge: <b>100 ${l}</b> · SIP of <b>${fm(amt)}</b> every ${Z.per}</p><p>Total money put in: <b>${fm(inv)}</b></p><p>Value after 100 ${l}: <b class="${g>=0?"up":"down"}">${fm(bal)}</b></p><p>${g>=0?"Gained":"Lost"}: <b class="${g>=0?"up":"down"}">${fm(Math.abs(g))}</b></p><p>Return on investment: <b class="${g>=0?"up":"down"}">${pc(roi)}</b></p><p>CAGR (yearly return): <b class="${cagr>=0?"up":"down"}">${pc(cagr)} a year</b></p>${Tyr<1?`<p style="font-size:13px;opacity:.75">100 days is less than a year: CAGR stretches the return to a full year, so it can look big.</p>`:""}<p>💡 ${A[5]}</p>`;
-  chart(h,ih);$("badges").textContent="";
-  const bd=[];if(patient)bd.push("🐼 Patient Panda");if(saver)bd.push("🐷 Super Saver");if(steady)bd.push("💪 Steady SIP");if(A[4])bd.push("🏦 Safe Saver");
-  const det={hero:H[hero][0],avenue:A[0],challenge:"100 "+l,sipPer:Z.per,sipAmount:amt,invested:Math.round(inv),final:Math.round(bal),gain:Math.round(g),roiPct:+roi.toFixed(1),cagrPct:+cagr.toFixed(1),badges:bd.join(", ")};
-  const res=g>=0?"Gained":"Lost";
-  MG.finish(reg&&reg.id,res,Math.round(bal),det);
-  quiz(av,ok=>{if(ok)bd.push("⭐ Quiz Star");$("badges").textContent=bd.length?"🏅 Badges: "+bd.join("  "):"";det.quiz=ok?"Correct":"Wrong";det.badges=bd.join(", ");MG.finish(reg&&reg.id,res,Math.round(bal),det);});
-  $("badges").textContent=bd.length?"🏅 Badges: "+bd.join("  "):"";
+  /* results: quiz score and total savings */
+  const stars="⭐".repeat(Math.max(1,Math.round(score/2)));
+  $("res").innerHTML=`<p style="margin:0;font-weight:700">🧠 Your quiz score</p><div class="score">${score} / 10</div><div class="stars">${stars}</div>
+    <p style="margin:6px 0 0">${score>=9?"Money genius! 🏆":score>=7?"Super smart saver! 🌟":score>=5?"Good job! Keep learning. 👍":"Nice try! Play again to learn more. 💪"}</p><hr style="border:0;border-top:1px solid #e5e7eb;margin:12px 0">
+    <p style="margin:0;font-weight:700">🐷 Your total savings</p><div class="saved">${fm(saved)}</div><p style="margin:2px 0 0;font-size:.9rem;opacity:.8">${fm(amt)} every ${Z.per} × 100 ${l}</p>`;
+  const bank=sipValue(amt,LEN,BANK,Z.yr),Tyr=LEN*Z.yr,flows=Array.from({length:LEN},(_,k)=>[k*Z.yr,amt]);
+  const bd=[];if(score>=7)bd.push("⭐ Quiz Star");bd.push("🐷 Super Saver");$("badges").textContent="🏅 Badges: "+bd.join("  ");
+  const det={hero:nm,challenge:"100 "+l,sipPer:Z.per,sipAmount:amt,saved:Math.round(saved),quizScore:score,quizOutOf:10,bankRatePct:BANK,bankValue:Math.round(bank.v),badges:bd.join(", ")};
+  const res="Score "+score+"/10";MG.finish(reg&&reg.id,res,score,det);
+  /* where should the savings grow? Bank is the default; pick Mutual Fund or Stocks to compare */
+  $("pickInv").innerHTML=`<b>Where will your savings grow?</b><p style="font-size:.9rem;opacity:.8;margin:4px 0 0">Your money is in the <b>Bank</b> at ${BANK}% a year. Pick one more to compare:</p>
+    <div class="invs"><div class="tile def on"><span class="e">🏦</span><b>Bank</b><small>${BANK}% a year</small><span class="tag">Default</span></div>
+    ${Object.entries(INV).map(([k,v])=>`<button class="tile" data-k="${k}"><span class="e">${v[1]}</span><b>${v[0]}</b><small>${v[2]}% a year</small></button>`).join("")}</div>`;
+  $("cmp").hidden=true;$("chart").hidden=true;
+  $("pickInv").onclick=e=>{const t=e.target.closest("[data-k]");if(!t)return;const k=t.dataset.k,I=INV[k];
+    $("pickInv").querySelectorAll("[data-k]").forEach(b=>b.classList.toggle("on",b===t));snd(988);
+    const iv=sipValue(amt,LEN,I[2],Z.yr),rows=[["🏦 Bank",BANK,bank],[I[1]+" "+I[0],I[2],iv]];
+    const roi=x=>(x.v-saved)/saved*100,cg=x=>MG.cagr(flows,Tyr,x.v);
+    $("cmp").hidden=false;$("cmp").innerHTML=`<b>📊 Bank vs ${I[0]}</b><table class="ctab"><thead><tr><th></th><th>🏦 Bank</th><th>${I[1]} ${I[0]}</th></tr></thead><tbody>
+      <tr><td>Yearly rate</td><td>${BANK}%</td><td>${I[2]}%</td></tr>
+      <tr><td>Money saved</td><td>${fm(saved)}</td><td>${fm(saved)}</td></tr>
+      <tr><td>Value after 100 ${l}</td><td>${fm(bank.v)}</td><td class="win">${fm(iv.v)}</td></tr>
+      <tr><td>Money earned</td><td>${fm(bank.v-saved)}</td><td class="win">${fm(iv.v-saved)}</td></tr>
+      <tr><td>Return on investment</td><td>${MG.pct(roi(bank))}</td><td class="win">${MG.pct(roi(iv))}</td></tr>
+      <tr><td>CAGR (yearly return)</td><td>${MG.pct(cg(bank))}</td><td class="win">${MG.pct(cg(iv))}</td></tr></tbody></table>
+      <p style="font-size:.85rem;margin:8px 0 0">${I[1]} ${I[0]} gives you <b class="up">${fm(iv.v-bank.v)}</b> more than the bank. ${k==="st"?"But stocks go up and down a lot!":"Mutual funds can go up and down too."}</p>
+      ${Tyr<1?`<p style="font-size:.78rem;opacity:.75;margin:4px 0 0">100 days is less than a year, so the money has only a little time to grow.</p>`:""}
+      <p style="font-size:.75rem;opacity:.7;margin:6px 0 0">Example rates for learning. The bank rate is fixed; mutual funds and stocks go up and down and are not guaranteed.</p>`;
+    chart2(bank.h,iv.h,I);
+    Object.assign(det,{chosen:I[0],chosenRatePct:I[2],chosenValue:Math.round(iv.v),bankRoiPct:+roi(bank).toFixed(1),chosenRoiPct:+roi(iv).toFixed(1),bankCagrPct:+cg(bank).toFixed(1),chosenCagrPct:+cg(iv).toFixed(1)});
+    MG.finish(reg&&reg.id,res,score,det)};
   /* last question: interest in a 100 days / weeks / months challenge habit */
   $("habit").innerHTML=`<b>🌱 Are you interested in the 100 days, 100 weeks or 100 months challenge habit?</b><p style="font-size:13px;opacity:.8;margin:4px 0 10px">Build a money habit: save and invest a little, regularly, for 100 days, weeks or months.</p>
     <div class="chips"><button class="chip" data-x="100 days">📅 100 Days</button><button class="chip" data-x="100 weeks">🗓️ 100 Weeks</button><button class="chip" data-x="100 months">📆 100 Months</button><button class="chip" data-x="Not now">Not now</button></div><p id="hmsg" class="up" style="font-weight:700;margin:8px 0 0"></p>`;
   $("habit").onclick=e=>{const x=e.target.closest("[data-x]");if(!x)return;$("habit").querySelectorAll(".chip").forEach(y=>y.classList.toggle("on",y===x));
-    det.habitInterest=x.dataset.x;MG.finish(reg&&reg.id,res,Math.round(bal),det);
+    det.habitInterest=x.dataset.x;MG.finish(reg&&reg.id,res,score,det);
     $("hmsg").textContent=x.dataset.x==="Not now"?"No problem. You can start a habit any time!":`Great choice! Mcube Academy will help you start your ${x.dataset.x} challenge habit.`};
   show(4);[523,659,784,1047].forEach((f,i)=>snd(f,.25,i*.15));busy=false;
 }
+function chart2(b,v,I){const w=300,ht=120,mx=Math.max(...v,...b)||1,sc=x=>ht-10-x/mx*(ht-22),px=i=>10+i/(b.length-1)*(w-20),line=(a,c,d)=>`<polyline fill="none" stroke="${c}" stroke-width="4" stroke-linejoin="round" ${d||""} points="${a.map((x,i)=>px(i)+","+sc(x)).join(" ")}"/>`;
+  $("chart").hidden=false;$("chart").innerHTML=`<b>📈 How your savings grow</b><svg viewBox="0 0 ${w} ${ht}" style="margin-top:6px">${line(b,"#0ea5e9")}${line(v,"#7c3aed")}</svg><small><span style="color:#0ea5e9">■</span> Bank ${BANK}% · <span style="color:#7c3aed">■</span> ${I[0]} ${I[2]}%</small>`}
+
 
 </script>
 </body>

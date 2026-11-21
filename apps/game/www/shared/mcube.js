@@ -11,7 +11,7 @@
     { id: "investment", name: "Investment Business", icon: "🎲", file: "games/investment.html", who: "Grown-ups and kids · 1 to 4 players",
       desc: "Move round the board with the dice or the spinning wheel and learn a money habit on every square." },
     { id: "adventure", name: "Money Adventure", icon: "🌟", file: "games/adventure.html", who: "Kids",
-      desc: "Pick a hero, take the 100 days, 100 weeks or 100 months SIP challenge and watch your money grow." },
+      desc: "Pick a hero, save for 100 days, weeks or months, answer 10 easy money questions, then compare Bank, Mutual Fund and Stocks." },
     { id: "challenge", name: "₹1 Lakh → ₹10 Lakh Challenge", icon: "💰", file: "games/challenge.html", who: "Grown-ups",
       desc: "Build a portfolio, face 3 surprise events and see what 15 years can do." },
     { id: "aadupuli", name: "Bull vs Bear – Aadu Puli", icon: "🐯", file: "games/aadupuli.html", who: "Everyone · English / தமிழ்",

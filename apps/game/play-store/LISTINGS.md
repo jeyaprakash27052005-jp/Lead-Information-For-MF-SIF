@@ -62,33 +62,36 @@ First release of Investment Business by Mcube Academy.
 | Graphics folder | `play-store/adventure/` |
 | Upload file | `Money-Adventure-PlayStore.aab` |
 
-**Short description (73/80)**
+**Short description (72/80)**
 
 ```
-Kids take a 100 days, weeks or months SIP challenge and watch money grow.
+Kids save for 100 days, weeks or months and answer easy money questions.
 ```
 
-**Full description (1175/4000)**
+**Full description (1077/4000)**
 
 ```
-Money Adventure is a colourful learning game from Mcube Academy that shows children how money can grow over time.
+Money Adventure is a colourful learning game from Mcube Academy that shows children how saving and investing work.
 
-Pick a hero – Bolt Boy, Zippy Bot, Tara Tiger, Luna Fairy, Chintu Monkey or Gajju Elephant – choose a 100 days, 100 weeks or 100 months challenge and a SIP amount for every day, week or month, then decide where to invest: mutual funds, a fixed deposit, gold, PPF, the stock market and more. Watch your hero walk along the road while the SIP money goes up and down, and play Toy Pop on the way.
+HOW TO PLAY
+• Pick a hero – Bolt Boy, Zippy Bot, Tara Tiger, Luna Fairy, Chintu Monkey or Gajju Elephant
+• Choose a challenge: 100 days, 100 weeks or 100 months
+• Choose how much to save every day, week or month: ₹100, ₹500 or ₹1,000
+• Play Toy Pop to start, then walk your hero along the road
+• At every stop your hero asks an easy money question – 10 questions in all
 
-ON THE WAY
-• Found some money or got a birthday gift? Save it or spend it
-• A friend says "Take your money out now!" – will you wait patiently?
-• A big toy sale – keep your SIP going or stop it?
-• See your money, return on investment and CAGR on a simple chart at the end
-• Answer a quiz question and collect badges: Patient Panda, Super Saver, Quiz Star
+AT THE END
+• Your quiz score out of 10 and your total savings
+• Your savings grow in the Bank at 5.5% a year, then compare with a Mutual Fund (12%) or Stocks (15%)
+• See the value, money earned, return on investment and CAGR for both, on a simple chart
+• Collect badges: Quiz Star and Super Saver
 
 FOR PARENTS
 • A parent or guardian registers once (parent's name and mobile number) after a grown-ups check
 • No information about the child is asked
-• No ads, no in-app purchases, no links to other apps
-• Works offline
+• No ads, no in-app purchases
 
-A pretend game to learn. The returns shown are made-up examples, not real or guaranteed.
+A pretend game to learn. The rates are examples; mutual funds and stocks go up and down and are not guaranteed.
 ```
 
 **Release notes**
