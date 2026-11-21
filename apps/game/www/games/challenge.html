@@ -109,37 +109,70 @@ const sc=(g,f)=>g.forEach(i=>b[i]*=f);
 function mv(g,to,f=1){const a=sum(g)*f;sc(g,1-f);b[to]+=a}
 function pf(f,to){const a=tot()*f;sc(ALL,1-f);b[to]+=a}
 function take(a,groups){for(const g of groups){const t=sum(g),x=Math.min(a,t);if(t>0){sc(g,1-x/t);a-=x}if(a<=0)break}}
-// surprises
+// surprises: bank deposits, RD, FD, mutual funds, equity, derivatives and the stock market
+let bet=null;/* a risky bet waits in b[10] until the next checkpoint */
+function place(f,b0){const a=tot()*f;sc(ALL,1-f);b[10]+=a;bet=b0;return a}
 const S=[
-{ic:"📉",n:"Market crash!",tx:()=>"Stock markets fell sharply. Your mutual funds, stocks and ETFs lost about 35% and silver lost 25%. Everyone is panicking.",on(){sc(EQ,.65);sc([8],.75)},mods:{0:[9,0],1:[9,0],9:[9,0],8:[6,0]},o:[
- ["Sell equity and move the cash to FD",()=>{mv(EQ,2);return "You sold at the bottom and parked the cash in an FD."},"Selling in a crash locks in the loss. Markets often recover."],
- ["Hold and stay calm",()=>"You stayed invested and waited.","Staying calm in a crash let your investments recover."],
+{id:"crash",ic:"📉",n:"Stock market crash!",tx:()=>"Stock markets fell sharply. Your mutual funds, shares and ETFs lost about 35%. Everyone is panicking.",on(){sc(EQ,.65)},mods:{0:[9,0],1:[9,0],9:[9,0]},o:[
+ ["Sell your equity and move the cash to FD",()=>{mv(EQ,2);return "You sold at the bottom and parked the cash in an FD."},"Selling in a crash locks in the loss. Markets often recover."],
+ ["Hold and stay calm",()=>"You stayed invested and waited.","Staying calm in a crash gives your investments time to recover."],
  ["Buy more: move half of your safe money into ETFs",()=>{mv(SAFE,9,.5);return "You moved half of your FD, PPF and bond money into ETFs at low prices."},"Buying at low prices is brave. It can pay off, but a rebound is never guaranteed."]]},
-{ic:"🚑",n:"Medical emergency!",tx:s=>"A family member needs "+fm(s.amt)+" for hospital bills right now. Where will the money come from?",on(s){s.amt=Math.round(tot()*.15/1000)*1000},o:[
- ["Use safe money first (FD, PPF, bonds)",s=>{take(s.amt,[SAFE,[3,6],EQ,[4,8]]);flows.push([step,-s.amt]);return "You paid "+fm(s.amt)+" from safe money."},"Keeping an emergency fund in safe assets avoids forced selling."],
- ["Sell equity (stocks, funds, ETFs)",s=>{take(s.amt,[EQ,[3,6],SAFE,[4,8]]);flows.push([step,-s.amt]);return "You sold equity to pay "+fm(s.amt)+"."},"Selling equity in an emergency can force you to sell at a bad time."],
- ["Take a loan (30% extra cost)",s=>{take(s.amt*1.3,[ALL]);flows.push([step,-s.amt*1.3]);return "You will repay "+fm(s.amt*1.3)+", taken from across your portfolio."},"Loans for emergencies are costly. An emergency fund is cheaper."]]},
-{ic:"🏗️",n:"Real estate boom?",tx:()=>"A builder offers plots in a fast-growing area. Real estate may boom, or it may bust. Nobody knows.",mods:{4:[10,12]},o:[
- ["Move 30% of your portfolio into Real Estate",()=>{pf(.3,4);return "You moved 30% of your money into land."},"Putting a lot in one asset can pay off big or hurt badly."],
- ["Invest a little: 10% into Real Estate",()=>{pf(.1,4);return "You moved 10% into real estate."},"A small bet lets you join the opportunity without big risk."],
- ["Skip it and stay as you are",()=>"You skipped the offer.","Diversifying keeps single surprises from hurting too much."]]},
-{ic:"🚀",n:"Startup opportunity!",tx:()=>"A friend’s startup wants investors. It could fail completely, or become a star. You will know by the next checkpoint.",o:[
- ["Invest 20% of your portfolio",()=>{pf(.2,10);return "You invested 20% in the startup."},"High-risk bets can win big or lose everything. Risk only what you can afford to lose."],
- ["Make a small bet: 5%",()=>{pf(.05,10);return "You invested 5% in the startup."},"A small bet gives a chance of a big win with limited damage."],
- ["Skip it",()=>"You passed on the startup.","Saying no to risky bets is also a decision."]]},
-{ic:"🎁",n:"Surprise bonus!",tx:()=>"Your company gives you a ₹30,000 bonus. What will you do with it?",o:[
- ["Invest it in Stocks",()=>{b[1]+=3e4;flows.push([step,3e4]);return "₹30,000 added to the Stock Market."},"Investing a bonus early gives it years to grow."],
- ["Invest it in Gold",()=>{b[3]+=3e4;flows.push([step,3e4]);return "₹30,000 added to Gold."},"Adding money to a steady asset grows your base."],
- ["Spend it on a holiday 🏖️",()=>"You enjoyed a lovely holiday!","Spending is fine, but invested money can grow for years."]]},
-{ic:"🪙",n:"Gold and silver rally!",tx:()=>"Prices are rising and metals are shining. Gold and silver are in demand.",mods:{3:[6,6],8:[4,6]},o:[
- ["Move 20% of your portfolio into Gold",()=>{pf(.2,3);return "You moved 20% into Gold."},"Gold can cushion a portfolio when other things fall."],
- ["Move 20% into Silver",()=>{pf(.2,8);return "You moved 20% into Silver."},"Silver swings a lot, so rallies and falls both come quickly."],
- ["Stay as you are",()=>"You stayed put.","Chasing a rally late can be risky. Staying put is a valid choice."]]}];
+{id:"medical",ic:"🚑",n:"Medical emergency!",tx:s=>"A family member needs "+fm(s.amt)+" for hospital bills right now. Where will the money come from?",on(s){s.amt=Math.round(tot()*.15/1000)*1000},o:[
+ ["Use bank deposits first (FD, PPF, bonds)",s=>{take(s.amt,[SAFE,[3,6],EQ,[4,8]]);flows.push([step,-s.amt]);return "You paid "+fm(s.amt)+" from safe money."},"An emergency fund in bank deposits avoids forced selling of shares."],
+ ["Sell equity (shares, funds, ETFs)",s=>{take(s.amt,[EQ,[3,6],SAFE,[4,8]]);flows.push([step,-s.amt]);return "You sold equity to pay "+fm(s.amt)+"."},"Selling equity in an emergency can force you to sell at a bad time."],
+ ["Take a personal loan (30% extra cost)",s=>{take(s.amt*1.3,[ALL]);flows.push([step,-s.amt*1.3]);return "You will repay "+fm(s.amt*1.3)+", taken from across your portfolio."},"Loans for emergencies are costly. An emergency fund is cheaper."]]},
+{id:"bonus",ic:"🎁",n:"Surprise bonus!",tx:()=>"Your company gives you a ₹30,000 bonus. What will you do with it?",o:[
+ ["Put it in a Fixed Deposit",()=>{b[2]+=3e4;flows.push([step,3e4]);return "₹30,000 added to your FD."},"An FD gives a fixed, safe return. Good for money you need soon."],
+ ["Invest it in a mutual fund",()=>{b[0]+=3e4;flows.push([step,3e4]);return "₹30,000 added to mutual funds."},"Mutual funds can grow more over time, with ups and downs."],
+ ["Spend it on a holiday 🏖️",()=>"You enjoyed a lovely holiday!","Spending is fine, but invested money keeps growing for you."]]},
+{id:"fdrate",ic:"🏦",n:"FD rates go up!",tx:()=>"Banks raise their Fixed Deposit rates to about 8% a year. Safe money suddenly looks attractive.",on(){sc([7],.97)},mods:{2:[1.5,0]},o:[
+ ["Move 30% of your portfolio into FD",()=>{pf(.3,2);return "You moved 30% of your money into FDs."},"Higher FD rates are good for safe money, but too much in FD can grow slower than inflation over time."],
+ ["Move just 10% into FD",()=>{pf(.1,2);return "You moved 10% into FDs."},"A small top-up locks a good rate without giving up growth."],
+ ["Stay as you are",()=>"You kept your mix.","Rates move up and down. Sticking to a plan is also a good choice."]]},
+{id:"rd",ic:"🔁",n:"Your pay went up!",tx:()=>"Your salary went up and you can save ₹20,000 more by the next checkpoint. How will you save it?",o:[
+ ["Start a Recurring Deposit (RD) in your bank",()=>{b[2]+=2e4;flows.push([step,2e4]);return "Your RD saved ₹20,000 into bank deposits."},"An RD saves a fixed amount every month at a fixed interest. A great saving habit."],
+ ["Start a mutual fund SIP",()=>{b[0]+=2e4;flows.push([step,2e4]);return "Your SIP put ₹20,000 into mutual funds."},"A SIP invests a fixed amount every month in a mutual fund. It can grow more than an RD, but it goes up and down."],
+ ["Spend the extra money",()=>"You spent the raise.","Spending every raise (lifestyle creep) leaves nothing to grow."]]},
+{id:"breakfd",ic:"💔",n:"Break your FD?",tx:()=>"A friend says: break your FD and buy the ‘hot’ share everyone is talking about.",o:[
+ ["Break the whole FD (1% penalty) and buy that share",()=>{const a=b[2]*.99;b[2]=0;b[10]+=a;bet={ic:"🔥",n:"The hot share",d:[[.4,.5],[.8,1],[1,1.8]]};return "You broke your FD and put "+fm(a)+" into one share."},"Breaking an FD early costs a penalty, and one share is a big risk."],
+ ["Break half and buy a Nifty index ETF",()=>{sc([2],.995);mv([2],9,.5);return "You moved half of your FD into an index ETF."},"An index ETF spreads your money over many big companies, so it is less risky than one share."],
+ ["Keep the FD till it matures",()=>"You kept your FD.","Following hot tips is risky. Keep safe money safe."]]},
+{id:"bull",ic:"🐂",n:"Sensex at an all-time high!",tx:()=>"The Sensex and Nifty hit record highs. Everyone around you is buying shares.",mods:{1:[6,0],0:[3,0],9:[4,0]},o:[
+ ["Move half of your safe money into shares",()=>{mv(SAFE,1,.5);return "You moved half of your FD, PPF and bond money into shares."},"Buying only because prices are high (FOMO) is risky. Markets can fall after a big rise."],
+ ["Book some profit: move 20% of equity into FD",()=>{mv(EQ,2,.2);return "You moved 20% of your equity into FDs."},"Rebalancing locks in some gains and keeps your risk where you planned."],
+ ["Stay with your plan",()=>"You stuck to your plan.","A plan helps you avoid fear and greed."]]},
+{id:"fno",ic:"🎰",n:"Futures & Options tip",tx:()=>"A WhatsApp group says trading Futures & Options (F&O, derivatives) can double your money in a week.",o:[
+ ["Put 20% of your portfolio into F&O",()=>{const a=place(.2,{ic:"🎰",n:"Your F&O trades",d:[[.6,.1],[.85,.6],[1,2]]});return "You put "+fm(a)+" into F&O trades."},"Derivatives are complex and very risky. SEBI found that about 9 out of 10 individual F&O traders lost money."],
+ ["Try a small 5%",()=>{const a=place(.05,{ic:"🎰",n:"Your F&O trades",d:[[.6,.1],[.85,.6],[1,2]]});return "You put "+fm(a)+" into F&O trades."},"A small amount limits the damage, but F&O is not a way to get rich quickly."],
+ ["Avoid it and stay invested",()=>"You stayed away from F&O.","Derivatives are for experts managing risk, not for quick money."]]},
+{id:"mfdip",ic:"🧺",n:"Mutual funds fall 15%",tx:()=>"Your mutual funds fell about 15% this period. Should you redeem them?",on(){sc([0],.85)},mods:{0:[5,0]},o:[
+ ["Redeem the mutual funds and move to FD",()=>{mv([0],2);return "You redeemed your mutual funds into FDs."},"Redeeming after a fall turns a temporary dip into a real loss."],
+ ["Stay invested",()=>"You stayed invested.","Mutual funds are for the long term. Dips are normal."],
+ ["Add more: move 20% of your FD into mutual funds",()=>{mv([2],0,.2);return "You moved 20% of your FD into mutual funds at lower prices."},"Adding when prices are low (rupee cost averaging) can help over time."]]},
+{id:"ipo",ic:"🔔",n:"Hot IPO!",tx:()=>"A popular company’s IPO (first sale of its shares) is open. People say it will list at a big gain.",o:[
+ ["Put 20% of your portfolio into the IPO",()=>{const a=place(.2,{ic:"🔔",n:"Your IPO shares",d:[[.3,.8],[.7,1.1],[1,1.5]]});return "You put "+fm(a)+" into the IPO."},"Listing gains are never guaranteed. Read the company’s offer document before you apply."],
+ ["Apply a small amount: 5%",()=>{const a=place(.05,{ic:"🔔",n:"Your IPO shares",d:[[.3,.8],[.7,1.1],[1,1.5]]});return "You put "+fm(a)+" into the IPO."},"A small amount lets you take part without big risk."],
+ ["Skip it",()=>"You skipped the IPO.","Not every popular IPO is a good investment."]]},
+{id:"tip",ic:"📲",n:"Share tip by SMS",tx:()=>"You get an SMS: ‘Buy XYZ share now, it will go up 5 times this month!’",o:[
+ ["Put 15% into the tip share",()=>{const a=place(.15,{ic:"📲",n:"The tip share",d:[[.7,.3],[.9,.8],[1,1.3]]});return "You put "+fm(a)+" into the tip share."},"Tips like this are often ‘pump and dump’ scams: the senders sell when you buy."],
+ ["Ignore it and report the message",()=>"You ignored the tip.","Never act on unknown tips. Report them to SEBI (SCORES) or your broker."],
+ ["Buy a Nifty index ETF with 10% of safe money",()=>{mv(SAFE,9,.1);return "You moved 10% of your safe money into an index ETF."},"An index ETF is a simple, low-cost way to own the whole market."]]},
+{id:"bank",ic:"🏛️",n:"Bank in trouble?",tx:()=>"News: a small cooperative bank is in trouble, and some of your FD is with it.",o:[
+ ["Panic: break the FD (1% penalty) and buy shares",()=>{sc([2],.99);mv([2],1);return "You broke the FD and bought shares."},"Panic moves cost money. Moving all your safe money into shares adds risk."],
+ ["Stay calm: deposits up to ₹5 lakh per bank are insured",()=>"You stayed calm.","DICGC insures bank deposits up to ₹5 lakh per person in each bank."],
+ ["Split your FD across two big banks",()=>{sc([2],.998);return "You moved your FD into two big banks."},"Keeping deposits within the insured limit in each bank keeps them safe."]]}];
+/* the next player gets different surprises: remember the last ones used on this device */
+function pickSurprises(){let seen=[];try{seen=JSON.parse(localStorage.getItem("ch_seen_v1")||"[]")}catch(e){}
+  let free=S.map((s,i)=>i).filter(i=>seen.indexOf(S[i].id)<0);
+  if(free.length<3){const last=seen.slice(-3);seen=last;free=S.map((s,i)=>i).filter(i=>last.indexOf(S[i].id)<0)}
+  const p=free.map(i=>[Math.random(),i]).sort((x,y)=>x[0]-y[0]).slice(0,3).map(x=>x[1]);
+  try{localStorage.setItem("ch_seen_v1",JSON.stringify(seen.concat(p.map(i=>S[i].id))))}catch(e){}
+  return p}
 function show(n){["s1","s2","s3","s4"].forEach((s,i)=>$(s).hidden=i+1!==n);window.scrollTo(0,0)}
 function head(){const t=tot();$("pv").textContent="💼 "+fm(t);$("pb").style.width=Math.min(100,t/TARGET*100)+"%"}
 let reg=null;
 $("start").onclick=async()=>{if(!reg){try{reg=(await MG.registerForm({game:"challenge"}))[0]}catch(x){return}}b=Array(11).fill(0);u=Array(10).fill(0);hist=[1e5];lessons=[];si=0;mods={};step=0;flows=[[0,1e5]];
-  pick=S.map((s,i)=>[Math.random(),i]).sort((x,y)=>x[0]-y[0]).slice(0,3).map(x=>x[1]);renderAlloc();show(2)};
+  pick=pickSurprises();bet=null;renderAlloc();show(2)};
 function renderAlloc(){
   const used=u.reduce((a,c)=>a+c,0);
   $("rows").innerHTML=A.map((a,i)=>`<div class="row"><div class="n">${a[1]} ${a[0]}<small>avg ${a[2]}% · risk ${risk(a[3])}</small></div><div class="st"><button data-i="${i}" data-d="-1" aria-label="less ${a[0]}">−</button><span>${fm(u[i]*1e4)}</span><button data-i="${i}" data-d="1" aria-label="more ${a[0]}">+</button></div></div>`).join("");
@@ -169,8 +202,8 @@ $("ff").onclick=async()=>{
     for(let i=0;i<10;i++){const md=mods[i]||[0,0],mu=Math.log(1+(A[i][2]+md[0])/100),sd=(A[i][3]+md[1])/100;
       b[i]*=Math.max(.4,Math.exp((mu-sd*sd/2)*dt+sd*Math.sqrt(dt)*gauss()))}
     if(y%10&&y!==n)continue;
-    if(y===n&&b[10]>0){const x=Math.random(),mu=x<.25?0:x<.65?1.5:x<.9?3.5:8,s0=b[10];b[10]*=mu;
-      m10=mu===0?"🚀 The startup failed. You lost "+fm(s0)+".":"🚀 The startup grew "+mu+"x! Your "+fm(s0)+" became "+fm(b[10])+".";b[2]+=b[10];b[10]=0}
+    if(y===n&&b[10]>0){const bt=bet||{ic:"🎲",n:"Your bet",d:[[1,1]]},x=Math.random(),mu=bt.d.find(d=>x<=d[0])[1],s0=b[10];b[10]*=mu;
+      m10=bt.ic+" "+bt.n+": "+fm(s0)+" became "+fm(b[10])+(mu>=1?" (+"+Math.round((mu-1)*100)+"%).":" ("+Math.round((mu-1)*100)+"%).");b[2]+=b[10];b[10]=0;bet=null}
     hist.push(tot());head();$("yr").textContent=HZ[hz].one+" "+step+" of "+LEN;
     const p=hist[hist.length-2],c=hist[hist.length-1];
     $("yrs").insertAdjacentHTML("beforeend",`<div class="kv"><span>${HZ[hz].one} ${step}</span><b class="${c>=p?"ok":"bad"}">${fm(c)} (${c>=p?"+":""}${((c/p-1)*100).toFixed(1)}%)</b></div>`);
