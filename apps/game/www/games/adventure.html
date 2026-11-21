@@ -45,7 +45,7 @@ svg{display:block;width:100%;height:auto}
 h1{letter-spacing:-.01em}
 @media (min-width:760px){.wrap{max-width:760px}.g3{grid-template-columns:repeat(6,1fr)}#avs{grid-template-columns:repeat(5,1fr)}.hud,.card{max-width:640px;margin-left:auto;margin-right:auto}}
 @media (min-width:1200px){.wrap{max-width:960px}}
-/* Bubble Pop: clear the bubbles to walk to the next year */
+/* Toy Pop: clear the toys to walk to Year 1 and Year 3 */
 .bp{position:fixed;inset:0;z-index:60;background:#1e1b4bcc;display:flex;align-items:center;justify-content:center;padding:12px}
 .bp[hidden]{display:none}
 .bp .in{background:#fff;border-radius:22px;width:min(380px,100%);max-height:100%;overflow:auto;padding:14px 14px 12px;text-align:center;box-shadow:0 20px 50px #0007;border:4px solid #c4b5fd}
@@ -73,8 +73,8 @@ h1{letter-spacing:-.01em}
 <div class="grid" id="avs"></div>
 </section>
 
-<div class="bp" id="bp" hidden><div class="in"><h3 id="bpT">🫧 Bubble Pop!</h3><p id="bpS"></p>
-<canvas id="bpC" width="320" height="400" aria-label="Bubble Pop game: drag to aim, let go to shoot"></canvas>
+<div class="bp" id="bp" hidden><div class="in"><h3 id="bpT">🧸 Toy Pop!</h3><p id="bpS"></p>
+<canvas id="bpC" width="320" height="400" aria-label="Toy Pop game: drag to aim, let go to shoot"></canvas>
 <div class="ft"><span id="bpN"></span><span id="bpL"></span></div><div class="won" id="bpW" aria-live="polite"></div></div></div>
 <section id="s3" hidden>
 <div class="hud"><span id="who"></span><span class="bal" id="bal"></span></div>
@@ -134,20 +134,24 @@ function place(l){const p=pt(l);$("hero").setAttribute("transform",`translate(${
 const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
 function move(a,b){return new Promise(r=>{const t0=performance.now(),d=yrs>5?900:1400;(function f(t){const p=Math.min((t-t0)/d,1);place(a+(b-a)*ease(p));p<1?requestAnimationFrame(f):r()})(t0)})}
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
-/* ---------- Bubble Pop: pop all the bubbles to walk to the next year ----------
+/* ---------- Toy Pop (bubble shooter with toys) before walking to Year 1 and Year 3 ----------
    Drag to aim and let go (or tap) to shoot. 3 or more bubbles of the same colour pop; bubbles left hanging fall. */
-const BP={R:20,W:320,H:400,COL:[["#f59e0b","🪙"],["#3b82f6","💎"],["#22c55e","🍀"],["#ec4899","🍓"]]};
+/* toys instead of bubbles: each toy has its own colour glow */
+const BP={R:20,W:320,H:400,COL:[["#b45309","🧸","teddy"],["#ef4444","🚗","car"],["#334155","⚽","ball"],["#eab308","🦆","duck"],["#ec4899","🎈","balloon"],["#3b82f6","🤖","robot"]]};
 function bubble(year){return new Promise(done=>{
-  const R=BP.R,W=BP.W,H=BP.H,S3=Math.sqrt(3),cv=$("bpC"),x=cv.getContext("2d"),k=3;
+  const R=BP.R,W=BP.W,H=BP.H,S3=Math.sqrt(3),cv=$("bpC"),x=cv.getContext("2d"),hard=year>=3,k=hard?5:4,ROWS0=hard?5:4,PAIRS=hard?18:14,AUTO=hard?36:28;
   const cols=r=>r%2?7:8,px=(r,c)=>R+c*2*R+(r%2?R:0),py=r=>R+r*R*S3,ROWS=14;
   let g=[],ball=null,aim=-Math.PI/2,next,cur,shots=0,over=false,popAnim=[];
   for(let r=0;r<ROWS;r++)g.push(Array(cols(r)).fill(-1));
-  /* 3 rows of colour runs, so groups pop quickly */
-  for(let r=0;r<3;r++){let c=0;while(c<cols(r)){const col=Math.floor(Math.random()*k),run=2+Math.floor(Math.random()*2);for(let i=0;i<run&&c<cols(r);i++)g[r][c++]=col}}
+  /* equal spread: every toy appears the same number of times. Medium (Y1): toys come in pairs; high (Y3): fully mixed */
+  {const cells=[];for(let r=0;r<ROWS0;r++)for(let c=0;c<cols(r);c++)cells.push([r,c]);
+   const bag=cells.map((_,i)=>i%k),sh=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+   if(hard)sh(bag).forEach((v,i)=>{const[r,c]=cells[i];g[r][c]=v});
+   else{const pairs=sh(Array.from({length:Math.ceil(cells.length/2)},(_,i)=>i%k));cells.forEach(([r,c],i)=>g[r][c]=pairs[Math.floor(i/2)])}}
   const left=()=>{const s=new Set();g.forEach(row=>row.forEach(v=>v>=0&&s.add(v)));return[...s]};
   const pickCol=()=>{const l=left();return l.length?l[Math.floor(Math.random()*l.length)]:0};
   cur=pickCol();next=pickCol();
-  $("bpT").textContent="🫧 Bubble Pop!";$("bpS").textContent=`Pop all the bubbles to walk to Year ${year}. Drag to aim, let go to shoot.`;$("bpW").textContent="";$("bp").hidden=false;
+  $("bpT").textContent=hard?"🧸 Toy Pop! · Level 2 (hard)":"🧸 Toy Pop! · Level 1 (medium)";$("bpS").textContent=`Match 3 or more of the same toy to pop them. Clear all the toys to walk to Year ${year}. Drag to aim, let go to shoot.`;$("bpW").textContent="";$("bp").hidden=false;
   const nb=(r,c)=>(r%2?[[r,c-1],[r,c+1],[r-1,c],[r-1,c+1],[r+1,c],[r+1,c+1]]:[[r,c-1],[r,c+1],[r-1,c-1],[r-1,c],[r+1,c-1],[r+1,c]]).filter(([a,b])=>a>=0&&a<ROWS&&b>=0&&b<cols(a));
   function snap(bx,by){let best=null,bd=1e9;const r0=Math.max(0,Math.round((by-R)/(R*S3)));
     for(let r=Math.max(0,r0-1);r<=Math.min(ROWS-1,r0+1);r++)for(let c=0;c<cols(r);c++){if(g[r][c]>=0)continue;
@@ -155,19 +159,21 @@ function bubble(year){return new Promise(done=>{
     return best}
   function land(r,c,col){g[r][c]=col;const grp=[[r,c]],seen=new Set([r+","+c]);
     for(let i=0;i<grp.length;i++)nb(...grp[i]).forEach(([a,b])=>{if(!seen.has(a+","+b)&&g[a][b]===col){seen.add(a+","+b);grp.push([a,b])}});
-    if(grp.length>=(shots>=10?2:3)){grp.forEach(([a,b])=>{popAnim.push([px(a,b),py(a),g[a][b],0]);g[a][b]=-1});
+    if(grp.length>=(shots>=PAIRS?2:3)){grp.forEach(([a,b])=>{popAnim.push([px(a,b),py(a),g[a][b],0]);g[a][b]=-1});
       /* drop bubbles that no longer hang from the top */
       const keep=new Set(),st=[];g[0].forEach((v,c2)=>{if(v>=0){keep.add("0,"+c2);st.push([0,c2])}});
       while(st.length){const[a,b]=st.pop();nb(a,b).forEach(([e,f])=>{if(g[e][f]>=0&&!keep.has(e+","+f)){keep.add(e+","+f);st.push([e,f])}})}
       g.forEach((row,a)=>row.forEach((v,b)=>{if(v>=0&&!keep.has(a+","+b)){popAnim.push([px(a,b),py(a),v,0]);g[a][b]=-1}}));
       snd(660+Math.random()*300,.12);
     }else snd(330,.06);
-    if(r>=ROWS-2)g[r][c]=-1;/* never get stuck at the bottom */
-    if(!left().length)win();else if(shots>=20)win(true);else{cur=left().includes(next)?next:pickCol();next=pickCol()}}
+    if(r>=9&&g[r][c]>=0){popAnim.push([px(r,c),py(r),g[r][c],0]);g[r][c]=-1}/* toys never pile down to the shooter */
+    if(!left().length)win();else if(shots>=AUTO)win(true);else{cur=left().includes(next)?next:pickCol();next=pickCol()}}
   function win(easy){over=true;if(easy)g.forEach((row,a)=>row.forEach((v,b)=>{if(v>=0){popAnim.push([px(a,b),py(a),v,0]);row[b]=-1}}));
-    $("bpW").textContent=easy?"🌟 Great effort! Let’s go!":"🎉 All popped! Let’s go!";[523,659,784].forEach((f,i)=>snd(f,.2,i*.12));setTimeout(()=>{$("bp").hidden=true;cv.onpointerdown=cv.onpointermove=cv.onpointerup=null;done()},900)}
-  function drawB(cx,cy,col,sc=1){x.beginPath();x.arc(cx,cy,(R-1)*sc,0,7);const gr=x.createRadialGradient(cx-6,cy-7,3,cx,cy,R);gr.addColorStop(0,"#fff");gr.addColorStop(.25,BP.COL[col][0]);gr.addColorStop(1,BP.COL[col][0]);
-    x.fillStyle=gr;x.fill();x.lineWidth=2;x.strokeStyle="#ffffffaa";x.stroke();if(sc>.6){x.font=`${15*sc}px sans-serif`;x.textAlign="center";x.textBaseline="middle";x.fillText(BP.COL[col][1],cx,cy+1)}}
+    $("bpW").textContent=easy?"🌟 Great effort! Let’s go!":"🎉 All toys popped! Let’s go!";[523,659,784].forEach((f,i)=>snd(f,.2,i*.12));setTimeout(()=>{$("bp").hidden=true;cv.onpointerdown=cv.onpointermove=cv.onpointerup=null;done()},900)}
+  function drawB(cx,cy,col,sc=1){x.save();x.globalAlpha=Math.min(1,sc*1.2);
+    x.beginPath();x.ellipse(cx,cy+R*.62*sc,R*.7*sc,R*.18*sc,0,0,7);x.fillStyle="#0002";x.fill();
+    x.shadowColor=BP.COL[col][0];x.shadowBlur=10;x.font=`${34*sc}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;x.textAlign="center";x.textBaseline="middle";
+    x.fillText(BP.COL[col][1],cx,cy+2*sc);x.restore()}
   const SX=W/2,SY=H-28;
   function frame(){if($("bp").hidden&&over)return;x.clearRect(0,0,W,H);
     x.fillStyle="#c4b5fd55";x.fillRect(0,H-58,W,2);
@@ -179,7 +185,7 @@ function bubble(year){return new Promise(done=>{
         if(hit){const s2=snap(ball.x,ball.y);const col=ball.col;ball=null;if(s2)land(s2[0],s2[1],col);break}}
       if(ball)drawB(ball.x,ball.y,ball.col)}
     if(!over&&!ball)drawB(SX,SY,cur);
-    $("bpN").innerHTML=over?"":`Next: <span style="color:${BP.COL[next][0]}">●</span> ${BP.COL[next][1]}`;$("bpL").textContent=shots>=10&&!over?`Shots: ${shots} · pairs pop now!`:`Shots: ${shots}`;
+    $("bpN").innerHTML=over?"":`Next toy: <span style="font-size:1.3em">${BP.COL[next][1]}</span>`;$("bpL").textContent=shots>=PAIRS&&!over?`Shots: ${shots} · pairs pop now!`:`Shots: ${shots}`;
     requestAnimationFrame(frame)}
   const pos=e=>{const b=cv.getBoundingClientRect();return[(e.clientX-b.left)*W/b.width,(e.clientY-b.top)*H/b.height]};
   const setAim=e=>{const[a,b]=pos(e);aim=Math.atan2(Math.min(b,SY-10)-SY,a-SX);aim=Math.max(-Math.PI+.18,Math.min(-.18,aim))};
@@ -209,7 +215,7 @@ async function play(){
   $("ev").innerHTML=`<b>${nm} invests ${fm(amt)} every month!</b><p>That is a SIP: a little money, every month, for ${yrs} years. Watch it grow and make smart choices. 🚶</p>`;
   await wait(1200);
   for(let y=1;y<=yrs;y++){
-    if(y>1)await bubble(y);
+    if(y===1||y===3)await bubble(y);
     await move(pos[y-1],pos[y]);
     const r=A[4]?A[2]:A[2]+Math.random()*(A[3]-A[2]),m=Math.pow(1+r/100,1/12)-1;
     for(let k=0;k<12;k++){flows.push([(y-1)*12+k,amt]);inv+=amt;bal=(bal+amt)*(1+m);}
