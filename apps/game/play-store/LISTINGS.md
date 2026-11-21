@@ -107,21 +107,23 @@ First release of Money Adventure for Kids by Mcube Academy.
 | Graphics folder | `play-store/challenge/` |
 | Upload file | `Lakh-Challenge-PlayStore.aab` |
 
-**Short description (68/80)**
+**Short description (73/80)**
 
 ```
-Build a portfolio, face 3 surprises and see where 15 years take you.
+Pick 100 days, weeks or months, face 3 surprises and grow your portfolio.
 ```
 
-**Full description (1006/4000)**
+**Full description (1209/4000)**
 
 ```
 Can you turn ₹1,00,000 into ₹10,00,000 through smart decisions? Take the challenge from Mcube Academy.
 
-1. Split your imaginary ₹1 lakh across 10 choices: mutual funds, stocks, fixed deposit, gold, real estate, PPF, NPS, government bonds, silver and ETFs. Each shows its average return and its risk.
-2. Face 3 surprise events – a market crash, a medical emergency, a real-estate offer, a startup idea, a bonus or a gold rally – and decide what to do.
-3. Fast-forward 5 years after each decision and watch every year's gain or loss.
-4. After 15 years, see your final portfolio, your holdings, a chart of your journey and what your choices taught you.
+1. Choose your challenge: 100 days, 100 weeks or 100 months.
+2. Split your imaginary ₹1 lakh across 10 choices: mutual funds, stocks, fixed deposit, gold, real estate, PPF, NPS, government bonds, silver and ETFs. Each shows its average return and its risk.
+3. Face 3 surprise events, after each 30 days, weeks or months, – a market crash, a medical emergency, a real-estate offer, a startup idea, a bonus or a gold rally – and decide what to do.
+4. Fast-forward and watch your portfolio rise and fall.
+5. After 100 days, weeks or months, see your portfolio value, return on investment, CAGR (yearly return), a chart of your journey and what your choices taught you.
+6. Tell us if you'd like to build a 100 days, 100 weeks or 100 months money habit.
 
 Your result ranks you as Legend, Wealth Wizard, Smart Investor, Safe Saver or Keep Learning. Play again with a different mix.
 

@@ -13,7 +13,7 @@
     { id: "adventure", name: "Money Adventure", icon: "🌟", file: "games/adventure.html", who: "Kids",
       desc: "Pick a hero, choose where to invest and watch the money grow year by year." },
     { id: "challenge", name: "₹1 Lakh → ₹10 Lakh Challenge", icon: "💰", file: "games/challenge.html", who: "Grown-ups",
-      desc: "Build a portfolio, face 3 surprise events and see what 15 years can do." },
+      desc: "Pick 100 days, 100 weeks or 100 months, build a portfolio, face 3 surprises and see your portfolio value." },
     { id: "aadupuli", name: "Bull vs Bear – Aadu Puli", icon: "🐯", file: "games/aadupuli.html", who: "Everyone · English / தமிழ்",
       desc: "The traditional goats-and-tigers game: protect your investments from market risks." },
     { id: "pallanguli", name: "Pallanguli Investment Game", icon: "🌰", file: "games/pallanguli.html", who: "2 players · English / தமிழ்",
@@ -291,7 +291,20 @@
   document.addEventListener("fullscreenchange", fsChange); document.addEventListener("webkitfullscreenchange", fsChange);
   window.addEventListener("popstate", function () { if (locked) { try { history.pushState({ mgLock: 1 }, ""); } catch (e) {} } });
 
-  window.MG = { FB: FB, GAMES: GAMES, game: function (id) { return byId[id]; }, esc: esc, device: device, inApp: inApp,
+  /* ---------- CAGR: the steady yearly return that turns the money put in into the final value ----------
+     flows: [[years from start, amount]] (money in > 0, money taken out < 0); T: years in total; fv: final value.
+     With one payment it is the usual CAGR; with several (SIP, top-ups) it is the same as XIRR. Returns % a year. */
+  function cagr(flows, T, fv) {
+    if (!(T > 0) || !flows.length) return 0;
+    var f = function (R) { return flows.reduce(function (s, x) { return s + x[1] * Math.pow(1 + R, T - x[0]); }, 0); };
+    var lo = -0.9999, hi = 1;
+    while (f(hi) < fv && hi < 1e6) hi *= 2;
+    for (var i = 0; i < 200; i++) { var m = (lo + hi) / 2; if (f(m) > fv) hi = m; else lo = m; }
+    return (lo + hi) / 2 * 100;
+  }
+  function pct(v) { return !isFinite(v) ? "–" : Math.abs(v) >= 1000 ? (v > 0 ? "> +999%" : "< −999%") : (v >= 0 ? "+" : "") + v.toFixed(1) + "%"; }
+
+  window.MG = { FB: FB, cagr: cagr, pct: pct, GAMES: GAMES, game: function (id) { return byId[id]; }, esc: esc, device: device, inApp: inApp,
     LIVE: LIVE, settings: loadSettings, cachedSettings: cachedSettings, isOn: isOn, onePlay: onePlay,
     lock: lock, unlock: unlock, register: register, check: check, finish: finish, flush: flush, registerForm: registerForm, topbar: topbar, cleanMobile: cleanMobile, playedHere: playedHere };
 })();

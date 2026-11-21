@@ -317,7 +317,7 @@ const T = {
   survT:'Which investments survived',
   sipT:'What if you invest this every month?',
   sipLine:(m,y,till)=>`You saved ₹${m}. If you put ₹${m} every month as a SIP in the same mix for ${y} years${till?' (till age 50)':''}:`,
-  invested:'Total you invest', becomes:'It can become', avg:'Average yearly return (compounded)',
+  invested:'Total you invest', becomes:'It can become', avg:'CAGR (yearly return)', roi:'Return on investment',
   thA:'Asset', thM:'Monthly SIP', thV:'Value after', total:'Total',
   yrs:'yrs',
   early:(y,v,x)=>`⏰ <b>Start early:</b> if the same SIP had started 5 years earlier (${y} years), it could be <b>₹${v}</b> – that is <b>₹${x}</b> more, just for starting earlier.`,
@@ -382,7 +382,7 @@ const T = {
   survT:'எந்த முதலீடுகள் தப்பின',
   sipT:'இதை ஒவ்வொரு மாதமும் முதலீடு செய்தால்?',
   sipLine:(m,y,till)=>`நீங்கள் ₹${m} காப்பாற்றினீர்கள். இதே கலவையில் ஒவ்வொரு மாதமும் ₹${m} SIP-ஆக ${y} ஆண்டுகள்${till?' (50 வயது வரை)':''} போட்டால்:`,
-  invested:'நீங்கள் முதலீடு செய்யும் மொத்தம்', becomes:'இது வளரக்கூடிய தொகை', avg:'சராசரி ஆண்டு வருமானம் (கூட்டு வட்டி)',
+  invested:'நீங்கள் முதலீடு செய்யும் மொத்தம்', becomes:'இது வளரக்கூடிய தொகை', avg:'CAGR (ஆண்டு வருமானம்)', roi:'முதலீட்டு வருமானம் (ROI)',
   thA:'முதலீடு', thM:'மாத SIP', thV:'முதிர்வுத் தொகை', total:'மொத்தம்',
   yrs:'ஆண்டு',
   early:(y,v,x)=>`⏰ <b>சீக்கிரம் தொடங்குங்கள்:</b> இதே SIP-ஐ 5 ஆண்டுகள் முன்பே (${y} ஆண்டுகள்) தொடங்கியிருந்தால் <b>₹${v}</b> ஆகியிருக்கும் – சீக்கிரம் தொடங்கியதற்காக மட்டுமே <b>₹${x}</b> கூடுதல்.`,
@@ -852,7 +852,8 @@ function showResult(res,why){
    <div class="card"><div class="sec-t">📈 ${t('sipT')}</div><p style="font-size:14px;line-height:1.55">${t('sipLine')(fmt(saved),yrs,till)}</p>
      <div class="kpis"><div class="kpi"><span>${t('invested')}</span><b>₹${fmt(invested)}</b></div>
      <div class="kpi mat"><span>${t('becomes')}</span><b>₹${fmt(mat)}</b></div>
-     <div class="kpi hl"><span>${t('avg')}</span><b>${avg.toFixed(2)}%</b></div></div>
+     <div class="kpi"><span>${t('roi')}</span><b>${MG.pct(invested?(mat-invested)/invested*100:0)}</b></div>
+     <div class="kpi hl"><span>${t('avg')}</span><b>${avg.toFixed(2)}% <small style="font-size:.6em;font-weight:600">/ yr</small></b></div></div>
      <table class="tbl" style="margin-top:14px"><thead><tr><th>${t('thA')}</th><th>${t('thM')}</th><th>${t('thV')} ${yrs} ${t('yrs')}</th></tr></thead><tbody>${rowsH}</tbody>
      <tfoot><tr><td>${t('total')}</td><td>₹${fmt(saved)}</td><td>₹${fmt(mat)}</td></tr></tfoot></table>
      <div class="early">${t('steady')}</div>
@@ -873,7 +874,7 @@ function showResult(res,why){
   Object.assign(r,{status:'finished',finishedAt:new Date().toISOString(),result:res==='win'?'WIN':'LOSE',goatsLeft:left,goatsTotal:total,savedRs:saved,
     lostAssets:ASSETS.map(a=>`${a}:${tot[a]-cnt[a]}`).join(' '),years:yrs,investedRs:Math.round(invested),maturityRs:Math.round(mat),avgReturnPct:avg.toFixed(2),goatMoves:G.moves},extra);
   if(!recs.includes(r))recs.push(r);saveRecs(recs);sendSheet(r);
-  Promise.resolve(MG.finish(player.mgId,res==='win'?'WIN':'LOSE',saved,Object.assign({goatsLeft:left,goatsTotal:total,savedRs:saved,lostAssets:r.lostAssets,sipYears:yrs,maturityRs:Math.round(mat),avgReturnPct:Number(avg.toFixed(2)),goatMoves:G.moves,emergencyFundLost:efg&&efg.lost?'Yes':'No',language:L==='ta'?'Tamil':'English'},extra)))
+  Promise.resolve(MG.finish(player.mgId,res==='win'?'WIN':'LOSE',saved,Object.assign({goatsLeft:left,goatsTotal:total,savedRs:saved,lostAssets:r.lostAssets,sipYears:yrs,maturityRs:Math.round(mat),roiPct:invested?Math.round((mat-invested)/invested*1000)/10:0,avgReturnPct:Number(avg.toFixed(2)),goatMoves:G.moves,emergencyFundLost:efg&&efg.lost?'Yes':'No',language:L==='ta'?'Tamil':'English'},extra)))
     .then(()=>renderBoard('lbRes',false));
 }
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}

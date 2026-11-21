@@ -277,6 +277,9 @@ function report(P){const bs=P.budgets.length?Math.round(P.budgets.reduce((a,b)=>
   let dg=debt<=0?'A':dr<=1?'B':dr<=3?'C':'D';if(P.card>0&&dg<'C')dg='C';
   return{bs,sr,efm,div,debt,grades:{budget:g(bs,80,60,40),save:g(sr,20,10,5),ef:g(efm,6,3,1),cibil:g(P.cibil,750,700,650),div:g(div,4,3,2),debt:dg}};}
 function ratingIdx(P){const gain=netWorth(P)-50000,k=P.len/12;return gain>=200000*k?0:gain>=100000*k?1:gain>=0?2:3;}
+/* return on investment and CAGR of all investments: money added each month (passbook rows) -> value now */
+function invReturn(P){const fl=[];let put=0;KINDS.forEach(k=>{const b=P.inv[k];put+=b.inv;b.rows.forEach(r=>{if(r.add>0)fl.push([(r.m-1)/12,r.add])});if(b.add>0)fl.push([P.len/12,b.add])});
+  const v=invTotal(P);return{put,v,roi:put?(v-put)/put*100:0,cagr:put&&fl.length?MG.cagr(fl,P.len/12,v):0}}
 function end(){busy=true;ui();const rows=PL.map(P=>({P,nw:netWorth(P),R:report(P)})).sort((a,b)=>b.nw-a.nw);
   const order=['debt','ef','save','budget','cibil','div'];
   const html=rows.map(({P,nw,R},i)=>{const worst=order.reduce((w,k)=>R.grades[k]>(w?R.grades[w]:'A')?k:w,null);const lesson=worst&&R.grades[worst]>='C'?worst:'great';
@@ -292,12 +295,14 @@ function end(){busy=true;ui();const rows=PL.map(P=>({P,nw:netWorth(P),R:report(P
      <div class="sec">${t('pbSummary')}</div><div class="tw"><table><thead><tr><th></th><th>${t('invested')}</th><th>${t('value')}</th><th>${t('gain')}</th></tr></thead><tbody>
       ${KINDS.map(k=>{const h=P.inv[k];return`<tr><td>${t('kinds')[k]}</td><td>${f(h.inv)}</td><td>${f(h.val)}</td><td class="${h.val-h.inv<0?'neg':'pos'}">${f(h.val-h.inv)}</td></tr>`;}).join('')}
       <tr><td>${t('kinds').loans}</td><td colspan="3">${f(P.friend)} · ${f(bankBal(P))} · ${f(P.card)}</td></tr></tbody></table></div>
+     ${(()=>{const q=invReturn(P),W=LANG==='ta'?['முதலீட்டு வருமானம் (ROI)','CAGR (ஆண்டு வருமானம்)','ஆண்டுக்கு']:['Return on investment','CAGR (yearly return)','a year'];
+       return q.put?`<div class="grades" style="grid-template-columns:1fr 1fr;margin-top:8px"><div><span>${W[0]}</span><b class="${q.roi<0?'neg':'pos'}" style="font-size:1.3em">${MG.pct(q.roi)}</b></div><div><span>${W[1]}</span><b class="${q.cagr<0?'neg':'pos'}" style="font-size:1.3em">${MG.pct(q.cagr)}</b><small>${W[2]}</small></div></div>${P.len<12?`<p class="note">${LANG==='ta'?'குறுகிய காலம்: CAGR ஒரு முழு ஆண்டுக்கு நீட்டிக்கப்படுகிறது, அதனால் அது அதிகமாக மாறலாம்.':'Short game: CAGR stretches the return to a full year, so it can look very big or very small.'}</p>`:''}`:''})()}
      <p class="note">${P.goal?t('goalLine',t('goals')[P.goal],goalPct(P))+(P.goalHit?' 🎯':''):''} · ${t('qScore',P.qR,P.qN)}</p>
      <div class="lesson"><b>${t('lessonT')}:</b> ${t('lessons')[lesson]}</div></div>`;}).join('');
   $('box2').innerHTML=`<h2>${t('resultT')}</h2>${html}<p class="disc">${t('disclaimer')}</p><button id="again">${t('playAgain')}</button>`;
   $('again').onclick=()=>{$('modal2').classList.remove('on');try{localStorage.removeItem(KEY);}catch(e){}init(true);};$('modal2').classList.add('on');
   const EN=D.TX.en;rows.forEach(({P,nw,R},i)=>MG.finish(P.mgId,EN.ratings[ratingIdx(P)].replace(/[^A-Za-z ]/g,'').trim(),Math.round(nw),{rank:i+1,players:rows.length,months:P.len,mode:MODE==='kids'?'Kids':'Grown-ups',language:LANG==='ta'?'Tamil':'English',
-    cash:Math.round(P.cash),emergencyFund:Math.round(P.ef),investments:Math.round(invTotal(P)),loans:Math.round(debtTotal(P)),cibil:P.cibil,budgetScore:R.bs,savingsRatePct:Math.round(R.sr),efMonths:Number(R.efm.toFixed(1)),
+    cash:Math.round(P.cash),emergencyFund:Math.round(P.ef),investments:Math.round(invTotal(P)),investedRs:Math.round(invReturn(P).put),roiPct:+invReturn(P).roi.toFixed(1),cagrPct:+invReturn(P).cagr.toFixed(1),loans:Math.round(debtTotal(P)),cibil:P.cibil,budgetScore:R.bs,savingsRatePct:Math.round(R.sr),efMonths:Number(R.efm.toFixed(1)),
     diversification:R.div,grades:Object.entries(R.grades).map(([k,v])=>k+' '+v).join(', '),sipPerMonth:P.sip,goal:P.goal?EN.goals[P.goal]:'',goalReached:P.goalHit?'Yes':'No',questions:P.qR+'/'+P.qN,taxSaved:P.taxSaved,interestPaid:Math.round(P.interestPaid)}));
   try{localStorage.removeItem(KEY);}catch(e){}}
 
